@@ -1,0 +1,80 @@
+<a name="glossary"><h1>Glossary</h1></a>
+
+
+
+
+
+<a name="Glossary:AbstractBaseClass"><b>
+  Abstract base class
+</b></a><br>
+
+
+<p> A <a href="MMTK_43.html#Glossary:BaseClass">base class</a> that is not
+  directly usable by itself, but which defines the common properties
+  of several subclasses. Example: the class <a href="MMTK_13.html#Class:MMTK.ChemicalObjects.ChemicalObject">MMTK.ChemicalObjects.ChemicalObject</a> is an abstract
+  base class which defines the common properties of its subclasses
+  <a href="MMTK_10.html#Class:MMTK.Atom">MMTK.Atom</a>, <a href="MMTK_13.html#Class:MMTK.ChemicalObjects.Group">MMTK.ChemicalObjects.Group</a>, <a href="MMTK_10.html#Class:MMTK.Molecule">MMTK.Molecule</a>, <a href="MMTK_10.html#Class:MMTK.Complex">MMTK.Complex</a>, and <a href="MMTK_10.html#Class:MMTK.AtomCluster">MMTK.AtomCluster</a>. A <a href="MMTK_43.html#Glossary:MixInClass">mix-in class</a> is a special kind of abstract base
+  class. </p>
+
+
+
+
+
+
+
+<a name="Glossary:BaseClass"><b>
+  Base class
+</b></a><br>
+
+
+<p> A class from which another class inherits. In most
+  cases, the inheriting class is a specialization of the base class.
+  For example, the class <a href="MMTK_10.html#Class:MMTK.Molecule">MMTK.Molecule</a> is a
+  base class of <a href="MMTK_33.html#Class:MMTK.Proteins.PeptideChain">MMTK.Proteins.PeptideChain</a>,
+  because peptide chains are special molecules. Another common
+  application is the <a href="MMTK_43.html#Glossary:AbstractBaseClass">abstract base class</a>.
+  </p>
+
+
+
+
+
+
+
+<a name="Glossary:MixInClass"><b>
+  Mix-in class
+</b></a><br>
+
+
+<p>
+  A class that is used as a <a href="MMTK_43.html#Glossary:BaseClass">base class</a>
+  in other classes with the sole intention of providing methods
+  that are common to these classes. Mix-in classes cannot be used
+  to create instances. They are a special kind of
+  <a href="MMTK_43.html#Glossary:AbstractBaseClass">abstract base class</a>.
+  Example: class <a href="MMTK_14.html#Class:MMTK.Collection.GroupOfAtoms">MMTK.Collection.GroupOfAtoms</a>.
+</p>
+
+
+
+
+
+
+
+<a name="Glossary:Subclass"><b>
+  Subclass
+</b></a><br>
+
+
+<p>
+  A class that has another class as its <a href="MMTK_43.html#Glossary:BaseClass">base class</a>.
+  The subclass is usually a specialization of the base class, and can
+  use all of the methods defined in the base class.
+  Example: class <a href="MMTK_33.html#Class:MMTK.Proteins.Residue">MMTK.Proteins.Residue</a> is
+  a subclass of <a href="MMTK_13.html#Class:MMTK.ChemicalObjects.Group">MMTK.ChemicalObjects.Group</a>.
+</p>
+
+
+
+
+

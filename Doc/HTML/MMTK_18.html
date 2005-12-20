@@ -1,0 +1,90 @@
+<a name="Module:MMTK.Environment"><h1>Module MMTK.Environment</h1></a>
+
+
+
+
+
+
+
+
+
+<hr width=70%>
+<a name="Class:MMTK.Environment.NoseThermostat"><h2>Class NoseThermostat: Nose thermostat for Molecular Dynamics</h2></a>
+
+
+
+
+
+<p>A thermostat object can be added to a universe and will then
+modify the integration algorithm to a simulation of an NVT
+ensemble.</p>
+
+
+
+<p>Constructor:  NoseThermostat(<i>temperature</i>, <i>relaxation_time</i>=0.2)</p>
+
+
+
+<p><dl>
+
+
+<dt><i>temperature</i></dt>
+
+
+<dd><p>
+the temperature set by the thermostat</p></dd>
+
+
+<dt><i>relaxation_time</i></dt>
+
+
+<dd><p>
+the relaxation time of the thermostat coordinate
+</p></dd>
+
+
+</dl>
+</p>
+
+
+
+<hr width=70%>
+<a name="Class:MMTK.Environment.AndersenBarostat"><h2>Class AndersenBarostat: Andersen barostat for Molecular Dynamics</h2></a>
+
+
+
+
+
+<p>A barostat object can be added to a universe and will then
+together with a thermostat object modify the integration algorithm
+to a simulation of an NPT ensemble.</p>
+
+
+
+<p>Constructor:  AndersenBarostat(<i>pressure</i>, <i>relaxation_time</i>=1.5)</p>
+
+
+
+<p><dl>
+
+
+<dt><i>pressure</i></dt>
+
+
+<dd><p>
+the pressure set by the barostat</p></dd>
+
+
+<dt><i>relaxation_time</i></dt>
+
+
+<dd><p>
+the relaxation time of the barostat coordinate
+</p></dd>
+
+
+</dl>
+</p>
+
+
+

@@ -1,0 +1,140 @@
+<a name="Module:MMTK.DCD"><h1>Module MMTK.DCD</h1></a>
+
+
+
+
+
+
+
+<hr width=70%>
+<h2>Functions</h2>
+
+
+
+
+
+<ul>
+
+
+<li> <p>
+
+<a name="Function:MMTK.DCD.writeDCDPDB"><b><i>writeDCDPDB</i></b>()</a><br>
+
+
+</p>
+
+
+
+<p>Write the configurations in <i>conf_list</i> (any sequence of Configuration
+objects) to a newly created DCD trajectory file with the name
+<i>dcd_file_name</i>. Also write the first configuration to a PDB file
+with the name <i>pdb_file_name</i>; this PDB file has the same atom order
+as the DCD file. The time step between configurations can be specified
+by <i>delta_t</i>.
+</p>
+
+<li> <p>
+
+<a name="Function:MMTK.DCD.writeVelocityDCDPDB"><b><i>writeVelocityDCDPDB</i></b>()</a><br>
+
+
+</p>
+
+
+
+<p>Write the velocities in <i>vel_list</i> (any sequence of ParticleVector
+objects) to a newly created DCD trajectory file with the name
+<i>dcd_file_name</i>. Also write the first configuration to a PDB file
+with the name <i>pdb_file_name</i>; this PDB file has the same atom order
+as the DCD file. The time step between configurations can be specified
+by <i>delta_t</i>.
+</p>
+
+</ul>
+
+
+
+
+<hr width=70%>
+<a name="Class:MMTK.DCD.DCDReader"><h2>Class DCDReader: Reader for DCD trajectories (CHARMM/X-Plor)</h2></a>
+
+
+
+
+
+<p>A DCDReader reads a DCD trajectory and "plays back" the
+data as if it were generated directly by an integrator.
+The universe for which the DCD file is read must be
+perfectly compatible with the data in the file, including
+an identical internal atom numbering. This can be guaranteed
+only if the universe was created from a PDB file that is
+compatible with the DCD file without leaving out any
+part of the system.</p>
+
+
+
+<p>Constructor: DCDReader(<i>universe</i>, <i>**options</i>)</p>
+
+
+
+<p><dl>
+
+
+<dt><i>universe</i></dt>
+
+
+<dd><p>
+the universe for which the information from the
+              trajectory file is read</p></dd>
+
+
+<dt><i>options</i></dt>
+
+
+<dd><p>
+keyword options:<ul>
+
+
+<li> <p>
+dcd_file:  the name of the DCD trajecory file to be read
+</p>
+
+<li> <p>
+actions: a list of actions to be executed periodically (default is
+             none)</p>
+
+</ul>
+
+
+</p></dd>
+
+
+</dl>
+</p>
+
+
+
+<p>Reading is started by calling the reader object.
+All the keyword options listed above can be specified either when
+creating the reader or when calling it.</p>
+
+
+
+<p>The following data categories and variables are available for
+output:</p>
+
+
+
+<ul>
+
+
+<li> <p>
+category "time": time</p>
+
+<li> <p>
+category "configuration": configuration
+</p>
+
+</ul>
+
+

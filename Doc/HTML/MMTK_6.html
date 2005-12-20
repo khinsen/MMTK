@@ -1,0 +1,138 @@
+<a name="analysis"><h1>Analysis operations</h1></a>
+
+
+
+
+
+<p>
+Analysis is the most non-standard part of molecular simulations.
+The quantities that must be calculated depend strongly on the
+system and the problem under study. MMTK provides a wide range
+of elementary operations that inquire the state of the system,
+as well as several more complex analysis tools. Some of them are
+demonstrated in the <a href="MMTK_42.html#examples">examples</a> section.
+</p>
+
+
+
+<hr width=70%>
+<h2>Properties of chemical objects and universes</h2>
+
+
+
+
+
+<p>
+Many operations access and modify various properties of an object. They
+are defined for the most general type of object: anything that can be
+broken down to atoms, i.e. atoms, molecules, collections, universes,
+etc., i.e. in the class <a href="MMTK_14.html#Class:MMTK.Collection.GroupOfAtoms">MMTK.Collection.GroupOfAtoms</a>.
+</p>
+
+
+
+<p>
+The most elementary operations are inquiries about specific properties
+of an object: number of atoms, total mass, center of mass, total momentum,
+total charge, etc. There are also operations that compare two different
+conformations of a system. Finally, there are special operations
+for analyzing conformations of peptide chains and proteins.
+</p>
+
+
+
+<p>
+Geometrical operations in periodic universes require special care.
+Whenever a distance vector between two points in a systems is
+evaluated, the minimum-image convention must be used in order to
+obtain consistent results. MMTK provides routines for finding
+these distance vectors as well as distances, angles, and dihedral
+angles between any points. Because these operations depend on the
+topology and geometry of the universe, they are implemented as
+methods in class <a href="MMTK_39.html#Class:MMTK.Universe.Universe">MMTK.Universe.Universe</a>
+and its subclasses. Of course they are available for non-periodic
+universes as well.
+</p>
+
+
+
+<p>
+Universes also provide methods for obtaining <a href="MMTK_3.html#atom_property">atom property</a>
+objects that describe the state of the system (configurations, velocities,
+masses), and for restoring the system state from a <a href="MMTK_4.html#trajectory">trajectory</a>
+file. 
+</p>
+
+
+
+
+
+<hr width=70%>
+<h2>Energy evaluation</h2>
+
+
+
+
+
+<p>
+Energy evaluation requires a force field, and therefore all the
+methods in this section are defined only for universe objects, i.e. in
+class <a href="MMTK_39.html#Class:MMTK.Universe.Universe">MMTK.Universe.Universe</a>.  However, they
+all take an optional arguments (anything that can be broken down into
+atoms) that indicates for which subset of the universe the energy is
+to be evaluated. In addition to the potential energy, energy gradients
+and second derivatives (force constants) can be obtained, if the
+force field implements them. There is also a method that returns
+a dictionary containing the values for all the individual force field
+terms, which is often useful for analysis.
+</p>
+
+
+
+
+
+<hr width=70%>
+<h2>Surfaces and volumes</h2>
+
+
+
+
+
+<p>
+Surfaces and volumes can be analyzed for anything consisting of
+atoms. Both quantities are defined by assigning a radius to each atom;
+the surface of the resulting conglomerate of overlapping spheres is
+taken to be the surface of the atom group. Atom radii for surface
+determination are usually called "van der Waals radii", but there is
+no unique method for determining them. MMTK uses the values from
+[<a href="MMTK_44.html#Article:Bondi1964">Bondi1964</a>]. However,
+users can change these values for each individual atom by assigning a
+new value to the attribute "vdW_radius".
+</p>
+
+
+
+<p>
+Surface and volume calculations are implemented in the module <a href="MMTK_28.html#Module:MMTK.MolecularSurface">MMTK.MolecularSurface</a> and make use of the NSC
+library by Frank Eisenhabes [<a href="MMTK_44.html#Article:Eisenhaber1993">Eisenhaber1993</a>,
+<a href="MMTK_44.html#Article:Eisenhaber1995">Eisenhaber1995</a>]. Because this library is
+subject to stricter copyright conditions than MMTK (it can be freely
+used only for non-commercial purposes), the whole molecular surface
+package (NSC and the module MolecularSurface) is distributed separately
+from the main MMTK distribution. If you get error messages when
+trying to evaluate surfaces or values, please verify that you
+have installed this separate package.
+</p>
+
+
+
+<p>
+The operations provided in <a href="MMTK_28.html#Module:MMTK.MolecularSurface">MMTK.MolecularSurface</a>
+include basic surface and volume calculation, determination of
+exposed atoms, and identification of contacts between two objects.
+</p>
+
+
+
+
+

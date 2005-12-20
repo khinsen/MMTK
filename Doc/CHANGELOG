@@ -1,0 +1,347 @@
+2.5.12 --> 2.5.13
+=================
+
+License change: MMTK is now distributed under the CeCILL license. See
+LICENSE (English) or LICENCE (French) for the license text, or
+www.cecill.info for more information. In short, CeCILL is an OpenSource
+license based on French law. It is compatible with the GPL, so the change
+from GPL to CeCILL should not make a difference in practice.
+
+
+2.5.11 --> 2.5.12
+=================
+
+New features:
+
+- MMTK.Geometry.Box has new method cornerPoints() and implements
+  intersectWith() for box-box-intersections.
+
+2.5.10 --> 2.5.11
+=================
+
+Bug fixes:
+
+- Some pickle files from pre-2.5 could not be read any more.
+- MMTK_energy_term.c wouldn't compile with GCC 4, it has been regenerated
+  with a corrected Pyrex
+
+2.5.9 --> 2.5.10
+================
+
+Bug fixes:
+
+- MMTK.Proteins.PeptideChain.replaceResidue() did not update the atom list
+  of the universe.
+
+- Compiler errors with gcc 4.0
+
+Changes:
+
+- Module "Collection" is now named "Collections" to avoid confusion with the
+  class "Collection". Application code should not import that module directly,
+  so there should be no compatibility issues.
+
+2.5.8 --> 2.5.9
+===============
+
+Improvements:
+
+- Subspace.RigidMotionSubspace avoids the costly SVD calculation by
+  constructing an orthonormal basis immediately.
+- Src/lapack_subset.c should compile with gcc 4 now.
+- MMTK.Proteins.PeptideChain.replaceResidue() could only be used prior
+  to the inclusion of the chain into a protein. Now it can be used later
+  as well, permitting mutations.
+
+2.5.7 --> 2.5.8
+===============
+
+Bug fix:
+
+- Bugs concerning storing certain force field terms in trajectory descriptions.
+- Universe descriptions didn't contain distance constraints in AtomCluster
+  objects.
+
+2.5.6 --> 2.5.7
+===============
+
+New features:
+
+- Support for force field development in Python
+
+2.5.5 --> 2.5.6
+===============
+
+New features:
+
+- Support for force field development with Pyrex.
+
+Bug fixes:
+
+- LAPACK error -13 with certain normal mode and subspace operations fixed.
+- MMTK.Proteins.Residue.phiPsi() could fail for proline residues.
+
+2.5.4 --> 2.5.5
+===============
+
+New features:
+
+- New module MoleculeFactory permits the construction of molecules
+  from Python code, without requiring database entries.
+
+- Any object can be written to an XML file that uses CML conventions
+  as much as possible, the method to call is writeXML(). These files
+  can also be read in using XML.XMLMoleculeFactory.
+
+Bug fixes:
+
+- A few C modules crashed on Opteron systems running Linux in 64 bit mode.
+
+
+2.5.3 --> 2.5.4
+===============
+
+New features:
+
+- Reorganization of the normal mode module into a package providing
+  vibrational, energetic, and Brownian normal modes.
+- New module MMTK.ProteinFriction to go with Brownian modes.
+
+
+2.4.2 --> 2.5.3
+===============
+
+New features:
+
+- Amber 99 force field
+- New module MMTK.InternalCoordinates
+- New methods phiAngle, psiAngle, chiAngle in MMTK.Proteins.Residue
+
+
+2.4.1 --> 2.4.2
+===============
+
+Bug fixes:
+
+- TrajectorySet with a list of tuples as argument would crash.
+
+
+2.4 --> 2.4.1
+=============
+
+Bug fixes:
+
+- A bug in Dynamics.RotationRemover could destabilize an MD run.
+- Visualization of periodic universes could produce strange
+  results (some molecules out of the box)
+
+Portability:
+
+- MMTK now compiles without errors under Windows using Microsoft's
+  VisualStudio. It should still compile with MinGW, of course.
+
+
+2.2 --> 2.4
+===========
+
+New features:
+
+- Interface to PyMOL. Running an MMTK script from within PyMOL automatically
+  makes all visualization use PyMOL. For more explicit control, see the
+  module MMTK.PyMol.
+
+Bug fixes:
+
+- Rotation removal during simulation had some wrong formulas.
+
+- Compound force fields could not be used in trajectory generation.
+
+- Wrong forces from Ewald reciprocal when run with more than one thread.
+
+
+2.1.3 --> 2.2
+=============
+
+New module:
+
+- MolecularSurface, a reimplementation by Peter McCluskey, which does
+  not have the license restrictions of the NSC code. The NSC-based
+  MolecularSurface (which according to Peter is faster and more
+  accurate) will remain available as an add-on that replaces the
+  standard module.
+
+New features:
+
+- New method "rotateAroundAxis()" in class GroupOfAtoms.
+
+- New protein model "polar_oldopls", which defines polar
+  hydrogens according to the old OPLS conventions. The
+  model "polar" follows the new OPLS conventions (i.e. includes
+  the hydrogens on aromatic rings).
+
+- TrajectorySet class permits the treatment of a sequence of
+  trajectory files as a single trajectory.
+
+Bug fixes:
+
+- Nonbonded list updated could crash for non-periodic universes
+  under certain (rare) circumstances.
+
+- Method "normalizeConfiguration" sometimes performed a reflection
+  in addition to rotation and translation.
+
+- Multi-threaded Ewald summation tended to hang after a couple of
+  energy evaluations.
+
+2.1.2 --> 2.1.3
+===============
+
+New features:
+
+- New method "contiguousObjectConfiguration" for universes.
+
+- Three independent scale factors (bonded, Lennard-Jones, electrostatic)
+  can be specified for the Amber force field, all are 1. by default.
+
+Improvements:
+
+- Snapshots can now specify arbitrary energy terms and pressure
+  (pressure should have worked before as well, but didn't).
+
+Bug fixes:
+
+- The Amber94 charges for the N-terminal versions of
+  THR, ARG, HIP, and LYS in the MMTK database were wrong,
+  due to mistakes in early versions of the Amber parameter
+  files from which the database entries were generated.
+  For more information see
+      http://www.amber.ucsf.edu/amber/bugfixes41.html
+  and then bugfix.76 and bugfix.91.
+
+- molecule.view() failed for non-protein molecules (this bug
+  was introduced in 2.1.2).
+
+- RigidBodyTrajectory generation crashed due to a typo.
+
+- ParticleTrajectory reads from trajectories with block_size > 1
+  could return wrong data.
+
+
+2.1.1 --> 2.1.2
+===============
+
+New features:
+
+- The TrajectoryViewer tool (in Tools/TrajectoryViewer) was extended
+  by normal mode projections for proteins.
+
+- The structure of trajectory files can be influenced by specifying
+  a "block size", which can be used to optimize I/O performance on
+  very large files.
+
+- Reading of single-atom and rigid-body trajectories has been
+  optimized.
+
+
+Bug fixes:
+
+- The functions MMTK.Biopolymers.defineAminoAcidResidue and
+  MMTK.Biopolymers.defineNucleicAcidResidue didn't work.
+
+- The method MMTK.Collection.GroupOfAtoms.findTransformationAsQuaternion
+  returned randomly one of the two equivalent quaternions that desribe
+  the rigid-body rotation. This doesn't matter for most purposes, but
+  it creates non-continuous quaternion trajectories when applied to a
+  sequence of configurations. The method has been changed to return
+  the quaternion that has a positive real part.
+
+- Rigid-body trajectories (in module Trajectory) were wrong in certain
+  circumstances.
+
+
+2.1.0 --> 2.1.1
+===============
+
+Modifications:
+
+- Improved load balance for shared memory parallelization.
+
+- The united-atom models for amino acids were changed from Amber 91
+  conventions to OPLS by removing the fake "lone pair" atoms.
+  Note that there was never proper support for lone pair atoms, so
+  this model wasn't functional, and therefore nothing should be
+  broken by this change. Now the united-atom model is actually
+  fully usable together with the OPLS force field.
+  (Thanks to Krzysztof Murzyn for fixing this!)
+
+Additions:
+
+- Basic MPI support. Only energy evaluation has been parallelized,
+  using a data-replication approach. All processors execute the same
+  code and cooperate only during energy evaluation. See
+  the Example MPI/md.py for more information.
+
+- New force fields: HarmonicForceField, CalphaForceField, SPCEForceField.
+  The first two are designed for proteins, the last one is only for
+  water.
+
+
+2.0 --> 2.1.0
+=============
+
+Bug fixes:
+
+- Addition of force fields didn't work when one of the terms was
+  already a compound force field.
+
+- Memory allocation bug in DCD output.
+
+- Restarting NPT dynamics simulations didn't work due to a reported
+  universe mismatch. This was caused by the different box size.
+
+- MMTK.DCD.writeDCDPDB produced a PDB file with non-contiguous molecules for
+  periodic universes.
+
+- In the electrostatic options for the Amber force field, the "screened"
+  option was misinterpreted as "ewald".
+
+Modifications:
+
+- The method objectList() for collections and universes now takes
+  an optional argument specifying a class; only the objects corresponding
+  to this class are returned. This permits a simple identification of
+  proteins etc.
+
+- The universe description that is stored in a trajectory now contains
+  the force field and environment objects (thermostats and barostats).
+
+- Optional name argument for C evaluator objects for bonded
+  interactions.
+
+Additions:
+
+- Thread support.
+
+- Module MMTK.ForceFields.Restraints.
+
+- New function MMTK.DCD.writeVelocityDCDPDB for exporting velocities
+  to velocity DCD files.
+
+- New method pairIndices for nonbonded list objects.
+
+
+2.0b1 --> 2.0
+=============
+
+Bug fixes:
+
+- Subtraction of a ParticleVector from a Configuration returned a
+  ParticleVector (now a Configuration).
+
+- The Amber atom types for two hydrogens in proline were wrong.
+
+
+Additions:
+
+- group definitions for neutral versions of aspartic acid, glutamic
+  acid, and lysine  (provided by Alan Grossfield)

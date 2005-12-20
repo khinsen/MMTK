@@ -1,0 +1,250 @@
+The Molecular Modelling Toolkit
+===============================
+
+This is release 2.5 of MMTK, the Molecular Modelling Toolkit. For more
+information about MMTK, look at the manual (in the directories
+Doc/HTML and Doc/PDF) and at the examples in the directory Examples.
+
+Please remember that MMTK, like Python, comes with neither a price tag
+nor any warranty (see the file COPYRIGHT for details). I use it for my
+own work, and I consider it reasonably stable, but your mileage may
+vary. If you find any problems with MMTK, please let me know, but
+understand that I cannot promise extensive support (I am a scientist,
+not a programmer, and much less a software distributor!). I also
+gratefully accept additional example applications and other code
+donations.
+
+
+
+Installation
+============
+
+Prerequisites: Python 2.2 or higher, ScientificPython 2.4 or higher.
+
+On most Unix systems, installation requires two commands:
+
+      python setup.py build
+      python setup.py install
+
+The second command often requires root priviledges, as MMTK will be
+installed in the Python library tree. There are many options for
+building and installing, type
+
+      python setup.py build --help
+
+or
+
+      python setup.py install --help
+
+for details.
+
+If you want MMTK's MPI support enabled, you must first install
+ScientificPython with MPI support and then use mpipython instead of
+python for running the compilation/installation procedure via
+setup.py. Note that a version of MMTK compiled with MPI support
+works only with the mpipython executable, not with an ordinary
+python interpreter. However, there is no overhead for using
+mpipython on a single processor.
+
+
+Platform-specific notes
+=======================
+
+This section is based on information I got from MMTK users in the
+past. There is a risk that it is not up to date. Any platform-specific
+information is welcome!
+ 
+Windows:
+--------
+
+MMTK can be compiled under Windows using the free MinGW compiler
+(available from www.mingw.org). You will need to have MinGW setup
+properly to compile python extensions, see
+http://www.python.org/doc/2.2.1/inst/non-ms-compilers.html for
+details. The option "--compiler=mingw32" must be added when running
+setup.py.
+
+MMTK can be compiled using Microsoft Visual Studio 6.0 as well. For
+more information, check the Wiki pages at:
+
+     http://dirac.cnrs-orleans.fr/mmtk_wiki
+
+
+For using visualization under Windows, you need Mark Hammond's Win32
+extensions, available at
+http://starship.python.net/crew/mhammond/win32/Downloads.html
+
+
+Mac OS X:
+---------
+
+The most convenient way to use MMTK with MacOS X is through the
+fink project, which is located at
+
+   http://fink.sourceforge.net/
+
+Fink provides an install-and-build system for Unix software on the
+Mac. You will find many other goodies there, including Python
+and many Python packages.
+
+Of course, MacOS X being a variant of Unix, it is also possible
+and quite straightforward to install MMTK and all the prerequisites
+from source code. Just make sure to have Xcode (Apple's developer
+kit) installed.
+
+
+Using VMD for visualization under MacOS X
+-----------------------------------------
+
+The VMD release for MacOS presents itself as a standard Mac application.
+Internally, it has the standard Unix command line interface that MMTK
+expects, but using the two together requires some particular steps:
+
+1) Create a script called "vmd" in a directory on your shell's
+   search path (e.g. /usr/bin) containing the following two lines:
+
+#!/bin/bash
+xterm -e '/Applications/VMD 1.8.2.app/Contents/Resources/VMD.app/Contents/MacOS/VMD' $*
+
+   Don't forget to make this file executable (chmod 755 vmd).
+
+2) Set the environment variable PDBVIEWER to "vmd". The most general
+   method to do this is by editing the file ~/.MacOS/environment.plist.
+   The most convenient tool to edit (or create) this file is the
+   Property List Editor (in Applications/Utilities), but if you feel
+   comfortable editing XML files, any text editor will do. Note that
+   changes to this file become active only after the next login.
+
+3) When using VMD from MMTK, make sure to have X11 running (because
+   the script uses xterm). One way not to forget this is to put
+   X11 (in /Applications/Utilities) into your startup item list
+   with the "hide" option selected.
+
+
+Mac OS X compilation hint:
+--------------------------
+
+(You can disregard this if you use the fink version.)
+
+Under at least some releases, the file /usr/include/pthread.h
+must be modified to make MMTK compile (probably this affects all
+Python extension modules that use threads). Search for the
+following two lines (around 239)
+
+   int       pthread_key_create __P((pthread_key_t *key,
+                                    void (*destructor)(void *)));
+
+and modify the second one to read
+
+                                    void (*)(void *)));
+
+(i.e. remove the word "destructor"). This *should* have no adverse
+effects on anything.
+
+
+External programs
+=================
+
+MMTK uses external programs for visualization and animation. The names
+of these programs must be supplied via environment variables. If no
+names are provided, the visualization functions will do nothing.
+The environment variables are
+
+- PDBVIEWER  to specify a program that can show the contents of a
+  file in the PDB format. The program will be called with the name
+  of a PDB file as a command line argument.
+
+- VRMLVIEWER to specify a program that can show a file in the
+  VRML format. The program will be called with the name
+  of a PDB file as a command line argument.
+
+Animation is implemented only for the programs VMD and XMol.
+It is sufficient to specify one of these programs as PDBVIEWER
+in order to have access to animation functions.
+
+
+Documentation
+=============
+
+The MMTK manual is included in HTML (Doc/HTML) and PDF (Doc/PDF)
+formats. A list of changes along MMTK development versions can
+be found in Doc/CHANGELOG.
+
+
+Useful tools
+============
+
+The directory Tools/TrajectoryViewer contains a small program for
+viewing trajectories. It allows that quick inspection of energies,
+thermodynamic quantities, etc., as well as animation via an external
+viewer.
+
+
+Web site
+========
+
+The MMTK home page can be found at
+
+   http://dirac.cnrs-orleans.fr/MMTK/
+
+or at
+
+   http://starship.python.net/crew/hinsen/MMTK/
+
+
+Mailing list
+============
+
+To be informed about updates to MMTK, and to communicate with other
+MMTK users, you should subscribe to the MMTK mailing list via
+the Web page
+
+    http://starship.python.net/mailman/listinfo/mmtk
+
+This is a low-traffic list; there is little reason not to subscribe.
+
+
+License
+=======
+
+MMTK is licensed under the GNU Lesser Public License. See the file
+LICENSE for the text of this license. The DPMTA library (everything in
+the directory Src/dpmta-2.7) is not part of MMTK and therefore not
+subject to this license.
+
+
+Acknowledgements
+================
+
+The DCD reader was contributed by Lutz Ehrlich, and uses a C library
+for reading DCD files (files Src/ReadDCD.c and Src/ReadDCD.h) which
+was written by Mark Nelson at the University of Illinois.
+
+The MolecularSurface module was contributed by Peter McCluskey.
+
+The DPMTA library used for electrostatic multipole calculations
+(everything in the directory Src/dpmta-2.7) was written by William T.
+Rankin at Duke University. Check the file dpmta-2.7/README and the Web
+page http://www.ee.duke.edu/Research/SciComp/Docs/Dpmta/dpmta.html for
+more information about this library. Note that MMTK does not contain
+the whole DPMTA distribution; the documentation, Fortran interface,
+and test code were left out to reduce the size of the MMTK
+distribution. You can obtain the full DPMTA distribution at the Web
+address given above.
+
+Patches to make MMTK work under Windows were provided by Jon Michelsen.
+
+Peter Cook contributed Windows code, examples, code improvements, and
+good suggestions.
+
+Routines for matrix diagonalization were taken from LAPACK, and
+for the erfc function from the CEPHES library.
+
+
+Konrad Hinsen
+Centre de Biophysique Moleculaire (CNRS)
+Rue Charles Sadron
+45071 Orleans Cedex 2
+France
+
+E-Mail: hinsen@cnrs-orleans.fr

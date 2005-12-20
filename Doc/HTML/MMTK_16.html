@@ -1,0 +1,565 @@
+<a name="Module:MMTK.Deformation"><h1>Module MMTK.Deformation</h1></a>
+
+
+
+
+
+<p>This module implements deformational energies for use in the analysis
+of motions and conformational changes in macromolecules. A description
+of the techniques can be found in [<a href="MMTK_44.html#Article:Hinsen1998">Hinsen1998</a>] and
+[<a href="MMTK_44.html#Article:Hinsen1999">Hinsen1999</a>].
+</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<hr width=70%>
+<a name="Class:MMTK.Deformation.DeformationFunction"><h2>Class DeformationFunction: Infinite-displacement deformation function</h2></a>
+
+
+
+
+
+<p>Constructor:  DeformationFunction(<i>universe</i>, <i>range</i>=0.7,
+                                  <i>cutoff</i>=1.2, <i>factor</i>=46402.)</p>
+
+
+
+<p><dl>
+
+
+<dt><i>universe</i></dt>
+
+
+<dd><p>
+the universe for which the deformation function should be
+              defined</p></dd>
+
+
+<dt><i>range</i></dt>
+
+
+<dd><p>
+the range parameter r_0 in the pair interaction term</p></dd>
+
+
+<dt><i>cutoff</i></dt>
+
+
+<dd><p>
+the cutoff used in the deformation calculation</p></dd>
+
+
+<dt><i>factor</i></dt>
+
+
+<dd><p>
+a global scaling factor</p></dd>
+
+
+</dl>
+</p>
+
+
+
+<p>The default values are appropriate for a C_alpha model of a protein
+with the global scaling described in the reference cited above.</p>
+
+
+
+<p>A DeformationFunction object must be called with a single parameter,
+which is a ParticleVector object containing the infinitesimal displacements
+of the atoms for which the deformation is to be evaluated.
+The return value is a ParticleScalar object containing the
+deformation value for each atom.
+</p>
+
+
+
+<hr width=70%>
+<a name="Class:MMTK.Deformation.NormalizedDeformationFunction"><h2>Class NormalizedDeformationFunction: Normalized infinite-displacement deformation function</h2></a>
+
+
+
+
+
+<p>Constructor:  NormalizedDeformationFunction(<i>universe</i>, <i>range</i>=0.7,
+                                            <i>cutoff</i>=1.2, <i>factor</i>=46402.)</p>
+
+
+
+<p><dl>
+
+
+<dt><i>universe</i></dt>
+
+
+<dd><p>
+the universe for which the deformation function should be
+              defined</p></dd>
+
+
+<dt><i>range</i></dt>
+
+
+<dd><p>
+the range parameter r_0 in the pair interaction term</p></dd>
+
+
+<dt><i>cutoff</i></dt>
+
+
+<dd><p>
+the cutoff used in the deformation calculation</p></dd>
+
+
+<dt><i>factor</i></dt>
+
+
+<dd><p>
+a global scaling factor</p></dd>
+
+
+</dl>
+</p>
+
+
+
+<p>The default values are appropriate for a C_alpha model of a protein
+with the global scaling described in the reference cited above.
+The normalization is defined by equation 10 of reference 1.</p>
+
+
+
+<p>A NormalizedDeformationFunction object must be called with a single
+parameter, which is a ParticleVector object containing the infinitesimal
+displacements of the atoms for which the deformation is to be evaluated.
+The return value is a ParticleScalar object containing the
+deformation value for each atom.
+</p>
+
+
+
+<hr width=70%>
+<a name="Class:MMTK.Deformation.FiniteDeformationFunction"><h2>Class FiniteDeformationFunction: Finite-displacement deformation function</h2></a>
+
+
+
+
+
+<p>Constructor:  FiniteDeformationFunction(<i>universe</i>, <i>range</i>=0.7,
+                                        <i>cutoff</i>=1.2, <i>factor</i>=46402.)</p>
+
+
+
+<p><dl>
+
+
+<dt><i>universe</i></dt>
+
+
+<dd><p>
+the universe for which the deformation function should be
+              defined</p></dd>
+
+
+<dt><i>range</i></dt>
+
+
+<dd><p>
+the range parameter r_0 in the pair interaction term</p></dd>
+
+
+<dt><i>cutoff</i></dt>
+
+
+<dd><p>
+the cutoff used in the deformation calculation</p></dd>
+
+
+<dt><i>factor</i></dt>
+
+
+<dd><p>
+a global scaling factor</p></dd>
+
+
+</dl>
+</p>
+
+
+
+<p>The default values are appropriate for a C_alpha model of a protein
+with the global scaling described in the reference cited above.</p>
+
+
+
+<p>A FiniteDeformationFunction object must be called with a single parameter,
+which is a Configuration or a ParticleVector object containing the
+alternate configuration of the universe for which the deformation is to be
+evaluated.
+The return value is a ParticleScalar object containing the
+deformation value for each atom.
+</p>
+
+
+
+<hr width=70%>
+<a name="Class:MMTK.Deformation.DeformationEnergyFunction"><h2>Class DeformationEnergyFunction: Infinite-displacement deformation energy function</h2></a>
+
+
+
+
+
+<p>The deformation energy is the sum of the deformation values over
+all atoms of a system.</p>
+
+
+
+<p>Constructor:  DeformationEnergyFunction(<i>universe</i>, <i>range</i>=0.7,
+                                        <i>cutoff</i>=1.2, <i>factor</i>=46402.)</p>
+
+
+
+<p><dl>
+
+
+<dt><i>universe</i></dt>
+
+
+<dd><p>
+the universe for which the deformation energy should be
+              defined</p></dd>
+
+
+<dt><i>range</i></dt>
+
+
+<dd><p>
+the range parameter r_0 in the pair interaction term</p></dd>
+
+
+<dt><i>cutoff</i></dt>
+
+
+<dd><p>
+the cutoff used in the deformation energy calculation</p></dd>
+
+
+<dt><i>factor</i></dt>
+
+
+<dd><p>
+a global scaling factor</p></dd>
+
+
+</dl>
+</p>
+
+
+
+<p>The default values are appropriate for a C_alpha model of a protein
+with the global scaling described in the reference cited above.</p>
+
+
+
+<p>A DeformationEnergyFunction is called with one or two parameters.
+The first parameter is a ParticleVector object containing the
+infinitesimal displacements of the atoms for which the deformation
+energy is to be evaluated. The optional second argument can be
+set to a non-zero value to request the gradients of the energy
+in addition to the energy itself. In that case there are two
+return values (energy and the gradients in a ParticleVector
+object), otherwise only the energy is returned.
+</p>
+
+
+
+<hr width=70%>
+<a name="Class:MMTK.Deformation.NormalizedDeformationEnergyFunction"><h2>Class NormalizedDeformationEnergyFunction: Normalized infinite-displacement deformation energy function</h2></a>
+
+
+
+
+
+<p>The normalized deformation energy is the sum of the normalized
+deformation values over all atoms of a system.</p>
+
+
+
+<p>Constructor: NormalizedDeformationEnergyFunction(<i>universe</i>, <i>range</i>=0.7,
+                                                 <i>cutoff</i>=1.2,
+                                                 <i>factor</i>=46402.)</p>
+
+
+
+<p><dl>
+
+
+<dt><i>universe</i></dt>
+
+
+<dd><p>
+the universe for which the deformation energy should be
+              defined</p></dd>
+
+
+<dt><i>range</i></dt>
+
+
+<dd><p>
+the range parameter r_0 in the pair interaction term</p></dd>
+
+
+<dt><i>cutoff</i></dt>
+
+
+<dd><p>
+the cutoff used in the deformation energy calculation</p></dd>
+
+
+<dt><i>factor</i></dt>
+
+
+<dd><p>
+a global scaling factor</p></dd>
+
+
+</dl>
+</p>
+
+
+
+<p>The default values are appropriate for a C_alpha model of a protein
+with the global scaling described in the reference cited above.
+The normalization is defined by equation 10 of reference 1.</p>
+
+
+
+<p>A NormalizedDeformationEnergyFunction is called with one or two parameters.
+The first parameter is a ParticleVector object containing the
+infinitesimal displacements of the atoms for which the deformation
+energy is to be evaluated. The optional second argument can be
+set to a non-zero value to request the gradients of the energy
+in addition to the energy itself. In that case there are two
+return values (energy and the gradients in a ParticleVector
+object), otherwise only the energy is returned.
+</p>
+
+
+
+<hr width=70%>
+<a name="Class:MMTK.Deformation.FiniteDeformationEnergyFunction"><h2>Class FiniteDeformationEnergyFunction: Finite-displacement deformation energy function</h2></a>
+
+
+
+
+
+<p>The deformation energy is the sum of the
+deformation values over all atoms of a system.</p>
+
+
+
+<p>Constructor: FiniteDeformationEnergyFunction(<i>universe</i>, <i>range</i>=0.7,
+                                             <i>cutoff</i>=1.2, <i>factor</i>=46402.)</p>
+
+
+
+<p><dl>
+
+
+<dt><i>universe</i></dt>
+
+
+<dd><p>
+the universe for which the deformation energy should be
+              defined</p></dd>
+
+
+<dt><i>range</i></dt>
+
+
+<dd><p>
+the range parameter r_0 in the pair interaction term</p></dd>
+
+
+<dt><i>cutoff</i></dt>
+
+
+<dd><p>
+the cutoff used in the deformation energy calculation</p></dd>
+
+
+<dt><i>factor</i></dt>
+
+
+<dd><p>
+a global scaling factor</p></dd>
+
+
+</dl>
+</p>
+
+
+
+<p>The default values are appropriate for a C_alpha model of a protein
+with the global scaling described in the reference cited above.</p>
+
+
+
+<p>A FiniteDeformationEnergyFunction is called with one or two parameters.
+The first parameter is a ParticleVector object containing the
+alternate configuration of the universe for which the deformation
+energy is to be evaluated. The optional second argument can be
+set to a non-zero value to request the gradients of the energy
+in addition to the energy itself. In that case there are two
+return values (energy and the gradients in a ParticleVector
+object), otherwise only the energy is returned.
+</p>
+
+
+
+<hr width=70%>
+<a name="Class:MMTK.Deformation.DeformationReducer"><h2>Class DeformationReducer: Iterative reduction of the deformation energy</h2></a>
+
+
+
+
+
+<p>Constructor:  DeformationReducer(<i>universe</i>, <i>range</i>=0.7,
+                                 <i>cutoff</i>=1.2, <i>factor</i>=46402.)</p>
+
+
+
+<p><dl>
+
+
+<dt><i>universe</i></dt>
+
+
+<dd><p>
+the universe for which the deformation function should be
+              defined</p></dd>
+
+
+<dt><i>range</i></dt>
+
+
+<dd><p>
+the range parameter r_0 in the pair interaction term</p></dd>
+
+
+<dt><i>cutoff</i></dt>
+
+
+<dd><p>
+the cutoff used in the deformation calculation</p></dd>
+
+
+<dt><i>factor</i></dt>
+
+
+<dd><p>
+a global scaling factor</p></dd>
+
+
+</dl>
+</p>
+
+
+
+<p>The default values are appropriate for a C_alpha model of a protein
+with the global scaling described in the reference cited above.</p>
+
+
+
+<p>A DeformationReducer is called with two arguments. The first
+is a ParticleVector containing the initial infinitesimal displacements
+for all atoms. The second is an integer indicating the number of
+iterations. The result is a modification of the displacements
+by steepest-descent minimization of the deformation energy.
+</p>
+
+
+
+<hr width=70%>
+<a name="Class:MMTK.Deformation.FiniteDeformationReducer"><h2>Class FiniteDeformationReducer: Iterative reduction of the finite-displacement deformation energy</h2></a>
+
+
+
+
+
+<p>Constructor:  FiniteDeformationReducer(<i>universe</i>, <i>range</i>=0.7,
+                                       <i>cutoff</i>=1.2, <i>factor</i>=46402.)</p>
+
+
+
+<p><dl>
+
+
+<dt><i>universe</i></dt>
+
+
+<dd><p>
+the universe for which the deformation function should be
+              defined</p></dd>
+
+
+<dt><i>range</i></dt>
+
+
+<dd><p>
+the range parameter r_0 in the pair interaction term</p></dd>
+
+
+<dt><i>cutoff</i></dt>
+
+
+<dd><p>
+the cutoff used in the deformation calculation</p></dd>
+
+
+<dt><i>factor</i></dt>
+
+
+<dd><p>
+a global scaling factor</p></dd>
+
+
+</dl>
+</p>
+
+
+
+<p>The default values are appropriate for a C_alpha model of a protein
+with the global scaling described in the reference cited above.</p>
+
+
+
+<p>A FiniteDeformationReducer is called with two arguments. The first
+is a ParticleVector or Configuration containing the alternate
+configuration for which the deformation energy is evaluated.
+The second is the RMS distance that defines the termination
+condition. The return value a configuration that differs from
+the input configuration by approximately the specified RMS distance,
+and which is obtained by iterative steepest-descent minimization of
+the finite-displacement deformation energy.
+</p>
+
+
+

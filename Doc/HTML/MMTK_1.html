@@ -1,0 +1,514 @@
+<a name="overview"><h1>Overview</h1></a>
+
+
+
+
+
+<p>
+This chapter explains the basic structure of MMTK and its view of
+molecular systems. Every MMTK user should read it at least once.
+</p>
+
+
+
+<hr width=70%>
+<h2>Using MMTK</h2>
+
+
+
+
+
+<p>
+MMTK applications are ordinary Python programs, and can be written
+using any standard text editor. For interactive use it is recommended
+to use either the special Python mode for the Emacs editor, or one of the
+Tk-based graphical user interfaces for Python, IDLE (comes with the
+Python interpreter from version 1.5.2) or
+<a href="http://starship.skyport.net/crew/zack/ptui/">PTUI</a>.
+</p>
+
+
+
+<p>
+MMTK tries to be as user-friendly as possible for interactive use. For
+example, lengthy calculations can usually be interrupted by typing
+Control-C. This will result in an error message ("Keyboard
+Interrupt"), but you can simply go on typing other commands.
+Interruption is particularly useful for energy minimization and
+molecular dynamics: you can interrupt the calculation at any time,
+look at the current state or do some analysis, and then continue.
+</p>
+
+
+
+
+
+<hr width=70%>
+<h2>Modules</h2>
+
+
+
+
+
+<p>
+MMTK is a package consisting of various modules, most of them written
+in Python, and some in C for efficiency. The individual modules are
+described in the <a href="MMTK_10.html#module_reference">Module Reference</a>. The basic
+definitions that almost every application needs are collected in the
+top-level module, MMTK. The first line of most applications is
+therefore
+<pre>
+from MMTK import *
+</pre>
+
+
+</p>
+
+
+
+<p>
+The definitions that are specific to particular applications reside in
+submodules within the package MMTK. For example, force fields are
+defined in <a href="MMTK_20.html#Module:MMTK.ForceFields">MMTK.ForceFields</a>, and peptide
+chain and protein objects are defined in <a href="MMTK_33.html#Module:MMTK.Proteins">MMTK.Proteins</a>.
+</p>
+
+
+
+<p>
+Python provides two ways to access objects in modules and submodules.
+The first one is importing a module and referring to objects in it,
+e.g.:
+<pre>
+import MMTK
+import MMTK.ForceFields
+universe = MMTK.InfiniteUniverse(MMTK.ForceFields.Amber94ForceField())
+</pre>
+
+The second method is importing all or some objects <i>from</i>
+a module:
+<pre>
+from MMTK import InfiniteUniverse
+from MMTK.ForceFields import Amber94ForceField
+universe = InfiniteUniverse(Amber94ForceField())
+</pre>
+
+These two import styles can also be mixed according to convience.
+In order to prevent any confusion, all objects are referred to by
+their full names in this manual. The Amber force field object
+is thus called <a href="MMTK_20.html#Class:MMTK.ForceFields.Amber94ForceField">MMTK.ForceFields.Amber94ForceField</a>.
+Of course the user is free to use selective imports in order to
+be able to use such objects with shorter names.
+</p>
+
+
+
+
+
+<hr width=70%>
+<h2>Objects</h2>
+
+
+
+
+
+<p>
+MMTK is an object-oriented system.  Since objects are everywhere and
+everything is an object, it is useful to know the most important
+object types and what can be done with them. All object types in MMTK
+have meaningful names, so it is easy to identify them in practice. The
+following overview contains only those objects that a user will see
+directly. There are many more object types used by MMTK internally,
+and also some less common user objects that are not mentioned here.
+</p>
+
+
+
+<h3>Chemical objects</h3>
+
+
+
+
+
+<p>
+These are the objects that represent the parts of a molecular system:
+<ul>
+
+
+<li> <p>atoms</p>
+
+<li> <p>groups</p>
+
+<li> <p>molecules</p>
+
+<li> <p>molecular complexes</p>
+
+</ul>
+
+
+</p>
+
+
+
+<p>
+These objects form a simple hierarchy: complexes consist of
+molecules, molecules consist of groups and atoms, groups consist of
+smaller groups and atoms. All of these, except for groups,
+can be used directly to construct a molecular system. Groups can
+only be used in the definitions of other groups and molecules in the
+<a href="MMTK_2.html#overview-database">chemical database</a>.
+</p>
+
+
+
+<p>
+A number of operations can be performed on chemical objects, which
+can roughly be classified into inquiry (constituent atoms, bonds, center
+of mass etc.) and modification (translate, rotate).
+</p>
+
+
+
+<p>
+There are also specialized versions of some of these objects. For example,
+MMTK defines proteins as special complexes, consisting of peptide
+chains, which are special molecules. They offer a range of special
+operations (such as selecting residues or constructing the positions of
+missing hydrogen atoms) that do not make sense for molecules in
+general.
+</p>
+
+
+
+
+
+<h3>Collections</h3>
+
+
+
+
+
+<p>
+Collection objects represent arbitrary collections of chemical
+objects.  They are used to be able to refer to collections as single
+entities. For example, you might want to call all water molecules
+collectively "solvent". Most of the operations on chemical objects
+are also available for collections.
+</p>
+
+
+
+
+
+<h3>Force fields</h3>
+
+
+
+
+
+<p>
+Force field objects represent a precise description of force
+fields, i.e. a complete recipe for calculating the potential energy
+(and its derivatives) for a given molecular system. In other words,
+they specify not only the functional form of the various interactions,
+but also all parameters and the prescriptions for applying these
+parameters to an actual molecular system.
+</p>
+
+
+
+
+
+<h3>Universes</h3>
+
+
+
+
+
+<p>
+Universes define complete molecular systems, i.e. they contain
+chemical objects. In addition, they describe interactions within the
+system (by a force field), boundary conditions, external fields,
+etc. Many of the operations that can be used on chemical objects can
+also be applied to complete universes.
+</p>
+
+
+
+
+
+<h3>Minimizers and integrators</h3>
+
+
+
+
+
+<p>
+A minimizer object is a special "machine" that can find local minima
+in the potential energy surface of a universe. You may consider this a
+function, if you wish, but of course functions are just special
+objects. Similarly, an integrator is a special "machine" that can
+determine a dynamical trajectory for a system on a given potential
+energy surface.
+</p>
+
+
+
+
+
+<h3>Trajectories</h3>
+
+
+
+
+
+<p>
+Minimizers and integrators can produce trajectories, which are special
+files containing a sequence of configurations and/or other related
+information. Of course trajectory objects can also be read for
+analysis.
+</p>
+
+
+
+
+
+<h3>Variables</h3>
+
+
+
+
+
+<p>
+Variable objects (not to be confused with standard Python variables)
+describe quantities that have a value for each atom in a system, for
+example positions, masses, or energy gradients. Their most common use
+is for storing various configurations of a system.
+</p>
+
+
+
+
+
+<h3>Normal modes</h3>
+
+
+
+
+
+<p>
+Normal mode objects contain normal mode frequencies and atomic
+displacements for a given universe.
+</p>
+
+
+
+
+
+<h3>Non-MMTK objects</h3>
+
+
+
+
+
+<p>
+An MMTK application program will typically also make use of objects
+provided by Python or Python library modules. A particularly useful
+library is the package Scientific, which
+is also used by MMTK itself. The most important objects are
+<ul>
+
+
+<li> <p>
+numbers (integers, real number, complex numbers), provided by Python
+</p>
+
+<li> <p>
+vectors (in 3D coordinate space) provided by the module Scientific.Geometry.
+</p>
+
+<li> <p>character strings, provided by Python</p>
+
+<li> <p>files, provided by Python</p>
+
+</ul>
+
+Of course MMTK applications can make use of the Python standard
+library or any other Python modules. For example, it is possible
+to write a simulation program that provides status reports via an
+integrated Web server, using the Python standard module SimpleHTTPServer.
+</p>
+
+
+
+
+
+<hr width=70%>
+<a name="overview-database"><h2>The chemical database</h2><a>
+
+
+
+
+
+<p>
+For defining the chemical objects described above, MMTK uses a
+database of descriptions. There is a database for atoms, one for
+groups, etc. When you ask MMTK to make a specific chemical object, for
+example a water molecule, MMTK looks for the definition of water in
+the molecule database. A database entry contains everything there
+is to know about the object it defines: its constituents and their
+names, configurations, other names used e.g. for I/O, and all
+information force fields might need about the objects.
+</p>
+
+
+
+<p>
+MMTK comes with database entries for many common objects (water,
+amino acids, etc.). For other objects you will have to write the definitions
+yourself, as described in the section on the <a href="MMTK_8.html#database">database</a>.
+</p>
+
+
+
+
+
+<hr width=70%>
+<h2>Force fields</h2>
+
+
+
+
+
+<p>
+MMTK contains everything necessary to use the <a href="http://www.amber.ucsf.edu/amber/amber.html">Amber 94 force field</a> on proteins, DNA, and
+water molecules. It uses the standard Amber parameter and modification
+file format. In addition to the Amber force field, there is a simple
+Lennard-Jones force field for noble gases, and a deformation force
+field for normal mode calculations on large proteins.
+</p>
+
+
+
+<p>
+MMTK was designed to make the addition of force field terms and the
+implementation of other force fields as easy as possible. Force field
+terms can be defined in Python (for ease of implementation) or in C or
+Fortran (for efficiency). This is described in the developer's guide.
+</p>
+
+
+
+
+
+<hr width=70%>
+<h2>Units</h2>
+
+
+
+
+
+<p>
+Since MMTK is not a black-box program, but a modular library,
+it is essential for it to use a consistent unit system in which, for
+example, the inverse of a frequency is a time, and the product of
+a mass and the square of a velocity is an energy, without additional
+conversion factors. Black-box programs can (and usually do) use
+a consistent unit system internally and convert to "conventional"
+units for input and output.
+</p>
+
+
+
+<p>
+The unit system of MMTK consists mostly of SI units of appropriate
+magnitude for molecular systems:
+<ul>
+
+
+<li> <p>nm for lengths</p>
+
+<li> <p>ps for times</p>
+
+<li> <p>atomic mass units (g/mol) for masses</p>
+
+<li> <p>kJ/mol for energies</p>
+
+<li> <p>THz (1/ps) for frequencies</p>
+
+<li> <p>K for temperatures</p>
+
+<li> <p>elementary charges</p>
+
+</ul>
+
+
+</p>
+
+
+
+<p>
+The module <a href="MMTK_38.html#Module:MMTK.Units">MMTK.Units</a> contains convenient
+conversion constants for the units commonly used in computational
+chemistry. For example, a length of 2 Ångström can be
+written as <tt>2*Units.Ang</tt>, and a frequency can be
+printed in wavenumbers with <tt>print
+frequency/Units.invcm</tt>.
+</p>
+
+
+
+
+
+<hr width=70%>
+<h2>A simple example</h2>
+
+
+
+
+
+<p>
+The following simple example shows how a typical MMTK application
+might look like. It constructs a system consisting of a single water
+molecule and runs a short molecular dynamics trajectory. There are
+many alternative ways to do this; this particular one was chosen
+because it makes each step explicit and clear. The individual steps
+are explained in the remaining chapters of the manual.
+</p>
+
+
+
+<pre>
+# Import the necessary MMTK definitions.
+from MMTK import *
+from MMTK.ForceFields import Amber94ForceField
+from MMTK.Trajectory import Trajectory, TrajectoryOutput, \
+                            StandardLogOutput
+from MMTK.Dynamics import VelocityVerletIntegrator
+# Create an infinite universe (i.e. no boundaries, non-periodic).
+universe = InfiniteUniverse(Amber94ForceField())
+# Create a water molecule in the universe.
+# Water is defined in the database.
+universe.molecule = Molecule('water')
+# Generate random velocities.
+universe.initializeVelocitiesToTemperature(300*Units.K)
+# Create an integrator.
+integrator = VelocityVerletIntegrator(universe)
+# Generate a trajectory
+trajectory = Trajectory(universe, "water.nc", "w")
+# Run the integrator for 50 steps of 1 fs, printing time and energy
+# every fifth step and writing time, energy, temperature, and the positions
+# of all atoms to the trajectory at each step.
+integrator(delta_t = 1.*Units.fs, steps = 50,
+           actions = [StandardLogOutput(5),
+                      TrajectoryOutput(trajectory, ("time", "energy",
+                                                    "thermodynamic",
+                                                    "configuration"),
+                                       0, None, 1)])
+# Close the trajectory
+trajectory.close()
+</pre>
+
+
+
+

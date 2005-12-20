@@ -1,0 +1,56 @@
+<a name="normal_modes"><h1>Normal modes</h1></a>
+
+
+
+
+
+<p>
+Normal mode analysis provides an analytic description of the dynamics
+of a system near a minimum using an harmonic approximation to the
+potential. Before a normal mode analysis can be started, the system
+must be brought to a local minimum of the potential energy by <a href="MMTK_4.html#energy_minimization">energy minimization</a>, except when special force fields
+designed only for normal mode analysis are used (e.g. <a href="MMTK_20.html#Class:MMTK.ForceFields.DeformationForceField">MMTK.ForceFields.DeformationForceField</a>). See also
+the <a href="MMTK_42.html#Example:NormalModes">normal mode</a> examples.
+</p>
+
+
+
+<p>
+A standard normal mode analysis is performed by creating a normal mode
+object, implemented in class <a href="MMTK_29.html#Class:MMTK.NormalModes.NormalModes">MMTK.NormalModes.NormalModes</a>. A normal mode object
+behaves like a sequence of <a href="MMTK_29.html#Class:MMTK.NormalModes.Mode">MMTK.NormalModes.Mode</a>
+objects which store the atomic displacement vectors corresponding
+to each mode and its vibrational frequency.
+</p>
+
+
+
+<p>
+For short-ranged potentials, it is advantageous to store the second
+derivatives of the potential in a sparse-matrix form and to use
+an iterative method to determine some or all modes. This permits
+the treatments of larger systems that would normally require huge
+amounts of memory. A sparse-matrix method is implemented in class
+<a href="MMTK_29.html#Class:MMTK.NormalModes.SparseMatrixNormalModes">MMTK.NormalModes.SparseMatrixNormalModes</a>.
+</p>
+
+
+
+<p>
+Another approach to deal with large systems is the restriction to
+low-frequency modes which are supposed to be well representable by
+linear combinations of a given set of basis vectors. The basis vectors
+can be obtained from a basis for the full Cartesian space by
+elimination of known fast degrees of freedom (e.g. bonds); the module
+<a href="MMTK_36.html#Module:MMTK.Subspace">MMTK.Subspace</a> contains support classes for
+this approach. It is also possible to construct a suitable basis
+vector set from small-deformation vector fields (e.g. <a href="MMTK_25.html#Class:MMTK.FourierBasis.FourierBasis">MMTK.FourierBasis.FourierBasis</a>). The normal mode
+analysis for a given set of basis vectors is performed by the class
+<a href="MMTK_29.html#Class:MMTK.NormalModes.SubspaceNormalModes">MMTK.NormalModes.SubspaceNormalModes</a>. There is
+also a variant using finite difference differentiation (<a href="MMTK_29.html#Class:MMTK.NormalModes.FiniteDifferenceSubspaceNormalModes">MMTK.NormalModes.FiniteDifferenceSubspaceNormalModes</a>)
+and another one using a sparse-matrix representation of the second
+derivatives (<a href="MMTK_29.html#Class:MMTK.NormalModes.SparseMatrixSubspaceNormalModes">MMTK.NormalModes.SparseMatrixSubspaceNormalModes</a>).
+</p>
+
+
+

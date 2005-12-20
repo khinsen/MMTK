@@ -1,0 +1,186 @@
+<a name="Module:MMTK.Subspace"><h1>Module MMTK.Subspace</h1></a>
+
+
+
+
+
+<p>This module implements subspaces for infinitesimal (or finite
+small-amplitude) atomic motions. They can be used in normal mode
+calculations (see example <a href="MMTK_42.html#Example:NormalModes:constrained_modes.py">NormalModes/constrained_modes.py</a>) or
+for analyzing complex motions [<a href="MMTK_44.html#Article:Hinsen1999a">Hinsen1999a</a>].
+</p>
+
+
+
+
+
+
+
+
+
+<hr width=70%>
+<a name="Class:MMTK.Subspace.Subspace"><h2>Class Subspace: Subspace of infinitesimal atomic motions</h2></a>
+
+
+
+
+
+<p>Constructor: Subspace(<i>universe</i>, <i>vectors</i>)</p>
+
+
+
+<p><dl>
+
+
+<dt><i>universe</i></dt>
+
+
+<dd><p>
+the universe for which the subspace is created</p></dd>
+
+
+<dt><i>vectors</i></dt>
+
+
+<dd><p>
+a list of <a href="MMTK_10.html#Class:MMTK.ParticleVector">MMTK.ParticleVector</a> objects
+             that define the subspace. They need not be orthogonal
+             or linearly independent.
+</p></dd>
+
+
+</dl>
+</p>
+
+
+
+<b>Methods:</b><br>
+<ul>
+<li> <b><i>getBasis</i></b>()
+
+
+<p>Returns a basis for the subspace, which is obtained
+by orthonormalization of the input vectors using Singular
+Value Decomposition. The basis consists of a sequence
+of <a href="MMTK_10.html#Class:MMTK.ParticleVector">MMTK.ParticleVector</a> objects that are orthonormal
+in configuration space.</p>
+
+
+
+
+
+<li> <b><i>projectionOf</i></b>(<i>vector</i>)
+
+
+
+
+<p>Returns the projection of <i>vector</i> (a <a href="MMTK_10.html#Class:MMTK.ParticleVector">MMTK.ParticleVector</a>
+object) onto the subspace.</p>
+
+
+
+
+
+<li> <b><i>projectionComplementOf</i></b>(<i>vector</i>)
+
+
+
+
+<p>Returns the projection of <i>vector</i> (a <a href="MMTK_10.html#Class:MMTK.ParticleVector">MMTK.ParticleVector</a>
+object) onto the orthogonal complement of the subspace.</p>
+
+
+
+
+
+</ul>
+<hr width=70%>
+<a name="Class:MMTK.Subspace.RigidMotionSubspace"><h2>Class RigidMotionSubspace: Subspace of rigid-body motions</h2></a>
+
+
+
+
+
+<p>A <a href="MMTK_43.html#Glossary:Subclass">subclass</a> of <a href="MMTK_36.html#Class:MMTK.Subspace.Subspace">MMTK.Subspace.Subspace</a>.</p>
+
+
+
+<p>A rigid-body motion subspace is the subspace which contains
+the rigid-body motions of any number of chemical objects.</p>
+
+
+
+<p>Constructor: RigidMotionSubspace(<i>universe</i>, <i>objects</i>)</p>
+
+
+
+<p><dl>
+
+
+<dt><i>universe</i></dt>
+
+
+<dd><p>
+the universe for which the subspace is created</p></dd>
+
+
+<dt><i>objects</i></dt>
+
+
+<dd><p>
+a sequence of objects whose rigid-body motion is
+             included in the subspace
+</p></dd>
+
+
+</dl>
+</p>
+
+
+
+<hr width=70%>
+<a name="Class:MMTK.Subspace.PairDistanceSubspace"><h2>Class PairDistanceSubspace: Subspace of pair-distance motions</h2></a>
+
+
+
+
+
+<p>A <a href="MMTK_43.html#Glossary:Subclass">subclass</a> of <a href="MMTK_36.html#Class:MMTK.Subspace.Subspace">MMTK.Subspace.Subspace</a>.</p>
+
+
+
+<p>A pair-distance motion subspace is the subspace which contains
+the relative motions of any number of atom pairs along
+their distance vector, e.g. bond elongation between two
+bonded atoms.</p>
+
+
+
+<p>Constructor: PairDistanceSubspace(<i>universe</i>, <i>atom_pairs</i>)</p>
+
+
+
+<p><dl>
+
+
+<dt><i>universe</i></dt>
+
+
+<dd><p>
+the universe for which the subspace is created</p></dd>
+
+
+<dt><i>atom_pairs</i></dt>
+
+
+<dd><p>
+a sequence of atom pairs whose distance-vector
+                motion is included in the subspace
+</p></dd>
+
+
+</dl>
+</p>
+
+
+

@@ -1,0 +1,155 @@
+
+
+<center>
+<title>MMTK User's Guide</title>
+<h1>MMTK User's Guide</h1>
+Konrad Hinsen<br>
+Centre de Biophysique Moléculaire<br>
+Centre National de la Recherche Scientifique<br>
+Rue Charles Sadron<br>
+        45071 Orléans
+        Cedex 2 
+        <br>
+France<br>
+        E-Mail: <a href="mailto:hinsen@cnrs-orleans.fr">hinsen@cnrs-orleans.fr</a><br>Last revision: 2004-2-6<br></center>
+
+
+
+
+<a name="introduction"><h3>Introduction</h3><a>
+
+
+
+
+
+<p>
+The Molecular Modelling Toolkit (MMTK)
+presents a new approach to molecular simulations. It is not a
+"simulation program" with a certain set of functions that can be used
+by writing more or less flexible "input files", but a collection of
+library modules written in an easy-to-learn high-level programming
+language, <a href="http://www.python.org">Python</a>. This approach
+offers three important advantages:
+<ul>
+
+
+<li> <p>
+Application programs can use the full power of a general and well-designed
+programming language.
+</p>
+
+<li> <p>
+Application programs can profit from the large set of other libraries
+that are available for Python. These may be scientific or
+non-scientific; for example, it is very easy to write simulation or
+analysis programs with graphical user interfaces (using the module
+<tt>Tkinter</tt> in the Python standard library),
+or couple scientific calculations with a Web server.
+</p>
+
+<li> <p>
+Any user can provide useful additions in separate modules, whereas adding
+features to a monolithic program requires at least the cooperation of
+the original author.
+</p>
+
+</ul>
+
+To further encourage collaborative code development, MMTK uses a very
+unrestrictive licensing policy, just like Python. Although MMTK is
+copyrighted, anyone is allowed to use it for any purpose, including
+commercial ones, as well as to modify and redistribute it (a more
+precise description is given in the copyright statement that comes
+with the code).
+</p>
+
+
+
+<p>
+This manual describes version 2.4 of MMTK. The 2.x versions contain
+some incompatible changes with respect to earlier versions (1.x), most
+importantly a package structure that reduces the risk of name
+conflicts with other Python packages, and facilitates future
+enhancements. There are also many new features and improvements to
+existing functions.
+</p>
+
+
+
+<p>
+Using MMTK requires a basic knowledge of object-oriented programming
+and Python. Newcomers to this subject should have a look at the 
+introductory section in this manual and at the <a href="http://www.python.org/doc/tut/tut.html">Python tutorial</a> (which also comes
+with the Python interpreter). There are also numerous
+<a href="http://www.python.org/doc/Books.html">books on Python</a>
+that are useful in getting started. Even without MMTK, Python is a very
+useful programming language for scientific use, allowing rapid development
+and testing and easy interfacing to code written in low-level languages such
+as Fortran or C.
+</p>
+
+
+
+<p>
+This manual consists of several introductory chapters and a <a href="MMTK_10.html#module_reference">Module Reference</a>. The introductory chapters explain how
+common tasks are handled with MMTK, but they do not describe
+all of its features, nor do they contain a full documentation of
+functions or classes. This information can be found in
+the <a href="MMTK_10.html#module_reference">Module Reference</a>, which describes all classes
+and functions intended for end-user applications module by module,
+using documentation extracted directly from the source code.
+References from the introductory sections to the module reference
+facilitate finding the relevant documentation.
+</p>
+
+
+
+
+
+<ul><li><a href="MMTK_1.html">Overview</a></ul>
+
+
+<ul><li><a href="MMTK_3.html">Constructing a molecular system</a></ul>
+
+
+<ul><li><a href="MMTK_4.html">Minimization and Molecular Dynamics</a></ul>
+
+
+<ul><li><a href="MMTK_5.html">Normal modes</a></ul>
+
+
+<ul><li><a href="MMTK_6.html">Analysis operations</a></ul>
+
+
+<ul><li><a href="MMTK_7.html">Miscellaneous operations</a></ul>
+
+
+<ul><li><a href="MMTK_8.html">Constructing the database</a></ul>
+
+
+<ul><li><a href="MMTK_9.html">Threads and parallelization</a></ul>
+
+
+
+
+
+
+<ul><li><a href="MMTK_10.html">Reference for Module MMTK</a></ul>
+
+
+
+
+<ul><li><a href="MMTK_42.html">Examples</a></ul>
+
+
+<ul><li><a href="MMTK_43.html">Glossary</a></ul>
+
+
+
+
+<ul><li><a href="MMTK_44.html">References</a></ul>
+</ul>
+
+
+
+

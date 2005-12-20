@@ -1,0 +1,10 @@
+P = Atom('P')
+O_1 = Atom('O')
+O_2 = Atom('O')
+
+bonds = [Bond(O_1, P), Bond(O_2, P), ]
+
+pdbmap = [('NAP', {"O2P": O_2, "P": P, "O1P": O_1, })]
+
+amber_atom_type = {O_2: 'O2', P: 'P', O_1: 'O2', }
+

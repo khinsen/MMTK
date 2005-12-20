@@ -1,0 +1,176 @@
+# 
+# Makefile to build dpmta_test and dpmta_slave on Cray T3D
+#
+# w. t. rankin
+#
+# Copyright (c) 1997 Duke University
+# All rights reserved
+#
+# this makefile is set up to compile for the cray t3d (and c90 front end)
+# for compilation on generic workstation networks should use the default
+# makefile
+#
+# RCS Info: $Id: Makefile.mimd,v 2.5 1998/04/02 21:34:14 wrankin Exp $
+#
+# Revision History:
+# $Log: Makefile.mimd,v $
+# Revision 2.5  1998/04/02 21:34:14  wrankin
+# added Make.dep files to contain all file dependencies
+# added sol86 (Solaris X86) architecture to top level Makefile
+# cleaned up propagation of CC and MAKE variables in Makefiles
+#
+# Revision 2.4  1998/03/10 22:21:57  wrankin
+# folded start/cleanup functionality into dpmta_slvcompute
+#
+# Revision 2.3  1998/01/17 16:31:46  wrankin
+# updated remainder of makefiles to compile test programs in
+#   seperate subdirectory
+# multipole library is now built into libdpmta2.a and libspmta.a so
+#   users won't have to link with extra -lmpole
+#
+# Revision 2.2  1997/11/12 13:39:01  wrankin
+# added compiler directives for dpmta_error
+#
+# Revision 2.1  1997/11/07 16:48:55  wrankin
+# massive cleanup of code.
+#  - ansi-fication and inclusion of prototypes
+#  - removed unused variables
+#  - all (except the test) code compiles with minimal warnings under gcc.
+#
+#
+# -----
+# History for file Makefile.cray:
+#
+# Revision 2.12  1997/09/29 20:24:50  wrankin
+# fixed problem with invalid (empty) multipoles during upward pass.
+# cell indexing by processor was inconsistant between master/slave.
+#
+# Revision 2.11  1997/05/13 17:53:18  wrankin
+# use basic types defined in mpe.h instead of redeclaring them
+#
+# Revision 2.10  1997/04/28  16:01:47  wrankin
+# fix to timer code to make consistant with distributed impl.
+# fit to handling of cell length to make consistant with distributed impl.
+#
+# Revision 2.9  1997/02/26  18:52:28  wrankin
+# cleaned up handling of cell resizing
+#
+# Revision 2.8  1997/02/26  16:52:03  wrankin
+# added copyright notice
+#
+# Revision 2.7  1997/01/29  20:24:18  wrankin
+# changes to support compilation for Cray T3E
+#
+# Revision 2.6  1997/01/13  22:10:04  wrankin
+# added supprt for dpmta_test5.c which does MIMD with PDB file input
+#
+# Revision 2.5  1996/11/01  02:26:42  wrankin
+# modifications to support cray t3d compilation
+# version update for 2.5 release
+#
+# Revision 2.4  1996/09/24  18:41:24  wrankin
+# many changes for support of version 2.5
+#  - non cubic cells
+#  - non power-of-2 processors
+#  - fixed the resize code
+#  - new virial interface
+#  - changes to macroscopic code (still not working)
+#  - code cleanup
+#  - new test program that reads PDB file
+#  - update code for T3D support
+#
+# Revision 2.3  1995/07/26  01:52:56  wrankin
+# updated Makefiles
+# slight performance improvement for direct calculations
+# clean up test code example
+# fixed t3dlib for new multipole code
+#
+# Revision 2.2  1995/07/17 01:13:34  wrankin
+# updates to support SGI Power Challenge (IRIX 6.0.1)
+# cleanup of Makefile
+# initial work on T3D port (not yet supported in this release)
+#
+# Revision 2.1  1995/06/13  04:25:58  wrankin
+# No updates.
+# Sources placed under CVS.
+#
+# Revision 1.3  1995/05/15  19:33:57  wrankin
+# removded dependancy declaration for dpmta_mastilist.c
+# added dependancy declaration for dpmta_mastmkil.c
+#
+# Revision 1.2  1995/04/24  04:33:11  wrankin
+# updated to actually work on the T3D at NCSC
+#
+# Revision 1.1  1995/01/01  15:01:53  wrankin
+# Initial revision
+#
+#
+################################################################
+
+MAKE   = make
+SHELL  = /bin/sh
+CC     = cc
+AR     = ar
+CP     = cp -f
+RM     = rm -f
+
+
+# tell the compiler where to locate the PVM include
+# files
+#
+
+PVM_IDIR = /usr/include/pvm3/
+
+#
+# where are the multipole libraries located
+#
+
+MPOLEDIR = ../mpole
+LIBMPOLE = $(MPOLEDIR)/libmpole.a
+
+
+################################################################
+#
+#  nothing below this line should need to be modified
+#
+################################################################
+
+IDIR = -I$(PVM_IDIR) -I$(MPOLEDIR)/
+
+CFLAGS = -O3 -D$(PVM_ARCH) -DEMBEDDED $(DFLAGS) $(IDIR)
+
+SSRC  =	dpmta_mimd.c dpmta_mastiter.c \
+	dpmta_slvmkcell.c dpmta_slvmcalc.c dpmta_slvpcalc.c \
+        dpmta_slvcomm.c \
+	dpmta_slvmkiil.c  dpmta_slvmkil.c dpmta_slvmkhl.c \
+	dpmta_slvcompute.c dpmta_slvmacro.c dpmta_slvscale.c \
+	dpmta_timer.c dpmta_slvglobals.c \
+	dpmta_distmisc.c
+SOBJS =	$(SSRC:.c=.o)
+
+
+
+################################################################
+
+default : all
+
+all:
+	$(MAKE) -f Makefile.mimd libdpmta2.a CFLAGS="$(CFLAGS)"
+
+libdpmta2.a : $(SOBJS)
+	$(CP) $(LIBMPOLE) $@
+	$(AR) r $@ $?
+
+clean:
+	$(RM) libdpmta2.a $(SOBJS)
+
+install: all
+	$(CP) libdpmta2.a $(PVM_HOME)/lib/$(PVM_ARCH)
+
+
+################################################################
+#
+#  include file dependencies
+#
+
+include Make.deps

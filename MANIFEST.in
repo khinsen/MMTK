@@ -1,0 +1,53 @@
+include README LICENSE LICENCE MANIFEST.in
+include tviewer
+exclude MMTK/SparseModes.py
+include MMTK/ForceFields/force_fields
+include MMTK/ForceFields/Amber/*parm*
+include MMTK/Database/Atoms/*
+include MMTK/Database/Groups/*
+include MMTK/Database/Molecules/*
+include MMTK/Database/Complexes
+include MMTK/Database/Proteins/*
+include MMTK/Database/PDB/*
+exclude MMTK/Visualization_win32.py
+recursive-include Include *.pxi
+include Src/*.c
+include Src/*.i
+include Src/*.h
+include Src/*.pyx
+include Src/*opt
+recursive-include Src/dpmta *
+prune Src/dpmta/data
+prune Src/dpmta/doc
+prune Src/dpmta/fortran
+prune Src/dpmta/test
+recursive-include Include *.h
+include config/*.c
+include Doc/CHANGELOG
+include Doc/XML/mmtk-user.xml
+include Doc/PDF/*.pdf
+include Doc/HTML/*.html
+include Doc/XMLConversion/*
+recursive-include Examples *.py
+recursive-include Examples *.c
+recursive-include Examples *.pyx
+include Examples/Forcefield/README
+exclude Examples/Forcefield/HarmonicOscillator/Pyrex/*.c
+exclude Examples/Forcefield/ElectricField/Pyrex/*.c
+include Examples/MolecularDynamics/argon.conf.gz
+include Examples/LangevinDynamics/*.c
+include Examples/LangevinDynamics/ranf.h
+include Examples/LangevinDynamics/README
+include Examples/LangevinDynamics/Setup.template
+prune Examples/Forcefield/HarmonicOscillator/C/build
+prune Examples/Forcefield/HarmonicOscillator/C/dist
+prune Examples/Forcefield/HarmonicOscillator/Pyrex/build
+prune Examples/Forcefield/HarmonicOscillator/Pyrex/dist
+prune Examples/Forcefield/ElectricField/C/build
+prune Examples/Forcefield/ElectricField/C/dist
+prune Examples/Forcefield/ElectricField/Pyrex/build
+prune Examples/Forcefield/ElectricField/Pyrex/dist
+recursive-include Tools *.py
+include MMTK/Tools/TrajectoryViewer/README
+exclude *~
+exclude ._*

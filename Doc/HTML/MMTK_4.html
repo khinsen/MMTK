@@ -1,0 +1,631 @@
+<h1>Minimization and Molecular Dynamics</h1>
+
+
+
+
+
+<hr width=70%>
+<a name="trajectory"><h2>Trajectories</h2><a>
+
+
+
+
+
+<p>
+Minimization and dynamics algorithms produce sequences of configurations
+that are often stored for later analysis. In fact, they are often the
+most valuable result of a lengthy simulation run. To make sure that the
+use of trajectory files is not limited by machine compatibility, MMTK
+stores trajectories in <a href="http://www.unidata.ucar.edu/packages/netcdf/">netCDF</a>
+files. These files contain binary data, minimizing disk space usage, but
+are freely interchangeable between different machines. In addition,
+there are a number of programs that can perform standard operations on
+arbitrary netCDF files, and which can therefore be used directly on MMTK
+trajectory files. Finally, netCDF files are self-describing, i.e.
+contain all the information needed to interpret their contents.
+An MMTK trajectory file can thus be inspected and processed without
+requiring any further information.
+</p>
+
+
+
+<p>
+For illustrations of trajectory operations, see the
+<a href="MMTK_42.html#Example:Trajectories">trajectory</a> examples.
+</p>
+
+
+
+<p>
+Trajectory file objects are represented by the class <a href="MMTK_37.html#Class:MMTK.Trajectory.Trajectory">MMTK.Trajectory.Trajectory</a>. They can be opened for
+reading, writing, or modification. The data in trajectory files can be
+stored in single precision or double precision; single-precision is
+usually sufficient, but double-precision files are required to
+reproduce a given state of the system exactly.
+</p>
+
+
+
+<p>
+A trajectory is closed by calling the method <tt>close()</tt>.
+If anything has been written to a trajectory, closing it is required to
+guarantee that all data has been written to the file. Closing a
+trajectory after reading is recommended in order to prevent memory
+leakage, but is not strictly required.
+</p>
+
+
+
+<p>
+Newly created trajectories can contain all
+objects in a universe or any subset; this is useful for limiting the
+amount of disk space occupied by the file by not storing uninteresting
+parts of the system, e.g. the solvent surrounding a protein. It is
+even possible to create a trajectory for a subset of the atoms in a
+molecule, e.g. for only the C-alpha atoms of a protein. The universe
+description that is stored in the trajectory file contains all
+chemical objects of which at least one atom is represented.
+</p>
+
+
+
+<p>
+When a trajectory is opened for reading, no universe object needs
+to be specified. In that case, MMTK creates a universe from
+the description contained in the trajectory file. This universe will
+contain the same objects as the one for which the trajectory file was
+created, but not necessarily have all the properties of the original
+universe (the description contains only the names and types of the
+objects in the universe, but not, for example, the force field). The
+universe can be accessed via the attribute <tt>universe</tt>
+of the trajectory.
+</p>
+
+
+
+<p>
+If the trajectory was created with partial data for some of the objects,
+reading data from it will set the data for the missing parts to
+"undefined". Analysis operations on such systems must be done very
+carefully. In most cases, the trajectory data will contain the atomic
+configurations, and in that case the "defined" atoms can be extracted
+with the method <tt>atomsWithDefinedPositions()</tt>.
+</p>
+
+
+
+<p>
+MMTK trajectory files can store various data: atomic positions,
+velocities, energies, energy gradients etc. Each trajectory-producing
+algorithm offers a set of quantities from which the user can choose what
+to put into the trajectory. Since a detailed selection would be
+tedious, the data is divided into classes, e.g. the class "energy"
+stands for potential energy, kinetic energy, and whatever other
+energy-related quantities an algorithm produces.
+</p>
+
+
+
+<p>
+For optimizing I/O efficiency, the data layout in a trajectory file
+can be modified by the <tt>block_size</tt> parameter. Small
+block sizes favour reading or writing all data for one time step,
+whereas large block sizes (up to the number of steps in the trajectory)
+favour accessing a few values for all time steps, e.g. scalar
+variables like energies or trajectories for individual atoms. The
+default value of the block size is one.
+</p>
+
+
+
+<p>
+Every trajectory file contains a history of its creation. The creation
+of the file is logged with time and date, as well as each operation that
+adds data to it with parameters and the time/date of start and end. This
+information, together with the comment and the number of atoms and steps
+contained in the file, can be obtained with the function
+<a href="MMTK_37.html#Function:MMTK.Trajectory.trajectoryInfo">MMTK.Trajectory.trajectoryInfo</a>.
+</p>
+
+
+
+<p>
+It is possible to read data from a trajectory file that is being
+written to by another process. For efficiency, trajectory data is not
+written to the file at every time step, but only approximately every
+15 minutes. Therefore the amount of data available for reading may be
+somewhat less than what has been produced already.
+</p>
+
+
+
+
+
+<hr width=70%>
+<h2>Options for minimization and dynamics</h2>
+
+
+
+
+
+<p>
+Minimizers and dynamics integrators accept various optional parameter
+specifications. All of them are selected by keywords, have reasonable
+default values, and can be specified when the minimizer or integrator
+is created or when it is called. In addition to parameters that are
+specific to each algorithm, there is a general parameter
+<i>actions</i> that specifies actions that are
+executed periodically, including trajectory and console output.
+</p>
+
+
+
+<h3>Periodic actions</h3>
+
+
+
+
+
+<p>
+Periodic actions are specified by the keyword parameter
+<i>actions</i> whose value is a list of periodic
+actions, which defaults to an empty list. Some of these actions are
+applicable to any trajectory-generating algorithm, especially the
+output actions. Others make sense only for specific algorithms or
+specific universes, e.g. the periodic rescaling of velocities during a
+Molecular Dynamics simulation.
+</p>
+
+
+
+<p>
+Each action is described by an action object. The step numbers for which
+an action is executed are specified by three parameters. The
+parameter <i>first</i> indicates the number of the
+first step for which the action is executed, and defaults to 0. The
+parameter <i>last</i> indicates the last step for
+which the action is executed, and default to <tt>None</tt>,
+meaning that the action is executed indefinitely. The parameter
+<i>skip</i> speficies how many steps are skipped
+between two executions of the action. The default value of 1 means
+that the action is executed at each step. Of course an action object
+may have additional parameters that are specific to its action.
+</p>
+
+
+
+<p>
+The output actions are defined in the module <a href="MMTK_37.html#Module:MMTK.Trajectory">MMTK.Trajectory</a> and can be used with any
+trajectory-generating algorithm. They are:
+<ul>
+
+
+<li> <p>
+
+<a href="MMTK_37.html#Class:MMTK.Trajectory.TrajectoryOutput">MMTK.Trajectory.TrajectoryOutput</a> for writing
+data to a trajectory. Note that it is possible to use
+several trajectory output actions simultaneously to write to multiple
+trajectories. It is thus possible, for example, to write a short
+dense trajectory during a dynamics run for analyzing short-time
+dynamics, and simultaneously a long-time trajectory with a larger
+step spacing, for analyzing long-time dynamics.
+</p>
+
+<li> <p>
+
+<a href="MMTK_37.html#Class:MMTK.Trajectory.RestartTrajectoryOutput">MMTK.Trajectory.RestartTrajectoryOutput</a>,
+which is a specialized version of
+<a href="MMTK_37.html#Class:MMTK.Trajectory.TrajectoryOutput">MMTK.Trajectory.TrajectoryOutput</a>.
+It writes the data that the
+algorithm needs in order to be restarted to a restart trajectory file.
+A restart trajectory is a trajectory that stores a fixed
+number of steps which are reused cyclically, such that it always
+contain the last few steps of a trajectory.
+</p>
+
+<li> <p>
+
+<a href="MMTK_37.html#Class:MMTK.Trajectory.LogOutput">MMTK.Trajectory.LogOutput</a> for text output
+of data to a file.
+</p>
+
+<li> <p>
+
+<a href="MMTK_37.html#Class:MMTK.Trajectory.StandardLogOutput">MMTK.Trajectory.StandardLogOutput</a>, a specialized
+version of <a href="MMTK_37.html#Class:MMTK.Trajectory.LogOutput">MMTK.Trajectory.LogOutput</a> that
+writes the data classes "time" and "energy" during the whole
+simulation run to standard output.
+</p>
+
+</ul>
+
+
+</p>
+
+
+
+<p>
+The other periodic actions are meaningful only for Molecular Dynamics
+simulations:
+<ul>
+
+
+<li> <p>
+
+<a href="MMTK_17.html#Class:MMTK.Dynamics.VelocityScaler">MMTK.Dynamics.VelocityScaler</a> is used for
+rescaling the velocities to force the kinetic energy to the value
+defined by some temperature. This is usually done during initial
+equilibration.
+</p>
+
+<li> <p>
+
+<a href="MMTK_17.html#Class:MMTK.Dynamics.BarostatReset">MMTK.Dynamics.BarostatReset</a> resets the
+barostat coordinate to zero and is during initial equilibration
+of systems in the NPT ensemble.
+</p>
+
+<li> <p>
+
+<a href="MMTK_17.html#Class:MMTK.Dynamics.Heater">MMTK.Dynamics.Heater</a> rescales the velocities
+like  <a href="MMTK_17.html#Class:MMTK.Dynamics.VelocityScaler">MMTK.Dynamics.VelocityScaler</a>, but
+increases the temperature step by step.
+</p>
+
+<li> <p>
+
+<a href="MMTK_17.html#Class:MMTK.Dynamics.TranslationRemover">MMTK.Dynamics.TranslationRemover</a> subtracts
+the global translational velocity of the system from all individual
+atomic velocities. This prevents a slow but systematic energy flow
+into the degrees of freedom of global translation, which occurs
+with most MD integrators due to non-perfect conservation of momentum.
+</p>
+
+<li> <p>
+
+<a href="MMTK_17.html#Class:MMTK.Dynamics.RotationRemover">MMTK.Dynamics.RotationRemover</a> subtracts
+the global angular velocity of the system from all individual
+atomic velocities. This prevents a slow but systematic energy flow
+into the degrees of freedom of global rotation, which occurs
+with most MD integrators due to non-perfect conservation of angular
+momentum.
+</p>
+
+</ul>
+
+
+</p>
+
+
+
+
+
+<h3>Fixed atoms</h3>
+
+
+
+
+
+<p>
+During the course of a minimization or molecular dynamics algorithm, the
+atoms move to different positions. It is possible to exclude specific
+atoms from this movement, i.e. fixing them at their initial positions.
+This has no influence whatsoever on energy or force calculations; the
+only effect is that the atoms' positions never change. Fixed atoms are
+specified by giving them an attribute <tt>fixed</tt>
+with a value of one. Atoms that do not have an attribute
+<tt>fixed</tt>, or one with a value of zero, move according
+to the selected algorithm.
+</p>
+
+
+
+
+
+
+
+<hr width=70%>
+<a name="energy_minimization"><h2>Energy minimization</h2><a>
+
+
+
+
+
+<p>
+MMTK has two energy minimizers using different algorithms: steepest
+descent (<a href="MMTK_27.html#Class:MMTK.Minimization.SteepestDescentMinimizer">MMTK.Minimization.SteepestDescentMinimizer</a>) and
+conjugate gradient (<a href="MMTK_27.html#Class:MMTK.Minimization.ConjugateGradientMinimizer">MMTK.Minimization.ConjugateGradientMinimizer</a>)
+. Steepest descent minimization is very inefficient if the goal is to
+find a local minimum of the potential energy. However, it has the
+advantage of always moving towards the minimum that is closest to the
+starting point and is therefore ideal for removing bad contacts in a
+unreasonably high energy configuration. For finding local minima, the
+conjugate gradient algorithm should be used.
+</p>
+
+
+
+<p>
+Both minimizers accept three specific optional parameters:
+<ul>
+
+
+<li> <p>
+
+<i>steps</i> (an integer) to specify the maximum number of
+steps (default is 100)
+</p>
+
+<li> <p>
+
+<i>step_size</i> (a number)
+to specify an initial step length used in the search for a minimum
+(default is 2 pm)
+</p>
+
+<li> <p>
+
+<i>convergence</i> (a number)
+to specify the gradient norm (more precisely the root-mean-square
+length) at which the minimization should stop (default is 0.01
+kJ/mol/nm)
+</p>
+
+</ul>
+
+
+</p>
+
+
+
+<p>
+There are three classes of trajectory data: "energy" includes the
+potential energy and the norm of its gradient, "configuration" stands
+for the atomic positions, and "gradients" stands for the energy
+gradients at each atom position.
+</p>
+
+
+
+<p>
+The following example performs 100 steps of steepest descent
+minimization without producing any trajectory or printed output:
+<pre>
+from MMTK import *
+from MMTK.ForceFields import Amber94ForceField
+from MMTK.Minimization import SteepestDescentMinimizer
+universe = InfiniteUniverse(Amber94ForceField())
+universe.protein = Protein('insulin')
+minimizer = SteepestDescentMinimizer(universe)
+minimizer(steps = 100)
+</pre>
+
+
+</p>
+
+
+
+<p>
+See also the example file <a href="MMTK_42.html#Example:NormalModes:modes.py">NormalModes/modes.py</a>.
+</p>
+
+
+
+
+
+<hr width=70%>
+<h2>Molecular dynamics</h2>
+
+
+
+
+
+<p>
+The techniques described in this section are illustrated by several
+<a href="MMTK_42.html#Example:MolecularDynamics">Molecular Dynamics</a> examples.
+</p>
+
+
+
+<h3>Velocities</h3>
+
+
+
+
+
+<p>
+The integration of the classical equations of motion for an atomic
+system requires not only positions, but also velocities for all atoms.
+Usually the velocities are initialized to random values drawn from a
+normal distribution with a variance corresponding to a certain
+temperature. This is done by calling the method
+<tt>initializeVelocitiesToTemperature(temperature)</tt>
+on a universe. Note that the velocities are assigned atom by atom; no
+attempt is made to remove global translation or rotation of the total
+system or any part of the system.
+</p>
+
+
+
+<p>
+During equilibration of a system, it is common to multiply all
+velocities by a common factor to restore the intended temperature. This
+can done explicitly by calling the method
+<tt>scaleVelocitiesToTemperature(temperature)</tt>
+on a universe, or by using the action object
+<a href="MMTK_17.html#Class:MMTK.Dynamics.VelocityScaler">MMTK.Dynamics.VelocityScaler</a>.
+</p>
+
+
+
+
+
+<h3>Distance constraints</h3>
+
+
+
+
+
+<p>
+A common technique to eliminate the fastest (usually uninteresting)
+degrees of freedom, permitting a larger integration time step,
+is the use of distance constraints on some or all chemical bonds.
+MMTK allows the use of distance constraints on any pair of
+atoms, even though constraining anything but chemical bonds
+is not recommended due to considerable modifications of the
+dynamics of the system [<a href="MMTK_44.html#Article:vanGunsteren1982">vanGunsteren1982</a>,
+<a href="MMTK_44.html#Article:Hinsen1995">Hinsen1995</a>].
+</p>
+
+
+
+<p>
+MMTK permits the definition of distance constraints on all atom pairs
+in an object that are connected by a chemical bond by calling the
+method <tt>setBondConstraints</tt>. Usually this is called
+for a complete universe, but it can also be called for a chemical
+object or a collection of chemical objects. The method
+<tt>removeDistanceConstraints</tt> removes all distance
+constraints from the object for which it is called.
+</p>
+
+
+
+<p>
+Constraints defined as described above are automatically taken into
+account by Molecular Dynamics integrators. It is also possible to
+enforce the constraints explicitly by calling the method
+<tt>enforceConstraints</tt> for a universe. This has the
+effect of modifying the configuration and the velocities (if
+velocities exist) in order to make them compatible with the
+constraints.
+</p>
+
+
+
+
+
+<h3>Thermostats and barostats</h3>
+
+
+
+
+
+<p>
+A standard Molecular Dynamics integration allows time averages
+corresponding to the NVE ensemble, in which the number of molecules,
+the system volume, and the total energy are constant. This ensemble
+does not represent typical experimental conditions very well.
+Alternative ensembles are the NVT ensemble, in which the temperature
+is kept constant by a thermostat, and the NPT ensemble, in which
+temperature and pressure are kept constant by a thermostat and a
+barostat. To obtain these ensembles in MMTK, thermostat and barostat
+objects must be added to a universe. In the presence of these objects,
+the Molecular Dynamics integrator will use the extended-systems method
+for producing the correct ensemble. The classes to be used are
+<a href="MMTK_18.html#Class:MMTK.Environment.NoseThermostat">MMTK.Environment.NoseThermostat</a> and
+<a href="MMTK_18.html#Class:MMTK.Environment.AndersenBarostat">MMTK.Environment.AndersenBarostat</a>.
+</p>
+
+
+
+
+
+<h3>Integration</h3>
+
+
+
+
+
+<p>
+A Molecular Dynamics integrator based on the "Velocity Verlet"
+algorithm [<a href="MMTK_44.html#Article:Swope1982">Swope1982</a>], which was extended
+to handle distance constraints as well as thermostats and
+barostats [<a href="MMTK_44.html#Article:Kneller1996">Kneller1996</a>], is implemented by the
+class <a href="MMTK_17.html#Class:MMTK.Dynamics.VelocityVerletIntegrator">MMTK.Dynamics.VelocityVerletIntegrator</a>.
+It has two optional keyword parameters:
+<ul>
+
+
+<li> <p>
+
+<i>steps</i> (an integer) to specify the number
+of steps (default is 100)
+</p>
+
+<li> <p>
+
+<i>delta_t</i> (a number) to specify the time step
+(default 1 fs)
+</p>
+
+</ul>
+
+
+</p>
+
+
+
+<p>
+There are three classes of trajectory data: "energy" includes the
+potential energy and the kinetic energy, as well as the energies of
+thermostat and barostat coordinates if they exist, "time" stands for the time,
+"thermodynamic" stand for temperature and pressure,
+"configuration" stands for the atomic positions, "velocities" stands for
+the atomic velocities, and "gradients" stands for the energy gradients
+at each atom position.
+</p>
+
+
+
+<p>
+The following example performs a 1000 step dynamics integration, storing
+every 10th step in a trajectory file and removing the total translation
+and rotation every 50th step:
+<pre>
+from MMTK import *
+from MMTK.ForceFields import Amber94ForceField
+from MMTK.Dynamics import VelocityVerletIntegrator, TranslationRemover, \
+                          RotationRemover
+from MMTK.Trajectory import TrajectoryOutput
+universe = InfiniteUniverse(Amber94ForceField())
+universe.protein = Protein('insulin')
+universe.initializeVelocitiesToTemperature(300.*Units.K)
+actions = [TranslationRemover(0, None, 50),
+           RotationRemover(0, None, 50),
+           TrajectoryOutput("insulin.nc",
+                            ("configuration", "energy", "time"),
+                            0, None, 10)]
+integrator = VelocityVerletIntegrator(universe, delta_t = 1.*Units.fs,
+                                      actions = actions)
+integrator(steps = 1000)
+</pre>
+
+
+</p>
+
+
+
+
+
+
+
+<hr width=70%>
+<h2>Snapshots</h2>
+
+
+
+
+
+<p>
+A snapshot generator allows writing the current system state to a
+trajectory. It works much like a zero-step minimization or dynamics run,
+i.e. it takes the same optional arguments for specifying the trajectory
+and protocol output. A snapshot generator is created using the
+class <a href="MMTK_37.html#Class:MMTK.Trajectory.SnapshotGenerator">MMTK.Trajectory.SnapshotGenerator</a>.
+</p>
+
+
+
+
+

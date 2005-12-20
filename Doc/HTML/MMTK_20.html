@@ -1,0 +1,322 @@
+<a name="Module:MMTK.ForceFields"><h1>Module MMTK.ForceFields</h1></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h1>Submodules:</h1>
+<ul><li><a href="MMTK_21.html">Module MMTK.ForceFields.BondFF</a></ul>
+
+
+<ul><li><a href="MMTK_22.html">Module MMTK.ForceFields.ForceFieldTest</a></ul>
+
+
+<ul><li><a href="MMTK_23.html">Module MMTK.ForceFields.Restraints</a></ul>
+
+
+<ul><li><a href="MMTK_24.html">Module MMTK.ForceFields.SPCEFF</a></ul>
+
+
+<hr width=70%>
+<a name="Class:MMTK.ForceFields.CalphaForceField"><h2>Class CalphaForceField: Effective harmonic force field for a C-alpha protein model</h2></a>
+
+
+
+
+
+<p>Constructor: CalphaForceField(<i>cutoff</i>=None, <i>scale_factor</i>=1.)</p>
+
+
+
+<p><dl>
+
+
+<dt><i>cutoff</i></dt>
+
+
+<dd><p>
+the cutoff for pair interactions, should be
+            at least 2.5 nm</p></dd>
+
+
+<dt><i>scale_factor</i></dt>
+
+
+<dd><p>
+a global scaling factor.</p></dd>
+
+
+</dl>
+</p>
+
+
+
+<p>Pair interactions in periodic systems are calculated using the
+minimum-image convention; the cutoff should therefore never be
+larger than half the smallest edge length of the elementary
+cell.</p>
+
+
+
+<p>See [<a href="MMTK_44.html#Article:Hinsen2000">Hinsen2000</a>] for a description of this force field.
+</p>
+
+
+
+<hr width=70%>
+<a name="Class:MMTK.ForceFields.DeformationForceField"><h2>Class DeformationForceField: Deformation force field for protein normal mode calculations</h2></a>
+
+
+
+
+
+<p>Constructor: DeformationForceField(<i>range</i>=0.7, <i>cutoff</i>=1.2,
+                                   <i>factor</i>=46402.)</p>
+
+
+
+<p><dl>
+
+
+<dt><i>range</i></dt>
+
+
+<dd><p>
+the range parameter</p></dd>
+
+
+<dt><i>cutoff</i></dt>
+
+
+<dd><p>
+the cutoff for pair interactions, should be significantly
+            larger than <i>range</i>.</p></dd>
+
+
+<dt><i>factor</i></dt>
+
+
+<dd><p>
+a global scaling factor.</p></dd>
+
+
+</dl>
+</p>
+
+
+
+<p>Pair interactions in periodic systems are calculated using the
+minimum-image convention; the cutoff should therefore never be
+larger than half the smallest edge length of the elementary
+cell.</p>
+
+
+
+<p>The pair interaction energy has the form
+U(r)=|factor|*exp(-(r-0.01)**2/|range|**2). The default value
+for <i>range</i> is appropriate for a C-alpha model of a protein.
+See [<a href="MMTK_44.html#Article:Hinsen1998">Hinsen1998</a>] for details.
+</p>
+
+
+
+<hr width=70%>
+<a name="Class:MMTK.ForceFields.LennardJonesForceField"><h2>Class LennardJonesForceField: Lennard-Jones force field for noble gases</h2></a>
+
+
+
+
+
+<p>Constructor: LennardJonesForceField(<i>cutoff</i>)</p>
+
+
+
+<p><dl>
+
+
+<dt><i>cutoff</i></dt>
+
+
+<dd><p>
+a cutoff value or <tt>None</tt>, meaning no cutoff</p></dd>
+
+
+</dl>
+</p>
+
+
+
+<p>Pair interactions in periodic systems are calculated using the
+minimum-image convention; the cutoff should therefore never be
+larger than half the smallest edge length of the elementary
+cell.</p>
+
+
+
+<p>The Lennard-Jones parameters are taken from the atom attributes
+LJ_radius and LJ_energy. The pair interaction energy has the form
+U(r)=4*LJ_energy*((LJ_radius/r)**12-(LJ_radius/r)**6).
+</p>
+
+
+
+<hr width=70%>
+<a name="Class:MMTK.ForceFields.Amber94ForceField"><h2>Class Amber94ForceField: Amber 94 force field</h2></a>
+
+
+
+
+
+<p>Constructor: Amber94ForceField(<i>lennard_jones_options</i>,
+                               <i>electrostatic_options</i>)</p>
+
+
+
+<p><dl>
+
+
+<dt><i>lennard_jones_options</i></dt>
+
+
+<dd><p>
+parameters for Lennard-Jones interactions;
+                           one of:<ul>
+
+
+<li> <p>
+a number, specifying the cutoff
+</p>
+
+<li> <p>
+
+<tt>None</tt>, meaning the default method (no cutoff; inclusion of all
+    pairs, using the minimum-image conventions for periodic universes)
+</p>
+
+<li> <p>
+a dictionary with an entry "method" which specifies the
+    calculation method as either "direct" (all pair terms)
+    or "cutoff", with the cutoff specified by the dictionary
+    entry "cutoff".</p>
+
+</ul>
+
+
+</p></dd>
+
+
+<dt><i>electrostatic_options</i></dt>
+
+
+<li> <p>
+parameters for electrostatic interactions;
+                           one of:<ul>
+
+
+<li> <p>
+a number, specifying the cutoff
+</p>
+
+<li> <p>
+
+<tt>None</tt>, meaning the default method (all pairs without cutoff for
+    non-periodic system, Ewald summation for periodic systems)
+</p>
+
+<li> <p>
+a dictionary with an entry "method" which specifies the
+    calculation method as either "direct" (all pair terms),
+    "cutoff" (with the cutoff specified by the dictionary
+    entry "cutoff"), "ewald" (Ewald summation, only for periodic
+    universes), "screened" (see below),
+    or "multipole" (fast-multipole method).</p>
+
+</ul>
+
+
+</p>
+
+</dl>
+</p>
+
+
+
+<p>Pair interactions in periodic systems are calculated using the
+minimum-image convention; the cutoff should therefore never be
+larger than half the smallest edge length of the elementary
+cell.</p>
+
+
+
+<p>For Lennard-Jones interactions, all terms for pairs whose distance
+exceeds the cutoff are set to zero, without any form of correction.
+For electrostatic interactions, a charge-neutralizing surface charge
+density is added around the cutoff sphere in order to reduce
+cutoff effects [<a href="MMTK_44.html#Article:Wolf1999">Wolf1999</a>].</p>
+
+
+
+<p>For Ewald summation, there are some additional parameters that can
+be specified by dictionary entries:</p>
+
+
+
+<ul>
+
+
+<li> <p>
+"beta" specifies the Ewald screening parameter
+</p>
+
+<li> <p>
+"real_cutoff" specifies the cutoff for the real-space sum.
+  It should be significantly larger than 1/beta to ensure that
+  the neglected terms are small.
+</p>
+
+<li> <p>
+"reciprocal_cutoff" specifies the cutoff for the reciprocal-space sum.
+  Note that, like the real-space cutoff, this is a distance; it describes
+  the smallest wavelength of plane waves to take into account.
+  Consequently, a smaller value means a more precise (and more expensive)
+  calculation.</p>
+
+</ul>
+
+
+<p>MMTK provides default values for these parameter which are calculated
+as a function of the system size. However, these parameters are
+exaggerated in most cases of practical interest and can lead to excessive
+calculation times for large systems. It is preferable to determine
+suitable values empirically for the specific system to be simulated.</p>
+
+
+
+<p>The method "screened" uses the real-space part of the Ewald sum
+with a charge-neutralizing surface charge density around the
+cutoff sphere, and no reciprocal sum [<a href="MMTK_44.html#Article:Wolf1999">Wolf1999</a>]. It requires
+the specification of the dictionary entries "cutoff" and "beta".</p>
+
+
+
+<p>The fast-multipole method uses the DPMTA library [<a href="MMTK_44.html#Article:DPMTA">DPMTA</a>].
+Note that this method provides only energy and forces, but no
+second-derivative matrix. There are several optional dictionary
+entries for this method, all of which are set to reasonable default
+values. The entries are "spatial_decomposition_levels",
+"multipole_expansion_terms", "use_fft", "fft_blocking_factor",
+"macroscopic_expansion_terms", and "multipole_acceptance".
+For an explanation of these options, refer to the
+DPMTA manual [<a href="MMTK_44.html#Article:DPMTA">DPMTA</a>].
+</p>
+
+
+

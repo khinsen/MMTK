@@ -1,0 +1,271 @@
+<a name="Module:MMTK.ChemicalObjects"><h1>Module MMTK.ChemicalObjects</h1></a>
+
+
+
+
+
+
+
+
+
+
+
+<hr width=70%>
+<h2>Functions</h2>
+
+
+
+
+
+<ul>
+
+
+<li> <p>
+
+<a name="Function:MMTK.ChemicalObjects.isChemicalObject"><b><i>isChemicalObject</i></b>()</a><br>
+
+
+</p>
+
+
+
+<p>Returns 1 if <i>object</i> is a chemical object.</p>
+
+</ul>
+
+
+
+
+<hr width=70%>
+<a name="Class:MMTK.ChemicalObjects.ChemicalObject"><h2>Class ChemicalObject: General chemical object</h2></a>
+
+
+
+
+
+<p>A <a href="MMTK_43.html#Glossary:Subclass">subclass</a> of <a href="MMTK_14.html#Class:MMTK.Collection.GroupOfAtoms">MMTK.Collection.GroupOfAtoms</a>
+and <a href="MMTK_40.html#Class:MMTK.Visualization.Viewable">MMTK.Visualization.Viewable</a>.</p>
+
+
+
+<p>This is an Glossary:abstract-base-class that implements methods which
+are applicable to any chemical object (atom, molecule, etc.).
+</p>
+
+
+
+<b>Methods:</b><br>
+<ul>
+<li> <b><i>topLevelChemicalObject</i></b>()
+
+
+<p>Returns the highest-level chemical object of which
+the current object is a part.</p>
+
+
+
+
+
+<li> <b><i>universe</i></b>()
+
+
+<p>Returns the universe to which the object belongs.</p>
+
+
+
+
+
+<li> <b><i>bondedUnits</i></b>()
+
+
+<p>Returns a list containing the subobjects which can
+contain bonds. There are no bonds between any of the
+subobjects in the list.</p>
+
+
+
+
+
+<li> <b><i>fullName</i></b>()
+
+
+<p>Returns the full name of the object. The full name
+consists of the proper name of the object preceded by
+the full name of its parent separated by a dot.</p>
+
+
+
+
+
+<li> <b><i>distanceConstraintList</i></b>()
+
+
+<p>Returns the list of distance constraints.</p>
+
+
+
+
+
+<li> <b><i>numberOfDistanceConstraints</i></b>()
+
+
+<p>Returns the number of distance constraints.</p>
+
+
+
+
+
+<li> <b><i>setBondConstraints</i></b>(<i>universe</i>=<tt>None</tt>)
+
+
+
+
+<p>Sets distance constraints for all bonds.</p>
+
+
+
+
+
+<li> <b><i>removeDistanceConstraints</i></b>(<i>universe</i>=<tt>None</tt>)
+
+
+
+
+<p>Removes all distance constraints.</p>
+
+
+
+
+
+<li> <b><i>setRigidBodyConstraints</i></b>(<i>universe</i>=<tt>None</tt>)
+
+
+
+
+<p>Sets distance constraints that make the object fully rigid.</p>
+
+
+
+
+
+<li> <b><i>getAtomProperty</i></b>(<i>atom</i>, <i>property</i>)
+
+
+
+
+
+
+<p>Returns the value of the specified <i>property</i> for the
+given <i>atom</i> from the chemical database.</p>
+
+
+
+<p>Note: the property is first looked up in the database entry
+for the object on which the method is called. If the lookup
+fails, the complete hierarchy from the atom to the top-level
+object is constructed and traversed starting from the top-level
+object until the property is found. This permits database entries
+for higher-level objects to override property definitions in
+its constituents.</p>
+
+
+
+<p>At the atom level, the property is retrieved from an attribute
+with the same name. This means that properties at the atom
+level can be defined both in the chemical database and for
+each atom individually by assignment to the attribute.</p>
+
+
+
+
+
+</ul>
+<hr width=70%>
+<a name="Class:MMTK.ChemicalObjects.CompositeChemicalObject"><h2>Class CompositeChemicalObject: Chemical object with subobjects</h2></a>
+
+
+
+
+
+<p>This is an Glossary:abstract-base-class that implements methods
+which can be used with any composite chemical object,
+i.e. any chemical object that is not an atom.
+</p>
+
+
+
+<b>Methods:</b><br>
+<ul>
+<li> <b><i>atomList</i></b>()
+
+
+<p>Returns a list containing all atoms in the object.</p>
+
+
+
+
+
+</ul>
+<hr width=70%>
+<a name="Class:MMTK.ChemicalObjects.Group"><h2>Class Group: Group of bonded atoms</h2></a>
+
+
+
+
+
+<p>A <a href="MMTK_43.html#Glossary:Subclass">subclass</a> of <a href="MMTK_13.html#Class:MMTK.ChemicalObjects.ChemicalObject">MMTK.ChemicalObjects.ChemicalObject</a>.</p>
+
+
+
+<p>Groups can contain atoms and other groups, and link them by chemical
+bonds. They are used to represent functional groups or any other
+part of a molecule that has a well-defined identity.</p>
+
+
+
+<p>Groups cannot be created in application programs, but only in
+database definitions for molecules.</p>
+
+
+
+<p>Constructor: Group(<i>species</i>, **|properties|)</p>
+
+
+
+<p><dl>
+
+
+<dt><i>species</i></dt>
+
+
+<dd><p>
+a string (not case sensitive) that specifies the group
+             name in the chemical database</p></dd>
+
+
+<dt><i>properties</i></dt>
+
+
+<dd><p>
+optional keyword properties:<ul>
+
+
+<li> <p>
+position: the center-of-mass position (a vector)
+</p>
+
+<li> <p>
+name: the atom name (a string)
+</p>
+
+</ul>
+
+
+</p></dd>
+
+
+</dl>
+</p>
+
+
+

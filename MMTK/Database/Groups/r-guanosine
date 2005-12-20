@@ -1,0 +1,12 @@
+name ='r-guanosine'
+symbol ='RG'
+
+phosphate = Group('na_phosphate')
+sugar = Group('ribose')
+base = Group('guanine')
+
+bonds = [Bond(sugar.O_5, phosphate.P), Bond(base.N_9, sugar.C_1), ]
+
+chain_links = [phosphate.P, sugar.O_3]
+
+amber_charge = {phosphate.P: 1.166, phosphate.O_1: -0.776, phosphate.O_2: -0.776, sugar.O_5: -0.498, sugar.C_5: 0.055, sugar.H_51: 0.067, sugar.H_52: 0.067, sugar.C_4: 0.106, sugar.H_4: 0.117, sugar.O_4: -0.354, sugar.C_1: 0.019, sugar.H_1: 0.2, base.N_9: 0.049, base.C_8: 0.137, base.H_8: 0.164, base.N_7: -0.57, base.C_5: 0.174, base.C_6: 0.477, base.O_6: -0.559, base.N_1: -0.478, base.H_1: 0.342, base.C_2: 0.765, base.N_2: -0.967, base.H_21: 0.436, base.H_22: 0.436, base.N_3: -0.632, base.C_4: 0.122, sugar.C_3: 0.202, sugar.H_3: 0.061, sugar.C_2: 0.067, sugar.H_21: 0.097, sugar.O_2: -0.613, sugar.H_O2: 0.418, sugar.O_3: -0.524, }

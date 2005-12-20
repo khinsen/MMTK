@@ -1,0 +1,217 @@
+<a name="Module:MMTK.Minimization"><h1>Module MMTK.Minimization</h1></a>
+
+
+
+
+
+
+
+
+
+<hr width=70%>
+<a name="Class:MMTK.Minimization.SteepestDescentMinimizer"><h2>Class SteepestDescentMinimizer: Steepest-descent minimizer</h2></a>
+
+
+
+
+
+<p>The minimizer can handle fixed atoms, but no distance constraints.
+It is fully thread-safe.</p>
+
+
+
+<p>Constructor: SteepestDescentMinimizer(<i>universe</i>, <i>**options</i>)</p>
+
+
+
+<p><dl>
+
+
+<dt><i>universe</i></dt>
+
+
+<dd><p>
+the universe on which the minimizer acts</p></dd>
+
+
+<dt><i>options</i></dt>
+
+
+<dd><p>
+keyword options:<ul>
+
+
+<li> <p>
+steps: the number of minimization steps (default is 100)
+</p>
+
+<li> <p>
+step_size: the initial size of a minimization step
+               (default is 0.002 nm)
+</p>
+
+<li> <p>
+convergence: the root-mean-square gradient length at which
+                 minimization stops (default is 0.01 kJ/mol/nm)
+</p>
+
+<li> <p>
+actions: a list of actions to be executed periodically (default is
+             none)
+</p>
+
+<li> <p>
+threads: the number of threads to use in energy evaluation
+             (default set by MMTK_ENERGY_THREADS)
+</p>
+
+<li> <p>
+background: if true, the minimization is executed as a separate thread
+                (default: 0)
+</p>
+
+<li> <p>
+mpi_communicator: an MPI communicator object, or None, meaning
+                      no parallelization (default: None)</p>
+
+</ul>
+
+
+</p></dd>
+
+
+</dl>
+</p>
+
+
+
+<p>The minimization is started by calling the minimizer object.
+All the keyword options listed above can be specified either when
+creating the minimizer or when calling it.</p>
+
+
+
+<p>The following data categories and variables are available for
+output:</p>
+
+
+
+<ul>
+
+
+<li> <p>
+category "configuration": configuration and box size (for
+  periodic universes)</p>
+
+<li> <p>
+category "gradients": energy gradients for each atom</p>
+
+<li> <p>
+category "energy": potential energy and
+                     norm of the potential energy gradient
+</p>
+
+</ul>
+
+
+<hr width=70%>
+<a name="Class:MMTK.Minimization.ConjugateGradientMinimizer"><h2>Class ConjugateGradientMinimizer: Conjugate gradient minimizer</h2></a>
+
+
+
+
+
+<p>The minimizer can handle fixed atoms, but no distance constraints.
+It is fully thread-safe.</p>
+
+
+
+<p>Constructor: ConjugateGradientMinimizer(<i>universe</i>, <i>**options</i>)</p>
+
+
+
+<p><dl>
+
+
+<dt><i>universe</i></dt>
+
+
+<dd><p>
+the universe on which the minimizer acts</p></dd>
+
+
+<dt><i>options</i></dt>
+
+
+<dd><p>
+keyword options:<ul>
+
+
+<li> <p>
+steps: the number of minimization steps (default is 100)
+</p>
+
+<li> <p>
+step_size: the initial size of a minimization step
+               (default is 0.002 nm)
+</p>
+
+<li> <p>
+convergence: the root-mean-square gradient length at which
+                 minimization stops (default is 0.01 kJ/mol/nm)
+</p>
+
+<li> <p>
+actions: a list of actions to be executed periodically (default is
+             none)
+</p>
+
+<li> <p>
+threads: the number of threads to use in energy evaluation
+             (default set by MMTK_ENERGY_THREADS)
+</p>
+
+<li> <p>
+background: if true, the minimization is executed as a separate thread
+                (default: 0)</p>
+
+</ul>
+
+
+</p></dd>
+
+
+</dl>
+</p>
+
+
+
+<p>The minimization is started by calling the minimizer object.
+All the keyword options listed above can be specified either when
+creating the minimizer or when calling it.</p>
+
+
+
+<p>The following data categories and variables are available for
+output:</p>
+
+
+
+<ul>
+
+
+<li> <p>
+category "configuration": configuration and box size (for
+  periodic universes)</p>
+
+<li> <p>
+category "gradients": energy gradients for each atom</p>
+
+<li> <p>
+category "energy": potential energy and
+                     norm of the potential energy gradient
+</p>
+
+</ul>
+
+

@@ -1,0 +1,102 @@
+<a name="Module:MMTK.FourierBasis"><h1>Module MMTK.FourierBasis</h1></a>
+
+
+
+
+
+<p>This module provides a basis that is suitable for the
+calculation of low-frequency normal modes. The basis is
+derived from vector fields whose components are stationary
+waves in a box surrounding the system. For a description
+see [<a href="MMTK_44.html#Article:Hinsen1998">Hinsen1998</a>].
+</p>
+
+
+
+
+
+<hr width=70%>
+<h2>Functions</h2>
+
+
+
+
+
+<ul>
+
+
+<li> <p>
+
+<a name="Function:MMTK.FourierBasis.countBasisVectors"><b><i>countBasisVectors</i></b>()</a><br>
+
+
+</p>
+
+
+
+<p>Returns the number of basis vectors in a FourierBasis for
+the given <i>universe</i> and <i>cutoff</i>.</p>
+
+<li> <p>
+
+<a name="Function:MMTK.FourierBasis.estimateCutoff"><b><i>estimateCutoff</i></b>()</a><br>
+
+
+</p>
+
+
+
+<p>Returns an estimate for the cutoff that will yield a basis of
+<i>nmodes</i> vectors for the given <i>universe</i>. The two return values
+are the cutoff and the precise number of basis vectors for this cutoff.</p>
+
+</ul>
+
+
+
+
+<hr width=70%>
+<a name="Class:MMTK.FourierBasis.FourierBasis"><h2>Class FourierBasis: Collective-motion basis for low-frequency normal mode calculations</h2></a>
+
+
+
+
+
+<p>To be used with <a href="MMTK_29.html#Class:MMTK.NormalModes.SubspaceNormalModes">MMTK.NormalModes.SubspaceNormalModes</a>.</p>
+
+
+
+<p>Constructor: FourierBasis(<i>universe</i>, <i>cutoff</i>)</p>
+
+
+
+<p><dl>
+
+
+<dt><i>universe</i></dt>
+
+
+<dd><p>
+the universe for which the basis will be used</p></dd>
+
+
+<dt><i>cutoff</i></dt>
+
+
+<dd><p>
+the wavelength cutoff. A smaller value means a larger basis.</p></dd>
+
+
+</dl>
+</p>
+
+
+
+<p>A FourierBasis object behaves like a sequence of
+<a href="MMTK_10.html#Class:MMTK.ParticleVector">MMTK.ParticleVector</a> objects. The vectors are <i>not</i>
+orthonormal, because orthonormalization is handled automatically
+by the class <a href="MMTK_29.html#Class:MMTK.NormalModes.SubspaceNormalModes">MMTK.NormalModes.SubspaceNormalModes</a>.
+</p>
+
+
+

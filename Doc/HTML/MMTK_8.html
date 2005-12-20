@@ -1,0 +1,417 @@
+<a name="database"><h1>Constructing the database</h1></a>
+
+
+
+
+
+<p>
+MMTK uses a database of chemical entities to define the properties of
+atoms, molecules, and related objects. This database consists of plain
+text files, more precisely short Python programs, whose names are the
+names of the object types. This chapter explains how to construct and
+manage these files. Note that the standard database already contains
+many definitions, in particular for proteins and nucleic acids.
+You do not need to read this chapter unless you want to add your
+own molecule definitions.
+</p>
+
+
+
+<p>
+MMTK's database does not have to reside in a single place. It can
+consist of any number of subdatabases, each of which can be a
+directory or a URL. Typically the database consists of at least two
+parts: MMTK's standard definitions and a user's personal definitions.
+When looking up an object type in the database, MMTK checks the value
+of the environment variable <tt>MMTKDATABASE</tt>. The value
+of this variable must be a list of subdatabase locations seperated by
+white space. If the variable <tt>MMTKDATABASE</tt> is not
+defined, MMTK uses a default value that contains the path
+".mmtk/Database" in the user's home directory followed by MMTK's
+standard database, which resides in the directory
+<tt>Database</tt> within the MMTK package directory (on many
+Unix systems this is /usr/local/lib/python2.2/site-packages/MMTK).
+MMTK checks the subdatabases in the order in which they are mentioned
+in <tt>MMTKDATABASE</tt>.
+</p>
+
+
+
+<p>
+Each subdatabase contains directories corresponding to the object
+classes, i.e. Atoms (atom definitions), Groups (group definitions),
+Molecules (molecule definitions), Complexes (complex definitions),
+Proteins (protein definitions), and PDB (Protein Data Bank files).
+These directories contain the definition files, whose names may
+not contain any upper-case letters. These file names correspond
+to the object types, e.g. the call <tt>MMTK.Molecule('Water')</tt>
+will cause MMTK to look for the file Molecules/water in the database
+(note that the names are converted to lower case).
+</p>
+
+
+
+<p>
+The remaining sections of this chapter explain how the individual
+definition files are constructed. Keep in mind that each file is
+actually a Python program, so of course standard Python syntax rules
+apply.
+</p>
+
+
+
+<hr width=70%>
+<h2>Atom definitions</h2>
+
+
+
+
+
+<p>
+An atom definition in MMTK describes a chemical element, such as
+"hydrogen". This should not be confused with the "atom types" used in
+force field descriptions and in some modelling programs. As a
+consequence, it is rarely necessary to add atom definitions to MMTK.
+</p>
+
+
+
+<p>
+Atom definition files are short and of essentially identical format.
+This is the definition for carbon:
+<pre>
+name = 'carbon'
+symbol = 'C'
+mass = [(12, 98.90), (13.003354826, 1.10)]
+color = 'black'
+vdW_radius = 0.17
+</pre>
+
+
+</p>
+
+
+
+<p>
+The name should be meaningful to users, but is not used by MMTK
+itself. The symbol, however, is used to identify chemical elements. It
+must be exactly equal to the symbol defined by IUPAC, including
+capitalization (e.g. 'Cl' for chlorine). The mass can be either a number
+or a list of tuples, as shown above. Each tuple defines an isotope by
+its mass and its percentage of occurrence; the percentages must add up
+to 100. The color is used for VRML output and must equal one of the
+color names defined in the module VRML. The van der Waals radius is used
+for the calculation of molecular volumes and surfaces; the values are
+taken from [<a href="MMTK_44.html#Article:Bondi1964">Bondi1964</a>].
+</p>
+
+
+
+<p>
+An application program can create an isolated atom with
+<tt>Atom('c')</tt> or, specifying an initial position, with
+<tt>Atom('c', position=Vector(0.,1.,0.))</tt>. The element
+name can use any combination of upper and lower case letters, which
+are considered equivalent.
+</p>
+
+
+
+
+
+<hr width=70%>
+<h2>Group definitions</h2>
+
+
+
+
+
+<p>
+Group definitions in MMTK exist to facilitate the definition of
+molecules by avoiding the frequent repetition of common combinations.
+MMTK doesn't give any physical meaning to groups. Groups can contain
+atoms and other groups. Their definitions look exactly like molecule
+definitions; the only difference between groups and molecules is the way
+they are used.
+</p>
+
+
+
+<p>
+This is the definition of a methyl group:
+<pre>
+name = 'methyl group'
+C  = Atom('C')
+H1 = Atom('H')
+H2 = Atom('H')
+H3 = Atom('H')
+bonds = [Bond(C, H1), Bond(C, H2), Bond(C, H3)]
+pdbmap = [('MTH', {'C': C, 'H1': H1, 'H2': H2, 'H3': H3})]
+amber_atom_type = {C: 'CT', H1: 'HC', H2: 'HC', H3: 'HC'}
+amber_charge = {C: 0., H1: 0.1, H2: 0.1, H3: 0.1}
+</pre>
+
+
+</p>
+
+
+
+<p>
+The name should be meaningful to users, but is not used by MMTK
+itself. The following lines create the atoms in the group and assign
+them to variables. These variables become attributes of whatever
+object uses this group; their names can be anything that is a legal
+Python name. The list of bonds, however, must be assigned to the
+variable "bonds". The bond list is used by force fields and for
+visualization.
+</p>
+
+
+
+<p>
+The variable "pdbmap" is used for reading and writing PDB files. Its
+value must be a list of tuples, where each tuple defines one PDB
+residue. The first element of the tuple is the residue name, which is
+used only for output. The second element is a dictionary that maps PDB
+atom names to the actual atoms. The pdbmap entry of any object can be
+overridden by an entry in a higher-level object. Therefore the entry for
+a group is only used for atoms that do not occur in the entry for a
+molecule that contains this group.
+</p>
+
+
+
+<p>
+The remaining lines in the definition file contain information specific
+to force fields, in this case the Amber force field. The dictionary
+"amber_atom_type" defines the atom type for each atom; the dictionary
+"amber_charge" defines the partial charges. As for pdbmap entries, these
+definitions can be overridden by higher-level definitions.
+</p>
+
+
+
+
+
+<hr width=70%>
+<h2>Molecule definitions</h2>
+
+
+
+
+
+<p>
+Molecules are typically used directly in application programs, but they
+can also be used in the definition of complexes. Molecule definitions
+can use atoms and groups.
+</p>
+
+
+
+<p>
+This is the definition of a water molecule:
+<pre>
+name = 'water'
+structure = \
+   "  O\n" + \
+   " / \\\n" + \
+   "H   H\n"
+O  = Atom('O')
+H1 = Atom('H')
+H2 = Atom('H')
+bonds = [Bond(O, H1), Bond(O, H2)]
+pdbmap = [('HOH', {'O': O, 'H1': H1, 'H2': H2})]
+pdb_alternative = {'OH2': 'O'}
+amber_atom_type = {O: 'OW', H1: 'HW', H2: 'HW'}
+amber_charge = {O: -0.83400, H1: 0.41700, H2: 0.41700}
+configurations = {
+    'default': ZMatrix([[H1],
+			[O,  H1,  0.9572*Ang],
+			[H2, O,   0.9572*Ang,  H1,  104.52*deg]])
+    }
+</pre>
+
+
+</p>
+
+
+
+<p>
+The name should be meaningful to users, but is not used by MMTK
+itself. The structure is optional and not used by MMTK either. The
+following lines create the atoms in the group and assign them to
+variables. These variables become attributes
+of the molecule, i.e. when a water molecule is created in an application
+program by <tt>w = Molecule('water')</tt>, then <tt>w.H1</tt>
+will refer to its first hydrogen atom. The names of these variables can
+be any legal Python names. The list of bonds, however, must be assigned to the
+variable "bonds". The bond list is used by force fields and for
+visualization.
+</p>
+
+
+
+<p>
+The variable "pdbmap" is used for reading and writing PDB files. Its
+value must be a list of tuples, where each tuple defines one PDB
+residue. The first element of the tuple is the residue name, which is
+used only for output. The second element is a dictionary that maps PDB
+atom names to the actual atoms. The pdbmap entry of any object can be
+overridden by an entry in a higher-level object, i.e. in the case of a
+molecule a complex containing it. The variable "pdb_alternative" allows
+to read PDB files that use non-standard names. When a
+PDB atom name is not found in the pdbmap, an attempt is made to
+translate it to another name using pdb_alternative.
+</p>
+
+
+
+<p>
+The two following lines in the definition file contain information
+specific to force fields, in this case the Amber force field. The
+dictionary "amber_atom_type" defines the atom type for each atom; the
+dictionary "amber_charge" defines the partial charges. As for pdbmap
+entries, these definitions can be overridden by higher-level
+definitions.
+</p>
+
+
+
+<p>
+The variable "configurations" can be defined to be a dictionary of
+configurations for the molecule. During the construction of a molecule,
+a configuration can be specified via an optional parameter, e.g. <tt>w
+= Molecule('water', configuration='default')</tt>. The names of the
+configurations can be arbitrary; only the name "default" has a special
+meaning; it is applied by default if no other configuration is specified
+when constructing the molecule. If there is no default configuration,
+and no other configuration is explicitly specified, then the molecule is
+created with undefined atomic positions.
+</p>
+
+
+
+<p>
+There are three ways of describing configurations:
+<ul>
+
+
+<li> <p>
+By a Z-Matrix:
+<pre>
+ZMatrix([[H1],
+         [O,  H1,  0.9572*Ang],
+         [H2, O,   0.9572*Ang,  H1,  104.52*deg]])
+</pre>
+
+
+</p>
+
+<li> <p>
+By Cartesian coordinates:
+<pre>
+Cartesian({O:  ( 0.004, -0.00518, 0.0),
+           H1: (-0.092, -0.00518, 0.0),
+           H2: ( 0.028,  0.0875,  0.0)})
+</pre>
+
+
+</p>
+
+<li> <p>
+By a PDB file:
+<pre>
+PDBFile('water.pdb')
+</pre>
+
+The PDB file must be in the database subdirectory PDB, unless a full
+path name is specified for it.
+</p>
+
+</ul>
+
+
+</p>
+
+
+
+
+
+<hr width=70%>
+<h2>Complex definitions</h2>
+
+
+
+
+
+<p>
+Complexes are defined much like molecules, except that they are composed
+of molecules and atoms; no groups are allowed, and neither are bonds.
+</p>
+
+
+
+
+
+<hr width=70%>
+<h2>Protein definitions</h2>
+
+
+
+
+
+<p>
+Protein definitions can take many different forms, depending on the
+source of input data and the type of information that is to be stored.
+For proteins it is particularly useful that database definition files
+are Python programs with all their flexibility.
+</p>
+
+
+
+<p>
+The most common way of constructing a protein is from a PDB file. This
+is an example for a protein definition:
+<pre>
+name = 'insulin'
+# Read the PDB file.
+conf = PDBConfiguration('insulin.pdb')
+# Construct the peptide chains.
+chains = conf.createPeptideChains()
+# Clean up
+del conf
+</pre>
+
+
+</p>
+
+
+
+<p>
+The name should be meaningful to users, but is not used by MMTK
+itself. The second command reads the sequences of all peptide chains
+from a PDB file. Everything which is not a peptide chain is ignored.
+The following line constructs a PeptideChain object (a special
+molecule) for each chain from the PDB sequence. This involves
+constructing positions for any missing hydrogen atoms.
+Finally, the temporary data ("conf") is deleted, otherwise
+it would remain in memory forever.
+</p>
+
+
+
+<p>
+The net result of a protein definition file is the assignment of a list
+of molecules (usually PeptideChain objects) to the variable "chains".
+MMTK then constructs a protein object from it. To use the above example,
+an application program would use the command <tt>p =
+Protein('insulin')</tt>. The construction of the protein involves
+one nontrivial (but automatic) step: the construction of disulfide
+bridges for pairs of cystein residues whose sulfur atoms have a distance
+of less then 2.5 Angstrom.
+</p>
+
+
+
+
+

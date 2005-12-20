@@ -1,0 +1,9 @@
+name = 'aluminum'
+symbol = 'Al'
+
+mass = 26.9815
+
+color = 'green'
+
+vdW_radius = 0.22		# half-assed guess
+

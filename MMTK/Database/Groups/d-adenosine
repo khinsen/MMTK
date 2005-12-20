@@ -1,0 +1,12 @@
+name ='d-adenosine'
+symbol ='DA'
+
+phosphate = Group('na_phosphate')
+sugar = Group('desoxyribose')
+base = Group('adenine')
+
+bonds = [Bond(sugar.O_5, phosphate.P), Bond(base.N_9, sugar.C_1), ]
+
+chain_links = [phosphate.P, sugar.O_3]
+
+amber_charge = {phosphate.P: 1.165, phosphate.O_1: -0.776, phosphate.O_2: -0.776, sugar.O_5: -0.495, sugar.C_5: -0.006, sugar.H_51: 0.075, sugar.H_52: 0.075, sugar.C_4: 0.162, sugar.H_4: 0.117, sugar.O_4: -0.369, sugar.C_1: 0.043, sugar.H_1: 0.183, base.N_9: -0.026, base.C_8: 0.16, base.H_8: 0.187, base.N_7: -0.617, base.C_5: 0.072, base.C_6: 0.689, base.N_6: -0.912, base.H_61: 0.416, base.H_62: 0.416, base.N_1: -0.762, base.C_2: 0.571, base.H_2: 0.059, base.N_3: -0.741, base.C_4: 0.38, sugar.C_3: 0.071, sugar.H_3: 0.098, sugar.C_2: -0.085, sugar.H_21: 0.071, sugar.H_22: 0.071, sugar.O_3: -0.523, }

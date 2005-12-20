@@ -1,0 +1,9 @@
+#!python
+
+from MMTK.Tools.TrajectoryViewer.TrajectoryViewer import TrajectoryViewer
+import sys
+if len(sys.argv) < 2:
+    sys.stderr.write('No trajectory specified\n')
+    sys.exit()
+for trajectory in sys.argv[1:]:
+    TrajectoryViewer(None, trajectory)

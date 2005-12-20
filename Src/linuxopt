@@ -1,0 +1,5 @@
+#!/bin/csh
+
+rm -f nonbonded.o ewald.o bonded.o MMTK_forcefieldmodule.so dpmta_*.o mpe_*.o dsyev.o lapack_dsyevmodule.so
+make OPT='-O3 -ffast-math -fomit-frame-pointer -fkeep-inline-functions'
+cp *.so ../MMTK/linux-i386

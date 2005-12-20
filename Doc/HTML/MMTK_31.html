@@ -1,0 +1,327 @@
+<a name="Module:MMTK.PDB"><h1>Module MMTK.PDB</h1></a>
+
+
+
+
+
+<p>This module provides classes that represent molecules in PDB file.
+They permit various manipulations and the creation of MMTK objects.
+Note that the classes defined in this module are specializations
+of classed defined in Scientific.IO.PDB; the methods defined in
+that module are also available.
+</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<hr width=70%>
+<a name="Class:MMTK.PDB.PDBPeptideChain"><h2>Class PDBPeptideChain: Peptide chain in a PDB file</h2></a>
+
+
+
+
+
+<p>A <a href="MMTK_43.html#Glossary:Subclass">subclass</a> of Scientific.IO.PDB.PeptideChain.
+See the description of that class for the constructor and
+additional methods. In MMTK, PDBPeptideChain objects
+are usually obtained from a PDBConfiguration object
+via its attribute peptide_chains (see the documentation
+of Scientific.IO.PDB.Structure).
+</p>
+
+
+
+<b>Methods:</b><br>
+<ul>
+<li> <b><i>createPeptideChain</i></b>(<i>model</i>=<tt>'all'</tt>, <i>n_terminus</i>=<tt>None</tt>, <i>c_terminus</i>=<tt>None</tt>)
+
+
+
+
+
+
+
+
+<p>Returns a PeptideChain object corresponding to the
+peptide chain in the PDB file. The parameter <i>model</i>
+has the same meaning as for the PeptideChain constructor.</p>
+
+
+
+
+
+</ul>
+<hr width=70%>
+<a name="Class:MMTK.PDB.PDBNucleotideChain"><h2>Class PDBNucleotideChain: Nucleotide chain in a PDB file</h2></a>
+
+
+
+
+
+<p>A <a href="MMTK_43.html#Glossary:Subclass">subclass</a> of Scientific.IO.PDB.NucleotideChain. See
+the description of that class for the constructor and
+additional methods. In MMTK, PDBNucleotideChain objects
+are usually obtained from a PDBConfiguration object
+via its attribute nucleotide_chains (see the documentation
+of Scientific.IO.PDB.Structure).
+</p>
+
+
+
+<b>Methods:</b><br>
+<ul>
+<li> <b><i>createNucleotideChain</i></b>(<i>model</i>=<tt>'all'</tt>)
+
+
+
+
+<p>Returns a NucleotideChain object corresponding to the
+nucleotide chain in the PDB file. The parameter <i>model</i>
+has the same meaning as for the NucleotideChain constructor.</p>
+
+
+
+
+
+</ul>
+<hr width=70%>
+<a name="Class:MMTK.PDB.PDBMolecule"><h2>Class PDBMolecule: Molecule in a PDB file</h2></a>
+
+
+
+
+
+<p>A <a href="MMTK_43.html#Glossary:Subclass">subclass</a> of Scientific.IO.PDB.Molecule. See
+the description of that class for the constructor and
+additional methods. In MMTK, PDBMolecule objects
+are usually obtained from a PDBConfiguration object
+via its attribute molecules (see the documentation
+of Scientific.IO.PDB.Structure). A molecule is by definition
+any residue in a PDB file that is not an amino acid or
+nucleotide residue.
+</p>
+
+
+
+<b>Methods:</b><br>
+<ul>
+<li> <b><i>createMolecule</i></b>(<i>name</i>=<tt>None</tt>)
+
+
+
+
+<p>Returns a Molecule object corresponding to the molecule
+in the PDB file. The parameter <i>name</i> specifies the molecule
+name as defined in the chemical database. It can be left out
+for known molecules (currently only water).</p>
+
+
+
+
+
+</ul>
+<hr width=70%>
+<a name="Class:MMTK.PDB.PDBConfiguration"><h2>Class PDBConfiguration: Everything in a PDB file</h2></a>
+
+
+
+
+
+<p>A PDBConfiguration object represents the full contents of a PDB
+file. It can be used to create MMTK objects for all or part
+of the molecules, or to change the configuration of an existing
+system.</p>
+
+
+
+<p>Constructor: PDBConfiguration(<i>filename</i>)</p>
+
+
+
+<p><dl>
+
+
+<dt><i>filename</i></dt>
+
+
+<dd><p>
+the name of a PDB file
+</p></dd>
+
+
+</dl>
+</p>
+
+
+
+<b>Methods:</b><br>
+<ul>
+<li> <b><i>createPeptideChains</i></b>(<i>model</i>=<tt>'all'</tt>)
+
+
+
+
+<p>Returns a list of PeptideChain objects, one for each
+peptide chain in the PDB file. The parameter <i>model</i>
+has the same meaning as for the PeptideChain constructor.</p>
+
+
+
+
+
+<li> <b><i>createNucleotideChains</i></b>(<i>model</i>=<tt>'all'</tt>)
+
+
+
+
+<p>Returns a list of NucleotideChain objects, one for each
+nucleotide chain in the PDB file. The parameter <i>model</i>
+has the same meaning as for the NucleotideChain constructor.</p>
+
+
+
+
+
+<li> <b><i>createMolecules</i></b>(<i>names</i>=<tt>None</tt>, <i>permit_undefined</i>=<tt>1</tt>)
+
+
+
+
+
+
+<p>Returns a collection of Molecule objects, one for each
+molecule in the PDB file. Each PDB residue not describing
+an amino acid or nucleotide residue is considered a molecule.</p>
+
+
+
+<p>The parameter <i>names</i> allows the selective construction of
+certain molecule types and the construction of unknown
+molecules. If its value is a list of molecule names
+(as defined in the chemical database) and/or PDB residue
+names, only molecules mentioned in this list will be
+constructed. If its value is a dictionary, it is used
+to map PDB residue names to molecule names. By default only
+water molecules are recognizes (under various common PDB residue
+names); for all other molecules a molecule name must be provided
+by the user.</p>
+
+
+
+<p>The parameter <i>permit_undefined</i> determines how PDB residues
+without a corresponding molecule name are handled. A value
+of 0 causes an exception to be raised. A value of 1 causes
+an AtomCluster object to be created for each unknown residue.
+</p>
+
+
+
+
+
+<li> <b><i>createAll</i></b>(<i>molecule_names</i>=<tt>None</tt>, <i>permit_undefined</i>=<tt>1</tt>)
+
+
+
+
+
+
+<p>Returns a collection containing all objects contained in
+the PDB file, i.e. the combination of the objects returned
+by createPeptideChains(), createNucleotideChains(), and
+createMolecules(). The parameters have the same meaning
+as for createMolecules().</p>
+
+
+
+
+
+<li> <b><i>applyTo</i></b>(<i>object</i>)
+
+
+
+
+<p>Sets the configuration of <i>object</i> from the coordinates in the
+PDB file. The object must be compatible with the PDB file, i.e.
+contain the same subobjects and in the same order. This is usually
+only guaranteed if the object was created by the method
+createAll() from a PDB file with the same layout.</p>
+
+
+
+
+
+</ul>
+<hr width=70%>
+<a name="Class:MMTK.PDB.PDBOutputFile"><h2>Class PDBOutputFile: PDB file for output</h2></a>
+
+
+
+
+
+<p>Constructor: PDBOutputFile(<i>filename</i>, <i>subformat</i>=<tt>None</tt>)</p>
+
+
+
+<p><dl>
+
+
+<dt><i>filename</i></dt>
+
+
+<dd><p>
+the name of the PDB file that is created</p></dd>
+
+
+<dt><i>subformat</i></dt>
+
+
+<dd><p>
+a variant of the PDB format; these subformats
+               are defined in module Scientific.IO.PDB. The
+               default is the standard PDB format.
+</p></dd>
+
+
+</dl>
+</p>
+
+
+
+<b>Methods:</b><br>
+<ul>
+<li> <b><i>write</i></b>(<i>object</i>, <i>configuration</i>=<tt>None</tt>, <i>tag</i>=<tt>None</tt>)
+
+
+
+
+
+
+
+
+<p>Writes <i>object</i> to the file, using coordinates from
+<i>configuration</i> (defaults to the current configuration).
+The parameter <i>tag</i> is reserved for internal use.</p>
+
+
+
+
+
+<li> <b><i>close</i></b>()
+
+
+<p>Closes the file. Must be called in order to prevent data loss.</p>
+
+
+
+
+
+</ul>

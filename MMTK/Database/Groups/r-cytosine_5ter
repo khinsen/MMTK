@@ -1,0 +1,11 @@
+name ='r-cytosine_5ter'
+symbol ='RC5'
+
+sugar = Group('ribose_5ter')
+base = Group('cytosine')
+
+bonds = [Bond(base.N_1, sugar.C_1), ]
+
+chain_links = [None, sugar.O_3]
+
+amber_charge = {sugar.H_5_terminal: 0.429, sugar.O_5: -0.622, sugar.C_5: 0.055, sugar.H_51: 0.067, sugar.H_52: 0.067, sugar.C_4: 0.106, sugar.H_4: 0.117, sugar.O_4: -0.354, sugar.C_1: 0.006, sugar.H_1: 0.202, base.N_1: -0.048, base.C_6: 0.005, base.H_6: 0.195, base.C_5: -0.521, base.H_5: 0.192, base.C_4: 0.818, base.N_4: -0.953, base.H_41: 0.423, base.H_42: 0.423, base.N_3: -0.758, base.C_2: 0.753, base.O_2: -0.625, sugar.C_3: 0.202, sugar.H_3: 0.061, sugar.C_2: 0.067, sugar.H_21: 0.097, sugar.O_2: -0.613, sugar.H_O2: 0.418, sugar.O_3: -0.524, }

@@ -1,0 +1,128 @@
+# 
+# Makefile to build dpmta_test and dpmta_slave on a serial workstation
+#
+# w. t. rankin
+#
+# Copyright (c) 1997 Duke University
+# All rights reserved
+#
+# this makefile is set up to compile for the cray t3d (and c90 front end)
+# for compilation on generic workstation networks should use the default
+# makefile
+#
+# RCS Info: $Id: Makefile.serial,v 2.14 1998/04/02 21:34:15 wrankin Exp $
+#
+# Revision History:
+# $Log: Makefile.serial,v $
+# Revision 2.14  1998/04/02 21:34:15  wrankin
+# added Make.dep files to contain all file dependencies
+# added sol86 (Solaris X86) architecture to top level Makefile
+# cleaned up propagation of CC and MAKE variables in Makefiles
+#
+# Revision 2.13  1998/03/10 22:21:58  wrankin
+# folded start/cleanup functionality into dpmta_slvcompute
+#
+# Revision 2.12  1998/01/17 16:31:47  wrankin
+# updated remainder of makefiles to compile test programs in
+#   seperate subdirectory
+# multipole library is now built into libdpmta2.a and libspmta.a so
+#   users won't have to link with extra -lmpole
+#
+# Revision 2.11  1997/11/07 16:48:57  wrankin
+# massive cleanup of code.
+#  - ansi-fication and inclusion of prototypes
+#  - removed unused variables
+#  - all (except the test) code compiles with minimal warnings under gcc.
+#
+# Revision 2.10  1997/09/29 20:24:51  wrankin
+# fixed problem with invalid (empty) multipoles during upward pass.
+# cell indexing by processor was inconsistant between master/slave.
+#
+# Revision 2.9  1997/05/13 17:53:19  wrankin
+# use basic types defined in mpe.h instead of redeclaring them
+#
+# Revision 2.8  1997/05/12  17:59:02  wrankin
+# updated compiler declarations
+#
+# Revision 2.7  1997/05/07  21:27:42  chumphre
+# cubectr changed to cellctr and other minor changes related to the interface
+#
+# Revision 2.6  1997/05/07  19:04:17  chumphre
+# *** empty log message ***
+#
+# Revision 2.5  1997/03/26  20:20:39  wrankin
+# fixed a couple of library definitions for dpmta_direct and dpmta_error
+#
+# Revision 2.4  1997/03/18  21:24:22  wrankin
+# fixed error computation code
+#
+# Revision 2.3  1997/03/07  00:46:11  wrankin
+# converted dpmta_direct to work serial without pvm
+#
+# Revision 2.2  1997/02/26  20:43:24  wrankin
+# updated timing measurements and placed routines in single module
+#
+# Revision 2.1  1997/02/26  16:54:25  wrankin
+# added support for serial non-pvm compilation of DPMTA
+#
+#
+################################################################
+
+MAKE   = make
+SHELL  = /bin/sh
+CC     = cc
+AR     = ar
+CP     = cp
+RM     = rm
+
+# library flags - set the flags to point to the directories
+#   containing the MPOLE libraries and include files.
+
+MPOLEDIR = ../mpole
+LIBMPOLE = $(MPOLEDIR)/libmpole.a
+
+IDIR =  -I$(MPOLEDIR)/
+
+
+################################################################
+#
+#  nothing below this line should need to be modified
+#
+################################################################
+
+CFLAGS = -O3 -DSERIAL $(DFLAGS) $(IDIR)
+
+SSRC  =	dpmta_serial.c \
+	dpmta_slvmkcell.c dpmta_slvmcalc.c dpmta_slvpcalc.c \
+	dpmta_slvmkil.c dpmta_slvmkhl.c \
+	dpmta_slvcompute.c dpmta_slvmacro.c dpmta_slvscale.c \
+	dpmta_timer.c dpmta_slvglobals.c \
+	dpmta_distmisc.c
+SOBJS =	$(SSRC:.c=.o)
+
+
+################################################################
+
+default : all
+
+all:
+	$(MAKE) -f Makefile.serial libspmta.a CFLAGS="$(CFLAGS)" CC="$(CC)"
+
+libspmta.a : $(SOBJS)
+	$(CP) $(LIBMPOLE) $@
+	$(AR) r $@ $?
+
+clean:
+	$(RM) -f libspmta.a
+	$(RM) -f $(SOBJS) 
+
+install: all
+
+
+################################################################
+#
+#  include file dependencies
+#
+
+include Make.deps
+

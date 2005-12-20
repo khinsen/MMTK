@@ -1,0 +1,8 @@
+name = 'silicon'
+symbol = 'Si'
+
+mass = 27.977
+
+color = 'black'
+
+vdW_radius = 0.225

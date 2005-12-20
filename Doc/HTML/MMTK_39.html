@@ -1,0 +1,912 @@
+<a name="Module:MMTK.Universe"><h1>Module MMTK.Universe</h1></a>
+
+
+
+
+
+
+
+<hr width=70%>
+<h2>Functions</h2>
+
+
+
+
+
+<ul>
+
+
+<li> <p>
+
+<a name="Function:MMTK.Universe.isUniverse"><b><i>isUniverse</i></b>()</a><br>
+
+
+</p>
+
+
+
+<p>Returns 1 if <i>object</i> is a Universe.</p>
+
+</ul>
+
+
+
+
+<hr width=70%>
+<a name="Class:MMTK.Universe.Universe"><h2>Class Universe: Complete model of chemical system</h2></a>
+
+
+
+
+
+<p>A <a href="MMTK_43.html#Glossary:Subclass">subclass</a> of <a href="MMTK_14.html#Class:MMTK.Collection.GroupOfAtoms">MMTK.Collection.GroupOfAtoms</a>
+and <a href="MMTK_40.html#Class:MMTK.Visualization.Viewable">MMTK.Visualization.Viewable</a>.</p>
+
+
+
+<p>A universe represents a complete model of a chemical system, i.e.
+the molecules, their environment (topology, boundary conditions,
+thermostats, etc.), and optionally a force field.</p>
+
+
+
+<p>The class Universe is an Glossary:abstract-base-class that defines
+properties common to all kinds of universes. To create universe
+objects, use one of its subclasses.</p>
+
+
+
+<p>In addition to the methods listed below, universe objects support
+the following operations (<tt>u</tt> is any universe object, <tt>o</tt> is any
+chemical object):</p>
+
+
+
+<ul>
+
+
+<li> <p>
+
+<tt>len(u)</tt> yields the number of chemical objects in the universe
+</p>
+
+<li> <p>
+
+<tt>u[i]</tt> returns object number <tt>i</tt>
+
+</p>
+
+<li> <p>
+
+<tt>u.name = o</tt> adds <tt>o</tt> to the universe and also makes it accessible as
+  an attribute
+</p>
+
+<li> <p>
+
+<tt>del u.name</tt> removes the object that was assigned to <tt>u.name</tt> from
+   the universe
+</p>
+
+</ul>
+
+
+<b>Methods:</b><br>
+<ul>
+<li> <b><i>objectList</i></b>(<i>klass</i>=<tt>None</tt>)
+
+
+
+
+<p>Returns a list of all chemical objects in the universe.
+If <i>klass</i> is not None, only objects whose class is equal
+to <i>klass</i> are returned.</p>
+
+
+
+
+
+<li> <b><i>environmentObjectList</i></b>(<i>klass</i>=<tt>None</tt>)
+
+
+
+
+<p>Returns a list of all environment objects in the universe.
+If <i>klass</i> is not None, only objects whose class is equal
+to <i>klass</i> are returned.</p>
+
+
+
+
+
+<li> <b><i>atomList</i></b>()
+
+
+<p>Returns a list of all atoms in the universe. This includes
+atoms that make up the compound chemical objects (molecules etc.).</p>
+
+
+
+
+
+<li> <b><i>universe</i></b>()
+
+
+<p>Returns the universe itself.</p>
+
+
+
+
+
+<li> <b><i>addObject</i></b>(<i>object</i>)
+
+
+
+
+<p>Adds <i>object</i> to the universe. If <i>object</i> is a Collection,
+all elements of the Collection are added to the universe. An
+object can only be added to a universe if it is not already
+part of another universe.</p>
+
+
+
+
+
+<li> <b><i>removeObject</i></b>(<i>object</i>)
+
+
+
+
+<p>Removes <i>object</i> from the universe. If <i>object</i> is a Collection,
+each of its elements is removed. The object to be removed must
+be in the universe.</p>
+
+
+
+
+
+<li> <b><i>selectShell</i></b>(<i>point</i>, <i>r1</i>, <i>r2</i>=<tt>0.0</tt>)
+
+
+
+
+
+
+
+
+<p>Return a Collection of all objects in the universe whose
+distance from <i>point</i> is between <i>r1</i> and <i>r2</i>.</p>
+
+
+
+
+
+<li> <b><i>selectBox</i></b>(<i>p1</i>, <i>p2</i>)
+
+
+
+
+
+
+<p>Return a Collection of all objects in the universe that lie
+within a box whose corners are given by <i>p1</i> and <i>p2</i>.</p>
+
+
+
+
+
+<li> <b><i>acquireReadStateLock</i></b>()
+
+
+<p>Acquire the universe read state lock. Any application that
+uses threading must acquire this lock prior to accessing the
+current state of the universe, in particular its configuration
+(particle positions). This guarantees the consistency of the
+data; while any thread holds the read state lock, no other
+thread can obtain the write state lock that permits modifying
+the state. The read state lock should be released as soon as
+possible.</p>
+
+
+
+<p>The read state lock can be acquired only if no thread holds
+the write state lock. If the read state lock cannot be
+acquired immediately, the thread will be blocked until
+it becomes available. Any number of threads can acquire
+the read state lock simultaneously.</p>
+
+
+
+
+
+<li> <b><i>acquireWriteStateLock</i></b>()
+
+
+<p>Acquire the universe write state lock. Any application that
+uses threading must acquire this lock prior to modifying the
+current state of the universe, in particular its configuration
+(particle positions). This guarantees the consistency of the
+data; while any thread holds the write state lock, no other
+thread can obtain the read state lock that permits accessing
+the state. The write state lock should be released as soon as
+possible.</p>
+
+
+
+<p>The write state lock can be acquired only if no other thread
+holds either the read state lock or the write state lock. If
+the write state lock cannot be acquired immediately, the
+thread will be blocked until it becomes available.</p>
+
+
+
+
+
+<li> <b><i>releaseReadStateLock</i></b>(<i>write</i>=<tt>0</tt>)
+
+
+
+
+<p>Release the universe read state lock.</p>
+
+
+
+
+
+<li> <b><i>releaseWriteStateLock</i></b>(<i>write</i>=<tt>0</tt>)
+
+
+
+
+<p>Release the universe write state lock.</p>
+
+
+
+
+
+<li> <b><i>acquireConfigurationChangeLock</i></b>(<i>waitflag</i>=<tt>1</tt>)
+
+
+
+
+<p>Acquire the configuration change lock. This lock should be
+acquired before starting an algorithm that changes the
+configuration continuously, e.g. minimization or molecular dynamics
+algorithms. This guarantees the proper order of execution when
+several such operations are started in succession. For example,
+when a minimization should be followed by a dynamics run,
+the use of this flag permits both operations to be started
+as background tasks which will be executed one after the other,
+permitting other threads to run in parallel.</p>
+
+
+
+<p>The configuration change lock should not be confused with
+the universe state lock. The former guarantees the proper
+sequence of long-running algorithms, whereas the latter
+guarantees the consistency of the data. A dynamics algorithm,
+for example, keeps the configuration change lock from the
+beginning to the end, but acquires the universe state lock
+only immediately before modifying configuration and velocities,
+and releases it immediately afterwards.</p>
+
+
+
+<p>If <i>waitflag</i> is true, the method waits until the lock
+becomes available; this is the most common operation. If
+<i>waitflag</i> is false, the method returns immediately even
+if another thread holds the lock. The return value indicates
+if the lock could be acquired (1) or not (0).</p>
+
+
+
+
+
+<li> <b><i>releaseConfigurationChangeLock</i></b>()
+
+
+<p>Releases the configuration change lock.</p>
+
+
+
+
+
+<li> <b><i>setForceField</i></b>(<i>forcefield</i>)
+
+
+
+
+<p>Assign a new <i>forcefield</i> to the universe.</p>
+
+
+
+
+
+<li> <b><i>configuration</i></b>()
+
+
+<p>Return the configuration object describing the current configuration
+of the universe. Note that this is not a copy of the current state;
+the positions in the configuration object will change when coordinate
+changes are applied to the universe in whatever way.</p>
+
+
+
+
+
+<li> <b><i>copyConfiguration</i></b>()
+
+
+<p>Returns a copy of the current configuration.</p>
+
+
+
+<p>This operation is thread-safe; it won't return inconsistent
+data even when another thread is modifying the
+configuration.</p>
+
+
+
+
+
+<li> <b><i>setConfiguration</i></b>(<i>configuration</i>, <i>block</i>=<tt>1</tt>)
+
+
+
+
+
+
+<p>Copy all positions are from <i>configuration</i> (which must be
+a Configuration object) to the current universe configuration.</p>
+
+
+
+<p>This operation is thread-safe; it blocks other threads that
+want to access the configuration while the data is being
+updated. If this is not desired (e.g. when calling from
+a routine that handles locking itself), the optional parameter
+<i>block</i> should be set to 0.</p>
+
+
+
+
+
+<li> <b><i>addToConfiguration</i></b>(<i>displacement</i>, <i>block</i>=<tt>1</tt>)
+
+
+
+
+
+
+<p>Add <i>displacement</i> (a ParticleVector object) to the current
+configuration of the universe.</p>
+
+
+
+<p>This operation is thread-safe; it blocks other threads that
+want to access the configuration while the data is being
+updated. If this is not desired (e.g. when calling from
+a routine that handles locking itself), the optional parameter
+<i>block</i> should be set to 0.</p>
+
+
+
+
+
+<li> <b><i>getParticleScalar</i></b>(<i>name</i>, <i>datatype</i>=<tt>'d'</tt>)
+
+
+
+
+
+
+<p>Return a ParticleScalar object containing the values of the
+attribute <i>name</i> for each atom in the universe.</p>
+
+
+
+
+
+<li> <b><i>getParticleBoolean</i></b>(<i>name</i>)
+
+
+
+
+<p>Return a ParticleScalar object containing the boolean values
+(0 or 1) of the attribute <i>name</i> for each atom in the universe.
+An atom that does not have the attribute <i>name</i> is assigned
+a value of zero.</p>
+
+
+
+
+
+<li> <b><i>masses</i></b>()
+
+
+<p>Return a ParticleScalar object containing the atom masses.</p>
+
+
+
+
+
+<li> <b><i>charges</i></b>()
+
+
+<p>Return a ParticleScalar object containing the atom charges.
+Since charges are parameters defined by a force field, this
+method will raise an exception if no force field is defined or
+if the current force field defines no charges.</p>
+
+
+
+
+
+<li> <b><i>velocities</i></b>()
+
+
+<p>Returns ParticleVector object containing the current velocities of
+all atoms. If no velocities are defined, the return value is <tt>None</tt>.
+Note that the return value is not a copy of the current state but
+a reference to it; its data will change when any changes are made
+to the current velocities.</p>
+
+
+
+
+
+<li> <b><i>setVelocities</i></b>(<i>velocities</i>, <i>block</i>=<tt>1</tt>)
+
+
+
+
+
+
+<p>Set the current atom velocities to the values contained in
+the ParticleVector object <i>velocities</i>. If <i>velocities</i> is
+None, the velocity information is removed from the universe.</p>
+
+
+
+<p>This operation is thread-safe; it blocks other threads that
+want to access the velocities while the data is being
+updated. If this is not desired (e.g. when calling from
+a routine that handles locking itself), the optional parameter
+<i>block</i> should be set to 0.</p>
+
+
+
+
+
+<li> <b><i>initializeVelocitiesToTemperature</i></b>(<i>temperature</i>)
+
+
+
+
+<p>Generate random velocities for all atoms from a Boltzmann
+distribution at the given <i>temperature</i>.</p>
+
+
+
+
+
+<li> <b><i>scaleVelocitiesToTemperature</i></b>(<i>temperature</i>, <i>block</i>=<tt>1</tt>)
+
+
+
+
+
+
+<p>Scale all velocities by a common factor in order to obtain
+the specified <i>temperature</i>.</p>
+
+
+
+<p>This operation is thread-safe; it blocks other threads that
+want to access the velocities while the data is being
+updated.  If this is not desired (e.g. when calling from
+a routine that handles locking itself), the optional parameter
+<i>block</i> should be set to 0.</p>
+
+
+
+
+
+<li> <b><i>distanceConstraintList</i></b>()
+
+
+<p>Returns the list of distance constraints.</p>
+
+
+
+
+
+<li> <b><i>numberOfDistanceConstraints</i></b>()
+
+
+<p>Returns the number of distance constraints.</p>
+
+
+
+
+
+<li> <b><i>setBondConstraints</i></b>()
+
+
+<p>Sets distance constraints for all bonds.</p>
+
+
+
+
+
+<li> <b><i>removeDistanceConstraints</i></b>()
+
+
+<p>Removes all distance constraints.</p>
+
+
+
+
+
+<li> <b><i>enforceConstraints</i></b>(<i>configuration</i>=<tt>None</tt>, <i>velocities</i>=<tt>None</tt>)
+
+
+
+
+
+
+<p>Enforces the previously defined distance constraints
+by modifying the configuration and velocities.</p>
+
+
+
+
+
+<li> <b><i>adjustVelocitiesToConstraints</i></b>(<i>velocities</i>=<tt>None</tt>, <i>block</i>=<tt>1</tt>)
+
+
+
+
+
+
+<p>Modifies the velocities to be compatible with
+the distance constraints, i.e. projects out the velocity
+components along the constrained distances.</p>
+
+
+
+<p>This operation is thread-safe; it blocks other threads that
+want to access the velocities while the data is being
+updated. If this is not desired (e.g. when calling from
+a routine that handles locking itself), the optional parameter
+<i>block</i> should be set to 0.</p>
+
+
+
+
+
+<li> <b><i>forcefield</i></b>()
+
+
+<p>Returns the force field.</p>
+
+
+
+
+
+<li> <b><i>energy</i></b>(<i>subset1</i>=<tt>None</tt>, <i>subset2</i>=<tt>None</tt>, <i>small_change</i>=<tt>0</tt>)
+
+
+
+
+
+
+
+
+<p>Returns the energy. Without any parameters, the energy is
+calculated for the whole universe. If <i>subset1</i> is given,
+only the energy terms within the atoms in <i>subset1</i> are calculated.
+If <i>subset1</i> and <i>subset2</i> are given, only the energy terms
+between atoms of the two subsets are evaluated. The parameter
+<i>small_change</i> can be set to one in order to obtain a faster
+energy evaluation when the current configuration differs from
+the one during the last energy evaluation only by small displacements.
+</p>
+
+
+
+
+
+<li> <b><i>energyAndGradients</i></b>(<i>subset1</i>=<tt>None</tt>, <i>subset2</i>=<tt>None</tt>, <i>small_change</i>=<tt>0</tt>)
+
+
+
+
+
+
+
+
+<p>Returns the energy and the energy gradients (a ParticleVector).</p>
+
+
+
+
+
+<li> <b><i>energyAndForceConstants</i></b>(<i>subset1</i>=<tt>None</tt>, <i>subset2</i>=<tt>None</tt>, <i>small_change</i>=<tt>0</tt>)
+
+
+
+
+
+
+
+
+<p>Returns the energy and the force constants
+(a SymmetricParticleTensor).</p>
+
+
+
+
+
+<li> <b><i>energyGradientsAndForceConstants</i></b>(<i>subset1</i>=<tt>None</tt>, <i>subset2</i>=<tt>None</tt>, <i>small_change</i>=<tt>0</tt>)
+
+
+
+
+
+
+
+
+<p>Returns the energy, the energy gradients (a ParticleVector),
+and the force constants (a SymmetricParticleTensor).</p>
+
+
+
+
+
+<li> <b><i>energyTerms</i></b>(<i>subset1</i>=<tt>None</tt>, <i>subset2</i>=<tt>None</tt>, <i>small_change</i>=<tt>0</tt>)
+
+
+
+
+
+
+
+
+<p>Returns a dictionary containing the energy values for each
+energy term separately. The energy terms are defined by the
+force field.</p>
+
+
+
+
+
+<li> <b><i>distanceVector</i></b>(<i>p1</i>, <i>p2</i>, <i>conf</i>=<tt>None</tt>)
+
+
+
+
+
+
+
+
+<p>Returns the distance vector between <i>p1</i> and <i>p2</i> (i.e. the
+vector from <i>p1</i> to <i>p2</i>) in the
+configuration <i>conf</i>. <i>p1</i> and <i>p2</i> can be vectors
+or subsets of the universe, in which case their center-of-mass
+positions are used. If <i>conf</i> is <tt>None</tt>, the current configuration
+of the universe is used. The result takes the universe topology
+(periodic boundary conditions etc.) into account.</p>
+
+
+
+
+
+<li> <b><i>distance</i></b>(<i>p1</i>, <i>p2</i>, <i>conf</i>=<tt>None</tt>)
+
+
+
+
+
+
+
+
+<p>Returns the distance between <i>p1</i> and <i>p2</i>, i.e. the length
+of the distance vector.</p>
+
+
+
+
+
+<li> <b><i>angle</i></b>(<i>p1</i>, <i>p2</i>, <i>p3</i>, <i>conf</i>=<tt>None</tt>)
+
+
+
+
+
+
+
+
+
+
+<p>Returns the angle between the distance vectors |p1|-|p2| and
+|p3|-|p2|.</p>
+
+
+
+
+
+<li> <b><i>dihedral</i></b>(<i>p1</i>, <i>p2</i>, <i>p3</i>, <i>p4</i>, <i>conf</i>=<tt>None</tt>)
+
+
+
+
+
+
+
+
+
+
+
+
+<p>Returns the dihedral angle between the plane containing the
+distance vectors |p1|-|p2| and |p3|-|p2| and the plane containing the
+distance vectors |p2|-|p3| and |p4|-|p3|.</p>
+
+
+
+
+
+<li> <b><i>basisVectors</i></b>()
+
+
+<p>Returns the basis vectors of the elementary cell of a periodic
+universe. For a non-periodic universe the return value is <tt>None</tt>.</p>
+
+
+
+
+
+<li> <b><i>reciprocalBasisVectors</i></b>()
+
+
+<p>Returns the reciprocal basis vectors of the elementary cell of a
+periodic universe. For a non-periodic universe the return value is
+<tt>None</tt>.</p>
+
+
+
+
+
+<li> <b><i>cellVolume</i></b>()
+
+
+<p>Returns the volume of the elementary cell of a periodic
+universe. For a non-periodic universe the return value is <tt>None</tt>.</p>
+
+
+
+
+
+<li> <b><i>largestDistance</i></b>()
+
+
+<p>Returns the largest possible distance that any two points
+can have in the universe. Returns <tt>None</tt> if no such upper limit
+exists.</p>
+
+
+
+
+
+<li> <b><i>contiguousObjectOffset</i></b>(<i>objects</i>=<tt>None</tt>, <i>conf</i>=<tt>None</tt>, <i>box_coordinates</i>=<tt>0</tt>)
+
+
+
+
+
+
+
+
+<p>Returns a ParticleVector with displacements relative to
+the configuration <i>conf</i> which when added to the configuration
+create a configuration in which none of the <i>objects</i> is split
+across the edge of the elementary cell. For nonperiodic universes
+the return value is <tt>None</tt>. If no object list is specified, the
+list of elements of the universe is used. The configuration
+defaults to the current configuration of the universe.</p>
+
+
+
+
+
+<li> <b><i>contiguousObjectConfiguration</i></b>(<i>objects</i>=<tt>None</tt>, <i>conf</i>=<tt>None</tt>)
+
+
+
+
+
+
+<p>Returns configuration <i>conf</i> (default: current configuration)
+corrected by the contiguous object offsets for that
+configuration.</p>
+
+
+
+
+
+<li> <b><i>realToBoxCoordinates</i></b>(<i>vector</i>)
+
+
+
+
+<p>Returns the box coordinate equivalent of <i>vector</i>.
+Box coordinates are defined only for periodic universes;
+their components have values between -0.5 and 0.5; these
+extreme values correspond to the walls of the simulation box.
+For a nonperiodic universe, <i>vector</i> is returned unchanged.</p>
+
+
+
+
+
+<li> <b><i>boxToRealCoordinates</i></b>(<i>vector</i>)
+
+
+
+
+<p>Returns the real-space equivalent of the box coordinate
+<i>vector</i>.</p>
+
+
+
+
+
+<li> <b><i>randomPoint</i></b>()
+
+
+<p>Returns a random point from a uniform distribution within
+the universe. This operation is defined only for finite-volume
+universes, e.g. periodic universes.</p>
+
+
+
+
+
+<li> <b><i>map</i></b>(<i>function</i>)
+
+
+
+
+<p>Applies <i>function</i> to all objects in the universe and
+returns the list of the results. If the results are chemical
+objects, a Collection is returned instead of a list.</p>
+
+
+
+
+
+<li> <b><i>setFromTrajectory</i></b>(<i>trajectory</i>, <i>step</i>=<tt>None</tt>)
+
+
+
+
+
+
+<p>Set the state of the universe to the one stored in
+the given <i>step</i> of the given <i>trajectory</i>. If no step number
+is given, the most recently written step is used for a restart
+trajectory, and the first step (number zero) for a normal
+trajectory.</p>
+
+
+
+<p>This operation is thread-safe; it blocks other threads that
+want to access the configuration or velocities while the data is
+being updated.</p>
+
+
+
+
+
+</ul>

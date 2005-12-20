@@ -1,0 +1,5 @@
+#!/bin/csh
+
+rm -f nonbonded.o ewald.o bonded.o MMTK_forcefieldmodule.so dpmta_*.o mpe_*.o
+make OPT='-O4'
+cp *.so ../MMTK/aix4/

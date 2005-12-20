@@ -1,0 +1,21 @@
+The files in this directory are provided as an illustration of how to
+implement molecular dynamics integrators and similar algorithms. The
+Langevin integrator is therefore intentionally kept simple; it
+supports neither fixed atoms nor distance constraints. The algorithm
+is taken from Allen&Tildesley (Eq. 9.24).
+
+The core of the integrator is written in C (file
+MMTK_langevinmodule.c), with a bit of Python code for parameter
+extraction, error checking, etc. (LangevinDynamics.py). The files
+ranf.c, ranf.h, and pmath_rng.c contain a random number generator and
+are taken without modification from the random number module for
+Python written at LLNL.
+
+To compile and link the C module, type
+
+   python setup.py build_ext --inplace
+
+To run the example, type
+
+   python example.py
+

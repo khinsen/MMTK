@@ -1,0 +1,5 @@
+#!/bin/csh
+
+rm -f nonbonded.o ewald.o bonded.o MMTK_forcefieldmodule.so dpmta_*.o mpe_*.o dsyev.o lapack_dsyevmodule.so
+make OPT='-O2 -fp_reorder -ansi_alias -ansi_args'
+cp *.so ../MMTK/osf1V4

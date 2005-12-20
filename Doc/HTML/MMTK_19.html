@@ -1,0 +1,306 @@
+<a name="Module:MMTK.Field"><h1>Module MMTK.Field</h1></a>
+
+
+
+
+
+<p>This module defines field objects that are useful in the analysis
+and visualization of collective motions in molecular systems. Atomic
+quantities characterizing collective motions vary slowly in space, and
+can be considered functions of position instead of values per atom.
+Functions of position are called fields, and mathematical techniques
+for the analysis of fields have proven useful in many branches of
+physics. Fields can be described numerically by values on a
+regular grid. In addition to permitting the application of vector
+analysis methods to atomic quantities, the introduction of
+fields is a valuable visualization aid, because information defined on
+a coarse regular grid can be added to a picture of a molecular system
+without overloading it. See also the example
+<a href="MMTK_42.html#Example:Miscellaneous:vector_field.py">Miscellaneous/vector_field.py</a>.
+</p>
+
+
+
+
+
+
+
+
+
+<hr width=70%>
+<a name="Class:MMTK.Field.AtomicField"><h2>Class AtomicField: A field whose values are determined by atomic quantities</h2></a>
+
+
+
+
+
+<p>This is an Glossary:abstract-base-class. To create field objects,
+use one of its subclasses.
+</p>
+
+
+
+<b>Methods:</b><br>
+<ul>
+<li> <b><i>particleValues</i></b>()
+
+
+<p>Returns the values of the field at the positions of the
+atoms in an appropriate subclass of
+<a href="MMTK_32.html#Class:MMTK.ParticleProperties.ParticleProperty">MMTK.ParticleProperties.ParticleProperty</a>.</p>
+
+
+
+
+
+<li> <b><i>writeToFile</i></b>(<i>filename</i>, <i>scale</i>=<tt>1.0</tt>, <i>color</i>=<tt>None</tt>)
+
+
+
+
+
+
+
+
+<p>Writes a graphical representation of the field
+to the VRML file named by <i>filename</i>, multiplying
+all values by <i>scale</i>. <i>color</i> permits the choice
+of a color for the graphics objects.</p>
+
+
+
+
+
+<li> <b><i>view</i></b>(<i>scale</i>=<tt>1.0</tt>, <i>color</i>=<tt>None</tt>)
+
+
+
+
+
+
+<p>Shows a graphical representation of the field using
+a VRML viewer. All values are multiplied by <i>scale</i>. <i>color</i>
+permits the choice of a color for the graphics objects.</p>
+
+
+
+
+
+</ul>
+<hr width=70%>
+<a name="Class:MMTK.Field.AtomicScalarField"><h2>Class AtomicScalarField: Scalar field defined by atomic quantities</h2></a>
+
+
+
+
+
+<p>A <a href="MMTK_43.html#Glossary:Subclass">subclass</a> of <a href="MMTK_19.html#Class:MMTK.Field.AtomicField">MMTK.Field.AtomicField</a> and
+<a href="MMTK_40.html#Class:MMTK.Visualization.Viewable">MMTK.Visualization.Viewable</a>.</p>
+
+
+
+<p>Constructor: AtomicScalarField(<i>system</i>, <i>grid_size</i>, <i>values</i>)</p>
+
+
+
+<p><dl>
+
+
+<dt><i>system</i></dt>
+
+
+<dd><p>
+any subset of a molecular system</p></dd>
+
+
+<dt><i>grid_size</i></dt>
+
+
+<dd><p>
+the spacing of a cubic grid on which the field values
+               are stored</p></dd>
+
+
+<dt><i>values</i></dt>
+
+
+<dd><p>
+an object of class <a href="MMTK_10.html#Class:MMTK.ParticleScalar">MMTK.ParticleScalar</a> containing
+            the atomic values that define the field</p></dd>
+
+
+</dl>
+</p>
+
+
+
+<p>The field values are obtained by averaging the atomic quantities
+over all atoms in a cube of edge length <i>grid_size</i> surrounding
+each grid point.</p>
+
+
+
+<p>The method graphicsObjects, defined in class
+<a href="MMTK_40.html#Class:MMTK.Visualization.Viewable">MMTK.Visualization.Viewable</a>, returns a small cube for each
+grid point, whose color indicates the field's value on a symmetric
+red-to-green color scale defined by the range of the field values.
+Additional keyword options are:</p>
+
+
+
+<p>-- <i>scale</i>=factor, to multiply all field values by a factor</p>
+
+
+
+<p>-- <i>range</i>=(min, max), to eliminate graphics objects for values
+   that are smaller than min or larger than max
+</p>
+
+
+
+<b>Methods:</b><br>
+<ul>
+<li> <b><i>gradient</i></b>()
+
+
+<p>Returns an <a href="MMTK_19.html#Class:MMTK.Field.AtomicVectorField">MMTK.Field.AtomicVectorField</a> object representing
+the gradient of the field.</p>
+
+
+
+
+
+<li> <b><i>laplacian</i></b>()
+
+
+<p>Returns an <a href="MMTK_19.html#Class:MMTK.Field.AtomicScalarField">MMTK.Field.AtomicScalarField</a> object representing
+the laplacian of the field.</p>
+
+
+
+
+
+</ul>
+<hr width=70%>
+<a name="Class:MMTK.Field.AtomicVectorField"><h2>Class AtomicVectorField: Vector field defined by atomic quantities</h2></a>
+
+
+
+
+
+<p>A <a href="MMTK_43.html#Glossary:Subclass">subclass</a> of <a href="MMTK_19.html#Class:MMTK.Field.AtomicField">MMTK.Field.AtomicField</a> and
+<a href="MMTK_40.html#Class:MMTK.Visualization.Viewable">MMTK.Visualization.Viewable</a>.</p>
+
+
+
+<p>Constructor: AtomicVectorField(<i>system</i>, <i>grid_size</i>, <i>values</i>)</p>
+
+
+
+<p><dl>
+
+
+<dt><i>system</i></dt>
+
+
+<dd><p>
+any subset of a molecular system</p></dd>
+
+
+<dt><i>grid_size</i></dt>
+
+
+<dd><p>
+the spacing of a cubic grid on which the field values
+               are stored</p></dd>
+
+
+<dt><i>values</i></dt>
+
+
+<dd><p>
+an object of class <a href="MMTK_10.html#Class:MMTK.ParticleVector">MMTK.ParticleVector</a> containing
+            the atomic values that define the field</p></dd>
+
+
+</dl>
+</p>
+
+
+
+<p>The field values are obtained by averaging the atomic quantities
+over all atoms in a cube of edge length <i>grid_size</i> surrounding
+each grid point.</p>
+
+
+
+<p>The method graphicsObjects, defined in class
+<a href="MMTK_40.html#Class:MMTK.Visualization.Viewable">MMTK.Visualization.Viewable</a>, returns a small arrow for each
+grid point. The arrow starts at the grid point and represents
+the vector value at that point.
+Additional keyword options are:</p>
+
+
+
+<p>-- <i>scale</i>=factor, to multiply all field values by a factor</p>
+
+
+
+<p>-- <i>diameter</i>=number, to define the diameter of the arrow
+   objects (default: 1.)</p>
+
+
+
+<p>-- <i>range</i>=(min, max), to eliminate graphics objects for values
+   whose lengths are smaller than min or larger than max</p>
+
+
+
+<p>-- <i>color</i>=string, to define the color of the arrows
+</p>
+
+
+
+<b>Methods:</b><br>
+<ul>
+<li> <b><i>length</i></b>()
+
+
+<p>Returns an <a href="MMTK_19.html#Class:MMTK.Field.AtomicScalarField">MMTK.Field.AtomicScalarField</a> object representing
+the length of the field vectors.</p>
+
+
+
+
+
+<li> <b><i>divergence</i></b>()
+
+
+<p>Returns an <a href="MMTK_19.html#Class:MMTK.Field.AtomicScalarField">MMTK.Field.AtomicScalarField</a> object representing
+the divergence of the field.</p>
+
+
+
+
+
+<li> <b><i>curl</i></b>()
+
+
+<p>Returns an <a href="MMTK_19.html#Class:MMTK.Field.AtomicVectorField">MMTK.Field.AtomicVectorField</a> object representing
+the curl of the field.</p>
+
+
+
+
+
+<li> <b><i>laplacian</i></b>()
+
+
+<p>Returns an <a href="MMTK_19.html#Class:MMTK.Field.AtomicVectorField">MMTK.Field.AtomicVectorField</a> object representing
+the laplacian of the field.</p>
+
+
+
+
+
+</ul>

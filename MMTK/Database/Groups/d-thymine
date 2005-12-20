@@ -1,0 +1,12 @@
+name ='d-thymine'
+symbol ='DT'
+
+phosphate = Group('na_phosphate')
+sugar = Group('desoxyribose')
+base = Group('thymine')
+
+bonds = [Bond(sugar.O_5, phosphate.P), Bond(base.N_1, sugar.C_1), ]
+
+chain_links = [phosphate.P, sugar.O_3]
+
+amber_charge = {phosphate.P: 1.165, phosphate.O_1: -0.776, phosphate.O_2: -0.776, sugar.O_5: -0.495, sugar.C_5: -0.006, sugar.H_51: 0.075, sugar.H_52: 0.075, sugar.C_4: 0.162, sugar.H_4: 0.117, sugar.O_4: -0.369, sugar.C_1: 0.068, sugar.H_1: 0.18, base.N_1: -0.023, base.C_6: -0.22, base.H_6: 0.26, base.C_5: 0.002, base.C_7: -0.226, base.H_71: 0.077, base.H_72: 0.077, base.H_73: 0.077, base.C_4: 0.519, base.O_4: -0.556, base.N_3: -0.434, base.H_3: 0.342, base.C_2: 0.567, base.O_2: -0.588, sugar.C_3: 0.071, sugar.H_3: 0.098, sugar.C_2: -0.085, sugar.H_21: 0.071, sugar.H_22: 0.071, sugar.O_3: -0.523, }

@@ -1,0 +1,189 @@
+<a name="parallelization"><h1>Threads and parallelization</h1></a>
+
+
+
+
+
+<p>
+This chapter explains the use of threads by MMTK and MMTK's
+parallelization support. This is an advanced topic, and not essential
+for the majority MMTK applications. You need to read this chapter only
+if you use multiprocessor computers, or if you want to implement
+multi-threaded programs that use MMTK.
+</p>
+
+
+
+<p>
+Threads are different execution paths through a program that are
+executed in parallel, at least in principle; real parallel execution
+is possible only on multiprocessor systems. MMTK makes use of threads
+in two ways, which are conceptually unrelated: parallelization of
+energy evaluation on shared-memory multiprocessor computers, and
+support for multithreaded applications. Thread support is not
+available on all machines; you can check if yous system supports
+threads by starting a Python interpreter and typing <tt>import
+threading</tt>. If this produces an error message, then your
+system does not support threads, otherwise it is available in Python
+and also in MMTK. If you do not have thread support in Python although
+you know that your operating system supports threads, you might have
+compiled your Python interpreter without thread support; in that case,
+MMTK does not have thread support either.
+</p>
+
+
+
+<p>
+Another approach to parallelization is message passing: several
+processors work on a program and communicate via a fast network to
+share results. A standard library, called MPI (Message Passing
+Interface), has been developped for sharing data by message passing,
+and implementations are available for all parallel computers currently
+on the market. MMTK contains elementary support for parallelization by
+message passing: only the energy evaluation has been paralellized,
+using a data-replication strategy, which is simple but not the most
+efficient for large systems. MPI support is disabled by default.
+Enabling it involves modifying the file Src/Setup.template prior
+to compilation of MMTK. Furthermore, an MPI-enabled installation of
+ScientificPython is required, and the mpipython executable must
+be used instead of the standard Python interpreter.
+</p>
+
+
+
+<p>
+Threads and message passing can be used together to use a cluster of
+shared-memory machines most efficiently. However, this requires that
+the thread and MPI implementations being used work together; sometimes
+there are conflicts, for example due to the use of the same signal in
+both libraries. Refer to your system documentation for details.
+</p>
+
+
+
+<p>
+The use of threads for parallelization on shared-memory systems is
+very simple: Just set the environment variable
+<tt>MMTK_ENERGY_THREADS</tt> to the desired value.  If this
+variable is not defined, the default value is 1, i.e. energy
+evaluations are performed serially. For choosing an appropriate
+value for this environment variable, the following points should
+be considered:
+<ul>
+
+
+<li> <p>
+The number of energy evaluation threads should not be larger than the
+number of processors that are fully dedicated to the MMTK application.
+A larger number of threads does not lead to wrong results,
+but it can increase the total execution time.
+</p>
+
+<li> <p>
+MMTK assumes that all processors are equally fast. If you use a
+heteregenous multiprocessor machine, in which the processors have
+different speeds, you might find that the total execution time is
+larger than without threads.
+</p>
+
+<li> <p>
+The use of threads incurs some computational overhead. For very small
+systems, it might be faster not to use threads.
+</p>
+
+<li> <p>
+Not all energy terms necessarily support threads. Of the force field
+terms that part of MMTK, only the multipole algorithms for
+electrostatic interactions does not support threads, but additional
+force fields defined outside MMTK might also be affected. MMTK
+automatically evaluates such energy terms with a single thread, such
+that there is no risk of getting wrong results. However, you might not
+get the performance you expect.
+</p>
+
+<li> <p>
+If second derivatives of the potential energy are requested, energy
+evaluation is handled by a single thread. An efficient implementation
+of multi-threaded energy evaluation would require a separate copy of
+the second-derivative matrix per thread. This approach needs too much
+memory for big systems to be feasible. Since second derivatives are
+almost exclusively used for normal mode calculations, which need only
+a single energy evaluation, multi-thread support is not particularly
+important anyway.
+</p>
+
+</ul>
+
+
+</p>
+
+
+
+<p>
+Parallelization via message passing is somewhat more complicated.
+In the current MMTK parallelization model, all processors execute
+the same program and replicate all tasks, with the important exception
+of energy evaluation. Energy terms are divided evenly between the
+processors, and at the end the energy and gradient values are shared
+by all machines. This is the only step involving network communication.
+Like thread-based parallelization, message-passing parallelization
+does not support the evaluation of second derivatives.
+</p>
+
+
+
+<p>
+A special problem with message-passing systems is input and output.
+The MMTK application must ensure that output files are written by
+only one processor, and that all processors correctly access input
+files, especially in the case of each processor having its own
+disk space. See the example <a href="MMTK_42.html#Example:MPI:md.py">MPI/md.py</a>
+for illustration.
+</p>
+
+
+
+<p>
+Multithreaded applications are applications that use multiple threads
+in order to simplify the implementation of certain algorithms, i.e.
+not necessarily with the goal of profiting from multiple processors.
+If you plan to write a multithreaded application that uses MMTK,
+you should first make sure you understand threading support in
+Python. In particular, you should keep in mind that the global
+interpreter lock prevents the effective use of multiple processors
+by Python code; only one thread at a time can execute interpreted
+Python code. C code called from Python can permit other threads
+to execute simultaneously; MMTK does this for energy evaluation,
+molecular dynamics integration, energy minimization, and normal
+mode calculation.
+</p>
+
+
+
+<p>
+A general problem in multithreaded applications is access to resources
+that are shared among the threads. In MMTK applications, the most
+important shared resource is the description of the chemical systems,
+i.e. universe objects and their contents. Chaos would result if two
+threads tried to modify the state of a universe simultaneously, or
+even if one thread uses information that is simultaneously being
+modified by another thread. Synchronization is therefore a critical
+part of multithreaded application. MMTK provides two synchronization
+aids, both of which described in the documentation of the class <a href="MMTK_39.html#Class:MMTK.Universe.Universe">MMTK.Universe.Universe</a>: the configuration change
+lock (methods <tt>acquireConfigurationChangeLock</tt> and
+<tt>releaseConfigurationChangeLock</tt>), and the universe
+state lock (methods <tt>acquireReadStateChangeLock</tt>,
+<tt>releaseReadStateChangeLock</tt>,
+<tt>acquireWriteStateChangeLock</tt>, and
+<tt>releaseWriteStateChangeLock</tt>). Only a few common
+universe operations manipulate the universe state lock in order to
+avoid conflicts with other threads; these methods are marked as
+thread-safe in the description. All other operations should only be
+used inside a code section that is protected by the appropriate
+manipulation of the state lock. The configuration change lock is less
+critical; it is used only by the molecular dynamics and energy
+minimization algorithms in MMTK.
+</p>
+
+
+

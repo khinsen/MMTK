@@ -1,0 +1,31 @@
+#
+#  Make.deps - include file dependencies for all files
+#
+#  w. t. rankin
+#
+#  Copyright (c) 1998 Duke University
+#  All rights reserved
+#
+#
+#  these are dependencies for local files only.  
+#
+#  RCS Info: $Id: Make.deps,v 1.1 1998/04/02 21:34:09 wrankin Exp $
+#
+#
+
+mpe_allocC.c : mpe.h 
+
+mpe_allocLJ.c : mpe.h 
+
+mpe_fft.c : mpe.h mpe_fftC.h 
+
+mpe_misc.c : mpe.h 
+
+mpe_mpoleC.c : mpe.h mpe_legendre.h mpe_fftC.h 
+
+mpe_mpoleLJ.c : mpe.h 
+
+mpe_testC.c : mpe.h 
+
+mpe_testLJ.c : mpe.h 
+
