@@ -1,7 +1,7 @@
 # Functions for finding random points and orientations.
 #
 # Written by: Konrad Hinsen
-# Last revision: 2000-8-9
+# Last revision: 2005-12-5
 # 
 
 """This module defines various random quantities that are useful in
@@ -12,7 +12,7 @@ uses the random number generators in modules RandomArray (part of
 Numerical Python) and whrandom (in the Python standard library).
 """
 
-import Numeric
+import Numeric as N
 from Scientific.Geometry import Vector
 from Numeric import dot
 from Scientific.Geometry.Transformation import Rotation
@@ -40,8 +40,8 @@ if RNG is None:
         if shape is None:
             x = random.normalvariate(0., 1.)
         else:
-            x = Numeric.zeros(shape, Numeric.Float)
-            xflat = Numeric.ravel(x)
+            x = N.zeros(shape, N.Float)
+            xflat = N.ravel(x)
             for i in range(len(xflat)):
                 xflat[i] = random.normalvariate(0., 1.)
         return mean + std*x
@@ -64,7 +64,7 @@ else:
         if shape is None:
             x = _uniform_generator.ranf()
         else:
-            n = Numeric.multiply.reduce(shape)
+            n = N.multiply.reduce(shape)
             x = _uniform_generator.sample(n)
             x.shape = shape
         return x1+(x2-x1)*x
@@ -73,7 +73,7 @@ else:
         if shape is None:
             x = _gaussian_generator.ranf()
         else:
-            n = Numeric.multiply.reduce(shape)
+            n = N.multiply.reduce(shape)
             x = _gaussian_generator.sample(n)
             x.shape = shape
         return mean+std*x
@@ -100,8 +100,8 @@ def randomPointInSphere(r):
     a sphere of radius |r|."""
     rsq = r*r
     while 1:
-	x = uniform(-r, r, (3,))
-	if dot(x, x) < rsq: break
+        x = N.array([uniform(-r, r), uniform(-r, r), uniform(-r, r)])
+        if dot(x, x) < rsq: break
     return Vector(x)
 
 #
@@ -132,7 +132,7 @@ def randomDirections(n):
 #
 # Random rotation.
 #
-def randomRotation(max_angle = Numeric.pi):
+def randomRotation(max_angle = N.pi):
     """Returns a Rotation object describing a random rotation
     with a uniform axis distribution and angles drawn from
     a uniform distribution between -|max_angle| and |max_angle|."""
@@ -145,7 +145,7 @@ def randomVelocity(temperature, mass):
     """Returns a random velocity vector for a particle of a given
     |mass|, drawn from a Boltzmann distribution for the given
     |temperature|."""
-    sigma = Numeric.sqrt((temperature*Units.k_B)/(mass*Units.amu))
+    sigma = N.sqrt((temperature*Units.k_B)/(mass*Units.amu))
     return Vector(gaussian(0., sigma, (3,)))
 
 #
@@ -169,6 +169,6 @@ if __name__ == '__main__':
     n = 10000
 
     values = gaussian(mean, std, (n,))
-    m = Numeric.sum(values)/n
+    m = N.sum(values)/n
     print mean, m
-    print std, Numeric.sqrt(Numeric.sum((values-m)**2)/n)
+    print std, N.sqrt(N.sum((values-m)**2)/n)
