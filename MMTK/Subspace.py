@@ -1,7 +1,7 @@
 # This module implements subspaces for motion analysis etc.
 #
 # Written by Konrad Hinsen
-# last revision: 2005-8-30
+# last revision: 2006-1-19
 #
 
 """This module implements subspaces for infinitesimal (or finite
@@ -158,8 +158,8 @@ class RigidMotionSubspace(Subspace):
         # The vector set is already orthonormal by construction
         # (assuming that the rigid bodies have no atoms in common),
         # so we can eliminate the lengthy SVD procedure
-        count = objects[0].booleanMask()
-        for o in objects[1:]:
+        count = ParticleProperties.ParticleScalar(universe)
+        for o in objects:
             count = count + o.booleanMask()
         if Numeric.maximum.reduce(count.array) == 1:
             self._basis = ParticleVectorSet(universe, len(vectors))
