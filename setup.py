@@ -138,11 +138,12 @@ if sys.platform != 'win32':
     if return_code == 0:
         macros.append(('LIBM_HAS_ERFC', None))
 
-command = '%s config/intlen.c -o config/intlen' % sysconfig['CC']
-os.system(command)
-result = os.popen('config/intlen', 'r').read().strip()
-if result == '8':
-    macros.append(('_LONG64_', None))
+if sys.platform != 'win32':
+    command = '%s config/intlen.c -o config/intlen' % sysconfig['CC']
+    os.system(command)
+    result = os.popen('config/intlen', 'r').read().strip()
+    if result == '8':
+        macros.append(('_LONG64_', None))
 
 if sys.version_info[0] == 2 and sys.version_info[1] >= 2:
     macros.append(('EXTENDED_TYPES', None))
