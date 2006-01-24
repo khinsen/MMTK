@@ -7,6 +7,12 @@ Bug fixes:
   VibrationalModes.
 - MMTK.Subspace.RigidMotionSubspace could fail for some object collections.
 
+Improvements:
+
+- MMTK.PDB.PDBConfiguration accepts optional arguments for model and
+  alternate code.
+
+
 2.5.12 --> 2.5.13
 =================
 
