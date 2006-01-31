@@ -1,7 +1,7 @@
 # Read PDBML files
 #
 # Written by Konrad Hinsen
-# last revision: 2006-1-27
+# last revision: 2006-1-31
 #
 
 #
@@ -11,12 +11,20 @@
 import elementtree.ElementTree as ET
 #import cElementTree as ET
 from Scientific.Geometry import Vector
+from Scientific.IO.PDB import Atom
+import MMTK.PDB
 
-class Structure:
+class PDBConfiguration(MMTK.PDB.PDBConfiguration):
 
     def __init__(self, filename, model = 1, alternate_code = 'A'):
-        self.model_num = model
-        self.alt_id = alternate_code
+        self.filename = filename
+        self.model = model
+        self.alternate = alternate_code
+        self.residues = []
+        self.objects = []
+        self.peptide_chains = []
+        self.nucleotide_chains = []
+        self.molecules = []
         self.prefix = None
         self.chem_comp = None
         self.entity_names = None
@@ -28,6 +36,11 @@ class Structure:
         self.parseFile(filename)
 
     def parseFile(self, filename):
+        current_comp_id = None
+        current_seq_id = None
+        current_asym_id = None
+        current_chain = None
+        current_residue = None
         for event, element in ET.iterparse(filename):
             tag = element.tag
             if self.prefix is None:
@@ -35,10 +48,23 @@ class Structure:
             if tag == self.prefix+"atom_site":
                 atom_spec = self.parseAtom(element)
                 if (atom_spec['alt_id'] is None or
-                    atom_spec['alt_id'] == self.alt_id) \
-                       and atom_spec['model_num'] == self.model_num:
-                    atom = Atom()
+                    atom_spec['alt_id'] == self.alternate) \
+                       and atom_spec['model'] == self.model:
+                    atom = Atom(atom_spec['name'], atom_spec['position'],
+                                element=atom_spec['element'],
+                                occupancy=atom_spec['occupancy'],
+                                temperature_factor=atom_spec['beta'])
                     self.atoms[atom_spec['atom_id']] = atom
+                    if atom_spec['asym_id'] != current_asym_id:
+                        # new chain
+                        current_asym_id = atom_spec['asym_id']
+                        current_comp_id = None
+                    if atom_spec['comp_id'] != current_comp_id or \
+                           atom_spec['seq_id'] != current_seq_id:
+                        # new residue
+                        current_comp_id = atom_spec['comp_id']
+                        current_seq_id = atom_spec['seq_id']
+                    current_residue.addAtom(atom)
                 element.clear()
             elif tag == self.prefix+'chem_compCategory':
                 self.chem_comp = element
@@ -62,7 +88,7 @@ class Structure:
             'element': element.find(self.prefix+'type_symbol').text,
             'name': element.find(self.prefix+'label_atom_id').text,
             'alt_id': element.find(self.prefix+'label_alt_id').text,
-            'model_num': int(element.find(self.prefix+'pdbx_PDB_model_num').text),
+            'model': int(element.find(self.prefix+'pdbx_PDB_model_num').text),
             'comp_id': element.find(self.prefix+'label_comp_id').text,
             'asym_id': element.find(self.prefix+'label_asym_id').text,
             'entity_id': element.find(self.prefix+'label_entity_id').text,
@@ -80,13 +106,8 @@ class Structure:
         return atom_spec
 
 
-class Atom:
-
-    def __init__(self):
-        pass
-
 
 if __name__ == '__main__':
     
-    s = Structure("/Users/hinsen/Desktop/1BTY.xml")
-    #s = Structure("/Users/hinsen/Desktop/2BG9.xml")
+    c = PDBConfiguration("/Users/hinsen/Desktop/1BTY.xml")
+    #c = PDBConfiguration("/Users/hinsen/Desktop/2BG9.xml")
