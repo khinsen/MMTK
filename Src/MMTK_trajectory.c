@@ -2,7 +2,7 @@
  * Trajectory objects using netCDF files.
  *
  * Written by Konrad Hinsen
- * last revision: 2005-2-7
+ * last revision: 2006-2-17
  */
 
 #define _TRAJECTORY_MODULE
@@ -891,6 +891,13 @@ PyTrajectory_Open(PyObject *universe, PyObject *description,
     else {
       char *description_length = "description_length";
       int ret;
+      PyNetCDFFile_SetAttributeString(self->file, "Conventions", "MMTK/Trajectory");
+      if (block_size == 1)
+	PyNetCDFFile_SetAttribute(self->file, "trajectory_type",
+				  PyInt_FromLong(0));
+      else
+	PyNetCDFFile_SetAttribute(self->file, "trajectory_type",
+				  PyInt_FromLong(1));
       PyTrajectory_TimeStamp(self, "Created %s");
       if (PyNetCDFFile_CreateDimension(self->file, step_number, cycle) == -1)
 	goto error;
