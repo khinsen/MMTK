@@ -2,7 +2,7 @@
 # complexes. They are made as copies from blueprints in the database.
 #
 # Written by Konrad Hinsen
-# last revision: 2005-11-7
+# last revision: 2006-3-14
 #
 
 import Bonds, Collections, ConfigIO, Database, Units, Utility, Visualization
@@ -746,10 +746,12 @@ class Molecule(CompositeChemicalObject, ChemicalObject):
     """
 
     def __init__(self, blueprint, _memo = None, **properties):
-        ChemicalObject.__init__(self, blueprint, _memo)
-        properties = copy.copy(properties)
-        CompositeChemicalObject.__init__(self, properties)
-        self.bonds = Bonds.BondList(self.bonds)
+        if blueprint is not None:
+            # blueprint is None when called from MoleculeFactory
+            ChemicalObject.__init__(self, blueprint, _memo)
+            properties = copy.copy(properties)
+            CompositeChemicalObject.__init__(self, properties)
+            self.bonds = Bonds.BondList(self.bonds)
 
     blueprintclass = Database.BlueprintMolecule
 
