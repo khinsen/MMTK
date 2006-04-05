@@ -21,7 +21,7 @@
 # modifications to this module.
 #
 # Written by Konrad Hinsen
-# last revision: 2005-8-30
+# last revision: 2006-4-5
 #
 
 _undocumented = 1
@@ -95,7 +95,9 @@ class MMBondedForceField(MMAtomParameters, BondedForceField):
         try:
             p = self.dataset.bondParameters(t1, t2)
         except KeyError:
-            raise KeyError('No parameters for bond ' + `a1` +  '--' + `a2`)
+            raise KeyError(('No parameters for bond %s (atom type %s)' +
+                            ' - %s (atom type %s)') % (str(a1), t1,
+                                                       str(a2), t2))
         if p is not None and p[1] != 0.:
             data.add('bonds', (i1, i2, p[0], p[1]*self.scale_factor))
 
@@ -113,8 +115,9 @@ class MMBondedForceField(MMAtomParameters, BondedForceField):
         try:
             p = self.dataset.bondAngleParameters(t1, tc, t2)
         except KeyError:
-            raise KeyError('No parameters for angle ' + `a1` +
-                            '--' + `ca` + '--' + `a2`)
+            raise KeyError(('No parameters for angle %s (atom type %s)' +
+                            ' - %s (atom type %s) - %s (atom type %s)')
+                           % (str(a1), t1, str(ca), tc, str(a2), t2))
         if p is not None and p[1] != 0.:
             data.add('angles', (i1, ic, i2, p[0], p[1]*self.scale_factor))
 
