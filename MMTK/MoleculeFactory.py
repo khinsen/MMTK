@@ -2,7 +2,7 @@
 # in code, without a database definition.
 #
 # Written by Konrad Hinsen
-# last revision: 2005-10-28
+# last revision: 2006-4-10
 #
 
 """See also the example in Example:Miscellaneous.
@@ -89,7 +89,7 @@ class GroupTemplate:
             if not isinstance(object, AtomTemplate):
                 raise ValueError("no atom " + atom)
         except KeyError:
-            raise ValueError("no atom " + atom)
+            raise ValueError("no atom " + '.'.join(atom_name))
         return atom_name
 
     def writeXML(self, file, memo):
