@@ -1,7 +1,7 @@
 # Read PDBML files
 #
 # Written by Konrad Hinsen
-# last revision: 2006-1-31
+# last revision: 2006-5-3
 #
 
 #
@@ -11,7 +11,8 @@
 import elementtree.ElementTree as ET
 #import cElementTree as ET
 from Scientific.Geometry import Vector
-from Scientific.IO.PDB import Atom
+from Scientific.IO.PDB import Atom, AminoAcidResidue, NucleotideResidue, \
+                              amino_acids, nucleic_acids
 import MMTK.PDB
 
 class PDBConfiguration(MMTK.PDB.PDBConfiguration):
@@ -24,7 +25,7 @@ class PDBConfiguration(MMTK.PDB.PDBConfiguration):
         self.objects = []
         self.peptide_chains = []
         self.nucleotide_chains = []
-        self.molecules = []
+        self.molecules = {}
         self.prefix = None
         self.chem_comp = None
         self.entity_names = None
@@ -56,22 +57,61 @@ class PDBConfiguration(MMTK.PDB.PDBConfiguration):
                                 temperature_factor=atom_spec['beta'])
                     self.atoms[atom_spec['atom_id']] = atom
                     if atom_spec['asym_id'] != current_asym_id:
-                        # new chain
+                        # start new chain or molecule
+                        entity = self.entities[atom_spec['entity_id']]
+                        residue_name = atom_spec['comp_id']
+                        if entity['type'] == 'polymer':
+                            if residue_name in amino_acids:
+                                current_chain = MMTK.PDB.PDBPeptideChain(chain_id = atom_spec['asym_id'])
+                                self.peptide_chains.append(current_chain)
+                            elif residue_name in nucleic_acids:
+                                current_chain = MMTK.PDB.PDBNucleotideChain(chain_id = atom_spec['asym_id'])
+                                self.nucleotide_chains.append(current_chain)
+                            else:
+                                raise ValueError('Unknown polymer type' +
+                                                 'containing residue ' +
+                                                 residue_name)
+                            current_comp_id = None
+                            current_residue = None
+                        else:
+                            current_chain = None
+                            current_residue = MMTK.PDB.PDBMolecule(residue_name)
+                            current_comp_id = residue_name
+                            current_seq_id = atom_spec['seq_id']
                         current_asym_id = atom_spec['asym_id']
-                        current_comp_id = None
                     if atom_spec['comp_id'] != current_comp_id or \
                            atom_spec['seq_id'] != current_seq_id:
-                        # new residue
+                        # start a new residue
                         current_comp_id = atom_spec['comp_id']
                         current_seq_id = atom_spec['seq_id']
-                    current_residue.addAtom(atom)
+                        if current_comp_id in amino_acids:
+                            current_residue = AminoAcidResidue(current_comp_id,
+                                                               [],
+                                                               current_seq_id)
+                        elif current_comp_id in nucleic_acids:
+                            current_residue = NucleotideResidue(current_comp_id,
+                                                                [],
+                                                                current_seq_id)
+                        else:
+                            raise ValueError('Unknown residue ' +
+                                             residue_name)
+                    if current_residue is not None:
+                        # Ultimately, this should never be None, but for
+                        # now we skip whatever we can't handle yet
+                        current_residue.addAtom(atom)
                 element.clear()
             elif tag == self.prefix+'chem_compCategory':
                 self.chem_comp = element
             elif tag == self.prefix+'pdbx_entity_nameCategory':
                 self.entity_names = element
             elif tag == self.prefix+'entityCategory':
-                self.entities = element
+                self.entities = {}
+                for e in element:
+                    entity_id = e.attrib['id']
+                    entity_def = {}
+                    for field in e:
+                        entity_def[field.tag[len(self.prefix):]] = field.text
+                    self.entities[entity_id] = entity_def
             elif tag == self.prefix+'entity_poly_seqCategory':
                 self.chain_entities = None
             elif tag == self.prefix+'pdbx_poly_seq_schemeCategory':
