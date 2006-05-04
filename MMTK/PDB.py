@@ -1,7 +1,7 @@
 # This module deals with input and output of configurations in PDB format.
 #
 # Written by Konrad Hinsen
-# last revision: 2006-1-24
+# last revision: 2006-5-4
 #
 
 """This module provides classes that represent molecules in PDB file.
@@ -49,10 +49,13 @@ class PDBPeptideChain(Scientific.IO.PDB.PeptideChain, PDBChain):
         """Returns a PeptideChain object corresponding to the
         peptide chain in the PDB file. The parameter |model|
         has the same meaning as for the PeptideChain constructor."""
+        self.identifyHistidines()
         import Proteins
         properties = {'model': model}
         if self.segment_id != '':
             properties['name'] = self.segment_id
+        elif self.chain_id != '':
+            properties['name'] = self.chain_id
         if c_terminus is None:
             properties['c_terminus'] = not self.isTerminated()
         else:
@@ -63,6 +66,26 @@ class PDBPeptideChain(Scientific.IO.PDB.PeptideChain, PDBChain):
         if model != 'no_hydrogens':
             chain.findHydrogenPositions()
         return chain
+
+    def identifyHistidines(self):
+        for residue in self.residues:
+            if residue.name != 'HIS':
+                continue
+            count_hd = 0
+            count_he = 0
+            for atom in residue:
+                if 'HD' in atom.name:
+                    count_hd += 1
+                if 'HE' in atom.name:
+                    count_he += 1
+            if count_he == 2:
+                if count_hd == 2:
+                    residue.name = 'HIP'
+                else:
+                    residue.name = 'HIE'
+            else:
+                residue.name = 'HID'
+                    
 
 class PDBNucleotideChain(Scientific.IO.PDB.NucleotideChain, PDBChain):
 
@@ -152,15 +175,18 @@ class PDBConfiguration(Scientific.IO.PDB.Structure):
         filename = Database.PDBPath(filename)
         Scientific.IO.PDB.Structure.__init__(self, filename,
                                              model, alternate_code)
-        n = 1
-        for residue in self.residues:
-            for atom in residue:
-                atom.number = n
-                n = n + 1
+        self._numberAtoms()
 
     peptide_chain_constructor = PDBPeptideChain
     nucleotide_chain_constructor = PDBNucleotideChain
     molecule_constructor = PDBMolecule
+
+    def _numberAtoms(self):
+        n = 1
+        for residue in self.residues:
+            for atom in residue:
+                atom.number = n
+                n += 1
 
     def createPeptideChains(self, model='all'):
         """Returns a list of PeptideChain objects, one for each

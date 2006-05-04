@@ -1,18 +1,20 @@
 # Read PDBML files
 #
 # Written by Konrad Hinsen
-# last revision: 2006-5-3
+# last revision: 2006-5-4
 #
 
-#
-# This is experimental code, not yet a real MMTK module. Patience...
-#
+"""
+Experimental PDBML reader. It doesn't treat water molecules correctly yet
+(it creates a single molecule object with all atoms of all water molecules).
+"""
 
-import elementtree.ElementTree as ET
-#import cElementTree as ET
+#import elementtree.ElementTree as ET
+import cElementTree as ET
 from Scientific.Geometry import Vector
 from Scientific.IO.PDB import Atom, AminoAcidResidue, NucleotideResidue, \
                               amino_acids, nucleic_acids
+from Scientific.IO.TextFile import TextFile
 import MMTK.PDB
 
 class PDBConfiguration(MMTK.PDB.PDBConfiguration):
@@ -34,15 +36,16 @@ class PDBConfiguration(MMTK.PDB.PDBConfiguration):
         self.chains = None
         self.nonchains = None
         self.atoms = {}
-        self.parseFile(filename)
+        self.parseFile(TextFile(filename))
+        self._numberAtoms()
 
-    def parseFile(self, filename):
+    def parseFile(self, file):
         current_comp_id = None
         current_seq_id = None
         current_asym_id = None
         current_chain = None
         current_residue = None
-        for event, element in ET.iterparse(filename):
+        for event, element in ET.iterparse(file):
             tag = element.tag
             if self.prefix is None:
                 self.prefix = tag[:tag.find('}')+1]
@@ -62,10 +65,10 @@ class PDBConfiguration(MMTK.PDB.PDBConfiguration):
                         residue_name = atom_spec['comp_id']
                         if entity['type'] == 'polymer':
                             if residue_name in amino_acids:
-                                current_chain = MMTK.PDB.PDBPeptideChain(chain_id = atom_spec['asym_id'])
+                                current_chain = MMTK.PDB.PDBPeptideChain(chain_id = atom_spec['asym_id'], segment_id = '')
                                 self.peptide_chains.append(current_chain)
                             elif residue_name in nucleic_acids:
-                                current_chain = MMTK.PDB.PDBNucleotideChain(chain_id = atom_spec['asym_id'])
+                                current_chain = MMTK.PDB.PDBNucleotideChain(chain_id = atom_spec['asym_id'], segment_id = '')
                                 self.nucleotide_chains.append(current_chain)
                             else:
                                 raise ValueError('Unknown polymer type' +
@@ -78,6 +81,10 @@ class PDBConfiguration(MMTK.PDB.PDBConfiguration):
                             current_residue = MMTK.PDB.PDBMolecule(residue_name)
                             current_comp_id = residue_name
                             current_seq_id = atom_spec['seq_id']
+                            mol_list = self.molecules.get(residue_name, [])
+                            mol_list.append(current_residue)
+                            self.molecules[residue_name] = mol_list
+                            self.residues.append(current_residue)
                         current_asym_id = atom_spec['asym_id']
                     if atom_spec['comp_id'] != current_comp_id or \
                            atom_spec['seq_id'] != current_seq_id:
@@ -95,6 +102,8 @@ class PDBConfiguration(MMTK.PDB.PDBConfiguration):
                         else:
                             raise ValueError('Unknown residue ' +
                                              residue_name)
+                        current_chain.addResidue(current_residue)
+                        self.residues.append(current_residue)
                     if current_residue is not None:
                         # Ultimately, this should never be None, but for
                         # now we skip whatever we can't handle yet
@@ -149,5 +158,8 @@ class PDBConfiguration(MMTK.PDB.PDBConfiguration):
 
 if __name__ == '__main__':
     
-    c = PDBConfiguration("/Users/hinsen/Desktop/1BTY.xml")
-    #c = PDBConfiguration("/Users/hinsen/Desktop/2BG9.xml")
+    #c = PDBConfiguration("/Users/hinsen/Desktop/1BTY.xml")
+    #c_ref = MMTK.PDB.PDBConfiguration("/Users/hinsen/Desktop/1BTY.pdb")
+    #c = PDBConfiguration("/Users/hinsen/Desktop/5CYT.xml")
+    #c_ref = MMTK.PDB.PDBConfiguration("/Users/hinsen/Desktop/5CYT.pdb")
+    c = PDBConfiguration("/Users/hinsen/Desktop/2BG9.xml")
