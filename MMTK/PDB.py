@@ -57,7 +57,7 @@ class PDBPeptideChain(Scientific.IO.PDB.PeptideChain, PDBChain):
         elif self.chain_id != '':
             properties['name'] = self.chain_id
         if c_terminus is None:
-            properties['c_terminus'] = not self.isTerminated()
+            properties['c_terminus'] = self.isTerminated()
         else:
             properties['c_terminus'] = c_terminus
         if n_terminus is not None:
@@ -192,37 +192,15 @@ class PDBConfiguration(Scientific.IO.PDB.Structure):
         """Returns a list of PeptideChain objects, one for each
         peptide chain in the PDB file. The parameter |model|
         has the same meaning as for the PeptideChain constructor."""
-        import Proteins
-        chains = []
-        for chain in self.peptide_chains:
-            properties = {'model': model}
-            if chain.segment_id != '':
-                properties['name'] = chain.segment_id
-            if not chain.isTerminated():
-                properties['c_terminus'] = 0
-            chain = apply(Proteins.PeptideChain, (chain,), properties)
-            if model != 'no_hydrogens':
-                chain.findHydrogenPositions()
-            chains.append(chain)
-        return chains
+        return [chain.createPeptideChain(model)
+                for chain in self.peptide_chains]
 
     def createNucleotideChains(self, model='all'):
         """Returns a list of NucleotideChain objects, one for each
         nucleotide chain in the PDB file. The parameter |model|
         has the same meaning as for the NucleotideChain constructor."""
-        import NucleicAcids
-        chains = []
-        for chain in self.nucleotide_chains:
-            properties = {'model': model}
-            if chain.segment_id != '':
-                properties['name'] = chain.segment_id
-            if chain[0].hasPhosphate():
-                properties['terminus_5'] = 0
-            chain = apply(NucleicAcids.NucleotideChain, (chain,), properties)
-            if model != 'no_hydrogens':
-                chain.findHydrogenPositions()
-            chains.append(chain)
-        return chains
+        return [chain.createNucleotideChain(model)
+                for chain in self.nucleotide_chains]
 
     def createMolecules(self, names = None, permit_undefined=1):
         """Returns a collection of Molecule objects, one for each
