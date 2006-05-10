@@ -1,7 +1,7 @@
 /* Low-level force field calculations
  *
  * Written by Konrad Hinsen
- * last revision: 2005-4-7
+ * last revision: 2006-5-10
  */
 
 #define _FORCEFIELD_MODULE
@@ -187,7 +187,7 @@ PyFFEnergyTerm_init(PyObject *self_po, PyObject *args, PyObject *kw)
 			 &PyTuple_Type, &term_names,
 			 &thread_safe))
         return -1; 
-  self->nterms = PyTuple_Size(term_names);
+  self->nterms = (int)PyTuple_Size(term_names);
   if (self->nterms == 0) {
     PyErr_SetString(PyExc_ValueError, "at least one term name required");
     return -1;
@@ -207,7 +207,7 @@ PyFFEnergyTerm_init(PyObject *self_po, PyObject *args, PyObject *kw)
     return -1;
   }
   for (i = 0; i < self->nterms; i++) {
-    PyObject *name = PyTuple_GetItem(term_names, i);
+    PyObject *name = PyTuple_GetItem(term_names, (Py_ssize_t)i);
     if (!PyString_Check(name)) {
       PyErr_SetString(PyExc_TypeError, "term names must be strings");
       return -1;
@@ -303,10 +303,11 @@ energyterm_getattr(PyFFEnergyTermObject *self, char *name)
     return PyString_FromString(self->evaluator_name);
   }
   else if (strcmp(name, "term_names") == 0) {
-    PyObject *ret = PyTuple_New(self->nterms);
+    PyObject *ret = PyTuple_New((Py_ssize_t)self->nterms);
     int i;
     for (i = 0; i < self->nterms; i++)
-      PyTuple_SetItem(ret, i, PyString_FromString(self->term_names[i]));
+      PyTuple_SetItem(ret, (Py_ssize_t)i,
+		      PyString_FromString(self->term_names[i]));
     return ret;
   }
   else if (strcmp(name, "info") == 0) {
@@ -344,7 +345,7 @@ energyterm_traverse(PyFFEnergyTermObject *self, visitproc visit, void *arg)
   return 0;
 }
 
-static int
+static Py_ssize_t
 energyterm_clear(PyFFEnergyTermObject *self)
 {
   return 0;
@@ -391,7 +392,7 @@ PyTypeObject PyFFEnergyTerm_Type = {
 
   /* delete references to contained objects */
   /* inquiry tp_clear */
-  (inquiry)energyterm_clear,
+  (lenfunc)energyterm_clear,
 
   /* Assigned meaning in release 2.1 */
 
@@ -961,14 +962,14 @@ evaluator_getattr(PyObject *self, char *name)
   return Py_FindMethod(evaluator_methods, self, name);
 }
 
-static int
+static Py_ssize_t
 evaluator_length(PyFFEvaluatorObject *self)
 {
   return self->ntermobjects;
 }
 
 static PyObject *
-evaluator_item(PyFFEvaluatorObject *self, int i)
+evaluator_item(PyFFEvaluatorObject *self, Py_ssize_t i)
 {
   if (i < 0)
     i = self->ntermobjects + i;
@@ -983,13 +984,13 @@ evaluator_item(PyFFEvaluatorObject *self, int i)
 /* Type object */
 
 static PySequenceMethods PyFFEvaluatorObject_as_sequence = {
-  (inquiry)evaluator_length,   /*sq_length*/
+  (lenfunc)evaluator_length,   /*sq_length*/
   (binaryfunc)NULL,            /*nb_add*/
-  (intargfunc)NULL,            /*nb_multiply*/
-  (intargfunc)evaluator_item,  /*sq_item*/
-  (intintargfunc)NULL,	       /*sq_slice*/
-  (intobjargproc)NULL,	       /*sq_ass_item*/
-  (intintobjargproc)NULL,      /*sq_ass_slice*/
+  (ssizeargfunc)NULL,            /*nb_multiply*/
+  (ssizeargfunc)evaluator_item,  /*sq_item*/
+  (ssizessizeargfunc)NULL,     /*sq_slice*/
+  (ssizeobjargproc)NULL,	       /*sq_ass_item*/
+  (ssizessizeobjargproc)NULL,      /*sq_ass_slice*/
 };
 
 PyTypeObject PyFFEvaluator_Type = {
@@ -1068,7 +1069,7 @@ nblist_dealloc(PyNonbondedListObject *self)
 
 /* Sequence protocol */
 
-static int
+static Py_ssize_t
 nblist_length(PyNonbondedListObject *self)
 {
   struct nblist_iterator iterator;
@@ -1079,7 +1080,7 @@ nblist_length(PyNonbondedListObject *self)
 }
 
 static PyObject *
-nblist_item(PyNonbondedListObject *self, int i)
+nblist_item(PyNonbondedListObject *self, Py_ssize_t i)
 {
   if (i < 0) {
     PyErr_SetString(PyExc_IndexError, "index must be positive");
@@ -1234,10 +1235,10 @@ nblist_getattr(PyNonbondedListObject *self, char *name)
 /* Type object */
 
 static PySequenceMethods nblist_as_sequence = {
-  (inquiry)nblist_length,   /*sq_length*/
+  (lenfunc)nblist_length,   /*sq_length*/
   0,                        /*nb_add, concat is numeric add*/
   0,                        /*nb_multiply, repeat is numeric multiply*/
-  (intargfunc)nblist_item,  /* sq_item*/
+  (ssizeargfunc)nblist_item,  /* sq_item*/
   0,                        /*sq_slice*/
   0,                        /*sq_ass_item*/
   0,                        /*sq_ass_slice*/
@@ -1296,13 +1297,13 @@ python_evaluator(PyFFEnergyTermObject *self,
   force_constants = energy->force_constants;
   if (force_constants == NULL)
     force_constants = Py_None;
-  args = PyTuple_New(3);
+  args = PyTuple_New((Py_ssize_t)3);
   Py_INCREF(input->coordinates);
   Py_INCREF(gradients);
   Py_INCREF(force_constants);
-  PyTuple_SetItem(args, 0, (PyObject *)input->coordinates);
-  PyTuple_SetItem(args, 1, gradients);
-  PyTuple_SetItem(args, 2, force_constants);    
+  PyTuple_SetItem(args, (Py_ssize_t)0, (PyObject *)input->coordinates);
+  PyTuple_SetItem(args, (Py_ssize_t)1, gradients);
+  PyTuple_SetItem(args, (Py_ssize_t)2, force_constants);    
   result = PyObject_CallObject(py_eval, args);
   Py_DECREF(args);
   if (result == NULL) {
@@ -1500,7 +1501,7 @@ EsMultipoleTerm(PyObject *dummy, PyObject *args)
 			&nlevels, &mp, &fft, &fftblock, &kterm, &theta))
     return NULL;
 
-  array_subset = (PyArrayObject *)PyList_GetItem(self->data[0], 2);
+  array_subset = (PyArrayObject *)PyList_GetItem(self->data[0], (Py_ssize_t)2);
   natoms = array_subset->dimensions[0];
   if (natoms == 0)
     natoms = ((PyArrayObject *)self->data[1])->dimensions[0];

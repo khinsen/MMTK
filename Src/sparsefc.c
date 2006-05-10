@@ -1,7 +1,7 @@
 /* Sparse force-constant matrix objects.
  *
  * Written by Konrad Hinsen
- * last revision: 2005-8-23
+ * last revision: 2006-5-10
  */
 
 #define NO_IMPORT
@@ -602,14 +602,14 @@ sparsefc_getattr(PySparseFCObject *self, char *name)
 
 /* Sequence protocol */
 
-static int
+static Py_ssize_t
 sparsefc_length(PySparseFCObject *self)
 {
-  return self->nused;
+  return (Py_ssize_t)self->nused;
 }
 
 static PyObject *
-sparsefc_item(PySparseFCObject *self, int i)
+sparsefc_item(PySparseFCObject *self, Py_ssize_t i)
 {
   if (i < 0 || i >= self->nused) {
     PyErr_SetString(PyExc_IndexError,"index out of bounds");
@@ -637,7 +637,7 @@ static PyObject *
 sparsefc_subscript(PySparseFCObject *self, PyObject *index)
 {
   PyArrayObject *array;
-  int from[2], to[2], rank[2], stride;
+  Py_ssize_t from[2], to[2], rank[2], stride;
   int i;
 
   if (PyInt_Check(index))
@@ -647,7 +647,7 @@ sparsefc_subscript(PySparseFCObject *self, PyObject *index)
     return NULL;
   }
   for (i = 0; i < 2; i++) {
-    PyObject *subscript = PyTuple_GetItem(index, i);
+    PyObject *subscript = PyTuple_GetItem(index, (Py_ssize_t)i);
     if (PyInt_Check(subscript)) {
       from[i] = PyInt_AsLong(subscript);
       to[i] = from[i] + 1;
@@ -677,11 +677,11 @@ sparsefc_subscript(PySparseFCObject *self, PyObject *index)
   if (array == NULL)
     return NULL;
   if (rank[0] == 0) {
-    PyObject *shape = PyTuple_New(2);
+    PyObject *shape = PyTuple_New((Py_ssize_t)2);
     if (shape == NULL)
       return NULL;
-    PyTuple_SetItem(shape, 0, PyInt_FromLong(3));
-    PyTuple_SetItem(shape, 1, PyInt_FromLong(3));
+    PyTuple_SetItem(shape, (Py_ssize_t)0, PyInt_FromLong(3));
+    PyTuple_SetItem(shape, (Py_ssize_t)1, PyInt_FromLong(3));
     array = (PyArrayObject *)PyArray_Reshape(array, shape);
     Py_DECREF(shape);
   }
@@ -691,17 +691,17 @@ sparsefc_subscript(PySparseFCObject *self, PyObject *index)
 /* Type object */
 
 static PySequenceMethods sparsefc_as_sequence = {
-  (inquiry)sparsefc_length,   /*sq_length*/
-  0,                        /*nb_add, concat is numeric add*/
-  0,                        /*nb_multiply, repeat is numeric multiply*/
-  (intargfunc)sparsefc_item,  /* sq_item*/
-  0,                        /*sq_slice*/
-  0,                        /*sq_ass_item*/
-  0,                        /*sq_ass_slice*/
+  (lenfunc)sparsefc_length,   /*sq_length*/
+  0,                          /*nb_add, concat is numeric add*/
+  0,                          /*nb_multiply, repeat is numeric multiply*/
+  (ssizeargfunc)sparsefc_item,/* sq_item*/
+  0,                          /*sq_slice*/
+  0,                          /*sq_ass_item*/
+  0,                          /*sq_ass_slice*/
 };
 
 static PyMappingMethods sparsefc_as_mapping = {
-  (inquiry)sparsefc_length,	    /*mp_length*/
+  (lenfunc)sparsefc_length,	    /*mp_length*/
   (binaryfunc)sparsefc_subscript,   /*mp_subscript*/
   0,                                /*mp_ass_subscript*/
 };

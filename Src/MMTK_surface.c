@@ -232,7 +232,7 @@ surface1atom(PyObject *dummy, PyObject *args)
   PyObject *unit_points = NULL;
   PyObject *ret_tup;
   int n_tess, n_nbors;
-  int n_atoms;
+  Py_ssize_t n_atoms;
   int i, j, aindex;
   double *vx, *vy, *vz, *thresh;
   double aposx, aposy, aposz;
@@ -261,16 +261,16 @@ surface1atom(PyObject *dummy, PyObject *args)
       return NULL;
     }
   }
-  ret_tup = PyTuple_New(2);
+  ret_tup = PyTuple_New((Py_ssize_t)2);
   if(return_unit_pts)
-    unit_points = PyList_New(0);
+    unit_points = PyList_New((Py_ssize_t)0);
   n_atoms = PyObject_Length(atom_data);
   nbor_data = (NeighborData*)malloc(n_atoms*sizeof(nbor_data[0]));
   n_nbors = nbor_data_1_atom(nbors, aindex, atom_data, nbor_data);
-  aposx = PyFloat_AsDouble(PyTuple_GetItem(ai_pos, 0));
-  aposy = PyFloat_AsDouble(PyTuple_GetItem(ai_pos, 1));
-  aposz = PyFloat_AsDouble(PyTuple_GetItem(ai_pos, 2));
-  points = PyList_New(0);
+  aposx = PyFloat_AsDouble(PyTuple_GetItem(ai_pos, (Py_ssize_t)0));
+  aposy = PyFloat_AsDouble(PyTuple_GetItem(ai_pos, (Py_ssize_t)1));
+  aposz = PyFloat_AsDouble(PyTuple_GetItem(ai_pos, (Py_ssize_t)2));
+  points = PyList_New((Py_ssize_t)0);
   n_tess = point_density;
   vx = (double *)malloc(n_nbors*sizeof(*vx));
   vy = (double *)malloc(n_nbors*sizeof(*vy));
@@ -283,12 +283,12 @@ surface1atom(PyObject *dummy, PyObject *args)
   {
     double r2;
     PyObject *apos;
-    apos = PyList_GetItem(atom_data, nbor_data[i].index);
+    apos = PyList_GetItem(atom_data, (Py_ssize_t)nbor_data[i].index);
     if(!apos) return NULL;
-    vx[i] = PyFloat_AsDouble(PyTuple_GetItem(apos, 0)) - aposx;
-    vy[i] = PyFloat_AsDouble(PyTuple_GetItem(apos, 1)) - aposy;
-    vz[i] = PyFloat_AsDouble(PyTuple_GetItem(apos, 2)) - aposz;
-    r2 = PyFloat_AsDouble(PyTuple_GetItem(apos, 3));
+    vx[i] = PyFloat_AsDouble(PyTuple_GetItem(apos, (Py_ssize_t)0)) - aposx;
+    vy[i] = PyFloat_AsDouble(PyTuple_GetItem(apos, (Py_ssize_t)1)) - aposy;
+    vz[i] = PyFloat_AsDouble(PyTuple_GetItem(apos, (Py_ssize_t)2)) - aposz;
+    r2 = PyFloat_AsDouble(PyTuple_GetItem(apos, (Py_ssize_t)3));
     thresh[i] = (nbor_data[i].dist2 + rad1sq - r2*r2) / rad1_2;
   }
   for(i = 0; i < n_tess; ++i)
@@ -348,18 +348,21 @@ surface1atom(PyObject *dummy, PyObject *args)
     }
     if(!buried)
     {
-      PyObject *new_pt = PyTuple_New(3);
-      PyTuple_SetItem(new_pt, 0, PyFloat_FromDouble(radius*ptx + aposx));
-      PyTuple_SetItem(new_pt, 1, PyFloat_FromDouble(radius*pty + aposy));
-      PyTuple_SetItem(new_pt, 2, PyFloat_FromDouble(radius*ptz + aposz));
+      PyObject *new_pt = PyTuple_New((Py_ssize_t)3);
+      PyTuple_SetItem(new_pt, (Py_ssize_t)0,
+		      PyFloat_FromDouble(radius*ptx + aposx));
+      PyTuple_SetItem(new_pt, (Py_ssize_t)1,
+		      PyFloat_FromDouble(radius*pty + aposy));
+      PyTuple_SetItem(new_pt, (Py_ssize_t)2,
+		      PyFloat_FromDouble(radius*ptz + aposz));
       PyList_Append(points, new_pt);
       Py_DECREF(new_pt);
       if(return_unit_pts)
       {
-	PyObject *new_pt = PyTuple_New(3);
-	PyTuple_SetItem(new_pt, 0, PyFloat_FromDouble(ptx));
-	PyTuple_SetItem(new_pt, 1, PyFloat_FromDouble(pty));
-	PyTuple_SetItem(new_pt, 2, PyFloat_FromDouble(ptz));
+	PyObject *new_pt = PyTuple_New((Py_ssize_t)3);
+	PyTuple_SetItem(new_pt, (Py_ssize_t)0, PyFloat_FromDouble(ptx));
+	PyTuple_SetItem(new_pt, (Py_ssize_t)1, PyFloat_FromDouble(pty));
+	PyTuple_SetItem(new_pt, (Py_ssize_t)2, PyFloat_FromDouble(ptz));
 	PyList_Append(unit_points, new_pt);
 	Py_DECREF(new_pt);
       }
@@ -374,13 +377,13 @@ surface1atom(PyObject *dummy, PyObject *args)
   /*
   surface_(&total_area, areas, dareas, doublereal *radius, doublereal *weight, doublereal *probe);
   */
-  PyTuple_SetItem(ret_tup, 0, points);
+  PyTuple_SetItem(ret_tup, (Py_ssize_t)0, points);
   if(return_unit_pts)
-    PyTuple_SetItem(ret_tup, 1, unit_points);
+    PyTuple_SetItem(ret_tup, (Py_ssize_t)1, unit_points);
   else
   {
     Py_INCREF(Py_None);
-    PyTuple_SetItem(ret_tup, 1, Py_None);
+    PyTuple_SetItem(ret_tup, (Py_ssize_t)1, Py_None);
   }
   return ret_tup;
 }
@@ -397,7 +400,8 @@ FindNeighbors(PyObject *dummy, PyObject *args)
   PyObject *atom_data;
   double max_dist_2;
   PyObject *nbors, *boxes;
-  int n_atoms, num_nbors;
+  Py_ssize_t n_atoms;
+  int num_nbors;
   int i, j;
   double box_size;
   PyObject **nlist3, *nlist;
@@ -416,29 +420,32 @@ FindNeighbors(PyObject *dummy, PyObject *args)
   {
     PyObject *v, *tmp;
     char key[128];
-    PyObject *pos = PyList_GetItem(atom_data, i);
+    PyObject *pos = PyList_GetItem(atom_data, (Py_ssize_t)i);
     sprintf(key, "%d %d %d",
-	    (int)floor(PyFloat_AsDouble(PyTuple_GetItem(pos, 0))/box_size),
-	    (int)floor(PyFloat_AsDouble(PyTuple_GetItem(pos, 1))/box_size),
-	    (int)floor(PyFloat_AsDouble(PyTuple_GetItem(pos, 2))/box_size));
+	    (int)floor(PyFloat_AsDouble(PyTuple_GetItem(pos,
+						     (Py_ssize_t)0))/box_size),
+	    (int)floor(PyFloat_AsDouble(PyTuple_GetItem(pos,
+						     (Py_ssize_t)1))/box_size),
+	    (int)floor(PyFloat_AsDouble(PyTuple_GetItem(pos,
+						     (Py_ssize_t)2))/box_size));
     v = PyDict_GetItemString(boxes, key);
     if(!v)
-      PyDict_SetItemString(boxes, key, v = PyList_New(0));
+      PyDict_SetItemString(boxes, key, v = PyList_New((Py_ssize_t)0));
     PyList_Append(v, tmp = PyInt_FromLong(i));
     Py_DECREF(tmp);
     if(0)
       printf("key %12.12s %3d %6.2f %6.2f %6.2f\n",
-	    key, PyObject_Length(v),
-	    PyFloat_AsDouble(PyTuple_GetItem(pos, 0)),
-	    PyFloat_AsDouble(PyTuple_GetItem(pos, 1)),
-	    PyFloat_AsDouble(PyTuple_GetItem(pos, 2)));
+	     key, (int)PyObject_Length(v),
+	    PyFloat_AsDouble(PyTuple_GetItem(pos, (Py_ssize_t)0)),
+	    PyFloat_AsDouble(PyTuple_GetItem(pos, (Py_ssize_t)1)),
+	    PyFloat_AsDouble(PyTuple_GetItem(pos, (Py_ssize_t)2)));
   }
   for(i = 0; i < n_atoms; ++i)
   {
-    PyObject *pos1 = PyList_GetItem(atom_data, i);
-    double posx = PyFloat_AsDouble(PyTuple_GetItem(pos1, 0));
-    double posy = PyFloat_AsDouble(PyTuple_GetItem(pos1, 1));
-    double posz = PyFloat_AsDouble(PyTuple_GetItem(pos1, 2));
+    PyObject *pos1 = PyList_GetItem(atom_data, (Py_ssize_t)i);
+    double posx = PyFloat_AsDouble(PyTuple_GetItem(pos1, (Py_ssize_t)0));
+    double posy = PyFloat_AsDouble(PyTuple_GetItem(pos1, (Py_ssize_t)1));
+    double posz = PyFloat_AsDouble(PyTuple_GetItem(pos1, (Py_ssize_t)2));
     int n_nbors1 = 0;
     int boxn;
     static const int nbor_boxes[27][3] = {
@@ -483,37 +490,40 @@ FindNeighbors(PyObject *dummy, PyObject *args)
       if(!alist && i == -1) printf("none in list at %s\n", key);
       if(alist)
       {
-	int n2 = PyObject_Length(alist);
+	int n2 = (int)PyObject_Length(alist);
 	if(i == -1) printf("%3d in list at %s\n", n2, key);
 	for(j = 0; j < n2; ++j)
 	{
-	  PyObject * py_i2 = PyList_GetItem(alist, j);
+	  PyObject * py_i2 = PyList_GetItem(alist, (Py_ssize_t)j);
 	  int i2 = PyInt_AsLong(py_i2);
 	  if(i2 != i)
 	  {
-	    PyObject *apos = PyList_GetItem(atom_data, i2);
-	    double vaax = PyFloat_AsDouble(PyTuple_GetItem(apos, 0)) - posx;
-	    double vaay = PyFloat_AsDouble(PyTuple_GetItem(apos, 1)) - posy;
-	    double vaaz = PyFloat_AsDouble(PyTuple_GetItem(apos, 2)) - posz;
+	    PyObject *apos = PyList_GetItem(atom_data, (Py_ssize_t)i2);
+	    double vaax = PyFloat_AsDouble(PyTuple_GetItem(apos,
+                                                         (Py_ssize_t)0)) - posx;
+	    double vaay = PyFloat_AsDouble(PyTuple_GetItem(apos,
+                                                         (Py_ssize_t)1)) - posy;
+	    double vaaz = PyFloat_AsDouble(PyTuple_GetItem(apos,
+                                                         (Py_ssize_t)2)) - posz;
 	    double d2 = vaax*vaax + vaay*vaay + vaaz*vaaz;
 	    if(d2 <= max_dist_2)
 	    {
-	      PyObject *tup1 = PyTuple_New(2);
+	      PyObject *tup1 = PyTuple_New((Py_ssize_t)2);
 	      Py_INCREF(py_i2);
-	      PyTuple_SetItem(tup1, 0, py_i2);
-	      PyTuple_SetItem(tup1, 1, PyFloat_FromDouble(d2));
+	      PyTuple_SetItem(tup1, (Py_ssize_t)0, py_i2);
+	      PyTuple_SetItem(tup1, (Py_ssize_t)1, PyFloat_FromDouble(d2));
 	      nlist3[n_nbors1++] = tup1;
 	    }
 	  }
 	}
       }
     }
-    nlist = PyTuple_New(n_nbors1);
+    nlist = PyTuple_New((Py_ssize_t)n_nbors1);
     for(j = 0; j < n_nbors1; ++j)
     {
-      PyTuple_SetItem(nlist, j, nlist3[j]);
+      PyTuple_SetItem(nlist, (Py_ssize_t)j, nlist3[j]);
     }
-    PyTuple_SetItem(nbors, i, nlist);
+    PyTuple_SetItem(nbors, (Py_ssize_t)i, nlist);
   }
   free(nlist3);
   Py_DECREF(boxes);
@@ -527,7 +537,7 @@ FindNeighborsOfAtom(PyObject *dummy, PyObject *args)
   PyObject *atom_data;
   double max_dist_2;
   PyObject *boxes;
-  int n_atoms;
+  Py_ssize_t n_atoms;
   int i, j;
   double box_size;
   PyObject **nlist3, *nlist;
@@ -538,10 +548,10 @@ FindNeighborsOfAtom(PyObject *dummy, PyObject *args)
   nlist3 = (PyObject **)malloc(n_atoms*sizeof(PyObject*));
   max_dist_2 = box_size*box_size;
   {
-    PyObject *pos1 = PyList_GetItem(atom_data, i);
-    double posx = PyFloat_AsDouble(PyTuple_GetItem(pos1, 0));
-    double posy = PyFloat_AsDouble(PyTuple_GetItem(pos1, 1));
-    double posz = PyFloat_AsDouble(PyTuple_GetItem(pos1, 2));
+    PyObject *pos1 = PyList_GetItem(atom_data, (Py_ssize_t)i);
+    double posx = PyFloat_AsDouble(PyTuple_GetItem(pos1, (Py_ssize_t)0));
+    double posy = PyFloat_AsDouble(PyTuple_GetItem(pos1, (Py_ssize_t)1));
+    double posz = PyFloat_AsDouble(PyTuple_GetItem(pos1, (Py_ssize_t)2));
     int n_nbors1 = 0;
     int boxn;
     static const int nbor_boxes[27][3] = {
@@ -586,35 +596,38 @@ FindNeighborsOfAtom(PyObject *dummy, PyObject *args)
       if(!alist && i == -1) printf("none in list at %s\n", key);
       if(alist)
       {
-	int n2 = PyObject_Length(alist);
+	int n2 = (int)PyObject_Length(alist);
 	if(i == -1) printf("%3d in list at %s\n", n2, key);
 	for(j = 0; j < n2; ++j)
 	{
-	  PyObject * py_i2 = PyList_GetItem(alist, j);
+	  PyObject * py_i2 = PyList_GetItem(alist, (Py_ssize_t)j);
 	  int i2 = PyInt_AsLong(py_i2);
 	  if(i2 != i)
 	  {
-	    PyObject *apos = PyList_GetItem(atom_data, i2);
-	    double vaax = PyFloat_AsDouble(PyTuple_GetItem(apos, 0)) - posx;
-	    double vaay = PyFloat_AsDouble(PyTuple_GetItem(apos, 1)) - posy;
-	    double vaaz = PyFloat_AsDouble(PyTuple_GetItem(apos, 2)) - posz;
+	    PyObject *apos = PyList_GetItem(atom_data, (Py_ssize_t)i2);
+	    double vaax = PyFloat_AsDouble(PyTuple_GetItem(apos,
+							(Py_ssize_t)0)) - posx;
+	    double vaay = PyFloat_AsDouble(PyTuple_GetItem(apos,
+							(Py_ssize_t)1)) - posy;
+	    double vaaz = PyFloat_AsDouble(PyTuple_GetItem(apos,
+							(Py_ssize_t)2)) - posz;
 	    double d2 = vaax*vaax + vaay*vaay + vaaz*vaaz;
 	    if(d2 <= max_dist_2)
 	    {
-	      PyObject *tup1 = PyTuple_New(2);
+	      PyObject *tup1 = PyTuple_New((Py_ssize_t)2);
 	      Py_INCREF(py_i2);
-	      PyTuple_SetItem(tup1, 0, py_i2);
-	      PyTuple_SetItem(tup1, 1, PyFloat_FromDouble(d2));
+	      PyTuple_SetItem(tup1, (Py_ssize_t)0, py_i2);
+	      PyTuple_SetItem(tup1, (Py_ssize_t)1, PyFloat_FromDouble(d2));
 	      nlist3[n_nbors1++] = tup1;
 	    }
 	  }
 	}
       }
     }
-    nlist = PyTuple_New(n_nbors1);
+    nlist = PyTuple_New((Py_ssize_t)n_nbors1);
     for(j = 0; j < n_nbors1; ++j)
     {
-      PyTuple_SetItem(nlist, j, nlist3[j]);
+      PyTuple_SetItem(nlist, (Py_ssize_t)j, nlist3[j]);
     }
   }
   free(nlist3);

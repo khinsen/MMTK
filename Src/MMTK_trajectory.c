@@ -2,7 +2,7 @@
  * Trajectory objects using netCDF files.
  *
  * Written by Konrad Hinsen
- * last revision: 2006-2-17
+ * last revision: 2006-5-10
  */
 
 #define _TRAJECTORY_MODULE
@@ -890,6 +890,7 @@ PyTrajectory_Open(PyObject *universe, PyObject *description,
     }
     else {
       char *description_length = "description_length";
+      Py_ssize_t len;
       int ret;
       PyNetCDFFile_SetAttributeString(self->file, "Conventions", "MMTK/Trajectory");
       if (block_size == 1)
@@ -915,8 +916,13 @@ PyTrajectory_Open(PyObject *universe, PyObject *description,
 					  universe_spec->geometry_data_length)
 	  == -1)
 	goto error;
+      len = PyString_Size(description);
+      if (len > INT_MAX) {
+	PyErr_SetString(PyExc_ValueError, "description string too long");
+	goto error;
+      }
       if (PyNetCDFFile_CreateDimension(self->file, description_length,
-				       PyString_Size(description)) == -1)
+				       (int)len) == -1)
 	goto error;
       description_var = PyNetCDFFile_CreateVariable(self->file,
 						    "description", 'c',
@@ -981,7 +987,7 @@ PyTrajectory_Open(PyObject *universe, PyObject *description,
     if (mode[0] == 'a') {
       PyObject *name;
       PyNetCDFVariableObject *variable;
-      int pos = 0;
+      Py_ssize_t pos = 0;
       while (PyDict_Next(self->file->variables, &pos, &name,
 			 (PyObject **)&variable))
 	if (variable->type == PyArray_FLOAT
@@ -1073,9 +1079,9 @@ get_spec(PyObject *universe, PyObject *spec,
   static char text[200];
   int i;
 
-  output->first = PyInt_AsLong(PyTuple_GetItem(spec, 1));
-  output->last = PyInt_AsLong(PyTuple_GetItem(spec, 2));
-  output->frequency = PyInt_AsLong(PyTuple_GetItem(spec, 3));
+  output->first = PyInt_AsLong(PyTuple_GetItem(spec, (Py_ssize_t)1));
+  output->last = PyInt_AsLong(PyTuple_GetItem(spec, (Py_ssize_t)2));
+  output->frequency = PyInt_AsLong(PyTuple_GetItem(spec, (Py_ssize_t)3));
   output->close = 0;
   output->type = type;
   output->destination = NULL;
@@ -1084,14 +1090,14 @@ get_spec(PyObject *universe, PyObject *spec,
 
   if (type != PySpec_Function) {
 
-    PyObject *what = PyTuple_GetItem(spec, 5);
-    int n = PyObject_Length(what);
-    output->destination = PyTuple_GetItem(spec, 4);
+    PyObject *what = PyTuple_GetItem(spec, (Py_ssize_t)5);
+    Py_ssize_t n = PyObject_Length(what);
+    output->destination = PyTuple_GetItem(spec, (Py_ssize_t)4);
     if (output->destination == Py_None)
       return 0;
     output->what = 0;
     while (n-- > 0) {
-      PyObject *item = PyObject_GetItem(what, PyInt_FromLong(n));
+      PyObject *item = PyObject_GetItem(what, PyInt_FromSsize_t(n));
       PyTrajectory_DataClassName *class = class_names;
       char *s;
       if (!PyString_Check(item)) {
@@ -1180,8 +1186,9 @@ get_spec(PyObject *universe, PyObject *spec,
   if (type == PySpec_Function) {
 
     output->function = (trajectory_fn *)
-                       PyCObject_AsVoidPtr(PyTuple_GetItem(spec, 4));
-    output->parameters = PyTuple_GetItem(spec, 5);
+                       PyCObject_AsVoidPtr(PyTuple_GetItem(spec,
+							   (Py_ssize_t)4));
+    output->parameters = PyTuple_GetItem(spec, (Py_ssize_t)5);
     Py_INCREF(output->parameters);
     if (!output->function(data, output->parameters, -1, &output->scratch))
       return -1;
@@ -1198,7 +1205,7 @@ PyTrajectory_OutputSpecification(PyObject *universe,
 {
   PyTrajectoryOutputSpec *output;
   PyTrajectoryVariable *v;
-  int nspecs = PyList_Size((PyObject *)spec_list);
+  Py_ssize_t nspecs = PyList_Size((PyObject *)spec_list);
   int nvar = 0;
   for (v = data; v->name != NULL; v++)
     nvar++;
@@ -1209,7 +1216,7 @@ PyTrajectory_OutputSpecification(PyObject *universe,
     int ret;
     int i;
     for (i = 0; i < nspecs; i++) {
-      PyObject *spec = PyList_GetItem((PyObject *)spec_list, i);
+      PyObject *spec = PyList_GetItem((PyObject *)spec_list, (Py_ssize_t)i);
       PyObject *which;
       char *which_str;
       int type;
@@ -1218,7 +1225,7 @@ PyTrajectory_OutputSpecification(PyObject *universe,
 	free(output);
 	return NULL;
       }
-      which = PyTuple_GetItem(spec, 0);
+      which = PyTuple_GetItem(spec, (Py_ssize_t)0);
       if (!PyString_Check(which)) {
 	PyErr_SetString(PyExc_TypeError, "must be a string");
 	free(output);
@@ -1539,7 +1546,7 @@ snapshot(PyObject *dummy, PyObject *args)
   char string_buffer[80];
   char *name;
   int energy_terms;
-  int dict_pos;
+  Py_ssize_t dict_pos;
 
   /* Parse and check arguments */
   if (!PyArg_ParseTuple(args, "OO!O!i", &universe,
@@ -1689,11 +1696,12 @@ readTrajectory(PyObject *dummy, PyObject *args)
   PyListObject *spec_list;
 
   PyObject *input_vars;
-  int ninvars;
+  Py_ssize_t ninvars;
   PyTrajectoryVariable *vars;
   PyObject *name;
   PyNetCDFVariableObject *var;
-  int i, j;
+  Py_ssize_t i;
+  int j;
 
   /* Parse and check arguments */
   if (!PyArg_ParseTuple(args, "OO!O!", &universe,
@@ -1743,7 +1751,7 @@ readTrajectory(PyObject *dummy, PyObject *args)
 								     "units"));
       vars[j].text = "";
       vars[j].class = 0;
-      j = j + 1;
+      j += 1;
     }
   }
   vars[j].name = NULL;

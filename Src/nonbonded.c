@@ -1,7 +1,7 @@
 /* Low-level force field calculations: non-bonded interactions
  *
  * Written by Konrad Hinsen
- * last revision: 2001-5-28
+ * last revision: 2006-5-10
  */
 
 #define NO_IMPORT
@@ -841,10 +841,12 @@ es_mp_evaluator(PyFFEnergyTermObject *self,
   PmtaVector virial;
   double potential;
   PyObject *pair_lists = self->data[0];
-  PyArrayObject *array_ex = (PyArrayObject *)PyList_GetItem(pair_lists, 0);
-  PyArrayObject *array_14 = (PyArrayObject *)PyList_GetItem(pair_lists, 1);
+  PyArrayObject *array_ex = 
+                  (PyArrayObject *)PyList_GetItem(pair_lists, (Py_ssize_t)0);
+  PyArrayObject *array_14 =
+                  (PyArrayObject *)PyList_GetItem(pair_lists, (Py_ssize_t)1);
   PyArrayObject *array_subset =
-                  (PyArrayObject *)PyList_GetItem(pair_lists, 2);
+                  (PyArrayObject *)PyList_GetItem(pair_lists, (Py_ssize_t)2);
   long *excluded = (long *)array_ex->data;
   long n_ex = 2*array_ex->dimensions[0];
   long *one_four = (long *)array_14->data;
