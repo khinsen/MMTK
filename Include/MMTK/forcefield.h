@@ -1,7 +1,7 @@
 /* Include file for C force field calculations.
  *
  * Written by Konrad Hinsen
- * last revision: 2005-4-4
+ * last revision: 2006-5-10
  */
 
 #ifndef MMTK_FORCEFIELD_H
@@ -161,7 +161,8 @@ enum nblist_iterator_states { nblist_start, nblist_continue, nblist_finished,
 
 struct nblist_iterator {
   nbbox *box1, *box2;
-  int ibox, jbox, ineighbor, i, j, a1, a2, n;
+  int ibox, jbox, ineighbor, i, j, a1, a2;
+  Py_ssize_t n;
   int state;
 };
 
@@ -208,8 +209,8 @@ typedef struct sparse_fc {
   PyObject_HEAD
   struct pair_fc *data;
   struct pair_descr_list *index;
-  int nalloc;
-  int nused;
+  Py_ssize_t nalloc;
+  Py_ssize_t nused;
   int natoms;
   fc_function *fc_fn;
   double cutoff_sq;

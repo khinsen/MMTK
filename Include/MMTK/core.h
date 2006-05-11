@@ -2,13 +2,26 @@
  * General include file for MMTK C modules.
  *
  * Written by Konrad Hinsen
- * last revision: 2004-2-24
+ * last revision: 2006-5-11
  */
 
 #ifndef MMTK_H
 
 #include "Python.h"
 #include "Numeric/arrayobject.h"
+
+/* Provide Py_ssize_t for Python < 2.5 */
+#if PY_VERSION_HEX < 0x02050000
+typedef int Py_ssize_t;
+#define PY_SSIZE_T_MAX INT_MAX
+#define PY_SSIZE_T_MIN INT_MIN
+#define PyInt_FromSsize_t(n) PyInt_FromLong(n)
+typedef Py_ssize_t (*lenfunc)(PyObject *);
+typedef PyObject *(*ssizeargfunc)(PyObject *, Py_ssize_t);
+typedef PyObject *(*ssizessizeargfunc)(PyObject *, Py_ssize_t, Py_ssize_t);
+typedef int(*ssizeobjargproc)(PyObject *, Py_ssize_t, PyObject *);
+typedef int(*ssizessizeobjargproc)(PyObject *, Py_ssize_t, Py_ssize_t, PyObject *);
+#endif
 
 /* MinGW doesn't have this */
 #ifndef M_PI

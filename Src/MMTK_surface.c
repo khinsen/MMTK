@@ -7,6 +7,7 @@
 #include "Python.h"
 #include <math.h>
 #include <time.h>
+#include "MMTK/core.h"
 
 typedef double TPoint[3];
 typedef struct {
@@ -126,7 +127,7 @@ nbor_data_1_atom(PyObject *nbors, int i, PyObject *atom_data,
   double max_dist_2;
   PyObject *boxes;
   PyObject *bsize;
-  int n_atoms;
+  Py_ssize_t n_atoms;
   int j;
   double box_size;
   int n_nbors1 = 0;
@@ -138,10 +139,10 @@ nbor_data_1_atom(PyObject *nbors, int i, PyObject *atom_data,
   n_atoms = PyObject_Length(atom_data);
   max_dist_2 = box_size*box_size;
   {
-    PyObject *pos1 = PyList_GetItem(atom_data, i);
-    double posx = PyFloat_AsDouble(PyTuple_GetItem(pos1, 0));
-    double posy = PyFloat_AsDouble(PyTuple_GetItem(pos1, 1));
-    double posz = PyFloat_AsDouble(PyTuple_GetItem(pos1, 2));
+    PyObject *pos1 = PyList_GetItem(atom_data, (Py_ssize_t)i);
+    double posx = PyFloat_AsDouble(PyTuple_GetItem(pos1, (Py_ssize_t)0));
+    double posy = PyFloat_AsDouble(PyTuple_GetItem(pos1, (Py_ssize_t)1));
+    double posz = PyFloat_AsDouble(PyTuple_GetItem(pos1, (Py_ssize_t)2));
     int boxn;
     static const int nbor_boxes[27][3] = {
       { -1, -1, -1},
@@ -185,18 +186,21 @@ nbor_data_1_atom(PyObject *nbors, int i, PyObject *atom_data,
       if(!alist && i == -1) printf("none in list at %s, atom %d\n", key, i);
       if(alist)
       {
-	int n2 = PyObject_Length(alist);
+	int n2 = (int)PyObject_Length(alist);
 	if(i == -1) printf("%3d in list at %s\n", n2, key);
 	for(j = 0; j < n2; ++j)
 	{
-	  PyObject * py_i2 = PyList_GetItem(alist, j);
+	  PyObject * py_i2 = PyList_GetItem(alist, (Py_ssize_t)j);
 	  int i2 = PyInt_AsLong(py_i2);
 	  if(i2 != i)
 	  {
-	    PyObject *apos = PyList_GetItem(atom_data, i2);
-	    double vaax = PyFloat_AsDouble(PyTuple_GetItem(apos, 0)) - posx;
-	    double vaay = PyFloat_AsDouble(PyTuple_GetItem(apos, 1)) - posy;
-	    double vaaz = PyFloat_AsDouble(PyTuple_GetItem(apos, 2)) - posz;
+	    PyObject *apos = PyList_GetItem(atom_data, (Py_ssize_t)i2);
+	    double vaax = PyFloat_AsDouble(PyTuple_GetItem(apos,
+							(Py_ssize_t)0)) - posx;
+	    double vaay = PyFloat_AsDouble(PyTuple_GetItem(apos,
+							(Py_ssize_t)1)) - posy;
+	    double vaaz = PyFloat_AsDouble(PyTuple_GetItem(apos,
+							(Py_ssize_t)2)) - posz;
 	    double d2 = vaax*vaax + vaay*vaay + vaaz*vaaz;
 	    if(d2 <= max_dist_2)
 	    {

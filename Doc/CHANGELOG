@@ -11,7 +11,8 @@ Improvements:
 
 - MMTK.PDB.PDBConfiguration accepts optional arguments for model and
   alternate code.
-
+- The C modules are adapted to the new 64-bit features in Python 2.5,
+  but have not yet been tested on a 64 bit machine.
 
 2.5.12 --> 2.5.13
 =================
