@@ -1,7 +1,7 @@
 # This module deals with input and output of configurations in PDB format.
 #
 # Written by Konrad Hinsen
-# last revision: 2006-5-4
+# last revision: 2006-6-8
 #
 
 """This module provides classes that represent molecules in PDB file.
@@ -262,7 +262,10 @@ class PDBConfiguration(Scientific.IO.PDB.Structure):
                             pdbdict[atom.name] = Database.AtomReference(i)
                             i = i + 1
                         m = ChemicalObjects.AtomCluster(atoms, name = name)
-                        m.pdbmap = [(name, pdbdict)]
+                        if len(pdbdict) == len(molecule):
+                            # pdbmap is correct only if the AtomCluster has
+                            # unique atom names
+                            m.pdbmap = [(name, pdbdict)]
                     collection.addObject(m)
         return collection
 
