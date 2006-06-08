@@ -1,7 +1,7 @@
 /* Low-level force field calculations
  *
  * Written by Konrad Hinsen
- * last revision: 2006-5-10
+ * last revision: 2006-5-30
  */
 
 #define _FORCEFIELD_MODULE
@@ -532,7 +532,7 @@ evaluator_dealloc(PyFFEvaluatorObject *self)
   Py_XDECREF(self->energy_terms_array);
   if (self->scratch != NULL)
     free(self->scratch);
-  PyMem_DEL(self);
+  PyObject_Del(self);
 }
 
 /* Call */
@@ -1064,7 +1064,7 @@ nblist_dealloc(PyNonbondedListObject *self)
   Py_XDECREF(self->universe_spec);
   free(self->box_number);
   free(self->boxes);
-  PyMem_DEL(self);
+  PyObject_Del(self);
 }
 
 /* Sequence protocol */

@@ -1,7 +1,7 @@
 /* Low-level functions for universes
  *
  * Written by Konrad Hinsen
- * last revision: 2005-2-7
+ * last revision: 2006-5-30
  */
 
 #define _UNIVERSE_MODULE
@@ -247,7 +247,7 @@ universe_new(void)
   }
   if (error) {
       PyErr_SetString(PyExc_OSError, "couldn't allocate lock");
-      PyMem_DEL(self);
+      PyObject_Del(self);
       return NULL;
   }
   self->state_access = 0;
@@ -260,7 +260,7 @@ static void
 universe_dealloc(PyUniverseSpecObject *self)
 {
   Py_XDECREF(self->geometry);
-  PyMem_DEL(self);
+  PyObject_Del(self);
 }
 
 /* Methods */

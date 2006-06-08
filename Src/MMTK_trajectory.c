@@ -2,7 +2,7 @@
  * Trajectory objects using netCDF files.
  *
  * Written by Konrad Hinsen
- * last revision: 2006-5-10
+ * last revision: 2006-5-30
  */
 
 #define _TRAJECTORY_MODULE
@@ -58,7 +58,7 @@ trajectory_dealloc(PyTrajectoryObject *self)
   Py_XDECREF(self->sbuffer);
   Py_XDECREF(self->vbuffer);
   Py_XDECREF(self->box_buffer);
-  PyMem_DEL(self);
+  PyObject_Del(self);
 }
 
 /* Close trajectory file */

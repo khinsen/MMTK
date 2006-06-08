@@ -1,7 +1,7 @@
 /* Sparse force-constant matrix objects.
  *
  * Written by Konrad Hinsen
- * last revision: 2006-5-10
+ * last revision: 2006-5-30
  */
 
 #define NO_IMPORT
@@ -53,7 +53,7 @@ PySparseFC_New(int natoms, int nalloc)
       free(self->data);
     if (self->index != NULL)
       free(self->index);
-    PyMem_DEL(self);
+    PyObject_Del(self);
     PyErr_NoMemory();
     return NULL;
   }
@@ -83,7 +83,7 @@ sparsefc_dealloc(PySparseFCObject *self)
       free(self->index[i].list);
   free(self->index);
   free(self->data);
-  PyMem_DEL(self);
+  PyObject_Del(self);
 }
 
 /* Find an entry */
