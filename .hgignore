@@ -1,3 +1,15 @@
-(^|/)\.svn($|/)
-(^|/)\.hg($|/)
-(^|/)\.hgtags($|/)
+syntax: glob
+
+*~
+**.pyc
+**.pyo
+build
+dist
+Test
+MANIFEST
+HG_CHANGESET_ID
+config/erfc_test
+config/intlen
+config/libm_test
+config/*.o
+1
