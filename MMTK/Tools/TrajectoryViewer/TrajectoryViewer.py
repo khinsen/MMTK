@@ -1,7 +1,7 @@
 # Trajectory viewer for MMTK trajectory files
 #
 # Written by Konrad Hinsen
-# last revision: 2005-1-25
+# last revision: 2006-6-20
 #
 
 from Tkinter import *
@@ -992,7 +992,7 @@ class ModeProjector:
         return Numeric.transpose(Numeric.array([self.time, series]))
 
     def amplitude(self, number):
-        force_constant = (2.*Numeric.pi*self.modes[number].frequency)**2
+        force_constant = self.modes[number].force_constant
         return Numeric.sqrt(self.temperature*MMTK.Units.k_B/force_constant)
 
 
