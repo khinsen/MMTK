@@ -152,16 +152,21 @@ if sys.version_info[0] == 2 and sys.version_info[1] >= 2:
 # System-specific optimization options
 
 high_opt = []
+lapack_opt = high_opt
 if sys.platform[:5] == 'linux' and sysconfig['CC'][:3] == 'gcc':
     high_opt = ['-O3', '-ffast-math', '-fomit-frame-pointer',
                 '-fkeep-inline-functions']
+    lapack_opt = high_opt + ['-ffloat-store']
 if sys.platform == 'darwin' and sysconfig['CC'][:3] == 'gcc':
     high_opt = ['-O3', '-ffast-math', '-fomit-frame-pointer',
                 '-fkeep-inline-functions', '-falign-loops=16']
+    lapack_opt = high_opt
 if sys.platform == 'aix4':
     high_opt = ['-O4']
+    lapack_opt = high_opt
 if sys.platform == 'odf1V4':
     high_opt = ['-O2', '-fp_reorder', '-ansi_alias', '-ansi_args']
+    lapack_opt = high_opt
 
 high_opt.append('-g')
 
@@ -190,7 +195,7 @@ standard and non-standard problems in molecular simulations.
        ext_package = 'MMTK.'+sys.platform,
        ext_modules = [Extension('lapack_mmtk',
                                 ['Src/lapack_subset.c', 'Src/lapack_mmtk.c'],
-                                extra_compile_args = high_opt,
+                                extra_compile_args = lapack_opt,
                                 include_dirs=['Include'],
                                 libraries=libraries,
                                 define_macros=macros),
