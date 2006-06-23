@@ -1,7 +1,7 @@
 # This file provides the Amber force field, using Amber parameter files.
 #
 # Written by Konrad Hinsen
-# last revision: 2005-1-18
+# last revision: 2006-6-23
 #
 
 _undocumented = 1
@@ -324,6 +324,7 @@ class OPLSForceField(MMForceField.MMForceField):
 class AmberBondedForceField(MMForceField.MMBondedForceField):
 
     def __init__(self):
+        self.arguments = ()
         readAmber94()
         MMForceField.MMBondedForceField.__init__(self, 'Amber_bonded', Amber94)
 
@@ -333,18 +334,21 @@ class AmberBondedForceField(MMForceField.MMBondedForceField):
 class AmberLJForceField(MMForceField.MMLJForceField):
 
     def __init__(self, cutoff = None):
+        self.arguments = (cutoff,)
         readAmber94()
         MMForceField.MMLJForceField.__init__(self, 'Amber_LJ', Amber94, cutoff)
 
 class AmberESForceField(MMForceField.MMESForceField):
 
     def __init__(self, cutoff = None):
+        self.arguments = (cutoff,)
         readAmber94()
         MMForceField.MMESForceField.__init__(self, 'Amber_ES', Amber94, cutoff)
 
 class AmberEwaldESForceField(MMForceField.MMEwaldESForceField):
 
     def __init__(self, options = {}):
+        self.arguments = (options,)
         readAmber94()
         MMForceField.MMEwaldForceESField.__init__(self, 'Amber_ES',
                                                   Amber94, options)
@@ -352,6 +356,7 @@ class AmberEwaldESForceField(MMForceField.MMEwaldESForceField):
 class AmberMPESForceField(MMForceField.MMMPESForceField):
 
     def __init__(self, options = {}):
+        self.arguments = (options,)
         readAmber94()
         MMForceField.MMMPESForceField.__init__(self, 'Amber_ES',
                                                Amber94, options)
@@ -359,6 +364,7 @@ class AmberMPESForceField(MMForceField.MMMPESForceField):
 class AmberNonbondedForceField(MMForceField.MMNonbondedForceField):
 
     def __init__(self, lj_options = None, es_options = None):
+        self.arguments = (lj_options, es_options)
         readAmber94()
-        MMForceField.MMNonbondedForceField.__init__(self, Amber94,
+        MMForceField.MMNonbondedForceField.__init__(self, 'Amber_NB', Amber94,
                                                     lj_options, es_options)
