@@ -19,6 +19,18 @@ class Dummy:
 pkginfo = Dummy()
 execfile('MMTK/__pkginfo__.py', pkginfo.__dict__)
 
+# Check that we have Scientific 2.5 or higher
+try:
+    from Scientific import __version__ as scientific_version
+    scientific_version = scientific_version.split('.')
+    scientific_ok = int(scientific_version[0]) >= 2 and \
+                    int(scientific_version[1]) >= 5
+except ImportError:
+    scientific_ok = False
+if not scientific_ok:
+    print "MMTK needs ScientificPython 2.5 or higher"
+    raise SystemExit
+
 
 headers = glob(os.path.join ("Include", "MMTK", "*.h"))
 
