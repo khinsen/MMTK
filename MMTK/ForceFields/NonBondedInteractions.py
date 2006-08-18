@@ -2,7 +2,7 @@
 # for non-bonded interactions
 #
 # Written by Konrad Hinsen
-# last revision: 2005-8-30
+# last revision: 2006-8-18
 #
 
 _undocumented = 1
@@ -10,7 +10,7 @@ _undocumented = 1
 from MMTK import Units, Utility
 from ForceField import ForceField
 from Scientific.Geometry import Vector
-import Numeric, umath
+import Numeric
 
 # Class definitions
 
@@ -136,12 +136,12 @@ class LJForceField(NonBondedForceField):
         sigma = eps_sigma[:,:,1]
         for i in range(n_types):
             for j in range(i+1, n_types):
-                eps[i,j] = umath.sqrt(eps[i,i]*eps[j,j])
+                eps[i,j] = Numeric.sqrt(eps[i,i]*eps[j,j])
                 eps[j,i] = eps[i,j]
                 if mix == 0:
                     sigma[i,j] = 0.5*(sigma[i,i]+sigma[j,j])
                 elif mix == 1:
-                    sigma[i,j] = umath.sqrt(sigma[i,i]*sigma[j,j])
+                    sigma[i,j] = Numeric.sqrt(sigma[i,i]*sigma[j,j])
                 else:
                     raise ValueError("undefined Lennard-Jones mixing rule")
                 sigma[j,i] = sigma[i,j]

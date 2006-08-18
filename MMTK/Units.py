@@ -1,7 +1,7 @@
 # Define unit conversion factors and physical constants
 #
 # Written by Konrad Hinsen
-# last revision: 1999-9-2
+# last revision: 2006-8-18
 #
 
 """This module defines constants and prefactors that convert between
@@ -48,8 +48,7 @@ eps0 = (permittivity of vacuum),
 me = (electron mass)
 """
 
-from umath import pi
-import umath
+from Scientific import N as Numeric
 
 # Prefixes
 
@@ -73,7 +72,7 @@ peta  = 1.0e15
 # internal unit: radian
 
 rad = 1.
-deg = (pi/180.)*rad
+deg = (Numeric.pi/180.)*rad
 
 # Length units
 # internal unit: nm
@@ -163,17 +162,20 @@ atm = 101325*Pa             # atmosphere
 # Constants
 
 h = 6.626176e-34*J*s
-hbar = h/(2.*pi)
+hbar = h/(2.*Numeric.pi)
 k_B = 1.3806513e-23*J/K
-eps0 = 1./(4.e-7*pi)*A**2*m/J/c**2
+eps0 = 1./(4.e-7*Numeric.pi)*A**2*m/J/c**2
 
 me = 0.51099906*mega*eV/c**2
 
-electrostatic_energy = 1/(4.*pi*eps0)
+electrostatic_energy = 1/(4.*Numeric.pi*eps0)
 
 # CHARMM time unit
-akma_time = umath.sqrt(Ang**2/(kcal/mol))
+akma_time = Numeric.sqrt(Ang**2/(kcal/mol))
 
 # "Atomic" units
-Bohr = 4.*pi*eps0*hbar**2/(me*e**2)
+Bohr = 4.*Numeric.pi*eps0*hbar**2/(me*e**2)
 Hartree = hbar**2/(me*Bohr**2)
+
+# Remove symbol "Numeric"
+del Numeric

@@ -1,13 +1,13 @@
 # This module implements classes for peptide chains and proteins.
 #
 # Written by Konrad Hinsen
-# last revision: 2005-10-11
+# last revision: 2006-8-18
 #
 
 import Biopolymers, Bonds, ChemicalObjects, Collections, ConfigIO, Database
 import Units, Universe, Utility
 from Scientific.Geometry import Vector
-import operator, string, umath
+import operator, string
 
 from Biopolymers import defineAminoAcidResidue
 

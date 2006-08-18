@@ -1,13 +1,13 @@
 # This module implements classes for nucleotide chains.
 #
 # Written by Konrad Hinsen
-# last revision: 2005-9-26
+# last revision: 2006-8-18
 #
 
 import Biopolymers, Bonds, ChemicalObjects, Collections, ConfigIO, Database
 import Universe, Utility
 from Scientific.Geometry import Vector
-import operator, string, umath
+import operator, string
 
 from Biopolymers import defineNucleicAcidResidue
 
