@@ -1,7 +1,7 @@
 # Functions for finding random points and orientations.
 #
 # Written by: Konrad Hinsen
-# Last revision: 2005-12-5
+# Last revision: 2006-8-18
 # 
 
 """This module defines various random quantities that are useful in
@@ -9,7 +9,7 @@ molecular simulations. For obtaining random numbers, it tries to use
 the RNG module, which is part of the LLNL package distribution, which
 also contains Numerical Python. If RNG is not available, it
 uses the random number generators in modules RandomArray (part of
-Numerical Python) and whrandom (in the Python standard library).
+Numerical Python) and random (in the Python standard library).
 """
 
 import Numeric as N
@@ -27,13 +27,12 @@ except ImportError:
 if RNG is None:
 
     random = __import__('random')
-    import whrandom
     from RandomArray import uniform, seed
     seed(1, 1)
-    whrandom.seed(1, 1, 1)
+    random.seed(1)
 
     def initializeRandomNumbersFromTime():
-        whrandom.seed(0, 0, 0)
+        random.seed()
         seed(0, 0)
 
     def gaussian(mean, std, shape=None):
