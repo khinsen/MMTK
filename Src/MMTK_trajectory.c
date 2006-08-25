@@ -2,7 +2,7 @@
  * Trajectory objects using netCDF files.
  *
  * Written by Konrad Hinsen
- * last revision: 2006-5-30
+ * last revision: 2006-8-25
  */
 
 #define _TRAJECTORY_MODULE
@@ -973,7 +973,11 @@ PyTrajectory_Open(PyObject *universe, PyObject *description,
 	if (step_array == NULL)
 	  return NULL;
 	for (i = 0; i < step_shape[1]; i++) {
+#ifdef _LONG64_
+	  if (((int *)step_array->data)[i] == NC_FILL_INT)
+#else
 	  if (((long *)step_array->data)[i] == NC_FILL_INT)
+#endif
 	    break;
 	  self->steps++;
 	}
