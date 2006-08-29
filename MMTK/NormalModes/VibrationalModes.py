@@ -1,7 +1,7 @@
 # Vibrational normal mode calculations.
 #
 # Written by Konrad Hinsen
-# last revision: 2006-1-19
+# last revision: 2006-8-29
 #
 
 """See also the Example:NormalModes example applications.
@@ -132,7 +132,7 @@ class VibrationalModes(Core.NormalModes):
 
         self.imaginary = N.less(ev, 0.)
         self.omega_sq = ev
-        self.frequencies = N.sqrt(N.fabs(ev)) / (2.*Units.pi)
+        self.frequencies = N.sqrt(N.fabs(ev)) / (2.*N.pi)
         self.sort_index = N.argsort(self.frequencies)
         self.array.shape = (self.nmodes, self.natoms, 3)
 
@@ -147,7 +147,7 @@ class VibrationalModes(Core.NormalModes):
             state['array'] *= weights[N.NewAxis, :, :]
             if state['temperature'] is not None:
                 factor = N.sqrt(2.*state['temperature']*Units.k_B/Units.amu) / \
-                         (2.*Units.pi)
+                         (2.*N.pi)
                 freq = state['frequencies']
                 for i in range(state['nmodes']):
                     index = state['sort_index'][i]
@@ -164,7 +164,7 @@ class VibrationalModes(Core.NormalModes):
             amplitude = 1.
         else:
             amplitude = N.sqrt(2.*self.temperature*Units.k_B/Units.amu) / \
-                        (2.*Units.pi*f)
+                        (2.*N.pi*f)
         return VibrationalMode(self.universe, item, f,
                                amplitude*self.array[index]/self.weights)
 

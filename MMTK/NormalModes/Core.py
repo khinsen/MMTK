@@ -1,7 +1,7 @@
 # Common aspect of normal mode calculations.
 #
 # Written by Konrad Hinsen
-# last revision: 2005-8-30
+# last revision: 2006-8-29
 #
 
 _undocumented = 1
@@ -23,7 +23,7 @@ class Mode(ParticleProperties.ParticleVector):
 
     def effectiveMassAndForceConstant(self):
         m = self.massWeightedProjection(self)/self.projection(self)
-        k = m*(2.*Units.pi*self.frequency)**2
+        k = m*(2.*N.pi*self.frequency)**2
         return m, k
 
     def view(self, factor=1., subset=None):
