@@ -1,18 +1,24 @@
-2.5.13 --> 2.5.14svn
-====================
+2.5.13 --> 2.5.14
+=================
 
 Bug fixes:
 
 - MMTK.NormalModes.Core.reduceToRange() didn't work correctly for
   VibrationalModes.
 - MMTK.Subspace.RigidMotionSubspace could fail for some object collections.
+- Various 64-bit issues.
+- Crashes at termination of Python when running under Python 2.5.
+- Molecule creation through MoleculeFactory didn't work.
 
 Improvements:
 
 - MMTK.PDB.PDBConfiguration accepts optional arguments for model and
   alternate code.
-- The C modules are adapted to the new 64-bit features in Python 2.5,
-  but have not yet been tested on a 64 bit machine.
+- The C modules are adapted to the new 64-bit features in Python 2.5.
+- Installation on Linux makes CLAPACK code compile correctly with GCC 4.
+- Improved handling of PDB residues with non-unique atom names.
+- Trajectory files contain a netCDF attributes "Conventions" that identifies
+  them as MMTK trajectories.
 
 2.5.12 --> 2.5.13
 =================
