@@ -1,11 +1,11 @@
 # Friction constants for protein C-alpha models
 #
 # Written by Konrad Hinsen
-# last revision: 2005-1-25
+# last revision: 2006-9-22
 #
 
-import MMTK.Collection, MMTK.ParticleProperties
-import Numeric
+import MMTK.ParticleProperties
+from Scientific import N
 
 def calphaFrictionConstants(protein, set=2):
     """Return a Class:MMTK.ParticleScalar object containing estimated
@@ -17,7 +17,7 @@ def calphaFrictionConstants(protein, set=2):
         for residue in chain:
             a = residue.peptide.C_alpha
             m = atoms.selectShell(a.position(), radius).mass()
-            d = 3.*m/(4.*Numeric.pi*radius**3)
+            d = 3.*m/(4.*N.pi*radius**3)
             if set == 1:  # linear fit to initial slope
                 f[a] = 121.2*d-8600
             elif set == 2:  # exponential fit 400 steps
