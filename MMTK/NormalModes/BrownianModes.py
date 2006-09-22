@@ -1,15 +1,16 @@
 # Brownian normal mode calculations.
 #
 # Written by Konrad Hinsen
-# last revision: 2005-1-26
+# last revision: 2006-9-22
 #
 
 """See also the Example:NormalModes example applications.
 """
 
 
-from MMTK import Features, Units, ParticleProperties
-import Numeric; N = Numeric
+from MMTK import Features, Units, ParticleProperties, Random
+from Scientific.Functions.Interpolation import InterpolatingFunction
+from Scientific import N
 
 from MMTK.NormalModes import Core
 
@@ -199,7 +200,7 @@ class BrownianModes(Core.NormalModes):
             rt = mode.inv_relaxation_time
             d = (weights*(mode*mode)).sumOverParticles()
             N.add(msd, d*(1.-N.exp(-rt*time))/rt, msd)
-        N.multiply(msd, 2.*MMTK.Units.k_B*self.temperature, msd)
+        N.multiply(msd, 2.*Units.k_B*self.temperature, msd)
         return InterpolatingFunction((time,), msd)
 
     def staticStructureFactor(self, q_range = (1., 15.), subset=None,
@@ -219,10 +220,10 @@ class BrownianModes(Core.NormalModes):
             step = (last-first)/50.
         q = N.arange(first, last, step)
 
-        kT = MMTK.Units.k_B*self.temperature
+        kT = Units.k_B*self.temperature
         natoms = subset.numberOfAtoms()
         sq = 0.
-        random_vectors = MMTK.Random.randomDirections(random_vectors)
+        random_vectors = Random.randomDirections(random_vectors)
         for v in random_vectors:
             sab = N.zeros((natoms, natoms), N.Float)
             for i in range(6, self.nmodes):
@@ -260,9 +261,9 @@ class BrownianModes(Core.NormalModes):
         time = N.arange(first, last, step)
 
         natoms = subset.numberOfAtoms()
-        kT = MMTK.Units.k_B*self.temperature
+        kT = Units.k_B*self.temperature
         fcoh = N.zeros((len(time),), N.Complex)
-        random_vectors = MMTK.Random.randomDirections(random_vectors)
+        random_vectors = Random.randomDirections(random_vectors)
         for v in random_vectors:
             phase = N.exp(-1.j*q*N.dot(r, v.array))
             for ai in range(natoms):
@@ -305,10 +306,10 @@ class BrownianModes(Core.NormalModes):
         time = N.arange(first, last, step)
 
         natoms = subset.numberOfAtoms()
-        kT = MMTK.Units.k_B*self.temperature
+        kT = Units.k_B*self.temperature
         finc = N.zeros((len(time),), N.Float)
         eisf = 0.
-        random_vectors = MMTK.Random.randomDirections(random_vectors)
+        random_vectors = Random.randomDirections(random_vectors)
         for v in random_vectors:
             phase = N.exp(-1.j*q*N.dot(r, v.array))
             faat = N.zeros((natoms, len(time)), N.Float)
@@ -346,14 +347,14 @@ class BrownianModes(Core.NormalModes):
             step = (last-first)/50.
         q = N.arange(first, last, step)
 
-        f = MMTK.ParticleProperties.ParticleTensor(self.universe)
+        f = ParticleProperties.ParticleTensor(self.universe)
         for i in range(6, self.nmodes):
             mode = self.rawMode(i)
             f = f + (1./mode.inv_relaxation_time)*mode.dyadicProduct(mode)
-        f = MMTK.Units.k_B*self.temperature*f/self.friction
+        f = Units.k_B*self.temperature*f/self.friction
 
         eisf = N.zeros(q.shape, N.Float)
-        random_vectors = MMTK.Random.randomDirections(random_vectors)
+        random_vectors = Random.randomDirections(random_vectors)
         for v in random_vectors:
             for a in subset.atomList():
                 exp = N.exp(-v*(f[a]*v))
