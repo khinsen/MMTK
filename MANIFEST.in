@@ -22,6 +22,7 @@ prune Src/dpmta/doc
 prune Src/dpmta/fortran
 prune Src/dpmta/test
 recursive-include Include *.h
+include Tests/*.py
 include config/*.c
 include Doc/CHANGELOG
 include Doc/XML/mmtk-user.xml
