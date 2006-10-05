@@ -259,9 +259,25 @@ class GroupOfAtoms:
           IIl   : x y z <--> a c b
           IIIl  : x y z <--> b a c
         """
+        transformation = self.normalizingTransformation(repr)
+        self.applyTransformation(transformation)
+
+    def normalizingTransformation(self, repr=None):
+        """Returns a linear transformation that shifts the center of mass
+        of the object to the coordinate origin and makes its
+        principal axes of inertia parallel to the three coordinate
+        axes.
+
+        A specific representation can be chosen by setting |repr| to
+          Ir    : x y z <--> b c a
+          IIr   : x y z <--> c a b
+          IIIr  : x y z <--> a b c
+          Il    : x y z <--> c b a
+          IIl   : x y z <--> a c b
+          IIIl  : x y z <--> b a c
+        """
         from LinearAlgebra import determinant
         cm, inertia = self.centerAndMomentOfInertia()
-        self.translateBy(-cm)
         ev, diag = inertia.diagonalization()
         if determinant(diag.array) < 0:
             diag.array[0] = -diag.array[0]
@@ -281,7 +297,7 @@ class GroupOfAtoms:
             elif repr != 'IIIr':
                 print 'unknown representation'
             diag.array = Numeric.take(diag.array, seq)                
-        self.applyTransformation(Transformation.Rotation(diag))
+        return Transformation.Rotation(diag)*Transformation.Translation(-cm)
 
     def applyTransformation(self, t):
         "Applies the transformation |t| to the object."
