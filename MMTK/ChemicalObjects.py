@@ -45,6 +45,9 @@ class ChemicalObject(Collections.GroupOfAtoms, Visualization.Viewable):
     __safe_for_unpickling__ = 1
     __had_initargs__ = 1
 
+    def __hash__(self):
+        return id(self)
+
     def __getattr__(self, attr):
         if attr[:1] == '_' or attr[:3] == 'is_':
             raise AttributeError
