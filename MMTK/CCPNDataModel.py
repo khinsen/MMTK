@@ -5,7 +5,7 @@
 # from CCPN MolSystems and MolStructures.
 #
 # Written by Konrad Hinsen
-# last revision: 2006-10-13
+# last revision: 2006-10-16
 #
 
 """Interface to the CCPN Data Model
@@ -26,7 +26,7 @@ CCPN                    MMTK
 
 Molecule                MoleculeType
 MolResidue              BlueprintGroup
-ChemComp/ChemCompVar    GroupType
+ChemCompVar             GroupType
 
 MolSystem               set of Molecules without coordinates
 MolSystem.Chain         Molecule without coordinates
@@ -53,24 +53,162 @@ class CCPNMoleculeFactory(MoleculeFactory):
         MoleculeFactory.__init__(self)
         self.mol_system = mol_system
         self.group_name_mapping = {}
+        self.peptide_chains = {}
         self.makeAllGroups()
 
     def retrieveMoleculeForChain(self, mol_system_chain):
-        return self.retrieveMolecule(self.group_name_mapping[mol_system_chain])
-        
+        group_name = self.group_name_mapping[mol_system_chain]
+        if self.peptide_chains.has_key(group_name):
+            return self.retrievePeptideChain(self.peptide_chains[group_name],
+                                             mol_system_chain)
+        else:
+            return self.retrieveMolecule(group_name)
+
+    def retrievePeptideChain(self, sequence, mol_system_chain):
+        from MMTK.Proteins import PeptideChain, Residue
+        chain = PeptideChain(None)
+        n_terminus = \
+          mol_system_chain.residues[0].molResidue.chemCompVar.linking == "start"
+        c_terminus = \
+          mol_system_chain.residues[-1].molResidue.chemCompVar.linking == "end"
+        chain.version_spec = {'n_terminus': n_terminus,
+                              'c_terminus': c_terminus,
+                              'model': 'all',
+                              'circular': False}
+        numbers = [r.seqId for r in mol_system_chain.residues]
+        chain.groups = []
+        n = 0
+        for residue, number in zip(sequence, numbers):
+            n = n + 1
+            r = Residue(residue, 'all')
+            r.name = r.symbol + str(number)
+            r.sequence_number = n
+            r.parent = chain
+            chain.groups.append(r)
+        chain._setupChain(False, {}, None)
+        return chain
+
     def makeAllGroups(self):
         for chain in self.mol_system.chains:
-            residues = chain.residues
-            for residue in residues:
-                chem_comp_var = residue.molResidue.chemCompVar
-                self.makeGroupFromChemCompVar(chem_comp_var)
-            mol_type = chain.molecule.molType
-            if len(residues) > 1:
-                self.makeGroupFromChain(chain)
-                self.group_name_mapping[chain] = chain.molecule.name
+            if chain.molecule.molType == "protein":
+                self.registerPeptideSequence(chain)
             else:
-                group_name = self.groupNameFromChemCompVar(chem_comp_var)
-                self.group_name_mapping[chain] = group_name
+                residues = chain.residues
+                for residue in residues:
+                    chem_comp_var = residue.molResidue.chemCompVar
+                    self.makeGroupFromChemCompVar(chem_comp_var)
+                mol_type = chain.molecule.molType
+                if len(residues) > 1:
+                    self.makeGroupFromChain(chain)
+                    self.group_name_mapping[chain] = chain.molecule.name
+                else:
+                    group_name = self.groupNameFromChemCompVar(chem_comp_var)
+                    self.group_name_mapping[chain] = group_name
+
+    def registerPeptideSequence(self, chain):
+        chain_name = chain.molecule.name
+        self.group_name_mapping[chain] = chain_name
+        sequence = []
+        for residue in chain.residues:
+            chem_comp_var = residue.molResidue.chemCompVar
+            rd, pd, sd = self.processDescriptor(chem_comp_var.descriptor)
+            # The first branch is a quick hack for testing the rest of the
+            # code without having to create a project with realistic
+            # protonation states.
+            if False:
+                pd = ''
+                res_name = self.peptide_mapping.get(chem_comp_var.chemComp.ccpCode,
+                                                    None)
+                if isinstance(res_name, dict):
+                    for name in res_name.values():
+                        if name is not None:
+                            res_name = name
+                            break
+            else:
+                res_name = self.peptide_mapping.get(chem_comp_var.chemComp.ccpCode,
+                                                    None)
+            if isinstance(res_name, dict):
+                if rd and sd:
+                    label = ';'.join((rd, sd))
+                elif rd:
+                    label = rd
+                else:
+                    label = sd
+                res_name = res_name.get(label, None)
+            if res_name is None \
+               or pd: # MMTK has no variants of the peptide group
+                raise ValueError("Unknown residue %s %s" %
+                                 (chem_comp_var.chemComp.ccpCode,
+                                  chem_comp_var.descriptor))
+            try:
+                res_name = res_name + \
+                         self.peptide_linking[chem_comp_var.linking]
+            except KeyError:
+                raise ValueError("Unknown linking %s" % chem_comp_var.linking)
+            sequence.append(res_name)
+        self.peptide_chains[chain_name] = sequence
+
+    def processDescriptor(self, descriptor):
+        residue = []
+        peptide = []
+        sidechain = []
+        for part in descriptor.split(';'):
+            if ':' not in part:
+                residue.append(part)
+            else:
+                label, atoms = part.split(':')
+                atoms = atoms.split(',')
+                for atom in atoms:
+                    if len(atom) > 1 and atom[1] in 'BGDEZH':
+                        sidechain.append(label[0] + atom)
+                    else:
+                        peptide.append(label[0] + atom)
+        residue.sort()
+        peptide.sort()
+        sidechain.sort()
+        return ','.join(residue), ','.join(peptide), ','.join(sidechain)
+
+    peptide_mapping = {
+        'ALA': 'alanine',
+        'ARG': {'pHH12': 'arginine',
+                'dHH12': None},
+        'ASN': {'neutral': 'asparagine',
+                'lND2': None},
+        'ASP': {'pHD2': 'aspartic_acid_neutral',
+                'dHD2': 'aspartic_acid'},
+        'CYS': {'pHG': 'cysteine',
+                'dHG': 'cysteine_with_negative_charge',
+                'lSG': 'cystine_ss'},
+        'GLN': 'glutamine',
+        'GLU': {'pHE2': 'glutamic_acid_neutral',
+                'dHE2': 'glutamic_acid'},    
+        'GLY': 'glycine',          
+        'HIS': {'pHD1,pHE2': 'histidine_plus',
+                'dHD1,pHE2': 'histidine_epsilonh',
+                'dHE1,pHD1': 'histidine_deltah'},        
+        'ILE': 'isoleucine',
+        'LEU': 'leucine',
+        'LYS': {'pHZ3': 'lysine',
+                'dHZ3': 'lysine_neutral'},
+        'MET': 'methionine',       
+        'PHE': 'phenylalanine',    
+        'PRO': 'proline',          
+        'SER': {'pHG': 'serine',
+                'dHG': None},
+        'THR': {'pHG1': 'threonine',
+                'dHG1': None},
+        'TRP': {'pHE1': 'tryptophan',
+                'dHE1': None},
+        'TYR': {'pHH': 'tyrosine',
+                'dHH': None,},
+        'VAL': 'valine',
+    }
+
+    peptide_linking = {
+        'start': '_nt',
+        'middle': '',
+        'end': '_ct',
+        }
 
     def groupNameFromChemCompVar(self, chem_comp_var):
         group_name = chem_comp_var.name
@@ -159,19 +297,36 @@ class CCPNMolSystemAdapter(object):
         self.ccpn_to_mmtk_molecule_map[ccpn_chain] = molecule
         self.mmtk_to_ccpn_molecule_map[molecule] = ccpn_chain
         residues = ccpn_chain.residues
-        for residue in residues:
-            if len(residues) == 1:
-                my_residue = molecule
-            else:
-                residue_id = residue.ccpCode + str(residue.seqId)
-                my_residue = getattr(molecule, residue_id)
-            for atom in residue.atoms:
-                my_atom = getattr(my_residue, atom.name)
-                self.ccpn_to_mmtk_atom_map[atom] =  my_atom
-                self.mmtk_to_ccpn_atom_map[my_atom] = atom
+        if ccpn_chain.molecule.molType == "protein":
+            for i in range(len(residues)):
+                residue = residues[i]
+                my_residue = molecule[i]
+                self.makeAtomMaps(residue, my_residue)
+        else:
+            for residue in residues:
+                if len(residues) == 1:
+                    my_residue = molecule
+                else:
+                    residue_id = residue.ccpCode + str(residue.seqId)
+                    my_residue = getattr(molecule, residue_id)
+                for atom in residue.atoms:
+                    my_atom = getattr(my_residue, atom.name)
+                    self.ccpn_to_mmtk_atom_map[atom] =  my_atom
+                    self.mmtk_to_ccpn_atom_map[my_atom] = atom
         if len(self.coord_mappings) == 1:
             self.assignPositions([molecule])
         return molecule
+
+    def makeAtomMaps(self, ccpn_residue, my_residue):
+        pdbmap = my_residue.pdbmap
+        altmap = my_residue.pdb_alternative
+        for atom in ccpn_residue.atoms:
+            name = atom.name
+            name = altmap.get(name, name)
+            atom_ref = pdbmap[0][1][name]
+            my_atom = my_residue.atoms[atom_ref.number]
+            self.ccpn_to_mmtk_atom_map[atom] =  my_atom
+            self.mmtk_to_ccpn_atom_map[my_atom] = atom
 
     def makeAllMolecules(self):
         molecules = Collection()
@@ -183,7 +338,10 @@ class CCPNMolSystemAdapter(object):
         mapping = self.coord_mappings[mol_structure_index]
         for molecule in molecules:
             for atom in molecule.atomList():
-                coords = mapping[self.mmtk_to_ccpn_atom_map[atom]]
+                try:
+                    coords = mapping[self.mmtk_to_ccpn_atom_map[atom]]
+                except KeyError:
+                    coords = None
                 if coords:
                     position = Vector(coords[0].x, coords[0].y, coords[0].z)
                     atom.setPosition(position*Units.Ang)
