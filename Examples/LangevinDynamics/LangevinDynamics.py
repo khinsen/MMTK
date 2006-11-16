@@ -16,21 +16,21 @@ import Numeric, operator
 class LangevinIntegrator(Dynamics.Integrator):
 
     def __init__(self, universe, **options):
-	Dynamics.Integrator.__init__(self, universe, options)
+        Dynamics.Integrator.__init__(self, universe, options)
         # Supported features: none for the moment, to keep it simple
-	self.features = []
+        self.features = []
 
     def __call__(self, **options):
         # Process the keyword arguments
-	self.setCallOptions(options)
+        self.setCallOptions(options)
         # Check if the universe has features not supported by the integrator
-	Features.checkFeatures(self, self.universe)
+        Features.checkFeatures(self, self.universe)
         # Get the universe variables needed by the integrator
-	configuration = self.universe.configuration()
-	masses = self.universe.masses()
-	velocities = self.universe.velocities()
-	if velocities is None:
-	    raise ValueError("no velocities")
+        configuration = self.universe.configuration()
+        masses = self.universe.masses()
+        velocities = self.universe.velocities()
+        if velocities is None:
+            raise ValueError("no velocities")
 
         # Get the friction coefficients. First check if a keyword argument
         # 'friction' was given to the integrator. Its value can be a
@@ -49,7 +49,7 @@ class LangevinIntegrator(Dynamics.Integrator):
         # Construct a C evaluator object for the force field, using
         # the specified number of threads or the default value
         nt = self.getOption('threads')
-	evaluator = self.universe.energyEvaluator(threads=nt).CEvaluator()
+        evaluator = self.universe.energyEvaluator(threads=nt).CEvaluator()
 
         # Run the C integrator
         MMTK_langevin.integrateLD(self.universe,

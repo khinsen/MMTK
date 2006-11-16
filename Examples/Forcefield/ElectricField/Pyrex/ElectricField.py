@@ -36,7 +36,7 @@ class ElectricField(ForceField):
     # requires. This is necessary for interdependent force field
     # terms. In our case, we just say "yes" immediately.
     def ready(self, global_data):
-	return 1
+        return 1
 
     # The following method is called by the energy evaluation engine
     # to obtain a list of the low-level evaluator objects (the C routines)
