@@ -4,7 +4,7 @@
 # (boundary conditions, external fields, etc.)
 #
 # Written by Konrad Hinsen
-# last revision: 2005-9-26
+# last revision: 2006-11-17
 #
 
 import Bonds, ChemicalObjects, Collections, Environment, \
@@ -604,6 +604,13 @@ class Universe(Collections.GroupOfAtoms, Visualization.Viewable):
     def forcefield(self):
         "Returns the force field."
         return self._forcefield
+
+    def energyEvaluatorParameters(self, subset1 = None, subset2 = None):
+        self.configuration()
+        from ForceFields import ForceField
+        ffdata = ForceField.ForceFieldData()
+        return self._forcefield.evaluatorParameters(self, subset1, subset2,
+                                                    ffdata)
 
     def energyEvaluator(self, subset1 = None, subset2 = None,
                         threads=None, mpi_communicator=None):

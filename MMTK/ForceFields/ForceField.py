@@ -2,7 +2,7 @@
 # and force field evaluators.
 #
 # Written by Konrad Hinsen
-# last revision: 2005-12-19
+# last revision: 2006-11-17
 #
 
 _undocumented = 1
@@ -36,9 +36,13 @@ class ForceField:
 
     __safe_for_unpickling__ = 1
 
+    def evaluatorParameters(self, universe, subset1, subset2, global_data):
+        # must be defined by derived classes
+        raise NotImplementedError
+
     def evaluatorTerms(self, universe, subset1, subset2, global_data):
         # must be defined by derived classes
-        raise AttributeError
+        raise NotImplementedError
 
     def __add__(self, other):
         return CompoundForceField(self, other)
@@ -76,6 +80,33 @@ class CompoundForceField(ForceField):
         self.type = 'compound'
 
     is_compound_force_field = 1
+
+    def evaluatorParameters(self, system, subset1, subset2, global_data):
+        parameters = {}
+        remaining = copy.copy(self.fflist)
+        while remaining:
+            done = []
+            for ff in remaining:
+                if ff.ready(global_data):
+                    params = ff.evaluatorParameters(system, subset1, subset2,
+                                                    global_data)
+                    if not isinstance(params, dict):
+                        raise ValueError("evaluator parameters are not a dict")
+                    for key, value in params.items():
+                        try:
+                            if parameters[key] != value:
+                                raise ValueError("A term with the same name " +
+                                                  "but a different value " +
+                                                  "already exists")
+                        except KeyError:
+                            pass
+                        parameters[key] = value
+                    done.append(ff)
+            if not done:
+                raise TypeError("Cyclic force field dependence")
+            for ff in done:
+                remaining.remove(ff)
+        return parameters
 
     def evaluatorTerms(self, system, subset1, subset2, global_data):
         eval_objects = []

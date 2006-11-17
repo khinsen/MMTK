@@ -1,7 +1,7 @@
 # Detailed harmonic force field for proteins
 #
 # Written by Konrad Hinsen
-# last revision: 2005-8-30
+# last revision: 2006-11-17
 #
 
 from NonBondedInteractions import NonBondedForceField
@@ -159,19 +159,30 @@ class MidrangeForceField(NonBondedForceField):
         self.factor = factor
         self.one_four_factor = 0.5
 
-    def evaluatorTerms(self, universe, subset1, subset2, global_data):
-        n = universe.numberOfCartesianCoordinates()
+    def evaluatorParameters(self, universe, subset1, subset2, global_data):
         excluded_pairs, one_four_pairs, atom_subset = \
                         self.excludedPairs(subset1, subset2, global_data)
-        nblist, nblist_update = \
-                self.nonbondedList(universe, subset1, subset2, global_data)
         if self.cutoff is None:
             cutoff = 0.
         else:
             cutoff = self.cutoff
-        ev = DeformationTerm(universe._spec, nblist, self.fc_length,
-                             self.cutoff, self.factor,
-                             self.one_four_factor)
+        return {'deformation_term': {'cutoff': cutoff,
+                                      'fc_length': self.fc_length,
+                                      'scale_factor': self.factor,
+                                      'one_four_factor': self.one_four_factor},
+                 'nonbonded': {'excluded_pairs': excluded_pairs,
+                               'one_four_pairs': one_four_pairs,
+                               'atom_subset': atom_subset},
+                }
+
+    def evaluatorTerms(self, universe, subset1, subset2, global_data):
+        param = self.evaluatorParameters(universe, subset1, subset2,
+                                         global_data)['deformation_term']
+        nblist, nblist_update = \
+                self.nonbondedList(universe, subset1, subset2, global_data)
+        ev = DeformationTerm(universe._spec, nblist, param['fc_length'],
+                             param['cutoff'], param['scale_factor'],
+                             param['one_four_factor'])
         return [nblist_update, ev]
 
 

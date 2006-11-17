@@ -1,7 +1,7 @@
 # A Lennard-Jones force fields for simple liquids
 #
 # Written by Konrad Hinsen
-# last revision: 2000-2-9
+# last revision: 2006-11-16
 #
 
 _undocumented = 1
@@ -55,7 +55,7 @@ class LennardJonesForceField(LJForceField):
     def _ljParameters(self, type, global_data):
         return global_data.lj_parameters[type]
 
-    def evaluatorTerms(self, universe, subset1, subset2, global_data):
+    def evaluatorParameters(self, universe, subset1, subset2, global_data):
         self.collectParameters(universe, global_data)
-        return LJForceField.evaluatorTerms(self, universe, subset1, subset2,
-                                           global_data)
+        return LJForceField.evaluatorParameters(self, universe, subset1,
+                                                subset2, global_data)

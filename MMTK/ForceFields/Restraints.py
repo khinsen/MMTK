@@ -1,7 +1,7 @@
 # Harmonic restraint terms that can be added to a force field.
 #
 # Written by Konrad Hinsen
-# last revision: 2005-8-30
+# last revision: 2006-11-17
 #
 
 """This module contains harmonic restraint terms that can be added
@@ -69,7 +69,7 @@ class HarmonicDistanceRestraint(ForceField):
         self.force_constant = force_constant
         ForceField.__init__(self, 'harmonic distance restraint')
 
-    def evaluatorTerms(self, universe, subset1, subset2, global_data):
+    def evaluatorParameters(self, universe, subset1, subset2, global_data):
         if self.universe is not None and self.universe is not universe:
             raise ValueError("Atoms are not in universe " + `universe`)
         if subset1 is not None:
@@ -78,8 +78,16 @@ class HarmonicDistanceRestraint(ForceField):
             if not ((self.atom1 in s1 and self.atom2 in s2) or \
                     (self.atom1 in s2 and self.atom2 in s1)):
                 raise ValueError("restraint outside subset")
-        indices = Numeric.array([[self.index1, self.index2]])
-        parameters = Numeric.array([[self.distance, self.force_constant]])
+        return {'harmonic_distance_term':
+                [(self.index1, self.index2,
+                  self.distance, self.force_constant)]}
+
+    def evaluatorTerms(self, universe, subset1, subset2, global_data):
+        params = self.evaluatorParameters(universe, subset1, subset2,
+                                          global_data)['harmonic_distance_term']
+        assert len(params) == 1
+        indices = Numeric.array([params[0][:2]])
+        parameters = Numeric.array([params[0][2:]])
         return [HarmonicDistanceTerm(universe._spec, indices, parameters,
                                      self.name)]
 
@@ -139,11 +147,19 @@ class HarmonicAngleRestraint(ForceField):
         self.force_constant = force_constant
         ForceField.__init__(self, 'harmonic angle restraint')
 
-    def evaluatorTerms(self, universe, subset1, subset2, global_data):
+    def evaluatorParameters(self, universe, subset1, subset2, global_data):
         if self.universe is not None and self.universe is not universe:
             raise ValueError("Atoms are not in universe " + `universe`)
-        indices = Numeric.array([[self.index1, self.index2, self.index3]])
-        parameters = Numeric.array([[self.angle, self.force_constant]])
+        return {'harmonic_angle_term':
+                 [(self.index1, self.index2, self.index3,
+                   self.angle, self.force_constant)]}
+
+    def evaluatorTerms(self, universe, subset1, subset2, global_data):
+        params = self.evaluatorParameters(universe, subset1, subset2,
+                                          global_data)['harmonic_angle_term']
+        assert len(params) == 1
+        indices = Numeric.array([params[0][:3]])
+        parameters = Numeric.array([params[0][3:]])
         return [HarmonicAngleTerm(universe._spec, indices, parameters,
                                   self.name)]
 
@@ -203,12 +219,19 @@ class HarmonicDihedralRestraint(ForceField):
                           dihedral, force_constant) 
         ForceField.__init__(self, 'harmonic dihedral restraint')
 
-    def evaluatorTerms(self, universe, subset1, subset2, global_data):
+    def evaluatorParameters(self, universe, subset1, subset2, global_data):
         if self.universe is not None and self.universe is not universe:
             raise ValueError("Atoms are not in universe " + `universe`)
-        indices = Numeric.array([[self.index1, self.index2,
-                                  self.index3, self.index4]])
-        parameters = Numeric.array([[0., self.dihedral,
-                                     0., self.force_constant]])
+        return {'cosine_dihedral_term': [(self.index1, self.index2,
+                                          self.index3, self.index4,
+                                          0., self.dihedral,
+                                          0., self.force_constant)]}
+
+    def evaluatorTerms(self, universe, subset1, subset2, global_data):
+        params = self.evaluatorParameters(universe, subset1, subset2,
+                                          global_data)['cosine_dihedral_term']
+        assert len(params) == 1
+        indices = Numeric.array([params[:4]])
+        parameters = Numeric.array([params[4:]])
         return [CosineDihedralTerm(universe._spec, indices, parameters,
                                    self.name)]

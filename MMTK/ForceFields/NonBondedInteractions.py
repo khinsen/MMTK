@@ -2,7 +2,7 @@
 # for non-bonded interactions
 #
 # Written by Konrad Hinsen
-# last revision: 2006-8-18
+# last revision: 2006-11-17
 #
 
 _undocumented = 1
@@ -10,7 +10,7 @@ _undocumented = 1
 from MMTK import Units, Utility
 from ForceField import ForceField
 from Scientific.Geometry import Vector
-import Numeric
+from Scientific import N
 
 # Class definitions
 
@@ -80,12 +80,12 @@ class NonBondedForceField(ForceField):
         if nbl is None:
             excluded_pairs, one_four_pairs, atom_subset = \
                             self.excludedPairs(subset1, subset2, global_data)
-            excluded_pairs = Numeric.array(excluded_pairs)
-            one_four_pairs = Numeric.array(one_four_pairs)
+            excluded_pairs = N.array(excluded_pairs)
+            one_four_pairs = N.array(one_four_pairs)
             if atom_subset is not None:
-                atom_subset = Numeric.array(atom_subset)
+                atom_subset = N.array(atom_subset)
             else:
-                atom_subset = Numeric.array([], Numeric.Int)
+                atom_subset = N.array([], N.Int)
             nbl = NonbondedList(excluded_pairs, one_four_pairs, atom_subset,
                                 universe._spec, self.cutoff)
             update = NonbondedListTerm(nbl)
@@ -112,51 +112,62 @@ class LJForceField(NonBondedForceField):
         self.cutoff = cutoff
         self.scale_factor = scale_factor
 
-    def evaluatorTerms(self, universe, subset1, subset2, global_data):
+    def evaluatorParameters(self, universe, subset1, subset2, global_data):
         n = universe.numberOfPoints()
-        lj_type = -Numeric.ones((n,), Numeric.Int)
+        lj_type = -N.ones((n,), N.Int)
         atom_types = {}
         for o in universe:
             for a in o.atomList():
-                atom_types[self._atomType(o, a, global_data)] = 1
-        i = 0
-        for t in atom_types.keys():
-            atom_types[t] = i
-            i = i + 1
-        n_types = i
-        for o in universe:
-            for a in o.atomList():
-                lj_type[a.index] = atom_types[self._atomType(o,a,global_data)]
-        eps_sigma = Numeric.zeros((n_types, n_types, 2), Numeric.Float)
+                t = self._atomType(o, a, global_data)
+                if not atom_types.has_key(t):
+                    atom_types[t] = len(atom_types)
+                lj_type[a.index] = atom_types[t]
+        n_types = len(atom_types)
+        eps_sigma = N.zeros((n_types, n_types, 2), N.Float)
         for t, i in atom_types.items():
             eps, sigma, mix = self._ljParameters(t, global_data)
-            eps = eps*self.scale_factor
-            eps_sigma[i,i] = Numeric.array([eps, sigma])
-        eps = eps_sigma[:,:,0]
-        sigma = eps_sigma[:,:,1]
+            eps *= self.scale_factor
+            eps_sigma[i, i] = N.array([eps, sigma])
+        eps = eps_sigma[:, :, 0]
+        sigma = eps_sigma[:, :, 1]
         for i in range(n_types):
             for j in range(i+1, n_types):
-                eps[i,j] = Numeric.sqrt(eps[i,i]*eps[j,j])
+                eps[i,j] = N.sqrt(eps[i,i]*eps[j,j])
                 eps[j,i] = eps[i,j]
                 if mix == 0:
                     sigma[i,j] = 0.5*(sigma[i,i]+sigma[j,j])
                 elif mix == 1:
-                    sigma[i,j] = Numeric.sqrt(sigma[i,i]*sigma[j,j])
+                    sigma[i,j] = N.sqrt(sigma[i,i]*sigma[j,j])
                 else:
-                    raise ValueError("undefined Lennard-Jones mixing rule")
+                    raise ValueError("unknown Lennard-Jones mixing rule")
                 sigma[j,i] = sigma[i,j]
         global_data.lj_type = lj_type
         global_data.lj_14_factor = self.lj_14_factor
         global_data.eps_sigma = eps_sigma
-        nblist, update = \
-                   self.nonbondedList(universe, subset1, subset2, global_data)
         if self.cutoff is None:
             cutoff = 0.
         else:
             cutoff = self.cutoff
+        excluded_pairs, one_four_pairs, atom_subset = \
+                             self.excludedPairs(subset1, subset2, global_data)
+        return {'lennard_jones': {'type': lj_type,
+                                  'epsilon_sigma': eps_sigma,
+                                  'one_four_factor': self.lj_14_factor,
+                                  'cutoff': cutoff},
+                'nonbonded': {'excluded_pairs': excluded_pairs,
+                              'one_four_pairs': one_four_pairs,
+                              'atom_subset': atom_subset}
+               }
+
+    def evaluatorTerms(self, universe, subset1, subset2, global_data):
+        params = self.evaluatorParameters(universe, subset1, subset2,
+                                          global_data)['lennard_jones']
+        nblist, update = \
+                   self.nonbondedList(universe, subset1, subset2, global_data)
         from MMTK_forcefield import LennardJonesTerm
-        ev = LennardJonesTerm(universe._spec, nblist, eps_sigma,
-                              lj_type, cutoff, self.lj_14_factor)
+        ev = LennardJonesTerm(universe._spec, nblist, params['epsilon_sigma'],
+                              params['type'], params['cutoff'],
+                              params['one_four_factor'])
         update.addTerm(ev, 0);
         if update.info:
             return [ev]
@@ -218,24 +229,38 @@ class ElectrostaticForceField(NonBondedForceField):
         self.cutoff = cutoff
         self.scale_factor = scale_factor
 
-    def evaluatorTerms(self, universe, subset1, subset2, global_data):
+    def evaluatorParameters(self, universe, subset1, subset2, global_data):
         n = universe.numberOfPoints()
-        charge = Numeric.zeros((n,), Numeric.Float)
+        charge = N.zeros((n,), N.Float)
         for o in universe:
             for a in o.atomList():
                 charge[a.index] = self._charge(o, a, global_data)
-        charge = charge*Numeric.sqrt(self.scale_factor)
-        nblist, update = \
-                     self.nonbondedList(universe, subset1, subset2,
-                                        global_data)
+        charge = charge*N.sqrt(self.scale_factor)
         if self.cutoff is None:
             cutoff = 0.
         else:
             cutoff = self.cutoff
+        excluded_pairs, one_four_pairs, atom_subset = \
+                             self.excludedPairs(subset1, subset2, global_data)
+        return {'electrostatic': {'algorithm':'direct',
+                                  'charge': charge,
+                                  'cutoff': cutoff,
+                                  'one_four_factor': self.es_14_factor},
+                'nonbonded': {'excluded_pairs': excluded_pairs,
+                              'one_four_pairs': one_four_pairs,
+                              'atom_subset': atom_subset}
+               }
+
+    def evaluatorTerms(self, universe, subset1, subset2, global_data):
+        params = self.evaluatorParameters(universe, subset1, subset2,
+                                          global_data)['electrostatic']
+        assert params['algorithm'] == 'direct'
+        nblist, update = \
+                    self.nonbondedList(universe, subset1, subset2, global_data)
         from MMTK_forcefield import ElectrostaticTerm
-        ev = ElectrostaticTerm(universe._spec, nblist, charge,
-                               cutoff, self.es_14_factor)
-        update.addTerm(ev, 1);
+        ev = ElectrostaticTerm(universe._spec, nblist, params['charge'],
+                               params['cutoff'], params['one_four_factor'])
+        update.addTerm(ev, 1)
         if update.info:
             return [ev]
         else:
@@ -264,20 +289,20 @@ class ESEwaldForceField(NonBondedForceField):
                      'ewald_precision', 'no_reciprocal_sum', 'method',
                      'scale_factor']
 
-    def evaluatorTerms(self, universe, subset1, subset2, global_data):
+    def evaluatorParameters(self, universe, subset1, subset2, global_data):
         rsum = not self.options.get('no_reciprocal_sum', 0)
         if not universe.is_periodic and rsum:
-            raise ValueError("Ewald methods accepts only periodic universes")
+            raise ValueError("Ewald method accepts only periodic universes")
         n = universe.numberOfPoints()
-        charge = Numeric.zeros((n,), Numeric.Float)
+        charge = N.zeros((n,), N.Float)
         for o in universe:
             for a in o.atomList():
                 charge[a.index] = self._charge(o, a, global_data)
-        charge = charge*Numeric.sqrt(self.scale_factor)
+        charge = charge*N.sqrt(self.scale_factor)
         precision = self.options.get('ewald_precision', 1.e-6)
-        p = Numeric.sqrt(-Numeric.log(precision))
+        p = N.sqrt(-N.log(precision))
         if rsum:
-            beta_opt = Numeric.sqrt(Numeric.pi) * \
+            beta_opt = N.sqrt(N.pi) * \
                 (5.*universe.numberOfAtoms()/universe.cellVolume()**2)**(1./6.)
             max_cutoff = universe.largestDistance()
             beta_opt = max(p/max_cutoff, beta_opt)
@@ -286,35 +311,54 @@ class ESEwaldForceField(NonBondedForceField):
         options = {}
         options['beta'] = beta_opt
         options['real_cutoff'] = p/beta_opt
-        options['reciprocal_cutoff'] = Numeric.pi/(beta_opt*p)
+        options['reciprocal_cutoff'] = N.pi/(beta_opt*p)
         options['no_reciprocal_sum'] = 0
         for key, value in self.options.items():
             options[key] = value
         lx = universe.boxToRealCoordinates(Vector(1., 0., 0.)).length()
         ly = universe.boxToRealCoordinates(Vector(0., 1., 0.)).length()
         lz = universe.boxToRealCoordinates(Vector(0., 0., 1.)).length()
-        kmax = Numeric.array([lx,ly,lz])/options['reciprocal_cutoff']
-        kmax = Numeric.ceil(kmax).astype(Numeric.Int)
+        kmax = N.array([lx,ly,lz])/options['reciprocal_cutoff']
+        kmax = N.ceil(kmax).astype(N.Int)
         excluded_pairs, one_four_pairs, atom_subset = \
                              self.excludedPairs(subset1, subset2, global_data)
         if atom_subset is not None:
             raise ValueError("Ewald summation not available for subsets")
-        nblist, update = \
-                self.nonbondedList(universe, subset1, subset2,global_data)
         if options['no_reciprocal_sum']:
             kcutoff = 0.
-            shape = Numeric.zeros((3, 3), Numeric.Float)
         else:
-            kcutoff = (2.*Numeric.pi/options['reciprocal_cutoff'])**2
+            kcutoff = (2.*N.pi/options['reciprocal_cutoff'])**2
+        return {'electrostatic': {'algorithm': 'ewald',
+                                  'charge': charge,
+                                  'real_cutoff': options['real_cutoff'],
+                                  'reciprocal_cutoff': kcutoff,
+                                  'beta': options['beta'],
+                                  'k_max': kmax,
+                                  'one_four_factor': self.es_14_factor},
+                'nonbonded': {'excluded_pairs': excluded_pairs,
+                              'one_four_pairs': one_four_pairs,
+                              'atom_subset': atom_subset}
+               }
+
+    def evaluatorTerms(self, universe, subset1, subset2, global_data):
+        params = self.evaluatorParameters(universe, subset1, subset2,
+                                          global_data)['electrostatic']
+        assert params['algorithm'] == 'ewald'
+        nblist, update = \
+                self.nonbondedList(universe, subset1, subset2, global_data)
+        if params['reciprocal_cutoff'] == 0.:
+            shape = N.zeros((3, 3), N.Float)
+        else:
             shape = universe.basisVectors()
             if shape is None:
                 raise ValueError("Ewald evaluator needs periodic universe")
-            shape = Numeric.array(shape, Numeric.Float)
+            shape = N.array(shape, N.Float)
         from MMTK_forcefield import EsEwaldTerm
-        ev = EsEwaldTerm(universe._spec, shape, nblist, charge,
-                         options['real_cutoff'], kcutoff, kmax,
-                         self.es_14_factor, options['beta'])
-        update.addTerm(ev, 2);
+        ev = EsEwaldTerm(universe._spec, shape, nblist, params['charge'],
+                         params['real_cutoff'], params['reciprocal_cutoff'],
+                         params['k_max'], params['one_four_factor'],
+                         params['beta'])
+        update.addTerm(ev, 2)
         if update.info:
             return [ev]
         else:
@@ -348,58 +392,72 @@ class ESMPForceField(NonBondedForceField):
                      'method',
                      'scale_factor']
 
+    def evaluatorParameters(self, universe, subset1, subset2, global_data):
+        n = universe.numberOfPoints()
+        charge = N.zeros((n,), N.Float)
+        atom_types = {}
+        for o in universe:
+            for a in o.atomList():
+                charge[a.index] = self._charge(o, a, global_data)
+        charge = N.zeros((n,), N.Float)
+        params = {}
+        if n < 10000:
+            params['spatial_decomposition_levels'] = 4
+        elif n < 100000:
+            params['spatial_decomposition_levels'] = 5
+        else:
+            params['spatial_decomposition_levels'] = 6
+        params['multipole_expansion_terms'] = 8
+        params['use_fft'] = 0
+        params['fft_blocking_factor'] = 4
+        params['macroscopic_expansion_terms'] = 6
+        params['multipole_acceptance'] = 0.5
+        for key, value in self.options.items():
+            params[key] = value
+        params['algorithm'] = 'dpmta'
+        params['charge'] = charge
+        params['one_four_factor'] = self.es_14_factor
+        excluded_pairs, one_four_pairs, atom_subset = \
+                             self.excludedPairs(subset1, subset2, global_data)
+        return {'electrostatic': params,
+                'nonbonded': {'excluded_pairs': excluded_pairs,
+                              'one_four_pairs': one_four_pairs,
+                              'atom_subset': atom_subset}
+               }
+
     def evaluatorTerms(self, universe, subset1, subset2, global_data):
+        params = self.evaluatorParameters(universe, subset1, subset2,
+                                          global_data)
+        pe = params['electrostatic']
+        assert pe['algorithm'] == 'dpmta'
+        pn = params['nonbonded']
+        excluded_pairs = N.array(pn['excluded_pairs'])
+        one_four_pairs = N.array(pn['one_four_pairs'])
+        if atom_subset is None:
+            atom_subset = N.array([], N.Int)
+        else:
+            atom_subset = N.array(pn['atom_subset'])
+        nbinfo = [excluded_pairs, one_four_pairs, atom_subset]
+
         if universe.is_periodic:
             try:
                 shape = universe.basisVectors()
             except AttributeError:
                 raise ValueError("Multipole method implemented only " +
-                                  "for orthorhombic universes.")
+                                 "for orthorhombic universes.")
+            shape = N.array(shape, N.Float)
         else:
-            shape = None
-        n = universe.numberOfPoints()
-        charge = Numeric.zeros((n,), Numeric.Float)
-        atom_types = {}
-        for o in universe:
-            for a in o.atomList():
-                charge[a.index] = self._charge(o, a, global_data)
-        charge = Numeric.zeros((n,), Numeric.Float)
-        options = {}
-        if n < 10000:
-            options['spatial_decomposition_levels'] = 4
-        elif n < 100000:
-            options['spatial_decomposition_levels'] = 5
-        else:
-            options['spatial_decomposition_levels'] = 6
-        options['multipole_expansion_terms'] = 8
-        options['use_fft'] = 0
-        options['fft_blocking_factor'] = 4
-        options['macroscopic_expansion_terms'] = 6
-        options['multipole_acceptance'] = 0.5
-        for key, value in self.options.items():
-            options[key] = value
-        excluded_pairs, one_four_pairs, atom_subset = \
-                             self.excludedPairs(subset1, subset2, global_data)
-        excluded_pairs = Numeric.array(excluded_pairs)
-        one_four_pairs = Numeric.array(one_four_pairs)
-        if atom_subset is None:
-            atom_subset = Numeric.array([], Numeric.Int)
-        else:
-            atom_subset = Numeric.array(atom_subset)
-        nbinfo = [excluded_pairs, one_four_pairs, atom_subset]
-        if shape is None:
-            shape = Numeric.zeros((), Numeric.Float)
-        else:
-            shape = Numeric.array(shape, Numeric.Float)
+            shape = N.zeros((), N.Float)
+
         from MMTK_forcefield import EsMPTerm
         ev = EsMPTerm(universe._spec, shape, nbinfo,
-                      charge, self.es_14_factor,
-                      options['spatial_decomposition_levels'],
-                      options['multipole_expansion_terms'],
-                      options['use_fft'],
-                      options['fft_blocking_factor'],
-                      options['macroscopic_expansion_terms'],
-                      options['multipole_acceptance'])
+                      pe['charge'], pe['one_four_factor'],
+                      pe['spatial_decomposition_levels'],
+                      pe['multipole_expansion_terms'],
+                      pe['use_fft'],
+                      pe['fft_blocking_factor'],
+                      pe['macroscopic_expansion_terms'],
+                      pe['multipole_acceptance'])
         return [ev]
 
     # the following methods must be overridden by derived classes

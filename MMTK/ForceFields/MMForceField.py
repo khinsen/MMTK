@@ -21,7 +21,7 @@
 # modifications to this module.
 #
 # Written by Konrad Hinsen
-# last revision: 2006-4-5
+# last revision: 2006-11-17
 #
 
 _undocumented = 1
@@ -78,11 +78,11 @@ class MMBondedForceField(MMAtomParameters, BondedForceField):
         self.scale_factor = scale_factor
         BondedForceField.__init__(self, name)
 
-    def evaluatorTerms(self, universe, subset1, subset2, global_data):
+    def evaluatorParameters(self, universe, subset1, subset2, global_data):
         self.collectAtomTypesAndIndices(universe, global_data)
-        return BondedForceField.evaluatorTerms(self, universe,
-                                               subset1, subset2,
-                                               global_data)
+        return BondedForceField.evaluatorParameters(self, universe,
+                                                    subset1, subset2,
+                                                    global_data)
 
     def addBondTerm(self, data, bond, object, global_data):
         a1 = bond.a1
@@ -222,12 +222,14 @@ class MMNonbondedForceField(MMAtomParameters, NonBondedForceField):
     def __init__(self, name, parameters, lj_options, es_options):
         self.name = name
         self.dataset = parameters
+
         if lj_options is None:
             self.lj_options = {}
         elif type(lj_options) != type({}):
             self.lj_options = {'method': 'cutoff', 'cutoff': lj_options}
         else:
             self.lj_options = copy.copy(lj_options)
+
         if es_options is None:
             self.es_options = {}
         elif type(es_options) != type({}):
@@ -261,47 +263,62 @@ class MMNonbondedForceField(MMAtomParameters, NonBondedForceField):
             total = total + charge*a.position()-reference
         return total
 
-    def evaluatorTerms(self, universe, subset1, subset2, global_data):
-        self.collectAtomTypesAndIndices(universe, global_data)
-        self.collectCharges(universe, global_data)
-
+    def _getLJForceField(self, universe):
         lj_method = self.lj_options.get('method', 'direct')
         lj_scale_factor = self.lj_options.get('scale_factor', 1.)
+        if lj_method == 'direct':
+            return MMLJForceField(self.name, self.dataset,
+                                  None, lj_scale_factor)
+        elif lj_method == 'cutoff':
+            return MMLJForceField(self.name, self.dataset,
+                                  self.lj_options['cutoff'], lj_scale_factor)
+        else:
+            raise ValueError("Unknown LJ method: " + lj_method)
+
+    def _getESForceField(self, universe):
         if universe.is_periodic:
             es_method = 'ewald'
         else:
             es_method = 'direct'
         es_method = self.es_options.get('method', es_method)
         es_scale_factor = self.es_options.get('scale_factor', 1.)
-
-        if lj_method == 'direct':
-            lj = MMLJForceField(self.name, self.dataset, None, lj_scale_factor)
-        elif lj_method == 'cutoff':
-            lj = MMLJForceField(self.name, self.dataset,
-                                self.lj_options['cutoff'], lj_scale_factor)
-        else:
-            raise ValueError("Unknown LJ method: " + lj_method)
         if es_method == 'ewald':
-            es = MMEwaldESForceField(self.name, self.dataset,
-                                     self.es_options)
+            return MMEwaldESForceField(self.name, self.dataset,
+                                       self.es_options)
         elif es_method == 'screened':
             options = copy.copy(self.es_options)
             options['method'] = 'ewald'
             options['real_cutoff'] = options['cutoff']
             options['no_reciprocal_sum'] = 1
             del options['cutoff']
-            es = MMEwaldESForceField(self.name, self.dataset, options)
+            return MMEwaldESForceField(self.name, self.dataset, options)
         elif es_method == 'multipole':
-            es = MMMPESForceField(self.name, self.dataset, self.es_options)
+            return MMMPESForceField(self.name, self.dataset, self.es_options)
         elif es_method == 'direct':
-            es = MMESForceField(self.name, self.dataset, None, es_scale_factor)
+            return MMESForceField(self.name, self.dataset, None,
+                                  es_scale_factor)
         elif es_method == 'cutoff':
-            es = MMESForceField(self.name, self.dataset,
-                                self.es_options['cutoff'], es_scale_factor)
+            return MMESForceField(self.name, self.dataset,
+                                  self.es_options['cutoff'], es_scale_factor)
         else:
             raise ValueError("Unknown electrostatics method: " + es_method)
-        return CompoundForceField(lj, es).evaluatorTerms(universe, subset1,
-                                                         subset2, global_data)
+
+    def evaluatorParameters(self, universe, subset1, subset2, global_data):
+        self.collectAtomTypesAndIndices(universe, global_data)
+        self.collectCharges(universe, global_data)
+        lj = self._getLJForceField(universe)
+        es = self._getESForceField(universe)
+        compound = CompoundForceField(lj, es)
+        return compound.evaluatorParameters(universe, subset1, subset2,
+                                            global_data)
+
+    def evaluatorTerms(self, universe, subset1, subset2, global_data):
+        self.collectAtomTypesAndIndices(universe, global_data)
+        self.collectCharges(universe, global_data)
+        lj = self._getLJForceField(universe)
+        es = self._getESForceField(universe)
+        compound = CompoundForceField(lj, es)
+        return compound.evaluatorTerms(universe, subset1, subset2, global_data)
 
 #
 # The total force field
@@ -318,11 +335,11 @@ class MMForceField(MMAtomParameters, CompoundForceField):
 
     is_compound_force_field = 0
 
-    def evaluatorTerms(self, universe, subset1, subset2, global_data):
+    def evaluatorParameters(self, universe, subset1, subset2, global_data):
         self.collectAtomTypesAndIndices(universe, global_data)
-        return CompoundForceField.evaluatorTerms(self, universe,
-                                                 subset1, subset2,
-                                                 global_data)
+        return CompoundForceField.evaluatorParameters(self, universe,
+                                                      subset1, subset2,
+                                                      global_data)
 
     def charge(self, atoms):
         return self.nonbonded.charge(atoms)

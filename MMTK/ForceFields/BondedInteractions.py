@@ -2,7 +2,7 @@
 # for bonded interactions.
 #
 # Written by Konrad Hinsen
-# last revision: 2000-2-10
+# last revision: 2006-11-17
 #
 
 _undocumented = 1
@@ -24,7 +24,7 @@ class BondedForceField(ForceField):
         ForceField.__init__(self, name)
         self.type = 'bonded'
 
-    def evaluatorTerms(self, universe, subset1, subset2, global_data):
+    def evaluatorParameters(self, universe, subset1, subset2, global_data):
         data = ForceFieldData()
         if subset1 is not None:
             label1 = Utility.uniqueAttribute()
@@ -85,28 +85,29 @@ class BondedForceField(ForceField):
             for atom in subset2.atomList():
                 delattr(atom, label2)
         global_data.add('initialized', 'bonded')
+        return {'harmonic_distance_term': data.get('bonds'),
+                'harmonic_angle_term': data.get('angles'),
+                'cosine_dihedral_term': data.get('dihedrals')}
 
+    def evaluatorTerms(self, universe, subset1, subset2, global_data):
         from MMTK_forcefield import HarmonicDistanceTerm, HarmonicAngleTerm, \
              CosineDihedralTerm
+        param = self.evaluatorParameters(universe, subset1, subset2,
+                                         global_data)
         eval_list = []
-        bonds = data.get('bonds')
+        bonds = param['harmonic_distance_term']
         if bonds:
-            import sys
-            main = sys.modules['__main__']
             indices = Numeric.array(map(lambda b: b[:2], bonds))
             parameters = Numeric.array(map(lambda b: b[2:], bonds))
-##              setattr(main, 'indices', indices)
-##              setattr(main, 'parameters', parameters)
-##              print parameters
             eval_list.append(HarmonicDistanceTerm(universe._spec,
                                                   indices, parameters))
-        angles = data.get('angles')
+        angles = param['harmonic_angle_term']
         if angles:
             indices = Numeric.array(map(lambda a: a[:3], angles))
             parameters = Numeric.array(map(lambda a: a[3:], angles))
             eval_list.append(HarmonicAngleTerm(universe._spec,
                                                indices, parameters))
-        dihedrals = data.get('dihedrals')
+        dihedrals = param['cosine_dihedral_term']
         if dihedrals:
             def _dihedral_parameters(p):
                 return [p[4], Numeric.cos(p[5]), Numeric.sin(p[5]), p[6]]
