@@ -19,18 +19,29 @@ class Dummy:
 pkginfo = Dummy()
 execfile('MMTK/__pkginfo__.py', pkginfo.__dict__)
 
-# Check that we have Scientific 2.5 or higher
+# Check that we have Scientific 2.6 or higher
 try:
     from Scientific import __version__ as scientific_version
     scientific_version = scientific_version.split('.')
     scientific_ok = int(scientific_version[0]) >= 2 and \
-                    int(scientific_version[1]) >= 5
+                    int(scientific_version[1]) >= 6
 except ImportError:
     scientific_ok = False
 if not scientific_ok:
-    print "MMTK needs ScientificPython 2.5 or higher"
+    print "MMTK needs ScientificPython 2.6 or higher"
     raise SystemExit
 
+compile_args = []
+include_dirs = ['Include']
+
+use_numpy = False
+if "--numpy" in sys.argv:
+    use_numpy = True
+    compile_args.append("-DNUMPY=1")
+    sys.argv.remove("--numpy")
+    include_dirs.append(os.path.join(sys.prefix,
+                            "lib/python%s.%s/site-packages/numpy/core/include"
+                                 % sys.version_info [:2]))
 
 headers = glob(os.path.join ("Include", "MMTK", "*.h"))
 
@@ -207,44 +218,50 @@ standard and non-standard problems in molecular simulations.
        ext_package = 'MMTK.'+sys.platform,
        ext_modules = [Extension('lapack_mmtk',
                                 ['Src/lapack_subset.c', 'Src/lapack_mmtk.c'],
-                                extra_compile_args = lapack_opt,
-                                include_dirs=['Include'],
+                                extra_compile_args = compile_args + lapack_opt,
+                                include_dirs=include_dirs,
                                 libraries=libraries,
                                 define_macros=macros),
                       Extension('MMTK_DCD',
                                 ['Src/MMTK_DCD.c', 'Src/ReadDCD.c'],
-                                include_dirs=['Include'],
+                                extra_compile_args = compile_args,
+                                include_dirs=include_dirs,
                                 libraries=libraries,
                                 define_macros=macros),
                       Extension('MMTK_deformation',
                                 ['Src/MMTK_deformation.c'],
-                                extra_compile_args = high_opt,
-                                include_dirs=['Include'],
+                                extra_compile_args = compile_args + high_opt,
+                                include_dirs=include_dirs,
                                 libraries=libraries,
                                 define_macros=macros),
                       Extension('MMTK_dynamics',
                                 ['Src/MMTK_dynamics.c'],
-                                include_dirs=['Include'],
+                                extra_compile_args = compile_args,
+                                include_dirs=include_dirs,
                                 libraries=libraries,
                                 define_macros=macros),
                       Extension('MMTK_minimization',
                                 ['Src/MMTK_minimization.c'],
-                                include_dirs=['Include'],
+                                extra_compile_args = compile_args,
+                                include_dirs=include_dirs,
                                 libraries=libraries,
                                 define_macros=macros),
                       Extension('MMTK_surface',
                                 ['Src/MMTK_surface.c'],
-                                include_dirs=['Include'],
+                                extra_compile_args = compile_args,
+                                include_dirs=include_dirs,
                                 libraries=libraries,
                                 define_macros=macros),
                       Extension('MMTK_trajectory',
                                 ['Src/MMTK_trajectory.c'],
-                                include_dirs=['Include'],
+                                extra_compile_args = compile_args,
+                                include_dirs=include_dirs,
                                 libraries=libraries,
                                 define_macros=macros),
                       Extension('MMTK_universe',
                                 ['Src/MMTK_universe.c'],
-                                include_dirs=['Include'],
+                                extra_compile_args = compile_args,
+                                include_dirs=include_dirs,
                                 libraries=libraries,
                                 define_macros=macros),
                       Extension('MMTK_forcefield',
@@ -269,10 +286,10 @@ standard and non-standard problems in molecular simulations.
                                  'Src/dpmta/src/dpmta_timer.c',
                                  'Src/dpmta/src/dpmta_slvglobals.c',
                                  'Src/dpmta/src/dpmta_distmisc.c'],
-                                extra_compile_args = high_opt,
-                                include_dirs=['Include', 'Src',
-                                              'Src/dpmta/src',
-                                              'Src/dpmta/mpole'],
+                                extra_compile_args = compile_args + high_opt,
+                                include_dirs=include_dirs + ['Src',
+                                                             'Src/dpmta/src',
+                                                             'Src/dpmta/mpole'],
                                 define_macros = [('WITH_DPMTA', None),
                                                  ('SERIAL', None),
                                                  ('VIRIAL', None),
@@ -281,7 +298,8 @@ standard and non-standard problems in molecular simulations.
                                 libraries=libraries),
                       Extension('MMTK_energy_term',
                                 ['Src/MMTK_energy_term.c'],
-                                include_dirs=['Include'],
+                                extra_compile_args = compile_args,
+                                include_dirs=include_dirs,
                                 libraries=libraries,
                                 define_macros=macros),                      
                       ],

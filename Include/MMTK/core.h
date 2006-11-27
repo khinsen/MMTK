@@ -2,13 +2,17 @@
  * General include file for MMTK C modules.
  *
  * Written by Konrad Hinsen
- * last revision: 2006-6-22
- */
+ * last revision: 2006-11-27 */
 
 #ifndef MMTK_H
 
 #include "Python.h"
+
+#if defined(NUMPY)
+#include "numpy/oldnumeric.h"
+#else
 #include "Numeric/arrayobject.h"
+#endif
 
 /* Provide Py_ssize_t for Python < 2.5 */
 #if PY_VERSION_HEX < 0x02050000
