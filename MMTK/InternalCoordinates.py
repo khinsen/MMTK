@@ -1,11 +1,11 @@
 # Manipulation of internal coordinates
 #
 # Written by Konrad Hinsen
-# last revision: 2005-8-30
+# last revision: 2006-11-27
 #
 
 import MMTK
-import Numeric; N = Numeric
+from Scientific import N
 from copy import copy
 
 #

@@ -1,10 +1,10 @@
 # This module defines environment objects for universes.
 #
 # Written by Konrad Hinsen
-# last revision: 2005-8-30
+# last revision: 2006-11-27
 #
 
-import Numeric
+from Scientific import N as Numeric
 
 #
 # The environment object base class

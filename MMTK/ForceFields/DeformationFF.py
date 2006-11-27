@@ -1,7 +1,7 @@
 # Deformation force field
 #
 # Written by Konrad Hinsen
-# last revision: 2000-2-10
+# last revision: 2006-11-27
 #
 
 _undocumented = 1
@@ -12,7 +12,7 @@ try:
     from MMTK_deformation import DeformationTerm
 except ImportError:
     pass
-import Numeric
+from Scientific import N as Numeric
 
 #
 # The deformation force field class

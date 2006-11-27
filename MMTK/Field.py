@@ -1,7 +1,7 @@
 # This module defines scalar and vector fields in molecular systems
 #
 # Written by Konrad Hinsen
-# last revision: 2005-12-19
+# last revision: 2006-11-27
 #
 
 """This module defines field objects that are useful in the analysis
@@ -22,7 +22,7 @@ Example:Miscellaneous:vector_field.py.
 import Collections, ParticleProperties, Visualization
 from Scientific.Visualization import Color
 from Scientific.Geometry import Vector, TensorAnalysis
-import Numeric
+from Scientific import N as Numeric
 
 class AtomicField:
 

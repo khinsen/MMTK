@@ -2,7 +2,7 @@
 # and a visualization base class
 #
 # Written by Konrad Hinsen
-# last revision: 2005-9-26
+# last revision: 2006-11-27
 #
 
 """This module provides visualization of chemical objects and animated
@@ -31,7 +31,8 @@ directory specification.
 """
 
 import ConfigIO, PDB, Universe, Units, Utility
-import Numeric, string, sys, tempfile, os
+from Scientific import N as Numeric
+import string, sys, tempfile, os
 
 #
 # If you want temporary files in a non-standard directory, make

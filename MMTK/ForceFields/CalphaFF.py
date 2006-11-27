@@ -1,7 +1,7 @@
 # C-alpha force field
 #
 # Written by Konrad Hinsen
-# last revision: 2000-8-3
+# last revision: 2006-11-27
 #
 
 _undocumented = 1
@@ -9,7 +9,7 @@ _undocumented = 1
 from ForceField import ForceField, ForceFieldData
 from MMTK_forcefield import NonbondedList, NonbondedListTerm
 from MMTK_deformation import CalphaTerm
-import Numeric
+from Scientific import N as Numeric
 
 #
 # The deformation force field class

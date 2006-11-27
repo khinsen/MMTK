@@ -1,12 +1,13 @@
 # This module implements energy minimizers.
 #
 # Written by Konrad Hinsen
-# last revision: 2005-8-30
+# last revision: 2006-11-27
 #
 
 import Features, ThreadManager, Trajectory, Units
 from MMTK_minimization import conjugateGradient, steepestDescent
-import Numeric, operator
+from Scientific import N as Numeric
+import operator
 
 try:
     import threading

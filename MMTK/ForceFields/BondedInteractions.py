@@ -2,7 +2,7 @@
 # for bonded interactions.
 #
 # Written by Konrad Hinsen
-# last revision: 2006-11-17
+# last revision: 2006-11-27
 #
 
 _undocumented = 1
@@ -10,7 +10,7 @@ _undocumented = 1
 from ForceField import ForceField, ForceFieldData
 from MMTK import Utility
 from Scientific.Geometry import Vector
-import Numeric
+from Scientific import N as Numeric
 
 #
 # The base class BondedForceField provides the common

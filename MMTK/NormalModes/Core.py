@@ -1,13 +1,13 @@
 # Common aspect of normal mode calculations.
 #
 # Written by Konrad Hinsen
-# last revision: 2006-8-29
+# last revision: 2006-11-27
 #
 
 _undocumented = 1
 
 from MMTK import Units, ParticleProperties, Visualization
-import Numeric; N = Numeric
+from Scientific import N
 import copy
 
 #
@@ -177,14 +177,12 @@ class NormalModes:
                 from lapack_mmtk import dsyev
             except ImportError: pass
         if dsyev is None:
-            from LinearAlgebra import eigenvectors
+            from Scientific.LA import eigenvectors
             _symmetrize(self.array)
             ev, modes = eigenvectors(self.array)
             self.array = modes
-            if ev.typecode() == N.Complex:
-                ev = ev.real
-            if modes.typecode() == N.Complex:
-                modes = modes.real
+            ev = ev.real
+            modes = modes.real
         else:
             ev = N.zeros((self.nmodes,), N.Float)
             lwork = 3*self.nmodes

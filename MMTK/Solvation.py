@@ -1,7 +1,7 @@
 # This module contains code for solvation.
 #
 # Written by Konrad Hinsen
-# last revision: 2005-8-30
+# last revision: 2006-11-27
 #
 
 """See also the example Example:MolecularDynamics:solvation.py.
@@ -15,7 +15,6 @@ from Dynamics import VelocityVerletIntegrator, VelocityScaler, \
 from Trajectory import Trajectory, TrajectoryOutput, SnapshotGenerator, \
                        StandardLogOutput
 import copy, sys
-import Numeric; N = Numeric
 
 #
 # Calculate the number of solvent molecules

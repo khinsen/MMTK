@@ -1,12 +1,13 @@
 # This module implements trajetories and trajectory generators.
 #
 # Written by Konrad Hinsen
-# last revision: 2005-9-26
+# last revision: 2006-11-27
 #
 
 import Collections, Units, Universe, Utility, ParticleProperties, Visualization
 from Scientific.Geometry import Vector
-import Numeric, copy, os, string, sys, types
+from Scientific import N as Numeric
+import copy, os, string, sys, types
 
 # Report error if the netCDF module is not available.
 try:
@@ -876,9 +877,9 @@ class RigidBodyTrajectory:
 
         quaternions = Numeric.zeros((steps, 4), Numeric.Float)
         fit = Numeric.zeros((steps,), Numeric.Float)
-        import LinearAlgebra
+        from Scientific.LA import eigenvectors
         for i in range(steps):
-            e, v = LinearAlgebra.eigenvectors(k[i])
+            e, v = eigenvectors(k[i])
             j = Numeric.argmin(e)
             if e[j] < 0.:
                 fit[i] = 0.

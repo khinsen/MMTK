@@ -1,7 +1,7 @@
 # Trajectory viewer for MMTK trajectory files
 #
 # Written by Konrad Hinsen
-# last revision: 2006-6-20
+# last revision: 2006-11-27
 #
 
 from Tkinter import *
@@ -14,7 +14,8 @@ from MMTK.Tk.ProteinVisualization import ProteinBackboneGraphics
 import Dialog, FileDialog
 from Scientific.DictWithDefault import DictWithDefault
 from Scientific.IO import ArrayIO
-import Numeric, os, string, tempfile, time
+from Scientific import N as Numeric
+import os, string, tempfile, time
 import MMTK, MMTK.Trajectory
 from TrajectoryInspector import TrajectoryInspector
 
@@ -578,8 +579,7 @@ class TrajectoryViewer(Tkwindow):
                 for jump in jumps[::-1]:
                     dt = self.time[jump-1] + self.time[jump+1] \
                          - 2*self.time[jump]
-                    self.time[jump:] = \
-                         (self.time[jump:] + dt).astype(self.time.typecode())
+                    self.time[jump:] += dt
         except KeyError:
             self.time = 1.*Numeric.arange(self.inspector.numberOfSteps())
         self.plotlist = []

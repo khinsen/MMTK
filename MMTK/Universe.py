@@ -4,14 +4,14 @@
 # (boundary conditions, external fields, etc.)
 #
 # Written by Konrad Hinsen
-# last revision: 2006-11-17
+# last revision: 2006-11-27
 #
 
 import Bonds, ChemicalObjects, Collections, Environment, \
        Random, Utility, ParticleProperties, Visualization
 from Scientific.Geometry import Transformation
 from Scientific.Geometry import Vector, isVector
-import Numeric; N = Numeric
+from Scientific import N
 import copy, operator, string
 
 try:

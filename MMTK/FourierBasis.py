@@ -1,7 +1,7 @@
 # Fourier basis for low-frequency normal mode calculations.
 #
 # Written by Konrad Hinsen
-# last revision: 2005-11-7
+# last revision: 2006-11-27
 #
 
 """This module provides a basis that is suitable for the
@@ -13,7 +13,7 @@ see [Article:Hinsen1998].
 
 import ParticleProperties
 from Scientific.Geometry import Vector
-import Numeric
+from Scientific import N as Numeric
 
 class FourierBasis:
 

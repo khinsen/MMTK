@@ -2,8 +2,7 @@
 
 _undocumented = 1
 
-
-import Numeric
+from Scientific import N as Numeric
 
 class ProteinBackboneGraphics:
 

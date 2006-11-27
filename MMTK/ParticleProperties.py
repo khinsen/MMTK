@@ -2,14 +2,14 @@
 # simulation, i.e. configurations, force vectors, etc.
 #
 # Written by Konrad Hinsen
-# last revision: 2005-11-7
+# last revision: 2006-11-27
 #
 
 from MMTK import Utility
 from Scientific.Geometry import Vector, isVector, Tensor, isTensor
 from Scientific.indexing import index_expression
+from Scientific import N
 import copy
-import Numeric; N = Numeric
 
 #
 # Base class for all properties defined for a universe.

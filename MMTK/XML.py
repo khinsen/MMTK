@@ -1,13 +1,13 @@
 # XML I/O
 #
 # Written by Konrad Hinsen
-# last revision: 2005-8-30
+# last revision: 2006-11-27
 #
 
 import MMTK
 from MMTK.MoleculeFactory import MoleculeFactory
 from cElementTree import iterparse
-import Numeric; N = Numeric
+from Scientific import N
 
 
 class XMLMoleculeFactory(MoleculeFactory):

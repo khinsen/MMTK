@@ -1,7 +1,7 @@
 # This module contains code for charge fitting.
 #
 # Written by Konrad Hinsen
-# last revision: 2005-8-30
+# last revision: 2006-11-27
 #
 
 """This module implements a numerically stable method (based on
@@ -19,8 +19,10 @@ See also Example:Miscellaneous:charge_fit.py.
 
 
 from MMTK import Random, Units, Utility
-import LinearAlgebra, Numeric, operator
+from Scientific import N as Numeric
+from Scientific import LA as LinearAlgebra
 from Scientific.Geometry import Vector
+import operator
 
 class ChargeFit:
 

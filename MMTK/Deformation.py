@@ -1,7 +1,7 @@
 # Deformation energy module
 #
 # Written by Konrad Hinsen
-# last revision: 2005-8-30
+# last revision: 2006-11-27
 #
 
 """This module implements deformational energies for use in the analysis
@@ -17,7 +17,7 @@ try:
 except ImportError:
     pass
 import ParticleProperties
-import Numeric
+from Scientific import N as Numeric
 
 #
 # Deformation energy evaluations

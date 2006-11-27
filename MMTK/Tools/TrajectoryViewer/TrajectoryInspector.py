@@ -4,11 +4,11 @@
 # resides on a different machine.
 #
 # Written by Konrad Hinsen
-# last revision: 2000-8-3
+# last revision: 2006-11-27
 #
 
 from Scientific.IO.NetCDF import NetCDFFile
-import Numeric
+from Scientific import N as Numeric
 
 class TrajectoryInspector:
 

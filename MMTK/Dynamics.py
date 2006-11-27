@@ -1,15 +1,16 @@
 # This module implements MD integrators
 #
 # Written by Konrad Hinsen
-# last revision: 2005-8-30
+# last revision: 2006-11-27
 #
 
 """See also the Example:MolecularDynamics example applications.
 """
 
+from Scientific import N as Numeric
 import Environment, Features, ThreadManager, Trajectory, Units
 import MMTK_dynamics
-import Numeric, operator
+import operator
 
 try:
     import threading

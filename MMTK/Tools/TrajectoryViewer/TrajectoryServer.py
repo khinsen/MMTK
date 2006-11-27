@@ -1,11 +1,11 @@
 # Pyro-based trajectory server
 #
 # Written by Konrad Hinsen
-# last revision: 2000-2-23
+# last revision: 2006-11-27
 #
 
 from TrajectoryInspector import TrajectoryInspector
-import Numeric # to enable pickling of arrays
+from Scientific import N as Numeric # to enable pickling of arrays
 import Pyro.core, Pyro.naming
 import socket, sys
 

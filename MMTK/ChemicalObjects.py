@@ -2,7 +2,7 @@
 # complexes. They are made as copies from blueprints in the database.
 #
 # Written by Konrad Hinsen
-# last revision: 2006-10-11
+# last revision: 2006-11-27
 #
 
 import Bonds, Collections, ConfigIO, Database, Units, Utility, Visualization
@@ -10,7 +10,8 @@ from Scientific.Geometry import Vector, Tensor
 from Scientific.Geometry.Transformation import Rotation, Translation
 from Scientific.DictWithDefault import DictWithDefault
 from Scientific.Geometry import Objects3D
-import copy, Numeric, operator, string, types
+from Scientific import N as Numeric
+import copy, operator, string, types
 
 #
 # The base class for all chemical objects.
@@ -580,7 +581,7 @@ class Atom(ChemicalObject):
             return 1
         if self.array is None:
             try:
-                array[index, :] = self.pos
+                array[index, :] = self.pos.array
             except AttributeError:
                 array[index, :] = Utility.undefined
         else:

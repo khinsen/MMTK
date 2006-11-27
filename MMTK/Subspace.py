@@ -1,7 +1,7 @@
 # This module implements subspaces for motion analysis etc.
 #
 # Written by Konrad Hinsen
-# last revision: 2006-1-19
+# last revision: 2006-11-27
 #
 
 """This module implements subspaces for infinitesimal (or finite
@@ -12,7 +12,7 @@ for analyzing complex motions [Article:Hinsen1999a].
 
 import Utility, ParticleProperties
 from Scientific.Geometry import Vector
-import Numeric
+from Scientific import N as Numeric
 
 
 class ParticleVectorSet:

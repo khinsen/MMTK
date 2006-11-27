@@ -1,7 +1,7 @@
 # Energetic normal mode calculations.
 #
 # Written by Konrad Hinsen
-# last revision: 2005-1-26
+# last revision: 2006-11-27
 #
 
 """See also the Example:NormalModes example applications.
@@ -9,7 +9,7 @@
 
 from MMTK import Features, Units, ParticleProperties
 from MMTK.NormalModes import Core
-import Numeric; N = Numeric
+from Scientific import N
 
 #
 # Class for a single mode

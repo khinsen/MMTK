@@ -1,13 +1,14 @@
 # This module defines collections of chemical objects.
 #
 # Written by Konrad Hinsen
-# last revision: 2005-12-19
+# last revision: 2006-11-27
 #
 
 import ConfigIO, Utility, Units, ParticleProperties, Visualization
 from Scientific.Geometry import Vector, Tensor, Objects3D
 from Scientific.Geometry import Quaternion, Transformation
-import copy, Numeric, operator, types
+from Scientific import N as Numeric
+import copy, operator, types
 
 #
 # This class defines groups of atoms. It is used as a base class
@@ -119,7 +120,7 @@ class GroupOfAtoms:
     def rotationalConstants(self, conf=None):
         """Returns a sorted array of rotational constants A, B, C
         in internal units."""
-        from Numeric import sort
+        from Scientific.N import sort
         from Units import h, pi
         com, i = self.centerAndMomentOfInertia(conf)
         pmi = i.eigenvalues()
@@ -208,8 +209,8 @@ class GroupOfAtoms:
         k = 2.*k
         for i in range(4):
             k[i, i] = k[i, i] + possq - Numeric.add.reduce(pos*pos)
-        import LinearAlgebra
-        e, v = LinearAlgebra.eigenvectors(k)
+        from Scientific import LA
+        e, v = LA.eigenvectors(k)
         i = Numeric.argmin(e)
         v = v[i]
         if v[0] < 0: v = -v
@@ -276,24 +277,23 @@ class GroupOfAtoms:
           IIl   : x y z <--> a c b
           IIIl  : x y z <--> b a c
         """
-        from LinearAlgebra import determinant
+        from Scientific.LA import determinant
         cm, inertia = self.centerAndMomentOfInertia()
         ev, diag = inertia.diagonalization()
         if determinant(diag.array) < 0:
             diag.array[0] = -diag.array[0]
         if repr != None:
-            from Numeric import argsort, array
-            seq = argsort(ev)
+            seq = Numeric.argsort(ev)
             if repr == 'Ir':
-                seq = array([seq[1], seq[2], seq[0]])
+                seq = Numeric.array([seq[1], seq[2], seq[0]])
             elif repr == 'IIr':
-                seq = array([seq[2], seq[0], seq[1]])
+                seq = Numeric.array([seq[2], seq[0], seq[1]])
             elif repr == 'Il':
-                seq = seq[2::-1]
+                seq = Numeric.seq[2::-1]
             elif repr == 'IIl':
-                seq[1:3] = array([seq[2], seq[1]])
+                seq[1:3] = Numeric.array([seq[2], seq[1]])
             elif repr == 'IIIl':
-                seq[0:2] = array([seq[1], seq[0]])
+                seq[0:2] = Numeric.array([seq[1], seq[0]])
             elif repr != 'IIIr':
                 print 'unknown representation'
             diag.array = Numeric.take(diag.array, seq)                

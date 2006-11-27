@@ -1,7 +1,7 @@
 # Harmonic restraint terms that can be added to a force field.
 #
 # Written by Konrad Hinsen
-# last revision: 2006-11-17
+# last revision: 2006-11-27
 #
 
 """This module contains harmonic restraint terms that can be added
@@ -25,7 +25,7 @@ universe.setForceField(force_field)
 from ForceField import ForceField
 from MMTK_forcefield import HarmonicDistanceTerm, HarmonicAngleTerm, \
                             CosineDihedralTerm
-import Numeric
+from Scientific import N as Numeric
 
 class HarmonicDistanceRestraint(ForceField):
 

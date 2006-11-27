@@ -1,14 +1,14 @@
 # Vibrational normal mode calculations.
 #
 # Written by Konrad Hinsen
-# last revision: 2006-8-29
+# last revision: 2006-11-27
 #
 
 """See also the Example:NormalModes example applications.
 """
 
 from MMTK import Features, Units, ParticleProperties
-import Numeric; N = Numeric
+from Scientific import N
 
 from MMTK.NormalModes import Core
 
@@ -211,15 +211,15 @@ class VibrationalModes(Core.NormalModes):
             last = 20./self[6].frequency
         if step is None:
             step = (last-first)/300.
-        time = Numeric.arange(first, last, step)
+        time = N.arange(first, last, step)
         if tau is None: damping = 1.
-        else: damping = Numeric.exp(-(time/tau)**2)
-        msd = Numeric.zeros(time.shape, Numeric.Float)
+        else: damping = N.exp(-(time/tau)**2)
+        msd = N.zeros(time.shape, N.Float)
         for i in range(6, self.nmodes):
             mode = self[i]
-            omega = 2.*Numeric.pi*mode.frequency
+            omega = 2.*N.pi*mode.frequency
             d = (weights*(mode*mode)).sumOverParticles()
-            Numeric.add(msd, d*(1.-damping*Numeric.cos(omega*time)), msd)
+            N.add(msd, d*(1.-damping*N.cos(omega*time)), msd)
         return InterpolatingFunction((time,), msd)
 
     def EISF(self, q_range = (0., 15.), subset=None, weights = None,
@@ -238,19 +238,19 @@ class VibrationalModes(Core.NormalModes):
         first, last, step = (q_range+(None,))[:3]
         if step is None:
             step = (last-first)/50.
-        q = Numeric.arange(first, last, step)
+        q = N.arange(first, last, step)
     
         f = MMTK.ParticleTensor(self.universe)
         for i in range(6, self.nmodes):
             mode = self[i]
             f = f + mode.dyadicProduct(mode)
     
-        eisf = Numeric.zeros(q.shape, Numeric.Float)
+        eisf = N.zeros(q.shape, N.Float)
         for i in range(random_vectors):
             v = MMTK.Random.randomDirection()
             for a in subset.atomList():
-                exp = Numeric.exp(-v*(f[a]*v))
-                Numeric.add(eisf, weights[a]*exp**(q*q), eisf)
+                exp = N.exp(-v*(f[a]*v))
+                N.add(eisf, weights[a]*exp**(q*q), eisf)
         return InterpolatingFunction((q,), eisf/random_vectors)
 
     def incoherentScatteringFunction(self, q, time_range = (0., None, None),
@@ -272,13 +272,13 @@ class VibrationalModes(Core.NormalModes):
             last = 20./self[6].frequency
         if step is None:
             step = (last-first)/400.
-        time = Numeric.arange(first, last, step)
+        time = N.arange(first, last, step)
     
         if tau is None:
             damping = 1.
         else:
-            damping = Numeric.exp(-(time/tau)**2)
-        finc = Numeric.zeros(time.shape, Numeric.Float)
+            damping = N.exp(-(time/tau)**2)
+        finc = N.zeros(time.shape, N.Float)
         random_vectors = MMTK.Random.randomDirections(random_vectors)
         for v in random_vectors:
             for a in subset.atomList():
@@ -286,7 +286,7 @@ class VibrationalModes(Core.NormalModes):
                 for i in range(6, self.nmodes):
                     mode = self[i]
                     d = (v*mode[a])**2
-                    omega = 2.*Numeric.pi*mode.frequency
-                    msd = msd+d*(1.-damping*Numeric.cos(omega*time))
-                Numeric.add(finc, weights[a]*Numeric.exp(-q*q*msd), finc)
+                    omega = 2.*N.pi*mode.frequency
+                    msd = msd+d*(1.-damping*N.cos(omega*time))
+                N.add(finc, weights[a]*N.exp(-q*q*msd), finc)
         return InterpolatingFunction((time,), finc/len(random_vectors))

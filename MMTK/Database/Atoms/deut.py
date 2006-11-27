@@ -1,6 +1,6 @@
 from MMTK import *
 from MMTK.ChemicalObjects import Group
-from Numeric import sqrt
+from Scientific.N import sqrt
 
 residues = ['alanine', 'arginine', 'asparagine', 'aspartic_acid',
             'cysteine', 'cystine_ss', 'glutamic_acid', 'glutamine',

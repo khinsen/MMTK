@@ -1,7 +1,7 @@
 # This module implements test functions.
 #
 # Written by Konrad Hinsen
-# last revision: 2005-3-14
+# last revision: 2006-11-27
 #
 
 """Force field consistency tests
@@ -11,7 +11,7 @@ To be documented later!
 
 from MMTK import Utility
 from Scientific.Geometry import Vector, ex, ey, ez
-import Numeric
+from Scientific import N as Numeric
 
 #
 # Check consistency of energies and gradients.

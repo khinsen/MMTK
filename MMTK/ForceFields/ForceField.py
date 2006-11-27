@@ -2,13 +2,14 @@
 # and force field evaluators.
 #
 # Written by Konrad Hinsen
-# last revision: 2006-11-17
+# last revision: 2006-11-27
 #
 
 _undocumented = 1
 
 from MMTK import ParticleProperties, Universe, Utility
-import copy, Numeric, operator, string
+from Scientific import N as Numeric
+import copy, operator, string
 from MMTK_energy_term import PyEnergyTerm as EnergyTerm
 
 # Class definitions

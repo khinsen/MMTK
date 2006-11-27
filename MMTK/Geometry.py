@@ -1,7 +1,7 @@
 # This module defines some geometrical objects in 3D-space.
 #
 # Written by Konrad Hinsen
-# last revision: 2005-12-2
+# last revision: 2006-11-27
 #
 
 """This module defines several elementary geometrical objects, which
@@ -12,7 +12,7 @@ and lattice objects, which define a regular arrangements of points.
 """
 
 from Scientific.Geometry import Vector
-import Numeric as N
+from Scientific import N
 
 # Error type
 class GeomError(Exception):
@@ -150,7 +150,7 @@ class Sphere(GeometricalObject3D):
 
 ##      def coordList(self, no_nulls = 0):
 ##          result = []
-##          from Numeric import arange
+##          from Scientific.N import arange
 ##          for normal in [Vector(1,0,0), Vector(0,1,0), Vector(0,0,1),\
 ##                         Vector(1,1,1)]:
 ##              v0 = normal.cross(randomDirection())
@@ -404,7 +404,7 @@ class Circle(GeometricalObject3D):
 
 ##      def coordList(self):
 ##          result = []
-##          from Numeric import arange
+##          from Scientific.N import arange
 ##          v0 = self.normal.cross(randomDirection())
 ##          for u in arange(0, 2*N.pi, N.pi/64):
 ##              v = rotateDirection(v0, self.normal, u)

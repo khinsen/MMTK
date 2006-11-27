@@ -2,14 +2,14 @@
 # places.
 #
 # Written by Konrad Hinsen
-# last revision: 2005-11-7
+# last revision: 2006-11-27
 #
 
 _undocumented = 1
 
 import Database
 import os, string, sys, types
-import Numeric
+from Scientific import N as Numeric
 
 # Constants
 

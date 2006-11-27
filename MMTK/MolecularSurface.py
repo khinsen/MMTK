@@ -27,7 +27,7 @@ and volumes.
 import surfm
 from MMTK.Collections import GroupOfAtoms, Collection
 from MMTK import Vector
-import Numeric
+from Scientific import N as Numeric
 
 def surfaceAndVolume(self, probe_radius = 0.):
     """Returns the molecular surface and volume of |object|,

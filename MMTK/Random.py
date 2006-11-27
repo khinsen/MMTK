@@ -1,7 +1,7 @@
 # Functions for finding random points and orientations.
 #
 # Written by: Konrad Hinsen
-# Last revision: 2006-8-18
+# Last revision: 2006-11-27
 # 
 
 """This module defines various random quantities that are useful in
@@ -12,22 +12,28 @@ uses the random number generators in modules RandomArray (part of
 Numerical Python) and random (in the Python standard library).
 """
 
-import Numeric as N
 from Scientific.Geometry import Vector
-from Numeric import dot
 from Scientific.Geometry.Transformation import Rotation
+from Scientific import N
 import ParticleProperties, Units
 
+RNG = None
 try:
-    import RNG
+    if N.package == "Numeric":
+        import RNG
+    elif N.package == "NumPy":
+        import numpy.oldnumeric.rng as RNG
 except ImportError:
-    RNG = None
+    pass
 
 
 if RNG is None:
 
+    if N.package == "Numeric":
+        from RandomArray import uniform, seed
+    elif N.package == "NumPy":
+        from numpy.oldnumeric.random_array import uniform, seed
     random = __import__('random')
-    from RandomArray import uniform, seed
     seed(1, 1)
     random.seed(1)
 
@@ -100,7 +106,7 @@ def randomPointInSphere(r):
     rsq = r*r
     while 1:
         x = N.array([uniform(-r, r), uniform(-r, r), uniform(-r, r)])
-        if dot(x, x) < rsq: break
+        if N.dot(x, x) < rsq: break
     return Vector(x)
 
 #

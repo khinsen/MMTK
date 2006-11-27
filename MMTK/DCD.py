@@ -2,11 +2,12 @@
 #
 # Written by Lutz Ehrlich
 # Adapted to MMTK conventions by Konrad Hinsen
-# last revision: 2000-12-8
+# last revision: 2006-11-27
 #
 import MMTK_DCD
 import PDB, Trajectory, Units
-import copy, Numeric, operator
+from Scientific import N as Numeric
+import copy, operator
 
 
 class DCDReader(Trajectory.TrajectoryGenerator):

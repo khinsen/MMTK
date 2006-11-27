@@ -1,7 +1,7 @@
 # Detailed harmonic force field for proteins
 #
 # Written by Konrad Hinsen
-# last revision: 2006-11-17
+# last revision: 2006-11-27
 #
 
 from NonBondedInteractions import NonBondedForceField
@@ -10,7 +10,7 @@ from MMForceField import MMAtomParameters
 from ForceField import ForceField, CompoundForceField
 from MMTK_deformation import DeformationTerm
 from Scientific.Geometry import Transformation
-import Numeric
+from Scientific import N as Numeric
 
 class BondForceField(AmberBondedForceField):
 

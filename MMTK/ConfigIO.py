@@ -1,7 +1,7 @@
 # This module deals with input and output of configurations.
 #
 # Written by Konrad Hinsen
-# last revision: 2005-8-30
+# last revision: 2006-11-27
 #
 
 _undocumented = 1
@@ -11,7 +11,8 @@ from Scientific.Geometry.Objects3D import Sphere, Cone, Plane, Line, \
                                           rotatePoint
 from Scientific.Geometry import Vector
 from Scientific.Visualization import VRML
-import Numeric, os, string
+from Scientific import N as Numeric
+import os, string
 
 #
 # This class represents a Z-Matrix. Z-Matrix data consists of a list
