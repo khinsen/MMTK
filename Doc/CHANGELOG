@@ -1,3 +1,30 @@
+2.5.15 --> 2.5.15
+=================
+
+New features:
+
+- New method energyEvaluatorTerms() on universes. It returns a data structure
+  (dictionary of dictionaries) that contains all the force field parameters
+  for the given universe. It can be used to use MMTK as an energy term
+  generator for other simulation programs.
+
+- There is a first draft for an interface to the CCPN data model. Since the
+  data model itself is still evolving, changes to the MMTK interface are
+  very likely as well.
+
+- New method GroupOfAtoms.normalizingTransformation.
+
+Improvements:
+
+- MMTK should now work with NumPy as an alternative to Numeric, though this
+  combination still requires a lot of testing. See README for installation
+  instructions.
+
+Bug fixes:
+
+- Minor bug fixes in MMTK.ProteinFriction and MMTK.NormalModes.BrownianModes.
+
+
 2.5.13 --> 2.5.14
 =================
 
