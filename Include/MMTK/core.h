@@ -18,7 +18,9 @@
 #if PY_VERSION_HEX < 0x02050000
 #if !defined(PY_SSIZE_T_COMPATIBILITY)
 #define PY_SSIZE_T_COMPATIBILITY
+#if !defined(NUMPY)
 typedef int Py_ssize_t;
+#endif
 #define PY_SSIZE_T_MAX INT_MAX
 #define PY_SSIZE_T_MIN INT_MIN
 #define PyInt_FromSsize_t(n) PyInt_FromLong(n)
