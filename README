@@ -47,6 +47,28 @@ python interpreter. However, there is no overhead for using
 mpipython on a single processor.
 
 
+Using NumPy instead of Numeric
+==============================
+
+There are three nearly compatible implementations of numeric arrays for
+Python: the original one, Numerical Python (module name "Numeric"),
+a later rewrite called numarray, and an evolution of Numeric that integrates
+features from numarray, called NumPy. In the long run, only NumPy will
+be maintained and further developed.
+
+MMTK was written for Numeric and still uses Numeric by default.
+However, it is now possible to use NumPy as well. To do this, use
+
+    python setup.py build --numpy
+    python setup.py install --numpy
+
+Also note that ScientificPython must be installed with NumPy support
+as well.
+
+At the time of this writing, NumPy support is still new and not very
+well tested.
+
+
 Platform-specific notes
 =======================
 

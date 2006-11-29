@@ -1,7 +1,7 @@
 # Functions for finding random points and orientations.
 #
 # Written by: Konrad Hinsen
-# Last revision: 2006-11-27
+# Last revision: 2006-11-29
 # 
 
 """This module defines various random quantities that are useful in
@@ -17,11 +17,16 @@ from Scientific.Geometry.Transformation import Rotation
 from Scientific import N
 import ParticleProperties, Units
 
+try:
+    numeric = N.package
+except AttributeError:
+    numeric = "Numeric"
+
 RNG = None
 try:
-    if N.package == "Numeric":
+    if numeric == "Numeric":
         import RNG
-    elif N.package == "NumPy":
+    elif numeric == "NumPy":
         import numpy.oldnumeric.rng as RNG
 except ImportError:
     pass
@@ -29,9 +34,9 @@ except ImportError:
 
 if RNG is None:
 
-    if N.package == "Numeric":
+    if numeric == "Numeric":
         from RandomArray import uniform, seed
-    elif N.package == "NumPy":
+    elif numeric == "NumPy":
         from numpy.oldnumeric.random_array import uniform, seed
     random = __import__('random')
     seed(1, 1)
