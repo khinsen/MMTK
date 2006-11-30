@@ -1,3 +1,13 @@
+2.5.15 --> 2.5.16
+=================
+
+Bug fixes:
+
+- Removed the dependency on Scientific 2.7.2 introduced into Random.py.
+  MMTK 2.5.16 should again work with ScientificPython > 2.5.
+
+- Updated README
+
 2.5.14 --> 2.5.15
 =================
 
