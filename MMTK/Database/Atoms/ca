@@ -9,3 +9,9 @@ mass = [(39.9625906, 96.941),
         (47.952533,   0.187)]
 
 color = 'red'
+
+
+b_coherent = 4.70*fm
+b_incoherent = 0.063*fm
+b_coherent_deut = 4.70*fm
+b_incoherent_deut = 0.063*fm
