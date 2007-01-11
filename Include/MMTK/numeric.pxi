@@ -1,4 +1,4 @@
-cdef extern from "Numeric/arrayobject.h": 
+cdef extern from "MMTK/arrayobject.h":
 
     void import_array()
 
@@ -24,7 +24,7 @@ cdef extern from "Numeric/arrayobject.h":
         PyArray_Descr *descr 
         int flags
 
-    ctypedef class Numeric.ArrayType [object PyArrayObject]: 
+    ctypedef class Scientific.N.ArrayType [object PyArrayObject]: 
         cdef char *data 
         cdef int nd 
         cdef int *dimensions, *strides 

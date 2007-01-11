@@ -4,7 +4,7 @@
 from MMTK import *
 from MMTK.Proteins import Protein
 from MMTK.Trajectory import Trajectory, SnapshotGenerator, TrajectoryOutput
-import Numeric; N = Numeric
+from Scientific import N
 
 # Construct system: lysozyme in vaccuum
 universe = InfiniteUniverse()

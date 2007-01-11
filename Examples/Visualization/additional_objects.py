@@ -3,7 +3,8 @@
 #
 from MMTK import *
 from MMTK.Proteins import Protein
-import Numeric, LinearAlgebra
+from Scientific import N, LA
+
 # Import the graphics module. Substitute any other graphics
 # module name to make the example use that module.
 from Scientific.Visualization import VRML; module = VRML
@@ -14,8 +15,8 @@ center, inertia = protein.centerAndMomentOfInertia()
 
 # Diagonalize the inertia tensor and scale the axes to a suitable length.
 mass = protein.mass()
-diagonal, directions = LinearAlgebra.eigenvectors(inertia.array)
-diagonal = Numeric.sqrt(diagonal/mass)
+diagonal, directions = LA.eigenvectors(inertia.array)
+diagonal = N.sqrt(diagonal/mass)
 
 # Generate the backbone graphics objects.
 graphics = protein.graphicsObjects(graphics_module = module,

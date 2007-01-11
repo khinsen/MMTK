@@ -1,9 +1,5 @@
 #include "Python.h"
-#if defined(NUMPY)
-#include "numpy/oldnumeric.h"
-#else
-#include "Numeric/arrayobject.h"
-#endif
+#include "MMTK/arrayobject.h"
 
 typedef struct { float r, i; } f2c_complex;
 typedef struct { double r, i; } f2c_doublecomplex;

@@ -9,7 +9,7 @@ from MMTK.Subspace import RigidMotionSubspace
 from MMTK.Minimization import ConjugateGradientMinimizer
 from MMTK.Trajectory import StandardLogOutput
 
-import Numeric
+from Scientific import N
 
 # Construct system
 universe = InfiniteUniverse(Amber94ForceField())
@@ -38,8 +38,8 @@ for i in range(6, len(modes)):
     overlap = []
     for m2 in full_modes:
 	o = m1.massWeightedDotProduct(m2) / \
-	    Numeric.sqrt(m1.massWeightedDotProduct(m1)) / \
-	    Numeric.sqrt(m2.massWeightedDotProduct(m2))
+	    N.sqrt(m1.massWeightedDotProduct(m1)) / \
+	    N.sqrt(m2.massWeightedDotProduct(m2))
 	overlap.append(abs(o))
-    best = Numeric.argsort(overlap)[-1]
+    best = N.argsort(overlap)[-1]
     print m1.frequency, full_modes[best].frequency, overlap[best]

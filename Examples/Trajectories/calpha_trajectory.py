@@ -12,7 +12,7 @@
 from MMTK import *
 from MMTK.Trajectory import Trajectory, TrajectoryOutput, SnapshotGenerator
 from MMTK.Proteins import Protein, PeptideChain
-import Numeric
+from Scientific import N
 
 # Open the input trajectory.
 trajectory = Trajectory(None, 'full_trajectory.nc')
@@ -62,7 +62,7 @@ first = 1
 for step in trajectory:
     conf = universe.contiguousObjectConfiguration(proteins,
                                                   step['configuration'])
-    conf_calpha = Configuration(universe_calpha, Numeric.take(conf.array, map),
+    conf_calpha = Configuration(universe_calpha, N.take(conf.array, map),
                                 None)
     universe_calpha.setConfiguration(conf_calpha)
     if first:

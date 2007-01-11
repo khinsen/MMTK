@@ -9,7 +9,6 @@ from MMTK.ForceFields import CalphaForceField
 from MMTK.NormalModes import NormalModes
 from MMTK.Random import gaussian
 from MMTK.Trajectory import Trajectory, SnapshotGenerator, TrajectoryOutput
-import Numeric
 
 # Construct the system. The scaling factor of 0.1 for the CalphaForceField
 # was determined empirically for a C-phycocyanin dimer at 300 K; its value

@@ -1,7 +1,7 @@
 from MMTK import *
 from MMTK.Subspace import Subspace
 from Scientific.Statistics.Histogram import WeightedHistogram, Histogram
-import Numeric
+from Scientific import N
 
 modes = load('~/proteins/lysozyme/lysozyme.umodes')
 universe = modes.universe
@@ -16,13 +16,13 @@ for chain in protein:
     dihedrals_with_index = zip(range(1, 1+len(dihedrals)), dihedrals)
     helix_indices = [index for index, (phi, psi) in dihedrals_with_index
                            if 4.5 < phi < 5.8 and 5. < psi < 6.]
-    helix_indices = Numeric.array(helix_indices)
-    breaks = Numeric.repeat(Numeric.arange(len(helix_indices)-1),
-                            (helix_indices[1:]-helix_indices[:-1]) > 1)
-    breaks = Numeric.concatenate(([0], breaks + 1))
+    helix_indices = N.array(helix_indices)
+    breaks = N.repeat(N.arange(len(helix_indices)-1),
+                      (helix_indices[1:]-helix_indices[:-1]) > 1)
+    breaks = N.concatenate(([0], breaks + 1))
     backbone = chain.backbone()
     for i in range(len(breaks)-1):
-        residues = Numeric.take(backbone, helix_indices[breaks[i]:breaks[i+1]])
+        residues = N.take(backbone, helix_indices[breaks[i]:breaks[i+1]])
         helices.append(Collection(list(residues)))
 helices = [h for h in helices if len(h) > 4]
 
@@ -35,7 +35,7 @@ for helix in helices:
     cms, inertia = helix.centerAndMomentOfInertia()
     moments, axes = inertia.diagonalization()
     axes = [a.asVector() for a in axes]
-    helix_axis = axes[Numeric.argmax([abs(end_to_end*v) for v in axes])]
+    helix_axis = axes[N.argmax([abs(end_to_end*v) for v in axes])]
     hmv = ParticleVector(universe)
     helix_motion_vectors.append(hmv)
     for residue in helix:

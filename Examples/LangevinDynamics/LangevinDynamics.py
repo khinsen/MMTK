@@ -1,14 +1,13 @@
 # This module implements a Langevin integrator.
 #
 # Written by Konrad Hinsen
-# last revision: 2005-8-30
+# last revision: 2007-1-11
 #
 
 from MMTK import Dynamics, Environment, Features, Trajectory, \
                  Units, ParticleProperties
 import MMTK_langevin
 import MMTK_forcefield
-import Numeric, operator
 
 #
 # Langevin integrator

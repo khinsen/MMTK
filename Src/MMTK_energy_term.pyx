@@ -1,13 +1,13 @@
 # Energy term interface for Python code
 #
 # Written by Konrad Hinsen
-# last revision: 2005-4-7
+# last revision: 2007-1-11
 #
 
 include 'MMTK/forcefield.pxi'
 
 import MMTK
-import Numeric
+from Scientific import N
 
 cdef class PyEnergyTerm(EnergyTerm):
 
@@ -55,17 +55,17 @@ cdef class PyEnergyTerm(EnergyTerm):
             energy.virial_available = 0
         if do_gradients:
             try:
-                Numeric.add(<object>energy.gradients,
-                            energy_dict['gradients'].array,
-                            <object>energy.gradients)
+                N.add(<object>energy.gradients,
+                      energy_dict['gradients'].array,
+                      <object>energy.gradients)
             except (KeyError, AttributeError):
                 energy.error = 1
                 raise
         if do_fc:
             try:
-                Numeric.add(<object>energy.force_constants,
-                            energy_dict['force_constants'].array,
-                            <object>energy.force_constants)
+                N.add(<object>energy.force_constants,
+                      energy_dict['force_constants'].array,
+                      <object>energy.force_constants)
             except (KeyError, AttributeError):
                 energy.error = 1
                 raise
