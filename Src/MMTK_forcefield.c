@@ -1,7 +1,7 @@
 /* Low-level force field calculations
  *
  * Written by Konrad Hinsen
- * last revision: 2006-5-30
+ * last revision: 2007-1-9
  */
 
 #define _FORCEFIELD_MODULE
@@ -576,15 +576,15 @@ test_fc_function(struct ffeval *evaluator, PyObject *data,
   double *sd = (double *)array->data;
   int natoms = array->dimensions[0];
   if (i < 0) {
-    int i;
+    long i;
 #if 0
     printf("Zeroing force constant array\n");
 #endif
-    for (i = 0; i < 9*natoms*natoms; i++)
+    for (i = 0; i < 9L*(long)natoms*(long)natoms; i++)
       sd[i] = 0.;
   }
   else if (fc != NULL) {
-    double *fcij = sd + 9*natoms*i + 3*j;
+    double *fcij = sd + 9L*(long)natoms*(long)i + 3L*(long)j;
     int l, m;
 #if 0
     printf("Force constants for atom pair (%d, %d) with distance %lf from %s\n",
@@ -687,8 +687,10 @@ evaluator(PyFFEvaluatorObject *self,
     else {
       double *data = (double *)
 	((PyArrayObject *)energy->force_constants)->data;
-      for (i = 0; i < 9*natoms*natoms; i++)
-	data[i] = 0.;
+      long nelements = 9L*(long)natoms*(long)natoms;
+      long j;
+      for (j = 0; j < nelements; j++)
+	data[j] = 0.;
     }
   }
   if (energy->gradients != NULL) {
