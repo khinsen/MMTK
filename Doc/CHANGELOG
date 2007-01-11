@@ -1,3 +1,18 @@
+2.5.16 -->
+=================
+
+Bug fixes:
+
+- Fixed iteration over force constant matrices > 5 GB
+
+- Improved NumPy compatibility
+
+Improvements:
+
+- New atom definitions and updates to existing ones to include
+  scattering lengths
+
+
 2.5.15 --> 2.5.16
 =================
 
