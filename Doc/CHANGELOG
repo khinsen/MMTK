@@ -3,6 +3,8 @@
 
 Bug fixes:
 
+- PartitionedCollection.selectShell() used wrong distance criteria
+
 - Fixed iteration over force constant matrices > 5 GB
 
 - Improved NumPy compatibility

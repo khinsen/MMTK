@@ -1,7 +1,7 @@
 # This module defines collections of chemical objects.
 #
 # Written by Konrad Hinsen
-# last revision: 2006-11-27
+# last revision: 2007-1-25
 #
 
 import ConfigIO, Utility, Units, ParticleProperties, Visualization
@@ -804,20 +804,15 @@ class PartitionedCollection(Collection):
         objects = Collection()
         minsq = min**2
         maxsq = max**2
-        corners = []
-        for x in [0., self.partition_size]:
-            for y in [0., self.partition_size]:
-                for z in [0., self.partition_size]:
-                    corners.append([x, y, z])
-        corners = Numeric.array(corners)
         for index in self.partition.keys():
-            d = self.partition_size*Numeric.array(index) - point.array
-            dminmax = d + corners
-            dmin = Numeric.add.reduce(Numeric.minimum.reduce(dminmax)**2)
-            dmax = Numeric.add.reduce(Numeric.maximum.reduce(dminmax)**2)
-            if dmin >= minsq and dmax <= maxsq:
+            d1 = self.partition_size*Numeric.array(index) - point.array
+            d2 = d1 + self.partition_size
+            dmin = (d1 > 0.)*d1 - (d2 < 0.)*d2
+            dminsq = Numeric.add.reduce(dmin**2)
+            dmaxsq = Numeric.add.reduce(Numeric.maximum(d1**2, d2**2))
+            if dminsq >= minsq and dmaxsq <= maxsq:
                 objects.addObject(self.partition[index])
-            elif dmax >= minsq and dmin <= maxsq:
+            elif dmaxsq >= minsq and dminsq <= maxsq:
                 o = Collection(self.partition[index]).selectShell(point,
                                                                   min, max)
                 objects.addObject(o)
