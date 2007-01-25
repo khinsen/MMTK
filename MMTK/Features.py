@@ -24,14 +24,14 @@ _all = []
 class Feature:
 
     def __init__(self):
-	for f in _all:
-	    if f.__class__ == self.__class__:
-		raise ValueError("feature alredy defined")
-	_all.append(self)
+        for f in _all:
+            if f.__class__ == self.__class__:
+                raise ValueError("feature alredy defined")
+        _all.append(self)
 
     # Method to be redefined by subclasses
     def isInUniverse(self, universe):
-	raise TypeError("must be defined in subclass")
+        raise TypeError("must be defined in subclass")
 
 #
 # Fixed particle feature
@@ -39,8 +39,8 @@ class Feature:
 class FixedParticleFeatureClass(Feature):
 
     def isInUniverse(self, universe):
-	fixed = universe.getAtomBooleanArray('fixed')
-	return fixed.sumOverParticles() > 0
+        fixed = universe.getAtomBooleanArray('fixed')
+        return fixed.sumOverParticles() > 0
 
     description = 'fixed particles'
 
@@ -64,10 +64,10 @@ DistanceConstraintsFeature = DistanceConstraintsFeatureClass()
 class NoseThermostatFeatureClass(Feature):
 
     def isInUniverse(self, universe):
-	for o in universe._environment:
-	    if o.__class__ is Environment.NoseThermostat:
-		return 1
-	return 0
+        for o in universe._environment:
+            if o.__class__ is Environment.NoseThermostat:
+                return 1
+        return 0
 
     description = 'Nose thermostat'
 
@@ -79,10 +79,10 @@ NoseThermostatFeature = NoseThermostatFeatureClass()
 class AndersenBarostatFeatureClass(Feature):
 
     def isInUniverse(self, universe):
-	for o in universe._environment:
-	    if o.__class__ is Environment.AndersenBarostat:
-		return 1
-	return 0
+        for o in universe._environment:
+            if o.__class__ is Environment.AndersenBarostat:
+                return 1
+        return 0
 
     description = 'Andersen barostat'
 
@@ -94,8 +94,8 @@ AndersenBarostatFeature = AndersenBarostatFeatureClass()
 def getFeatureList(universe):
     features = []
     for f in _all:
-	if f.isInUniverse(universe):
-	    features.append(f)
+        if f.isInUniverse(universe):
+            features.append(f)
     return features
 
 #
@@ -105,13 +105,13 @@ def checkFeatures(algorithm, universe):
     universe_features = getFeatureList(universe)
     features = universe_features[:]
     for f in algorithm.features:
-	try:
-	    features.remove(f)
-	except ValueError:
-	    pass
+        try:
+            features.remove(f)
+        except ValueError:
+            pass
     if features:
-	d = map(lambda f: f.description, features)
-	f = string.join(d, '\n')
-	raise ValueError(algorithm.__class__.__name__ +
-			  " does not support the following features:\n" + f)
+        d = map(lambda f: f.description, features)
+        f = string.join(d, '\n')
+        raise ValueError(algorithm.__class__.__name__ +
+                          " does not support the following features:\n" + f)
     return universe_features
