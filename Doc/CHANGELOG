@@ -9,6 +9,8 @@ Bug fixes:
 
 - Improved NumPy compatibility
 
+- AtomCluster objects were not correctly written to trajectory files
+
 Improvements:
 
 - New atom definitions and updates to existing ones to include

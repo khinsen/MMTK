@@ -2,7 +2,7 @@
 # complexes. They are made as copies from blueprints in the database.
 #
 # Written by Konrad Hinsen
-# last revision: 2006-11-27
+# last revision: 2007-2-5
 #
 
 import Bonds, Collections, ConfigIO, Database, Units, Utility, Visualization
@@ -1167,7 +1167,7 @@ class AtomCluster(CompositeChemicalObject, ChemicalObject):
     def _description(self, tag, index_map, toplevel):
         s = 'AC(' + `self.name` + ',['
         for a in self.atoms:
-            s = s + a._description(tag, index_map, 0) + ','
+            s = s + a._description(tag, index_map, 1) + ','
         s = s + ']'
         constraints = self._distanceConstraintList()
         if constraints:
