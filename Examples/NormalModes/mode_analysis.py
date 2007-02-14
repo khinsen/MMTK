@@ -3,6 +3,12 @@ from MMTK.Subspace import Subspace
 from Scientific.Statistics.Histogram import WeightedHistogram, Histogram
 from Scientific import N
 
+#
+# You ned to provide a mode file as input for this script; the
+# line below is just an illustration for how to load one. A mode
+# file is created by writing a NormalModes object to a file
+# using MMTK.save().
+#
 modes = load('~/proteins/lysozyme/lysozyme.umodes')
 universe = modes.universe
 

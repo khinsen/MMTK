@@ -1,7 +1,7 @@
 # Detailed harmonic force field for proteins
 #
 # Written by Konrad Hinsen
-# last revision: 2006-11-27
+# last revision: 2007-2-14
 #
 
 from NonBondedInteractions import NonBondedForceField
@@ -15,9 +15,9 @@ from Scientific import N as Numeric
 class BondForceField(AmberBondedForceField):
 
     def __init__(self, bonds=1, angles=1, dihedrals=1):
+        AmberBondedForceField.__init__(self)
         self.arguments = (bonds, angles, dihedrals)
         self.bonded = self
-        AmberBondedForceField.__init__(self)
 
     def addBondTerm(self, data, bond, object, global_data):
         if not self.arguments[0]:

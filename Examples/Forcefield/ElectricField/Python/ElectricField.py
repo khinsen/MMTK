@@ -34,7 +34,7 @@ class ElectricFieldTerm(EnergyTerm):
     # force constants are requested.
     def evaluate(self, configuration, do_gradients, do_force_constants):
         results = {}
-        energy = (self.charges*(self.strength*configuration)) \
+        energy = (self.charges*(configuration*self.strength)) \
                  .sumOverParticles()
         results['energy'] = energy
         results['virial'] = -energy
