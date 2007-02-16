@@ -19,7 +19,9 @@ donations.
 Installation
 ============
 
-Prerequisites: Python 2.2 or higher, ScientificPython 2.4 or higher.
+Prerequisites: Python 2.2 or higher, ScientificPython 2.4 or higher,
+               Numerical Python 22.x or 23.x (various problems have been
+               reported with 24.x)
 
 On most Unix systems, installation requires two commands:
 
