@@ -1,7 +1,7 @@
 # This module implements classes for peptide chains and proteins.
 #
 # Written by Konrad Hinsen
-# last revision: 2006-8-18
+# last revision: 2007-2-28
 #
 
 import Biopolymers, Bonds, ChemicalObjects, Collections, ConfigIO, Database
@@ -552,16 +552,20 @@ class ConnectedChains(PeptideChain):
             self.parent = None
             self.type = None
             self.configurations = {}
+            for i in range(len(self.chains)):
+                c = self.chains[i]
+                sub_chain = SubChain(self, self.groups[c[1]:c[2]], c[0])
+                sub_chain.version_spec = c[3]
+                for g in sub_chain.groups:
+                    g.parent = sub_chain
+                self.chains[i] = sub_chain
     is_connected_chains = 1
 
     def __len__(self):
         return len(self.chains)
 
     def __getitem__(self, item):
-        c = self.chains[item]
-        chain = SubChain(self, self.groups[c[1]:c[2]], c[0])
-        chain.version_spec = c[3]
-        return chain
+        return self.chains[item]
 
     def __getslice__(self, first, last):
         raise TypeError("Can't slice connected chains")
@@ -687,6 +691,8 @@ class Protein(ChemicalObjects.Complex):
                 numbers = reduce(operator.add, map(lambda i: i._numbers, m[0]))
                 m = ConnectedChains(m[0])
                 m._numbers = numbers
+                for c in m:
+                    c.parent = self
             m._addSSBridges(bonds)
             m.parent = self
             self.molecules.append(m)
