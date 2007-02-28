@@ -34,6 +34,11 @@ if not scientific_ok:
 compile_args = []
 include_dirs = ['Include']
 
+# Take care of the common problem that netcdf is in /usr/local but
+# /usr/local/include is not on $CPATH.
+if os.path.exists('/usr/local/include/netcdf.h'):
+    include_dirs.append('/usr/local/include')
+
 use_numpy = False
 if "--numpy" in sys.argv:
     use_numpy = True
@@ -174,6 +179,10 @@ if sys.version_info[0] == 2 and sys.version_info[1] >= 2:
 #################################################################
 # System-specific optimization options
 
+low_opt = []
+if sysconfig['CC'][:3] == 'gcc':
+    low_opt = ['-O0']
+
 high_opt = []
 lapack_opt = high_opt
 if sys.platform[:5] == 'linux' and sysconfig['CC'][:3] == 'gcc':
@@ -207,7 +216,7 @@ code basis that can be easily extended and modified to deal with
 standard and non-standard problems in molecular simulations.
 """,
        author = "Konrad Hinsen",
-       author_email = "hinsen@llb.saclay.cea.fr",
+       author_email = "hinsen@cnrs-orleans.fr",
        url = "http://dirac.cnrs-orleans.fr/MMTK/",
        license = "LGPL",
 
@@ -216,8 +225,16 @@ standard and non-standard problems in molecular simulations.
                    'MMTK.Tools.TrajectoryViewer'],
        headers = headers,
        ext_package = 'MMTK.'+sys.platform,
-       ext_modules = [Extension('lapack_mmtk',
-                                ['Src/lapack_subset.c', 'Src/lapack_mmtk.c'],
+       ext_modules = [Extension('mmtk_dummy',
+                                ['Src/lapack_dlamc.c', 'Src/mmtk_dummy.c'],
+                                extra_compile_args = compile_args + low_opt,
+                                include_dirs=include_dirs,
+                                libraries=libraries,
+                                define_macros=macros),
+                      Extension('lapack_mmtk',
+                                ['Src/lapack_subset.c', 'Src/lapack_dlamc.c',
+                                 'Src/lapack_mmtk.c'],
+                                #extra_objects = ['Src/lapack_dlamc'],
                                 extra_compile_args = compile_args + lapack_opt,
                                 include_dirs=include_dirs,
                                 libraries=libraries,
