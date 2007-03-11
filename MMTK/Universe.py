@@ -4,7 +4,7 @@
 # (boundary conditions, external fields, etc.)
 #
 # Written by Konrad Hinsen
-# last revision: 2006-11-27
+# last revision: 2007-3-11
 #
 
 import Bonds, ChemicalObjects, Collections, Environment, \
@@ -187,15 +187,16 @@ class Universe(Collections.GroupOfAtoms, Visualization.Viewable):
         """Removes |object| from the universe. If |object| is a Collection,
         each of its elements is removed. The object to be removed must
         be in the universe."""
-        if Collections.isCollection(object) or Utility.isSequenceObject(object):
-            for o in object:
-                self.removeObject(o)
-        elif ChemicalObjects.isChemicalObject(object):
+        if ChemicalObjects.isChemicalObject(object):
             if object.parent != self:
                 raise ValueError(`object` + ' is not in this universe.')
             object.parent = None
             self._objects.removeObject(object)
             self._changed(1)
+        elif Collections.isCollection(object) \
+                 or Utility.isSequenceObject(object):
+            for o in object:
+                self.removeObject(o)
         elif Environment.isEnvironmentObject(object):
             self._environment.remove(object)
             self._changed(0)
