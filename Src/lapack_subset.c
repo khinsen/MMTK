@@ -386,7 +386,7 @@ double sqrt(doublereal);
 double log(doublereal);
 static double pow_dd(doublereal *, doublereal *), d_sign(
 	doublereal *, doublereal *);
-static double pow_di(doublereal *, integer *);
+double pow_di(doublereal *, integer *);
 static void s_cat(char *, char **, integer *, integer *, ftnlen);
 static /* Subroutine */ int dgemm_(char *, char *, integer *, integer *, 
 	integer *, doublereal *, doublereal *, integer *, doublereal *, 
@@ -427,7 +427,7 @@ static /* Subroutine */ int dlarfb_(char *, char *, char *, char *,
 	integer *);
 static /* Subroutine */ int dlarft_(char *, char *, integer *, integer *, 
 	doublereal *, integer *, doublereal *, doublereal *, integer *);
-static logical lsame_(char *, char *);
+logical lsame_(char *, char *);
 static /* Subroutine */ int dormlq_(char *, char *, integer *, integer *, 
 	integer *, doublereal *, integer *, doublereal *, doublereal *, 
 	integer *, doublereal *, integer *, integer *);
@@ -14552,7 +14552,7 @@ static integer ieeeck_(integer *ispec, real *zero, real *one)
     return ret_val;
 } /* ieeeck_ */
 
-static logical lsame_(char *ca, char *cb)
+logical lsame_(char *ca, char *cb)
 {
     /* System generated locals */
     logical ret_val;
@@ -17481,9 +17481,9 @@ return( *b >= 0 ? x : -x);
 }
 
 #ifdef KR_headers
-static double pow_di(ap, bp) doublereal *ap; integer *bp;
+double pow_di(ap, bp) doublereal *ap; integer *bp;
 #else
-static double pow_di(doublereal *ap, integer *bp)
+double pow_di(doublereal *ap, integer *bp)
 #endif
 {
 double pow, x;

@@ -45,7 +45,7 @@ typedef unsigned long long ulongint;	/* system-dependent */
 
 #endif
 
-static doublereal dlamch_(char *);
+doublereal dlamch_(char *);
 static doublereal dlamc3_(doublereal *, doublereal *);
 static /* Subroutine */ int dlamc2_(integer *, integer *, logical *, 
 	doublereal *, integer *, doublereal *, integer *, doublereal *);
@@ -56,7 +56,7 @@ static /* Subroutine */ int dlamc4_(integer *, doublereal *, integer *),
 	dlamc5_(integer *, integer *, integer *, logical *, integer *, 
 	doublereal *);
 
-static doublereal dlamch_(char *cmach)
+doublereal dlamch_(char *cmach)
 {
 /* >>Start of File<<   
        Initialized data */
