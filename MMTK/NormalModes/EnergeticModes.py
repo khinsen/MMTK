@@ -1,7 +1,7 @@
 # Energetic normal mode calculations.
 #
 # Written by Konrad Hinsen
-# last revision: 2006-11-27
+# last revision: 2007-3-16
 #
 
 """See also the Example:NormalModes example applications.
@@ -120,7 +120,6 @@ class EnergeticModes(Core.NormalModes):
                                   ['array', 'force_constants'])
         self.temperature = temperature
 
-        self.weights = N.sqrt(self.universe.masses().array)
         self.weights = N.ones((1, 1), N.Float)
 
         self._forceConstantMatrix()
@@ -160,5 +159,17 @@ class EnergeticModes(Core.NormalModes):
         for i in range(6, self.nmodes):
             mode = self.rawMode(i)
             f += (mode*mode)/mode.force_constant
-        f = Units.k_B*self.temperature*f
+        f.array *= Units.k_B*self.temperature
+        return f
+
+    def anisotropicFluctuations(self):
+        """Returns a Class:MMTK.ParticleTensor containing the thermal
+        fluctuations for each atom in the universe."""
+        f = ParticleProperties.ParticleTensor(self.universe)
+        for i in range(6, self.nmodes):
+            mode = self.rawMode(i)
+            array = mode.array
+            f.array += (array[:, :, N.NewAxis]*array[:, N.NewAxis, :]) \
+                       / mode.force_constant
+        f.array *= Units.k_B*self.temperature
         return f

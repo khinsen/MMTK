@@ -1,7 +1,7 @@
 # Vibrational normal mode calculations.
 #
 # Written by Konrad Hinsen
-# last revision: 2006-11-27
+# last revision: 2007-3-19
 #
 
 """See also the Example:NormalModes example applications.
@@ -179,13 +179,26 @@ class VibrationalModes(Core.NormalModes):
     def fluctuations(self):
         """Returns a Class:MMTK.ParticleScalar containing the thermal
         fluctuations for each atom in the universe."""
-        f = 0.
+        f = ParticleProperties.ParticleScalar(self.universe)
         for i in range(6, self.nmodes):
-            index = self.sort_index[i]
-            mode = self.array[index]
-            f += (N.add.reduce(mode*mode, -1))/self.omega_sq[index]
-        f = Units.k_B*self.temperature*f/self.universe.masses().array
-        return ParticleProperties.ParticleScalar(self.universe, f)
+            mode = self.rawMode(i)
+            f += (mode*mode)/mode.frequency**2
+        f.array /= self.weights[:, 0]**2
+        f.array *= Units.k_B*self.temperature/(2.*N.pi)**2
+        return f
+
+    def anisotropicFluctuations(self):
+        """Returns a Class:MMTK.ParticleTensor containing the thermal
+        fluctuations for each atom in the universe."""
+        f = ParticleProperties.ParticleTensor(self.universe)
+        for i in range(6, self.nmodes):
+            mode = self.rawMode(i)
+            array = mode.array
+            f.array += (array[:, :, N.NewAxis]*array[:, N.NewAxis, :]) \
+                       / mode.frequency**2
+        f.array *= Units.k_B*self.temperature/(2.*N.pi)**2
+        f.array /= self.universe.masses().array[:, N.NewAxis, N.NewAxis]
+        return f
 
     def meanSquareDisplacement(self, subset=None, weights=None,
                                time_range = (0., None, None), tau=None):
