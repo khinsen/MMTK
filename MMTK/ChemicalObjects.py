@@ -2,7 +2,7 @@
 # complexes. They are made as copies from blueprints in the database.
 #
 # Written by Konrad Hinsen
-# last revision: 2007-2-5
+# last revision: 2007-3-21
 #
 
 import Bonds, Collections, ConfigIO, Database, Units, Utility, Visualization
@@ -1074,6 +1074,14 @@ class Complex(CompositeChemicalObject, ChemicalObject):
 
     def bondedUnits(self):
         return self.molecules
+
+    def setBondAttributes(self):
+        for m in self.molecules:
+            m.setBondAttributes()
+
+    def clearBondAttributes(self):
+        for m in self.molecules:
+            m.clearBondAttributes()
 
     def _subunits(self):
         return self.molecules
