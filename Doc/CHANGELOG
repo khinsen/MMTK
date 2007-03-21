@@ -1,4 +1,4 @@
-2.5.16 -->
+2.5.16 --> 2.5.17
 =================
 
 Bug fixes:
@@ -11,11 +11,19 @@ Bug fixes:
 
 - AtomCluster objects were not correctly written to trajectory files
 
+- Compilation/linking issues under Fedora 6 (GCC 4.1)
+
 Improvements:
 
 - New atom definitions and updates to existing ones to include
   scattering lengths
 
+- Methods setBondAttributes and clearBondAttributes available also
+  on complexes (and thus proteins)
+
+New features:
+
+- Method anisotropicFluctuations for normal modes.
 
 2.5.15 --> 2.5.16
 =================
