@@ -1,18 +1,21 @@
 # Normal mode tests
 #
 # Written by Konrad Hinsen
-# last revision: 2007-3-19
+# last revision: 2007-3-22
 #
 
 import unittest
 import MMTK
+from MMTK.Proteins import Protein
 from MMTK.ForceFields import HarmonicForceField
-import MMTK.NormalModes
+from MMTK.Subspace import RigidMotionSubspace, PairDistanceSubspace
+from MMTK import NormalModes
 
 class WaterTest(unittest.TestCase):
 
     """
-    Test MMTK.NormalModes.EnergeticModes
+    Test NormalModes.EnergeticModes
+    and NormalModes.VibrationalModes
     """
 
     def setUp(self):
@@ -20,7 +23,7 @@ class WaterTest(unittest.TestCase):
         self.universe.water = MMTK.Molecule('water')
 
     def test_energeticModes(self):
-        emodes = MMTK.NormalModes.EnergeticModes(self.universe)
+        emodes = NormalModes.EnergeticModes(self.universe)
         fc = emodes.force_constants[6:]
         self.assertAlmostEqual(fc[0], 757849.3957485439, 5)
         self.assertAlmostEqual(fc[1], 1041520.6252049773, 5)
@@ -48,7 +51,7 @@ class WaterTest(unittest.TestCase):
                                af[self.universe.water.H2].trace())
 
     def test_vibrationalModes(self):
-        vmodes = MMTK.NormalModes.VibrationalModes(self.universe)
+        vmodes = NormalModes.VibrationalModes(self.universe)
         freq = vmodes.frequencies[6:]
         self.assertAlmostEqual(freq[0], 87.220841117866954)
         self.assertAlmostEqual(freq[1], 112.00521970255059)
@@ -74,6 +77,132 @@ class WaterTest(unittest.TestCase):
                                af[self.universe.water.H1].trace())
         self.assertAlmostEqual(f[self.universe.water.H2],
                                af[self.universe.water.H2].trace())
+
+
+class PeptideTest(unittest.TestCase):
+
+    """
+    Test VibrationalModes with a RigidMotionSubspace
+    """
+
+    def setUp(self):
+        self.universe = MMTK.InfiniteUniverse(HarmonicForceField())
+        self.universe.peptide = Protein('bala1')
+        self.subspace = RigidMotionSubspace(self.universe,
+                                            self.universe.peptide.residues())
+
+    def test_subspaceModes(self):
+        vmodes = NormalModes.VibrationalModes(self.universe,
+                                              subspace=self.subspace)
+        freq = vmodes.frequencies[6:]
+        self.assertAlmostEqual(freq[0], 2.9043011743224980)
+        self.assertAlmostEqual(freq[1], 3.6128808005364310)
+        self.assertAlmostEqual(freq[2], 4.3000233773335133)
+        self.assertAlmostEqual(freq[3], 5.2090714221161276)
+        self.assertAlmostEqual(freq[4], 7.0952710075055210)
+        self.assertAlmostEqual(freq[5], 7.9176238459485777)
+        self.assertAlmostEqual(freq[6], 9.6411463817591212)
+        self.assertAlmostEqual(freq[7], 12.0152992300718431)
+        self.assertAlmostEqual(freq[8], 14.9048078046098240)
+        self.assertAlmostEqual(freq[9], 15.2183689507424500)
+        self.assertAlmostEqual(freq[10], 24.5076529744237135)
+        self.assertAlmostEqual(freq[11], 28.8319451574310399)
+        for i in range(len(vmodes)):
+            mi = vmodes.rawMode(i)
+            norm_sq = mi.dotProduct(mi)
+            self.assertAlmostEqual(norm_sq, 1.)
+            for j in range(i+1, len(vmodes)):
+                overlap = mi.dotProduct(vmodes.rawMode(j))
+                self.assert_(overlap < 1.e-15)
+        self.assertAlmostEqual(vmodes[6].norm(), 0.0571232913318908)
+        self.assertAlmostEqual(vmodes[7].norm(), 0.0529117541861086)
+        self.assertAlmostEqual(vmodes[8].norm(), 0.0400676921877648)
+        self.assertAlmostEqual(vmodes[9].norm(), 0.0362476194356468)
+        self.assertAlmostEqual(vmodes[10].norm(), 0.0268401314942991)
+        self.assertAlmostEqual(vmodes[11].norm(), 0.0320133176798322)
+        self.assertAlmostEqual(vmodes[12].norm(), 0.0300364605341464)
+        self.assertAlmostEqual(vmodes[13].norm(), 0.0187776117285175)
+        self.assertAlmostEqual(vmodes[14].norm(), 0.0110276987544110)
+        self.assertAlmostEqual(vmodes[15].norm(), 0.0107808471624157)
+        self.assertAlmostEqual(vmodes[16].norm(), 0.0057739025201874)
+        self.assertAlmostEqual(vmodes[17].norm(), 0.0054749382544073)
+
+    def test_subspaceModesWithExclusion(self):
+        excluded = PairDistanceSubspace(self.universe,
+                                        [(self.universe.peptide[0][0].O,
+                                          self.universe.peptide[0][-1].CH3)])
+        vmodes = NormalModes.VibrationalModes(self.universe,
+                                              subspace=(excluded,
+                                                        self.subspace))
+        freq = vmodes.frequencies[6:]
+        self.assertAlmostEqual(freq[0], 3.6017105438829620)
+        self.assertAlmostEqual(freq[1], 4.0003081312982314)
+        self.assertAlmostEqual(freq[2], 5.1866580036742684)
+        self.assertAlmostEqual(freq[3], 7.0881826743326561)
+        self.assertAlmostEqual(freq[4], 7.8556351790494565)
+        self.assertAlmostEqual(freq[5], 9.6339267095045233)
+        self.assertAlmostEqual(freq[6], 11.7536434294379255)
+        self.assertAlmostEqual(freq[7], 14.6787264425208157)
+        self.assertAlmostEqual(freq[8], 15.1577783773569710)
+        self.assertAlmostEqual(freq[9], 23.3702950486827703)
+        self.assertAlmostEqual(freq[10], 28.6687153116058759)
+        self.assertAlmostEqual(freq[11], 40.6387222002291679)
+        for i in range(len(vmodes)):
+            mi = vmodes.rawMode(i)
+            norm_sq = mi.dotProduct(mi)
+            self.assertAlmostEqual(norm_sq, 1.)
+            for j in range(i+1, len(vmodes)):
+                overlap = mi.dotProduct(vmodes.rawMode(j))
+                self.assert_(overlap < 1.e-15)
+        self.assertAlmostEqual(vmodes[6].norm(), 0.0539485999212520)
+        self.assertAlmostEqual(vmodes[7].norm(), 0.0457018173643255)
+        self.assertAlmostEqual(vmodes[8].norm(), 0.0366795025558611)
+        self.assertAlmostEqual(vmodes[9].norm(), 0.0268655512968592)
+        self.assertAlmostEqual(vmodes[10].norm(), 0.0324186752148948)
+        self.assertAlmostEqual(vmodes[11].norm(), 0.0302214878165687)
+        self.assertAlmostEqual(vmodes[12].norm(), 0.0196586315981532)
+        self.assertAlmostEqual(vmodes[13].norm(), 0.0112857136900571)
+        self.assertAlmostEqual(vmodes[14].norm(), 0.0106366256304052)
+        self.assertAlmostEqual(vmodes[15].norm(), 0.0062204565671206)
+        self.assertAlmostEqual(vmodes[16].norm(), 0.0054224348308254)
+        self.assertAlmostEqual(vmodes[17].norm(), 0.0048003670430221)
+
+    def test_subspaceModesWithNumericalDifferentiation(self):
+        vmodes = NormalModes.VibrationalModes(self.universe,
+                                              subspace=self.subspace,
+                                              delta=0.01)
+        freq = vmodes.frequencies[6:]
+        self.assertAlmostEqual(freq[0], 1.8385687254030860)
+        self.assertAlmostEqual(freq[1], 2.9775713468863034)
+        self.assertAlmostEqual(freq[2], 4.0264836838167568)
+        self.assertAlmostEqual(freq[3], 4.8702158640406257)
+        self.assertAlmostEqual(freq[4], 6.6448566360285604)
+        self.assertAlmostEqual(freq[5], 7.7428620004542745)
+        self.assertAlmostEqual(freq[6], 9.6151162459113166)
+        self.assertAlmostEqual(freq[7], 11.6184650874707032)
+        self.assertAlmostEqual(freq[8], 14.5713711290416175)
+        self.assertAlmostEqual(freq[9], 14.8473398362720879)
+        self.assertAlmostEqual(freq[10], 24.4154082155068899)
+        self.assertAlmostEqual(freq[11], 28.7210239653978405)
+        for i in range(len(vmodes)):
+            mi = vmodes.rawMode(i)
+            norm_sq = mi.dotProduct(mi)
+            self.assertAlmostEqual(norm_sq, 1.)
+            for j in range(i+1, len(vmodes)):
+                overlap = mi.dotProduct(vmodes.rawMode(j))
+                self.assert_(overlap < 1.e-15)
+        self.assertAlmostEqual(vmodes[6].norm(), 0.0946583765128969)
+        self.assertAlmostEqual(vmodes[7].norm(), 0.0626193337792630)
+        self.assertAlmostEqual(vmodes[8].norm(), 0.0436543750243850)
+        self.assertAlmostEqual(vmodes[9].norm(), 0.0383367486810925)
+        self.assertAlmostEqual(vmodes[10].norm(), 0.0284991536339517)
+        self.assertAlmostEqual(vmodes[11].norm(), 0.0319057570404965)
+        self.assertAlmostEqual(vmodes[12].norm(), 0.0308662655350956)
+        self.assertAlmostEqual(vmodes[13].norm(), 0.0196712528863329)
+        self.assertAlmostEqual(vmodes[14].norm(), 0.0113194641000392)
+        self.assertAlmostEqual(vmodes[15].norm(), 0.0109957102079478)
+        self.assertAlmostEqual(vmodes[16].norm(), 0.0057879281184461)
+        self.assertAlmostEqual(vmodes[17].norm(), 0.0054875877675966)
 
 if __name__ == '__main__':
     unittest.main()
