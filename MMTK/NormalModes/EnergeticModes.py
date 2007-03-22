@@ -1,7 +1,7 @@
 # Energetic normal mode calculations.
 #
 # Written by Konrad Hinsen
-# last revision: 2007-3-16
+# last revision: 2007-3-22
 #
 
 """See also the Example:NormalModes example applications.
@@ -68,9 +68,9 @@ class EnergeticModes(Core.NormalModes):
                   orthogonal). This can either be a sequence of
                   Class:MMTK.ParticleVector objects or a tuple of two
                   such sequences. In the second case, the subspace is
-                  defined by the space spanned by the first set of
+                  defined by the space spanned by the second set of
                   vectors projected on the complement of the space
-                  spanned by the second set of vectors. The second set
+                  spanned by the first set of vectors. The first set
                   thus defines directions that are excluded from the
                   subspace.
                   The default value of None indicates a standard
