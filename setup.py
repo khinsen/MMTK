@@ -184,21 +184,16 @@ if sysconfig['CC'][:3] == 'gcc':
     low_opt = ['-O0']
 
 high_opt = []
-lapack_opt = high_opt
 if sys.platform[:5] == 'linux' and sysconfig['CC'][:3] == 'gcc':
     high_opt = ['-O3', '-ffast-math', '-fomit-frame-pointer',
                 '-fkeep-inline-functions']
-    lapack_opt = high_opt + ['-ffloat-store']
 if sys.platform == 'darwin' and sysconfig['CC'][:3] == 'gcc':
     high_opt = ['-O3', '-ffast-math', '-fomit-frame-pointer',
                 '-fkeep-inline-functions', '-falign-loops=16']
-    lapack_opt = high_opt
 if sys.platform == 'aix4':
     high_opt = ['-O4']
-    lapack_opt = high_opt
 if sys.platform == 'odf1V4':
     high_opt = ['-O2', '-fp_reorder', '-ansi_alias', '-ansi_args']
-    lapack_opt = high_opt
 
 high_opt.append('-g')
 
@@ -225,21 +220,7 @@ standard and non-standard problems in molecular simulations.
                    'MMTK.Tools.TrajectoryViewer'],
        headers = headers,
        ext_package = 'MMTK.'+sys.platform,
-       ext_modules = [Extension('mmtk_dummy',
-                                ['Src/lapack_dlamc.c', 'Src/mmtk_dummy.c'],
-                                extra_compile_args = compile_args + low_opt,
-                                include_dirs=include_dirs,
-                                libraries=libraries,
-                                define_macros=macros),
-                      Extension('lapack_mmtk',
-                                ['Src/lapack_subset.c', 'Src/lapack_dlamc.c',
-                                 'Src/lapack_mmtk.c'],
-                                #extra_objects = ['Src/lapack_dlamc'],
-                                extra_compile_args = compile_args + lapack_opt,
-                                include_dirs=include_dirs,
-                                libraries=libraries,
-                                define_macros=macros),
-                      Extension('MMTK_DCD',
+       ext_modules = [Extension('MMTK_DCD',
                                 ['Src/MMTK_DCD.c', 'Src/ReadDCD.c'],
                                 extra_compile_args = compile_args,
                                 include_dirs=include_dirs,

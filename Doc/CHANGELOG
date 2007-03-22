@@ -1,3 +1,14 @@
+2.5.17 --> 2.5.18hg
+===================
+
+Bug fixes:
+
+- The module lapack_mmtk that consisted of CLAPACK2 code and caused
+  compilation problems with recent GCC versions was removed. Instead,
+  CLAPACK3 routines from Numeric/numpy are used. They are also faster,
+  but use more working memory.
+
+
 2.5.16 --> 2.5.17
 =================
 
