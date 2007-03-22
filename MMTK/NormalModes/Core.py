@@ -1,4 +1,4 @@
-# Common aspect of normal mode calculations.
+# Common aspects of normal mode calculations.
 #
 # Written by Konrad Hinsen
 # last revision: 2007-3-22
@@ -14,34 +14,41 @@ import copy
 # Import LAPACK routines
 #
 dsyevd = None
+dgesdd = None
 try:
     # Numeric
-    from lapack_lite import dsyevd, LapackError
+    from lapack_lite import dsyevd, dgesdd, LapackError
 except ImportError: pass
-if dsyevd is None:
+if dsyevd is None or dgesdd is None:
     try:
         # numpy
-        from numpy.linalg.lapack_lite import dsyevd, LapackError
+        from numpy.linalg.lapack_lite import dsyevd, dgesdd, LapackError
     except ImportError: pass
 if dsyevd is None:
     try:
         # PyLAPACK
         from lapack_dsy import dsyevd, LapackError
     except ImportError: pass
+if dgesdd is None:
+    try:
+        # PyLAPACK
+        from lapack_dge import dgesdd
+    except ImportError: pass
 if dsyevd is None:
     from Scientific.LA import Heigenvectors
-else:
+if dsyevd:
     n = 1
     array = N.zeros((n, n), N.Float)
     ev = N.zeros((n,), N.Float)
     work = N.zeros((1,), N.Float)
-    int_types = [N.Int, N.Int32]
+    int_types = [N.Int, N.Int8, N.Int16, N.Int32]
     try:
         int_types.append(N.Int64)
+        int_types.append(N.Int128)
     except AttributeError:
         pass
     for int_type in int_types:
-        iwork = N.zeros((1,), N.Int)
+        iwork = N.zeros((1,), int_type)
         try:
             dsyevd('V', 'L', n, array, n, ev, work, -1, iwork, -1, 0)
             break
@@ -243,35 +250,46 @@ class NormalModes:
         ntotal = nexcluded + nmodes
         natoms = len(basis[0])
 
-        try:
-            from lapack_dge import dgesvd
-        except ImportError:
-            from lapack_mmtk import dgesvd
-
         sv = N.zeros((min(ntotal, 3*natoms),), N.Float)
-        work = N.zeros((max(3*min(3*natoms,ntotal)+max(3*natoms,ntotal),
-                        5*min(3*natoms,ntotal)),), N.Float)
-        dummy = N.zeros((1,), N.Float)
         if nexcluded > 0:
             self.basis = N.zeros((ntotal, 3*natoms), N.Float)
             for i in range(nexcluded):
                 self.basis[i] = N.ravel(excluded[i].array*self.weights)
-            result = dgesvd('O', 'N', 3*natoms, nexcluded, self.basis,
-                            3*natoms, sv, dummy, 1, dummy, 1,
-                            work, work.shape[0], 0)
+            min_n_m = min(3*natoms, nexcluded)
+            u = N.zeros((min_n_m, 3*natoms), N.Float)
+            vt = N.zeros((nexcluded, min_n_m), N.Float)
+            work = N.zeros((1,), N.Float)
+            iwork = N.zeros((8*min_n_m,), int_type)
+            result = dgesdd('S', 3*natoms, nexcluded, self.basis,
+                            3*natoms, sv, u, 3*natoms, vt, min_n_m,
+                            work, -1, iwork, 0)
+            work = N.zeros((int(work[0]),), N.Float)
+            result = dgesdd('S', 3*natoms, nexcluded, self.basis,
+                            3*natoms, sv, u, 3*natoms, vt, min_n_m,
+                            work, work.shape[0], iwork, 0)
             if result['info'] != 0:
                 raise ValueError('Lapack SVD: ' + `result['info']`)
+            self.basis[:min_n_m] = u
             svmax = N.maximum.reduce(sv)
             nexcluded = N.add.reduce(N.greater(sv,
                                                            1.e-10*svmax))
             ntotal = nexcluded + nmodes
             for i in range(nmodes):
                 self.basis[i+nexcluded] = N.ravel(basis[i].array*self.weights)
-            result = dgesvd('O', 'N', 3*natoms, ntotal, self.basis,
-                            3*natoms, sv, dummy, 1, dummy, 1,
-                            work, work.shape[0], 0)
+            min_n_m = min(3*natoms, ntotal)
+            u = N.zeros((min_n_m, 3*natoms), N.Float)
+            vt = N.zeros((ntotal, min_n_m), N.Float)
+            work = N.zeros((1,), N.Float)
+            result = dgesdd('S', 3*natoms, ntotal, self.basis, 3*natoms,
+                            sv, u, 3*natoms, vt, min_n_m,
+                            work, -1, iwork, 0)
+            work = N.zeros((int(work[0]),), N.Float)
+            result = dgesdd('S', 3*natoms, ntotal, self.basis, 3*natoms,
+                            sv, u, 3*natoms, vt, min_n_m,
+                            work, work.shape[0], iwork, 0)
             if result['info'] != 0:
                 raise ValueError('Lapack SVD: ' + `result['info']`)
+            self.basis[:min_n_m] = u
             svmax = N.maximum.reduce(sv)
             ntotal = N.add.reduce(N.greater(sv, 1.e-10*svmax))
             nmodes = ntotal - nexcluded
@@ -283,11 +301,21 @@ class NormalModes:
                 self.basis = N.array(map(lambda v: v.array, basis))
             N.multiply(self.basis, self.weights, self.basis)
             self.basis.shape = (nmodes, 3*natoms)
-            result = dgesvd('O', 'N', 3*natoms, nmodes,
-                            self.basis, 3*natoms,
-                            sv, dummy, 1, dummy, 1, work, work.shape[0], 0)
+            min_n_m = min(3*natoms, nmodes)
+            u = N.zeros((min_n_m, 3*natoms), N.Float)
+            vt = N.zeros((nmodes, min_n_m), N.Float)
+            work = N.zeros((1,), N.Float)
+            iwork = N.zeros((8*min_n_m,), int_type)
+            result = dgesdd('S', 3*natoms, nmodes, self.basis, 3*natoms,
+                            sv, u, 3*natoms, vt, min_n_m,
+                            work, -1, iwork, 0)
+            work = N.zeros((int(work[0]),), N.Float)
+            result = dgesdd('S', 3*natoms, nmodes, self.basis, 3*natoms,
+                            sv, u, 3*natoms, vt, min_n_m,
+                            work, work.shape[0], iwork, 0)
             if result['info'] != 0:
                 raise ValueError('Lapack SVD: ' + `result['info']`)
+            self.basis[:min_n_m] = u
             svmax = N.maximum.reduce(sv)
             nmodes = N.add.reduce(N.greater(sv, 1.e-10*svmax))
             ntotal = nmodes

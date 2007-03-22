@@ -1,7 +1,7 @@
 # This module implements subspaces for motion analysis etc.
 #
 # Written by Konrad Hinsen
-# last revision: 2006-11-27
+# last revision: 2007-3-22
 #
 
 """This module implements subspaces for infinitesimal (or finite
@@ -12,20 +12,62 @@ for analyzing complex motions [Article:Hinsen1999a].
 
 import Utility, ParticleProperties
 from Scientific.Geometry import Vector
-from Scientific import N as Numeric
+from Scientific import N
 
+#
+# Import LAPACK routines
+#
+dgesdd = None
+try:
+    # Numeric
+    from lapack_lite import dgesdd, LapackError
+except ImportError: pass
+if dgesdd is None:
+    try:
+        # numpy
+        from numpy.linalg.lapack_lite import dgesdd, LapackError
+    except ImportError: pass
+if dgesdd is None:
+    try:
+        # PyLAPACK
+        from lapack_dge import dgesdd
+    except ImportError: pass
+if dgesdd:
+    n = 1
+    array = N.zeros((n, n), N.Float)
+    sv = N.zeros((n,), N.Float)
+    u = N.zeros((n, n), N.Float)
+    vt = N.zeros((n, n), N.Float)
+    work = N.zeros((1,), N.Float)
+    int_types = [N.Int, N.Int8, N.Int16, N.Int32]
+    try:
+        int_types.append(N.Int64)
+        int_types.append(N.Int128)
+    except AttributeError:
+        pass
+    for int_type in int_types:
+        iwork = N.zeros((1,), int_type)
+        try:
+            dgesdd('S', n, n, array, n, sv, u, n, vt, n, work, -1, iwork, 0)
+            break
+        except LapackError:
+            pass
+    del n, array, sv, u, vt, work, iwork, int_types
 
+#
+# A set of particle vectors that define a subspace
+#
 class ParticleVectorSet:
 
     def __init__(self, universe, data):
         self.universe = universe
-        if type(data) == Numeric.arraytype:
+        if type(data) == N.arraytype:
             self.n = data.shape[0]
             self.array = data
         else:
             self.n = data
-            self.array = Numeric.zeros((self.n, universe.numberOfAtoms(), 3),
-                                       Numeric.Float)
+            self.array = N.zeros((self.n, universe.numberOfAtoms(), 3),
+                                 N.Float)
 
     def __len__(self):
         return self.n
@@ -72,29 +114,31 @@ class Subspace:
         of Class:MMTK.ParticleVector objects that are orthonormal
         in configuration space."""
         if self._basis is None:
-            try:
-                from lapack_dge import dgesvd
-            except ImportError:
-                from lapack_mmtk import dgesvd
-            basis = Numeric.array(self.vectors, Numeric.Float)
+            basis = N.array(self.vectors, N.Float)
             shape = basis.shape
             nvectors = shape[0]
             natoms = shape[1]
             basis.shape = (nvectors, 3*natoms)
-            sv = Numeric.zeros((min(nvectors, 3*natoms),), Numeric.Float)
-            work = Numeric.zeros((max(3*min(3*natoms, nvectors)
-                                            + max(3*natoms, nvectors),
-                                      5*min(3*natoms, nvectors)),),
-                                 Numeric.Float)
-            dummy = Numeric.zeros((1,), Numeric.Float)
-            result = dgesvd('O', 'N', 3*natoms, nvectors, basis, 3*natoms,
-                            sv, dummy, 1, dummy, 1, work, work.shape[0], 0)
+            sv = N.zeros((min(nvectors, 3*natoms),), N.Float)
+            min_n_m = min(3*natoms, nvectors)
+            u = N.zeros((min_n_m, 3*natoms), N.Float)
+            vt = N.zeros((nvectors, min_n_m), N.Float)
+            work = N.zeros((1,), N.Float)
+            iwork = N.zeros((8*min_n_m,), int_type)
+            result = dgesdd('S', 3*natoms, nvectors, basis, 3*natoms,
+                            sv, u, 3*natoms, vt, min_n_m,
+                            work, -1, iwork, 0)
+            work = N.zeros((int(work[0]),), N.Float)
+            result = dgesdd('S', 3*natoms, nvectors, basis, 3*natoms,
+                            sv, u, 3*natoms, vt, min_n_m,
+                            work, work.shape[0], iwork, 0)
             if result['info'] != 0:
                 raise ValueError('Lapack SVD: ' + `result['info']`)
-            svmax = Numeric.maximum.reduce(sv)
-            nvectors = Numeric.add.reduce(Numeric.greater(sv, 1.e-10*svmax))
-            basis.shape = shape
-            self._basis = ParticleVectorSet(self.universe, basis[:nvectors])
+            svmax = N.maximum.reduce(sv)
+            nvectors = N.add.reduce(N.greater(sv, 1.e-10*svmax))
+            u = u[:nvectors]
+            u.shape = (nvectors, natoms, 3)
+            self._basis = ParticleVectorSet(self.universe, u)
         return self._basis
 
     def projectionOf(self, vector):
@@ -102,10 +146,9 @@ class Subspace:
         object) onto the subspace."""
         vector = vector.array
         basis = self.getBasis().array
-        p = Numeric.zeros(vector.shape, Numeric.Float)
+        p = N.zeros(vector.shape, N.Float)
         for bv in basis:
-            Numeric.add(Numeric.add.reduce(Numeric.ravel(bv*vector))*bv,
-                        p, p)
+            N.add(N.add.reduce(N.ravel(bv*vector))*bv, p, p)
         return ParticleProperties.ParticleVector(self.universe, p)
 
     def projectionComplementOf(self, vector):
@@ -143,7 +186,7 @@ class RigidMotionSubspace(Subspace):
                 v = ParticleProperties.ParticleVector(universe)
                 for a in atoms:
                     v[a] = d
-                vectors.append(v/Numeric.sqrt(len(atoms)))
+                vectors.append(v/N.sqrt(len(atoms)))
             if len(atoms) > 1:
                 center = o.centerOfMass()
                 iv = len(vectors)-3
@@ -153,7 +196,7 @@ class RigidMotionSubspace(Subspace):
                         v[a] = d.cross(a.position()-center)
                     for vt in vectors[iv:]:
                         v = v - v.dotProduct(vt)*vt
-                    vectors.append(v/Numeric.sqrt(v.dotProduct(v)))
+                    vectors.append(v/N.sqrt(v.dotProduct(v)))
         Subspace.__init__(self, universe, vectors)
         # The vector set is already orthonormal by construction
         # (assuming that the rigid bodies have no atoms in common),
@@ -161,7 +204,7 @@ class RigidMotionSubspace(Subspace):
         count = ParticleProperties.ParticleScalar(universe)
         for o in objects:
             count = count + o.booleanMask()
-        if Numeric.maximum.reduce(count.array) == 1:
+        if N.maximum.reduce(count.array) == 1:
             self._basis = ParticleVectorSet(universe, len(vectors))
             for i in range(len(vectors)):
                 self._basis.array[i] = vectors[i].array
