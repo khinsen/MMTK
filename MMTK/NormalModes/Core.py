@@ -1,7 +1,7 @@
 # Common aspect of normal mode calculations.
 #
 # Written by Konrad Hinsen
-# last revision: 2006-11-27
+# last revision: 2007-3-22
 #
 
 _undocumented = 1
@@ -9,6 +9,45 @@ _undocumented = 1
 from MMTK import Units, ParticleProperties, Visualization
 from Scientific import N
 import copy
+
+#
+# Import LAPACK routines
+#
+dsyevd = None
+try:
+    # Numeric
+    from lapack_lite import dsyevd, LapackError
+except ImportError: pass
+if dsyevd is None:
+    try:
+        # numpy
+        from numpy.linalg.lapack_lite import dsyevd, LapackError
+    except ImportError: pass
+if dsyevd is None:
+    try:
+        # PyLAPACK
+        from lapack_dsy import dsyevd, LapackError
+    except ImportError: pass
+if dsyevd is None:
+    from Scientific.LA import Heigenvectors
+else:
+    n = 1
+    array = N.zeros((n, n), N.Float)
+    ev = N.zeros((n,), N.Float)
+    work = N.zeros((1,), N.Float)
+    int_types = [N.Int, N.Int32]
+    try:
+        int_types.append(N.Int64)
+    except AttributeError:
+        pass
+    for int_type in int_types:
+        iwork = N.zeros((1,), N.Int)
+        try:
+            dsyevd('V', 'L', n, array, n, ev, work, -1, iwork, -1, 0)
+            break
+        except LapackError:
+            pass
+    del n, array, ev, work, iwork, int_types
 
 #
 # Class for a single mode
@@ -168,29 +207,27 @@ class NormalModes:
             self.array = eigenvectors[:self.nmodes]
             return eigenvalues
 
-        dsyev = None
-        try:
-            from lapack_dsy import dsyev
-        except ImportError: pass
-        if dsyev is None:
-            try:
-                from lapack_mmtk import dsyev
-            except ImportError: pass
-        if dsyev is None:
-            from Scientific.LA import eigenvectors
-            _symmetrize(self.array)
-            ev, modes = eigenvectors(self.array)
+        # Calculate eigenvalues and eigenvectors of self.array
+        if dsyevd is None:
+            ev, modes = Heigenvectors(self.array)
             self.array = modes
             ev = ev.real
             modes = modes.real
         else:
             ev = N.zeros((self.nmodes,), N.Float)
-            lwork = 3*self.nmodes
+            work = N.zeros((1,), N.Float)
+            iwork = N.zeros((1,), int_type)
+            results = dsyevd('V', 'L', self.nmodes, self.array, self.nmodes,
+                             ev, work, -1, iwork, -1, 0)
+            lwork = int(work[0])
+            liwork = iwork[0]
             work = N.zeros((lwork,), N.Float)
-            results = dsyev('V', 'L', self.nmodes, self.array, self.nmodes,
-                            ev, work, lwork, 0)
+            iwork = N.zeros((liwork,), int_type)
+            results = dsyevd('V', 'L', self.nmodes, self.array, self.nmodes,
+                             ev, work, lwork, iwork, liwork, 0)
             if results['info'] > 0:
                 raise ValueError('Eigenvalue calculation did not converge')
+
         if self.basis is not None:
             self.array = N.dot(self.array, self.basis)
         return ev
