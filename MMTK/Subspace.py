@@ -114,7 +114,7 @@ class Subspace:
         of Class:MMTK.ParticleVector objects that are orthonormal
         in configuration space."""
         if self._basis is None:
-            basis = N.array(self.vectors, N.Float)
+            basis = N.array([v.array for v in self.vectors], N.Float)
             shape = basis.shape
             nvectors = shape[0]
             natoms = shape[1]
