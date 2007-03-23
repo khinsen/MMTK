@@ -1,7 +1,7 @@
 # Common aspects of normal mode calculations.
 #
 # Written by Konrad Hinsen
-# last revision: 2007-3-22
+# last revision: 2007-3-23
 #
 
 _undocumented = 1
@@ -251,45 +251,63 @@ class NormalModes:
         natoms = len(basis[0])
 
         sv = N.zeros((min(ntotal, 3*natoms),), N.Float)
+        work_size = N.zeros((1,), N.Float)
         if nexcluded > 0:
             self.basis = N.zeros((ntotal, 3*natoms), N.Float)
             for i in range(nexcluded):
                 self.basis[i] = N.ravel(excluded[i].array*self.weights)
             min_n_m = min(3*natoms, nexcluded)
-            u = N.zeros((min_n_m, 3*natoms), N.Float)
             vt = N.zeros((nexcluded, min_n_m), N.Float)
-            work = N.zeros((1,), N.Float)
             iwork = N.zeros((8*min_n_m,), int_type)
-            result = dgesdd('S', 3*natoms, nexcluded, self.basis,
-                            3*natoms, sv, u, 3*natoms, vt, min_n_m,
-                            work, -1, iwork, 0)
-            work = N.zeros((int(work[0]),), N.Float)
-            result = dgesdd('S', 3*natoms, nexcluded, self.basis,
-                            3*natoms, sv, u, 3*natoms, vt, min_n_m,
-                            work, work.shape[0], iwork, 0)
+            if 3*natoms >= nexcluded:
+                result = dgesdd('O', 3*natoms, nexcluded, self.basis,
+                                3*natoms, sv, self.basis, 3*natoms, vt, min_n_m,
+                                work_size, -1, iwork, 0)
+                work = N.zeros((int(work_size[0]),), N.Float)
+                result = dgesdd('O', 3*natoms, nexcluded, self.basis,
+                                3*natoms, sv, self.basis, 3*natoms, vt, min_n_m,
+                                work, work.shape[0], iwork, 0)
+            else:
+                u = N.zeros((min_n_m, 3*natoms), N.Float)
+                result = dgesdd('S', 3*natoms, nexcluded, self.basis,
+                                3*natoms, sv, u, 3*natoms, vt, min_n_m,
+                                work_size, -1, iwork, 0)
+                work = N.zeros((int(work_size[0]),), N.Float)
+                result = dgesdd('S', 3*natoms, nexcluded, self.basis,
+                                3*natoms, sv, u, 3*natoms, vt, min_n_m,
+                                work, work.shape[0], iwork, 0)
+                self.basis[:min_n_m] = u
             if result['info'] != 0:
                 raise ValueError('Lapack SVD: ' + `result['info']`)
-            self.basis[:min_n_m] = u
             svmax = N.maximum.reduce(sv)
-            nexcluded = N.add.reduce(N.greater(sv,
-                                                           1.e-10*svmax))
+            nexcluded = N.add.reduce(N.greater(sv, 1.e-10*svmax))
             ntotal = nexcluded + nmodes
             for i in range(nmodes):
                 self.basis[i+nexcluded] = N.ravel(basis[i].array*self.weights)
             min_n_m = min(3*natoms, ntotal)
-            u = N.zeros((min_n_m, 3*natoms), N.Float)
             vt = N.zeros((ntotal, min_n_m), N.Float)
-            work = N.zeros((1,), N.Float)
-            result = dgesdd('S', 3*natoms, ntotal, self.basis, 3*natoms,
-                            sv, u, 3*natoms, vt, min_n_m,
-                            work, -1, iwork, 0)
-            work = N.zeros((int(work[0]),), N.Float)
-            result = dgesdd('S', 3*natoms, ntotal, self.basis, 3*natoms,
-                            sv, u, 3*natoms, vt, min_n_m,
-                            work, work.shape[0], iwork, 0)
+            if 3*natoms >= ntotal:
+                result = dgesdd('O', 3*natoms, ntotal, self.basis, 3*natoms,
+                                sv, self.basis, 3*natoms, vt, min_n_m,
+                                work_size, -1, iwork, 0)
+                if int(work_size[0]) > work.shape[0]:
+                    work = N.zeros((int(work_size[0]),), N.Float)
+                result = dgesdd('O', 3*natoms, ntotal, self.basis, 3*natoms,
+                                sv, self.basis, 3*natoms, vt, min_n_m,
+                                work, work.shape[0], iwork, 0)
+            else:
+                u = N.zeros((min_n_m, 3*natoms), N.Float)
+                result = dgesdd('S', 3*natoms, ntotal, self.basis, 3*natoms,
+                                sv, u, 3*natoms, vt, min_n_m,
+                                work_size, -1, iwork, 0)
+                if int(work_size[0]) > work.shape[0]:
+                    work = N.zeros((int(work_size[0]),), N.Float)
+                result = dgesdd('S', 3*natoms, ntotal, self.basis, 3*natoms,
+                                sv, u, 3*natoms, vt, min_n_m,
+                                work, work.shape[0], iwork, 0)
+                self.basis[:min_n_m] = u
             if result['info'] != 0:
                 raise ValueError('Lapack SVD: ' + `result['info']`)
-            self.basis[:min_n_m] = u
             svmax = N.maximum.reduce(sv)
             ntotal = N.add.reduce(N.greater(sv, 1.e-10*svmax))
             nmodes = ntotal - nexcluded
@@ -302,20 +320,28 @@ class NormalModes:
             N.multiply(self.basis, self.weights, self.basis)
             self.basis.shape = (nmodes, 3*natoms)
             min_n_m = min(3*natoms, nmodes)
-            u = N.zeros((min_n_m, 3*natoms), N.Float)
             vt = N.zeros((nmodes, min_n_m), N.Float)
-            work = N.zeros((1,), N.Float)
             iwork = N.zeros((8*min_n_m,), int_type)
-            result = dgesdd('S', 3*natoms, nmodes, self.basis, 3*natoms,
-                            sv, u, 3*natoms, vt, min_n_m,
-                            work, -1, iwork, 0)
-            work = N.zeros((int(work[0]),), N.Float)
-            result = dgesdd('S', 3*natoms, nmodes, self.basis, 3*natoms,
-                            sv, u, 3*natoms, vt, min_n_m,
-                            work, work.shape[0], iwork, 0)
+            if 3*natoms >= nmodes:
+                result = dgesdd('O', 3*natoms, nmodes, self.basis, 3*natoms,
+                                sv, self.basis, 3*natoms, vt, min_n_m,
+                                work_size, -1, iwork, 0)
+                work = N.zeros((int(work_size[0]),), N.Float)
+                result = dgesdd('O', 3*natoms, nmodes, self.basis, 3*natoms,
+                                sv, self.basis, 3*natoms, vt, min_n_m,
+                                work, work.shape[0], iwork, 0)
+            else:
+                u = N.zeros((min_n_m, 3*natoms), N.Float)
+                result = dgesdd('S', 3*natoms, nmodes, self.basis, 3*natoms,
+                                sv, u, 3*natoms, vt, min_n_m,
+                                work_size, -1, iwork, 0)
+                work = N.zeros((int(work_size[0]),), N.Float)
+                result = dgesdd('S', 3*natoms, nmodes, self.basis, 3*natoms,
+                                sv, u, 3*natoms, vt, min_n_m,
+                                work, work.shape[0], iwork, 0)
+                self.basis[:min_n_m] = u
             if result['info'] != 0:
                 raise ValueError('Lapack SVD: ' + `result['info']`)
-            self.basis[:min_n_m] = u
             svmax = N.maximum.reduce(sv)
             nmodes = N.add.reduce(N.greater(sv, 1.e-10*svmax))
             ntotal = nmodes

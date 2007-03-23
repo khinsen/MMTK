@@ -1,7 +1,7 @@
 # This module implements subspaces for motion analysis etc.
 #
 # Written by Konrad Hinsen
-# last revision: 2007-3-22
+# last revision: 2007-3-23
 #
 
 """This module implements subspaces for infinitesimal (or finite
@@ -121,17 +121,27 @@ class Subspace:
             basis.shape = (nvectors, 3*natoms)
             sv = N.zeros((min(nvectors, 3*natoms),), N.Float)
             min_n_m = min(3*natoms, nvectors)
-            u = N.zeros((min_n_m, 3*natoms), N.Float)
             vt = N.zeros((nvectors, min_n_m), N.Float)
             work = N.zeros((1,), N.Float)
             iwork = N.zeros((8*min_n_m,), int_type)
-            result = dgesdd('S', 3*natoms, nvectors, basis, 3*natoms,
-                            sv, u, 3*natoms, vt, min_n_m,
-                            work, -1, iwork, 0)
-            work = N.zeros((int(work[0]),), N.Float)
-            result = dgesdd('S', 3*natoms, nvectors, basis, 3*natoms,
-                            sv, u, 3*natoms, vt, min_n_m,
-                            work, work.shape[0], iwork, 0)
+            if 3*natoms >= nvectors:
+                result = dgesdd('O', 3*natoms, nvectors, basis, 3*natoms,
+                                sv, basis, 3*natoms, vt, min_n_m,
+                                work, -1, iwork, 0)
+                work = N.zeros((int(work[0]),), N.Float)
+                result = dgesdd('O', 3*natoms, nvectors, basis, 3*natoms,
+                                sv, basis, 3*natoms, vt, min_n_m,
+                                work, work.shape[0], iwork, 0)
+                u = basis
+            else:
+                u = N.zeros((min_n_m, 3*natoms), N.Float)
+                result = dgesdd('S', 3*natoms, nvectors, basis, 3*natoms,
+                                sv, u, 3*natoms, vt, min_n_m,
+                                work, -1, iwork, 0)
+                work = N.zeros((int(work[0]),), N.Float)
+                result = dgesdd('S', 3*natoms, nvectors, basis, 3*natoms,
+                                sv, u, 3*natoms, vt, min_n_m,
+                                work, work.shape[0], iwork, 0)
             if result['info'] != 0:
                 raise ValueError('Lapack SVD: ' + `result['info']`)
             svmax = N.maximum.reduce(sv)
