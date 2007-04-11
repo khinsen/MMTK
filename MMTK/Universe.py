@@ -4,7 +4,7 @@
 # (boundary conditions, external fields, etc.)
 #
 # Written by Konrad Hinsen
-# last revision: 2007-3-11
+# last revision: 2007-4-11
 #
 
 import Bonds, ChemicalObjects, Collections, Environment, \
@@ -335,16 +335,37 @@ class Universe(Collections.GroupOfAtoms, Visualization.Viewable):
         the positions in the configuration object will change when coordinate
         changes are applied to the universe in whatever way."""
         if self._configuration is None:
-            np = self.numberOfPoints()
+            np = self.numberOfAtoms()
             coordinates = N.zeros((np, 3), N.Float)
-            indices = range(np)
+            index_map = {}
             redef = []
             for a in self.atomList():
-                if not a.setArray(coordinates, indices):
+                if a.index is None or a.index > np:
                     redef.append(a)
-            for a in redef:
-                a.setArray(coordinates, indices[0:1])
-                del indices[0]
+                else:
+                    if index_map.get(a.index, None) is None:
+                        index_map[a.index] = a
+                    else:
+                        redef.append(a)
+            free_indices = [i for i in xrange(np)
+                            if index_map.get(i, None) is None]
+            assert len(free_indices) == len(redef)
+            for a, i in zip(redef, free_indices):
+                a.index = i
+            # At this point a.index runs from 0 to np-1 in the universe.
+            # We should now call a.setArray, but for efficiency
+            # resons a simplified version of that code is inlined here.
+            for a in self.atomList():
+                if a.array is None:
+                    try:
+                        coordinates[a.index, :] = a.pos.array
+                        del a.pos
+                    except AttributeError:
+                        coordinates[a.index, :] = Utility.undefined
+                else:
+                    coordinates[a.index, :] = a.array[a.index, :]
+                a.array = coordinates
+            # Define configuration object.
             self._configuration = 1 # a hack to prevent endless recursion
             self._configuration = \
                          ParticleProperties.Configuration(self, coordinates)
