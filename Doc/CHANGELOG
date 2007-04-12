@@ -1,3 +1,27 @@
+2.5.18 --> 2.5.19hg
+===================
+
+New features:
+
+- PDB.PDBConfiguration contains crystallographic information read from the
+  PDB file: the edge lengths of the cell (a, b, c, in units of nm), the
+  unit cell angles (alpha, beta, gamma, in units of radians),
+  the space group (space_group, a string), the crystallographic
+  symmetry transformations corresponding to the space group
+  (cs_transformations, a list of transformation objects), and the
+  non-crystallographic symmetry transformations (ncs_transformations,
+  a list of transformation objects). The transformations are transformed
+  to Cartesian coordinates, so they can be applied directly to the
+  atom positions.
+  This information is available only if ScientificPython >= 2.7.5 is
+  installed.
+
+Improvements:
+
+- universe.configuration() has been accelerated. The speedup can be
+  very important (a factor of ten), but in most situations it is rather
+  modest.
+
 2.5.17 --> 2.5.18
 =================
 
