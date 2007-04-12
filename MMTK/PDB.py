@@ -1,7 +1,7 @@
 # This module deals with input and output of configurations in PDB format.
 #
 # Written by Konrad Hinsen
-# last revision: 2006-6-8
+# last revision: 2007-4-12
 #
 
 """This module provides classes that represent molecules in PDB file.
@@ -176,6 +176,7 @@ class PDBConfiguration(Scientific.IO.PDB.Structure):
         Scientific.IO.PDB.Structure.__init__(self, filename,
                                              model, alternate_code)
         self._numberAtoms()
+        self._convertUnits()
 
     peptide_chain_constructor = PDBPeptideChain
     nucleotide_chain_constructor = PDBNucleotideChain
@@ -187,6 +188,37 @@ class PDBConfiguration(Scientific.IO.PDB.Structure):
             for atom in residue:
                 atom.number = n
                 n += 1
+
+    def _convertUnits(self):
+        # All these attributes exist only if ScientificPython >= 2.7.5 is used.
+        # The Scaling transformation was introduced with the same version,
+        # so if it exists, the rest should work as well.
+        try:
+            from Scientific.Geometry.Transformation import Scaling
+        except ImportError:
+            return
+        for attribute in ['a', 'b', 'c']:
+            value = getattr(self, attribute)
+            if value is not None:
+                setattr(self, attribute, value*Units.Ang)
+        for attribute in ['alpha', 'beta', 'gamma']:
+            value = getattr(self, attribute)
+            if value is not None:
+                setattr(self, attribute, value*Units.deg)
+        if self.to_fractional is not None:
+            self.to_fractional = self.to_fractional*Scaling(1./Units.Ang)
+        if self.from_fractional is not None:
+            self.from_fractional = Scaling(Units.Ang)*self.from_fractional
+        for i in range(len(self.ncs_transformations)):
+            tr = self.ncs_transformations[i]
+            tr_new = Scaling(Units.Ang)*tr*Scaling(1./Units.Ang)
+            tr_new.given = tr.given
+            tr_new.serial = tr.serial
+            self.ncs_transformations[i] = tr_new
+        for i in range(len(self.cs_transformations)):
+            tr = self.cs_transformations[i]
+            tr_new = Scaling(Units.Ang)*tr*Scaling(1./Units.Ang)
+            self.cs_transformations[i] = tr_new
 
     def createPeptideChains(self, model='all'):
         """Returns a list of PeptideChain objects, one for each
