@@ -9,9 +9,6 @@
 
 from MMTK import *
 from MMTK.PDB import PDBConfiguration
-from Scientific.Geometry.Transformation import Translation, Rotation, Scaling
-from Scientific.Geometry import Tensor
-from Scientific import N
 
 # A utility function that creates an image of an object by making
 # a copy and applying a transformation to the copy.
