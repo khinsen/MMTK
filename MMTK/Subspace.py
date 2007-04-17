@@ -1,7 +1,7 @@
 # This module implements subspaces for motion analysis etc.
 #
 # Written by Konrad Hinsen
-# last revision: 2007-3-23
+# last revision: 2007-4-17
 #
 
 """This module implements subspaces for infinitesimal (or finite
@@ -19,14 +19,11 @@ from Scientific import N
 #
 dgesdd = None
 try:
-    # Numeric
-    from lapack_lite import dgesdd, LapackError
-except ImportError: pass
-if dgesdd is None:
-    try:
-        # numpy
+    if N.package == "Numeric":
+        from lapack_lite import dgesdd, LapackError
+    else:
         from numpy.linalg.lapack_lite import dgesdd, LapackError
-    except ImportError: pass
+except ImportError: pass
 if dgesdd is None:
     try:
         # PyLAPACK

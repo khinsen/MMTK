@@ -18,6 +18,8 @@ New features:
 
 Improvements:
 
+- Improved NumPy compatibility.
+
 - universe.configuration() has been accelerated. The speedup can be
   very important (a factor of ten), but in most situations it is rather
   modest.

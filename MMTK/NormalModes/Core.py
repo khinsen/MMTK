@@ -1,7 +1,7 @@
 # Common aspects of normal mode calculations.
 #
 # Written by Konrad Hinsen
-# last revision: 2007-3-23
+# last revision: 2007-4-17
 #
 
 _undocumented = 1
@@ -16,14 +16,11 @@ import copy
 dsyevd = None
 dgesdd = None
 try:
-    # Numeric
-    from lapack_lite import dsyevd, dgesdd, LapackError
-except ImportError: pass
-if dsyevd is None or dgesdd is None:
-    try:
-        # numpy
+    if N.package == "Numeric":
+        from lapack_lite import dsyevd, dgesdd, LapackError
+    else:
         from numpy.linalg.lapack_lite import dsyevd, dgesdd, LapackError
-    except ImportError: pass
+except ImportError: pass
 if dsyevd is None:
     try:
         # PyLAPACK
