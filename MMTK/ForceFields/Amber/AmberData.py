@@ -1,7 +1,7 @@
 # This module handles input and application of Amber parameter files.
 #
 # Written by Konrad Hinsen
-# last revision: 2005-8-30
+# last revision: 2007-4-17
 #
 
 _undocumented = 1
@@ -429,7 +429,7 @@ class AmberLJParameterSet:
 # Utility functions
 #
 def _normalizeName(name):
-    return string.upper(string.strip(name))
+    return name.strip()
 
 def _sort(s1, s2):
     if s2 < s1:
