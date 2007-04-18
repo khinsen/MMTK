@@ -11,8 +11,20 @@ from Scientific import N
 import copy
 
 #
-# Import LAPACK routines
+# Import LAPACK routines or equivalents
 #
+symeig = None
+if N.package == "NumPy":
+    # Use symeig (http://mdp-toolkit.sourceforge.net/symeig.html)
+    # if it is installed and if NumPy is used (symeig works only
+    # with NumPy). Symeig uses the LAPACK routine dsyevr, which
+    # uses less memory than dsyevd. It is also said to be faster,
+    # but in my tests on the Mac it turned out to be slightly slower.
+    try:
+        from symeig import symeig
+    except ImportError:
+        pass
+
 dsyevd = None
 dgesdd = None
 try:
@@ -212,7 +224,11 @@ class NormalModes:
             return eigenvalues
 
         # Calculate eigenvalues and eigenvectors of self.array
-        if dsyevd is None:
+        if symeig is not None:
+            _symmetrize(self.array)
+            ev, modes = symeig(self.array, overwrite=True)
+            self.array = N.transpose(modes)
+        elif dsyevd is None:
             ev, modes = Heigenvectors(self.array)
             self.array = modes
             ev = ev.real

@@ -113,7 +113,7 @@ class PeptideTest(unittest.TestCase):
             self.assertAlmostEqual(norm_sq, 1.)
             for j in range(i+1, len(vmodes)):
                 overlap = mi.dotProduct(vmodes.rawMode(j))
-                self.assert_(overlap < 1.e-15)
+                self.assert_(overlap < 1.e-14)
         self.assertAlmostEqual(vmodes[6].norm(), 0.0571232913318908)
         self.assertAlmostEqual(vmodes[7].norm(), 0.0529117541861086)
         self.assertAlmostEqual(vmodes[8].norm(), 0.0400676921877648)
