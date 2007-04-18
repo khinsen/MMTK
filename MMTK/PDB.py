@@ -1,7 +1,7 @@
 # This module deals with input and output of configurations in PDB format.
 #
 # Written by Konrad Hinsen
-# last revision: 2007-4-12
+# last revision: 2007-4-18
 #
 
 """This module provides classes that represent molecules in PDB file.
@@ -22,7 +22,8 @@ import os, string
 #
 class PDBChain:
 
-    def applyTo(self, chain, map = 'pdbmap', alt = 'pdb_alternative'):
+    def applyTo(self, chain, map = 'pdbmap', alt = 'pdb_alternative',
+                atom_map = None):
         if len(chain) != len(self):
             raise ValueError("chain lengths do not match")
         for i in range(len(chain)):
@@ -30,7 +31,8 @@ class PDBChain:
             pdbmap = getattr(residue, map)
             try: altmap = getattr(residue, alt)
             except AttributeError: altmap = {}
-            setResidueConfiguration(residue, self[i], pdbmap[0], altmap)
+            setResidueConfiguration(residue, self[i], pdbmap[0], altmap,
+                                    atom_map)
     
 class PDBPeptideChain(Scientific.IO.PDB.PeptideChain, PDBChain):
 
@@ -49,7 +51,7 @@ class PDBPeptideChain(Scientific.IO.PDB.PeptideChain, PDBChain):
         """Returns a PeptideChain object corresponding to the
         peptide chain in the PDB file. The parameter |model|
         has the same meaning as for the PeptideChain constructor."""
-        self.identifyHistidines()
+        self.identifyProtonation()
         import Proteins
         properties = {'model': model}
         if self.segment_id != '':
@@ -67,25 +69,40 @@ class PDBPeptideChain(Scientific.IO.PDB.PeptideChain, PDBChain):
             chain.findHydrogenPositions()
         return chain
 
-    def identifyHistidines(self):
+    def identifyProtonation(self):
         for residue in self.residues:
-            if residue.name != 'HIS':
-                continue
-            count_hd = 0
-            count_he = 0
-            for atom in residue:
-                if 'HD' in atom.name:
-                    count_hd += 1
-                if 'HE' in atom.name:
-                    count_he += 1
-            if count_he == 2:
-                if count_hd == 2:
-                    residue.name = 'HIP'
+            if residue.name == 'HIS':
+                count_hd = 0
+                count_he = 0
+                for atom in residue:
+                    if 'HD' in atom.name:
+                        count_hd += 1
+                    if 'HE' in atom.name:
+                        count_he += 1
+                if count_he == 2:
+                    if count_hd == 2:
+                        residue.name = 'HIP'
+                    else:
+                        residue.name = 'HIE'
                 else:
-                    residue.name = 'HIE'
-            else:
-                residue.name = 'HID'
-                    
+                    residue.name = 'HID'
+            elif residue.name == 'GLU':
+                for atom in residue:
+                    if 'HE' in atom.name:
+                        residue.name = 'GLP'
+                        break
+            elif residue.name == 'ASP':
+                for atom in residue:
+                    if 'HD' in atom.name:
+                        residue.name = 'APP'
+                        break
+            elif residue.name == 'LYS':
+                count_hz = 0
+                for atom in residue:
+                    if 'HZ' in atom.name:
+                        count_hz += 1
+                if count_hz < 3:
+                    residue.name = 'LYP'
 
 class PDBNucleotideChain(Scientific.IO.PDB.NucleotideChain, PDBChain):
 
@@ -128,11 +145,12 @@ class PDBMolecule(Scientific.IO.PDB.Molecule):
     nucleotide residue.
     """
 
-    def applyTo(self, molecule, map = 'pdbmap', alt = 'pdb_alternative'):
+    def applyTo(self, molecule, map = 'pdbmap', alt = 'pdb_alternative',
+                atom_map = None):
         pdbmap = getattr(molecule, map)
         try: altmap = getattr(molecule, alt)
         except AttributeError: altmap = {}
-        setResidueConfiguration(molecule, self, pdbmap[0], altmap)
+        setResidueConfiguration(molecule, self, pdbmap[0], altmap, atom_map)
 
     def createMolecule(self, name=None):
         """Returns a Molecule object corresponding to the molecule
@@ -329,13 +347,13 @@ class PDBConfiguration(Scientific.IO.PDB.Structure):
         collection.addObject(molecules)
         return collection
 
-    def applyTo(self, object):
+    def applyTo(self, object, atom_map=None):
         """Sets the configuration of |object| from the coordinates in the
         PDB file. The object must be compatible with the PDB file, i.e.
         contain the same subobjects and in the same order. This is usually
         only guaranteed if the object was created by the method
         createAll() from a PDB file with the same layout."""
-        setConfiguration(object, self.residues)
+        setConfiguration(object, self.residues, atom_map=atom_map)
 
 #
 # An alternative name for compatibility in Database files.
@@ -345,7 +363,8 @@ PDBFile = PDBConfiguration
 #
 # Set atom coordinates from PDB configuration.
 #
-def setResidueConfiguration(object, pdb_residue, pdbmap, altmap):
+def setResidueConfiguration(object, pdb_residue, pdbmap, altmap,
+                            atom_map = None):
     defined = 0
     for atom in pdb_residue:
         name = atom.name
@@ -365,25 +384,27 @@ def setResidueConfiguration(object, pdb_residue, pdbmap, altmap):
                 object.setIndex(pdbname, atom.number-1)
             except ValueError:
                 pass
+            if atom_map is not None:
+                atom_map[object.getAtom(pdbname)] = atom
             defined = defined + 1
     return defined
 
 def setConfiguration(object, pdb_residues,
                      map = 'pdbmap', alt = 'pdb_alternative',
-                     toplevel = 1):
+                     atom_map = None, toplevel = 1):
     defined = 0
     if hasattr(object, 'is_protein'):
         i = 0
         for chain in object:
             l = len(chain)
             defined = defined + setConfiguration(chain, pdb_residues[i:i+l],
-                                                 map, alt, 0)
+                                                 map, alt, atom_map, 0)
             i = i + l
     elif hasattr(object, 'is_chain'):
         for i in range(len(object)):
             defined = defined + setConfiguration(object[i],
                                                  pdb_residues[i:i+1],
-                                                 map, alt, 0)
+                                                 map, alt, atom_map, 0)
     elif hasattr(object, map):
         pdbmap = getattr(object, map)
         try: altmap = getattr(object, alt)
@@ -395,7 +416,8 @@ def setConfiguration(object, pdb_residues,
         for i in range(nres):
             defined = defined + setResidueConfiguration(object,
                                                         pdb_residues[i],
-                                                        pdbmap[i], altmap)
+                                                        pdbmap[i], altmap,
+                                                        atom_map)
     elif Collections.isCollection(object):
         nres = len(pdb_residues)
         if len(object) != nres:
@@ -403,7 +425,7 @@ def setConfiguration(object, pdb_residues,
                            object.fullName())
         for i in range(nres):
             defined = defined + setConfiguration(object[i], [pdb_residues[i]],
-                                                 map, alt, 0)
+                                                 map, alt, atom_map, 0)
     else:
         try:
             name = object.fullName()

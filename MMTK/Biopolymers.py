@@ -2,7 +2,7 @@
 # nucleic acid chains.
 #
 # Written by Konrad Hinsen
-# last revision: 2005-9-26
+# last revision: 2007-4-18
 #
 
 import Bonds, ChemicalObjects, Collections, Database, PDB
@@ -136,10 +136,13 @@ _residue_names = {'ala': 'alanine',          'a': 'alanine',
                   'tyr': 'tyrosine',         'y': 'tyrosine',
                   'val': 'valine',           'v': 'valine',
                   'cyx': 'cystine_ss',
+                  'app': 'aspartic_acid_neutral',
+                  'glp': 'glutamic_acid_neutral',
                   'hsd': 'histidine_deltah', 'hse': 'histidine_epsilonh',
                   'hsp': 'histidine_plus',
                   'hid': 'histidine_deltah', 'hie': 'histidine_epsilonh',
                   'hip': 'histidine_plus',
+                  'lyp': 'lysine_neutral',
                   'ace': 'ace_beginning',    'nme': 'nmethyl',
                   'nhe': 'amide',
 
