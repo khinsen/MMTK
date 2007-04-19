@@ -4,7 +4,7 @@
 # (boundary conditions, external fields, etc.)
 #
 # Written by Konrad Hinsen
-# last revision: 2007-4-11
+# last revision: 2007-4-19
 #
 
 import Bonds, ChemicalObjects, Collections, Environment, \
@@ -340,7 +340,7 @@ class Universe(Collections.GroupOfAtoms, Visualization.Viewable):
             index_map = {}
             redef = []
             for a in self.atomList():
-                if a.index is None or a.index > np:
+                if a.index is None or a.index >= np:
                     redef.append(a)
                 else:
                     if index_map.get(a.index, None) is None:
