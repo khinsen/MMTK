@@ -2,7 +2,7 @@
 # simulation, i.e. configurations, force vectors, etc.
 #
 # Written by Konrad Hinsen
-# last revision: 2006-11-27
+# last revision: 2007-4-23
 #
 
 from MMTK import Utility
@@ -350,6 +350,11 @@ class Configuration(ParticleVector):
     def __sub__(self, other):
         value = ParticleVector.__sub__(self, other)
         return Configuration(self.universe, value.array, self.cell_parameters)
+
+    def __copy__(self, memo = None):
+        return self.__class__(self.universe, copy.copy(self.array),
+                              copy.copy(self.cell_parameters))
+    __deepcopy__ = __copy__
 
     def hasValidPositions(self):
         return N.logical_and.reduce(N.ravel(N.less(self.array,

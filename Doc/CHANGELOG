@@ -1,3 +1,13 @@
+2.5.19 --> 2.5.20hg
+===================
+
+Bug fixes:
+
+- When Configuration objects were copied, the cell parameters were not copied.
+  The copy contained the cell parameters of the current configuration of the
+  universe instead.
+
+
 2.5.18 --> 2.5.19
 =================
 
