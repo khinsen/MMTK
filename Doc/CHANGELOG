@@ -1,5 +1,5 @@
-2.5.18 --> 2.5.19hg
-===================
+2.5.18 --> 2.5.19
+=================
 
 New features:
 
@@ -20,9 +20,18 @@ Improvements:
 
 - Improved NumPy compatibility.
 
+- Use the symeig package for normal modes if it is installed.
+
 - universe.configuration() has been accelerated. The speedup can be
   very important (a factor of ten), but in most situations it is rather
   modest.
+
+- AMBER atom types are handled as case-sensitive, as is done by the
+  AMBER program.
+
+- Better identification of protonation states in PDB files that contain
+  hydrogens.
+
 
 2.5.17 --> 2.5.18
 =================
