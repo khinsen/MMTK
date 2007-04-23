@@ -40,7 +40,11 @@ if os.path.exists('/usr/local/include/netcdf.h'):
     include_dirs.append('/usr/local/include')
 
 from Scientific import N
-if N.package == "NumPy":
+try:
+    num_package = N.package
+except AttributeError:
+    num_package = "Numeric"
+if num_package == "NumPy":
     compile_args.append("-DNUMPY=1")
     include_dirs.append(os.path.join(sys.prefix,
                             "lib/python%s.%s/site-packages/numpy/core/include"
