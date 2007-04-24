@@ -1,7 +1,7 @@
 /* Low-level functions for universes
  *
  * Written by Konrad Hinsen
- * last revision: 2006-5-30
+ * last revision: 2007-4-23
  */
 
 #define _UNIVERSE_MODULE
@@ -12,6 +12,58 @@
 
 #define DEBUG 0
 #define THREAD_DEBUG 0
+
+
+/*
+ * Utility functions
+ * /
+
+/* Calculate determinant and inverse of the coordinate transformation
+ * matrix for parallelepipedic universes.
+ */
+static void
+parallelepiped_invert(double *data)
+{
+  int i;
+
+  data[9+0] = data[4]*data[8]-data[7]*data[5];
+  data[9+3] = data[6]*data[5]-data[3]*data[8];
+  data[9+6] = data[3]*data[7]-data[6]*data[4];
+  data[9+1] = data[7]*data[2]-data[1]*data[8];
+  data[9+4] = data[0]*data[8]-data[6]*data[2];
+  data[9+7] = data[6]*data[1]-data[0]*data[7];
+  data[9+2] = data[1]*data[5]-data[4]*data[2];
+  data[9+5] = data[3]*data[2]-data[0]*data[5];
+  data[9+8] = data[0]*data[4]-data[3]*data[1];
+
+  data[18] = data[0]*data[9+0]+data[1]*data[9+3]+data[2]*data[9+6];
+  if (fabs(data[18]) > 0.) {
+    double r = 1./data[18];
+    for (i = 0; i < 9; i++)
+      data[i+9] *= r;
+  }
+  else {
+    for (i = 0; i < 9; i++)
+      data[i+9] = 0.;
+  }
+}
+
+static PyObject *
+parallelepiped_invert_py(PyObject *dummy, PyObject *args)
+{
+  PyArrayObject *geometry;
+
+  if (!PyArg_ParseTuple(args, "O!",
+			&PyArray_Type, &geometry))
+    return NULL;
+  if (geometry->nd != 1 || geometry->dimensions[0] != 19) {
+    PyErr_SetString(PyExc_ValueError, "Bad universe data shape");
+    return NULL;
+  }
+  parallelepiped_invert((double *)geometry->data);
+  Py_INCREF(Py_None);
+  return Py_None;
+}
 
 /*
  * Distance vector functions
@@ -26,6 +78,13 @@ static void
 orthorhombic_distance_vector(vector3 d, vector3 r1, vector3 r2, double *data)
 {
   distance_vector_2(d, r1, r2, data);
+}
+
+static void
+parallelepipedic_distance_vector(vector3 d, vector3 r1, vector3 r2,
+				 double *data)
+{
+  distance_vector_3(d, r1, r2, data);
 }
 
 /*
@@ -93,6 +152,28 @@ orthorhombic_correction(vector3 *x, int natoms, double *data)
 #endif
 }
 
+static void
+parallelepipedic_correction(vector3 *x, int natoms, double *data)
+{
+  double xf, yf, zf;
+  int i;
+
+  for (i = 0; i < natoms; i++) {
+    xf = data[0+9]*x[i][0] + data[1+9]*x[i][1] + data[2+9]*x[i][2];
+    yf = data[3+9]*x[i][0] + data[4+9]*x[i][1] + data[5+9]*x[i][2];
+    zf = data[6+9]*x[i][0] + data[7+9]*x[i][1] + data[8+9]*x[i][2];
+    while (xf > 0.5) xf -= 1.;
+    while (xf < -0.5) xf += 1.;
+    while (yf > 0.5) yf -= 1.;
+    while (yf < -0.5) yf += 1.;
+    while (zf > 0.5) zf -= 1.;
+    while (zf < -0.5) zf += 1.;
+    x[i][0] = data[0]*xf + data[1]*yf + data[2]*zf;
+    x[i][1] = data[3]*xf + data[4]*yf + data[5]*zf;
+    x[i][2] = data[6]*xf + data[7]*yf + data[8]*zf;
+  }
+}
+
 /*
  * Volume scaling functions
  */
@@ -109,6 +190,18 @@ orthorhombic_volume(double scale_factor, double *data)
   data[1] *= scale_factor;
   data[2] *= scale_factor;
   return data[0]*data[1]*data[2];
+}
+
+static double
+parallelepipedic_volume(double scale_factor, double *data)
+{
+  int i;
+  for (i = 0; i < 9; i++)
+    data[i] *= scale_factor;
+  for (i = 9; i < 18; i++)
+    data[i] /= scale_factor;
+  data[18] *= scale_factor*scale_factor*scale_factor;
+  return fabs(data[18]);
 }
 
 /*
@@ -134,6 +227,24 @@ orthorhombic_box(vector3 *x, vector3 *b, int n, double *data, int to_box)
       x[i][0] = b[i][0]*data[0];
       x[i][1] = b[i][1]*data[1];
       x[i][2] = b[i][2]*data[2];
+    }
+}
+
+static void
+parallelepipedic_box(vector3 *x, vector3 *b, int n, double *data, int to_box)
+{
+  int i;
+  if (to_box)
+    for (i = 0; i < n; i++) {
+      b[i][0] = data[0+9]*x[i][0] + data[1+9]*x[i][1] + data[2+9]*x[i][2];
+      b[i][1] = data[3+9]*x[i][0] + data[4+9]*x[i][1] + data[5+9]*x[i][2];
+      b[i][2] = data[6+9]*x[i][0] + data[7+9]*x[i][1] + data[8+9]*x[i][2];
+    }
+  else
+    for (i = 0; i < n; i++) {
+      x[i][0] = data[0]*b[i][0] + data[1]*b[i][1] + data[2]*b[i][2];
+      x[i][1] = data[3]*b[i][0] + data[4]*b[i][1] + data[5]*b[i][2];
+      x[i][2] = data[6]*b[i][0] + data[7]*b[i][1] + data[8]*b[i][2];
     }
 }
 
@@ -164,6 +275,29 @@ orthorhombic_trajectory(vector3 *x, vector3 *b, int nsteps,
     }
 }
 
+static void
+parallelepipedic_trajectory(vector3 *x, vector3 *b, int nsteps,
+			    double *data, int to_box)
+{
+  double ud[19];
+  int i, j;
+  if (to_box)
+    for (i = 0; i < nsteps; i++) {
+      for (j = 0; j < 9; j++)
+	ud[j] = data[9*i+j];
+      parallelepiped_invert(ud);
+      b[i][0] = ud[0+9]*x[i][0] + ud[1+9]*x[i][1] + ud[2+9]*x[i][2];
+      b[i][1] = ud[3+9]*x[i][0] + ud[4+9]*x[i][1] + ud[5+9]*x[i][2];
+      b[i][2] = ud[6+9]*x[i][0] + ud[7+9]*x[i][1] + ud[8+9]*x[i][2];
+    }
+  else
+    for (i = 0; i < nsteps; i++) {
+      x[i][0] = data[9*i+0]*b[i][0] + data[9*i+1]*b[i][1] + data[9*i+2]*b[i][2];
+      x[i][1] = data[9*i+3]*b[i][0] + data[9*i+4]*b[i][1] + data[9*i+5]*b[i][2];
+      x[i][2] = data[9*i+6]*b[i][0] + data[9*i+7]*b[i][1] + data[9*i+8]*b[i][2];
+    }
+}
+
 /*
  * Bounding box functions
  */
@@ -191,6 +325,17 @@ orthorhombic_bounding_box(vector3 *box1, vector3 *box2, vector3 *x,
   (*box2)[0] = 0.5*data[0];
   (*box2)[1] = 0.5*data[1];
   (*box2)[2] = 0.5*data[2];
+  (*box1)[0] = -(*box2)[0];
+  (*box1)[1] = -(*box2)[1];
+  (*box1)[2] = -(*box2)[2];
+}
+static void
+parallelepipedic_bounding_box(vector3 *box1, vector3 *box2, vector3 *x,
+			      int n, double *data)
+{
+  (*box2)[0] = 0.5*(data[0]+data[3]+data[6]);
+  (*box2)[1] = 0.5*(data[1]+data[4]+data[7]);
+  (*box2)[2] = 0.5*(data[2]+data[5]+data[8]);
   (*box1)[0] = -(*box2)[0];
   (*box1)[1] = -(*box2)[1];
   (*box1)[2] = -(*box2)[2];
@@ -625,6 +770,35 @@ OrthorhombicPeriodicUniverseSpec(PyObject *dummy, PyObject *args)
   return (PyObject *)new;
 }
 
+static PyObject *
+ParallelepipedicPeriodicUniverseSpec(PyObject *dummy, PyObject *args)
+{
+  PyUniverseSpecObject *new;
+  PyArrayObject *geometry;
+  if (!PyArg_ParseTuple(args, "O!", &PyArray_Type, &geometry))
+    return NULL;
+  if (geometry->nd != 1 || geometry->dimensions[0] != 19) {
+    PyErr_SetString(PyExc_ValueError, "Bad universe data shape");
+    return NULL;
+  }
+  new = universe_new();
+  if (new == NULL)
+    return NULL;
+  new->geometry = geometry;
+  Py_INCREF(geometry);
+  new->geometry_data = (double *)new->geometry->data;
+  new->geometry_data_length = 9;
+  parallelepiped_invert(new->geometry_data);
+  new->distance_function = parallelepipedic_distance_vector;
+  new->correction_function = parallelepipedic_correction;
+  new->volume_function = parallelepipedic_volume;
+  new->box_function = parallelepipedic_box;
+  new->trajectory_function = parallelepipedic_trajectory;
+  new->bounding_box_function = parallelepipedic_bounding_box;
+  new->is_periodic = 1;
+  return (PyObject *)new;
+}
+
 /*
  * Find offset to be added to each atom position to make all atoms
  * contiguous in spite of periodic boundary conditions.
@@ -674,83 +848,14 @@ contiguous_object_offset(PyObject *dummy, PyObject *args)
   return Py_None;
 }
 
-#if 0
-static PyObject *
-contiguous_object_offset(PyObject *dummy, PyObject *args)
-{
-  PyUniverseSpecObject *spec;
-  PyArrayObject *atoms, *conf, *masses, *offsets;
-  PyArrayObject *geometry = NULL;
-  double *geometry_data;
-  vector3 center, cms;
-  long *a;
-  vector3 *x, *o;
-  double *m;
-  int natoms;
-  double mass = 0.;
-  int i;
-
-  if (!PyArg_ParseTuple(args, "O!O!O!O!O!|O!",
-			&PyUniverseSpec_Type, &spec,
-			&PyArray_Type, &atoms,
-			&PyArray_Type, &conf,
-			&PyArray_Type, &masses,
-                        &PyArray_Type, &offsets,
-			&PyArray_Type, &geometry))
-    return NULL;
-
-  if (geometry == NULL)
-    geometry_data = spec->geometry_data;
-  else
-    geometry_data = (double *)geometry->data;
-  natoms = atoms->dimensions[0];
-  a = (long *)atoms->data;
-  m = (double *)masses->data;
-  x = (vector3 *)conf->data;
-  o = (vector3 *)offsets->data;
-  cms[0] = m[a[0]]*x[a[0]][0];
-  cms[1] = m[a[0]]*x[a[0]][1];
-  cms[2] = m[a[0]]*x[a[0]][2];
-  mass = m[a[0]];
-  for (i = 1; i < natoms; i++) {
-    int ai = a[i];
-    vector3 d;
-    center[0] = cms[0]/mass;
-    center[1] = cms[1]/mass;
-    center[2] = cms[2]/mass;
-    spec->distance_function(d, center, x[ai], geometry_data);
-    o[ai][0] = d[0] + center[0] - x[ai][0];
-    o[ai][1] = d[1] + center[1] - x[ai][1];
-    o[ai][2] = d[2] + center[2] - x[ai][2];
-    cms[0] += m[ai]*(x[ai][0]+o[ai][0]);
-    cms[1] += m[ai]*(x[ai][1]+o[ai][1]);
-    cms[2] += m[ai]*(x[ai][2]+o[ai][2]);
-    mass += m[ai];
-  }
-  center[0] = cms[0]/mass;
-  center[1] = cms[1]/mass;
-  center[2] = cms[2]/mass;
-  vector_copy(cms, center);
-  spec->correction_function(&center, 1, geometry_data);
-  if (cms[0] != center[0] || cms[1] != center[1] || cms[2] != center[2]) {
-    for (i = 0; i < natoms; i++) {
-      int ai = a[i];
-      o[ai][0] += center[0]-cms[0];
-      o[ai][1] += center[1]-cms[1];
-      o[ai][2] += center[2]-cms[2];
-    }
-  }
-  Py_INCREF(Py_None);
-  return Py_None;
-}
-#endif
-
 /*
  * Module method table
  */
 static PyMethodDef universe_module_methods[] = {
   {"InfiniteUniverseSpec", InfiniteUniverseSpec, 1},
   {"OrthorhombicPeriodicUniverseSpec", OrthorhombicPeriodicUniverseSpec, 1},
+  {"ParallelepipedicPeriodicUniverseSpec", ParallelepipedicPeriodicUniverseSpec, 1},
+  {"parallelepiped_invert", parallelepiped_invert_py, 1},
   {"contiguous_object_offset", contiguous_object_offset, 1},
   {NULL, NULL}		/* sentinel */
 };
@@ -807,6 +912,19 @@ initMMTK_universe(void)
 					     NULL));
   PyDict_SetItemString(d, "orthorhombic_universe_box_transformation",
 		       PyCObject_FromVoidPtr((void *) orthorhombic_box,
+					     NULL));
+  PyDict_SetItemString(d, "parallelepipedic_universe_distance_function",
+		       PyCObject_FromVoidPtr((void *)
+					     parallelepipedic_distance_vector,
+					     NULL));
+  PyDict_SetItemString(d, "parallelepipedic_universe_correction_function",
+		       PyCObject_FromVoidPtr((void *) parallelepipedic_correction,
+					     NULL));
+  PyDict_SetItemString(d, "parallelepipedic_universe_volume_function",
+		       PyCObject_FromVoidPtr((void *) parallelepipedic_volume,
+					     NULL));
+  PyDict_SetItemString(d, "parallelepipedic_universe_box_transformation",
+		       PyCObject_FromVoidPtr((void *) parallelepipedic_box,
 					     NULL));
 
   /* Check for errors */

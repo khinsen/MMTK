@@ -4,7 +4,7 @@
 # (boundary conditions, external fields, etc.)
 #
 # Written by Konrad Hinsen
-# last revision: 2007-4-19
+# last revision: 2007-4-24
 #
 
 import Bonds, ChemicalObjects, Collections, Environment, \
@@ -1019,45 +1019,9 @@ class InfiniteUniverse(Universe):
         return 'topology="infinite"'
 
 #
-# Orthorhombic universe with periodic boundary conditions
+# 3D periodic universe base class
 #
-class OrthorhombicPeriodicUniverse(Universe):
-
-    """Periodic universe with orthorhombic elementary cell.
-
-    A Glossary:Subclass of Class:MMTK.Universe.Universe.
-
-    Constructor: OrthorhombicPeriodicUniverse(|shape|, |forcefield|=None)
-
-    Arguments:
-    
-    |shape| -- a sequence of length three specifying the edge
-               lengths along the x, y, and z directions
-
-    |forcefield| -- a force field object, or 'None' for no force field
-    """
-
-    def __init__(self, size = None, forcefield = None, **properties):
-        Universe.__init__(self, forcefield, properties)
-        self.data = N.zeros((3,), N.Float)
-        if size is not None:
-            self.setSize(size)
-        self._createSpec()
-
-    is_periodic = 1
-
-    def __setstate__(self, state):
-        Universe.__setstate__(self, state)
-        if len(self.data.shape) == 2:
-            self.data = self.data[0]
-
-    def setSize(self, size):
-        self.data[:] = size
-
-    def scaleSize(self, factor):
-        "Multiplies all edge lengths by |factor|."
-        self.data[:] = factor*self.data
-        self._spec.foldCoordinatesIntoBox(self.configuration().array)
+class Periodic3DUniverse(Universe):
 
     def setVolume(self, volume):
         """Multiplies all edge lengths by the same factor such that the cell
@@ -1067,71 +1031,15 @@ class OrthorhombicPeriodicUniverse(Universe):
 
     def foldCoordinatesIntoBox(self):
         self._spec.foldCoordinatesIntoBox(self.configuration().array)
-
-    def setCellParameters(self, parameters):
-        if parameters is not None:
-            self.data[:] = parameters
-
-    def realToBoxCoordinates(self, vector):
-        x, y, z = vector
-        return Vector(x/self.data[0],
-                      y/self.data[1],
-                      z/self.data[2])
-
-    def boxToRealCoordinates(self, vector):
-        x, y, z = vector
-        return Vector(x*self.data[0],
-                      y*self.data[1],
-                      z*self.data[2])
-
-    def _realToBoxPointArray(self, array, parameters=None):
-        if parameters is None:
-            parameters = self.data
-        if parameters.shape == (3,):
-            parameters = parameters[N.NewAxis, :]
-        return array/parameters
-
-    def _boxToRealPointArray(self, array, parameters=None):
-        if parameters is None:
-            parameters = self.data
-        if parameters.shape == (3,):
-            parameters = parameters[N.NewAxis, :]
-        return array*parameters
-
-    def CdistanceFunction(self):
-        from MMTK_universe import orthorhombic_universe_distance_function
-        return orthorhombic_universe_distance_function, self.data
-
-    def CcorrectionFunction(self):
-        from MMTK_universe import orthorhombic_universe_correction_function
-        return orthorhombic_universe_correction_function, self.data
-
-    def CvolumeFunction(self):
-        from MMTK_universe import orthorhombic_universe_volume_function
-        return orthorhombic_universe_volume_function, self.data
-
-    def CboxTransformationFunction(self):
-        from MMTK_universe import orthorhombic_universe_box_transformation
-        return orthorhombic_universe_box_transformation, self.data
-
-    def cellParameters(self):
-        return self.data
-
+    
     def basisVectors(self):
-        return [self.data[0]*Vector(1., 0., 0.),
-                self.data[1]*Vector(0., 1., 0.),
-                self.data[2]*Vector(0., 0., 1.)]
+        return [self.boxToRealCoordinates(Vector(1., 0., 0.)),
+                self.boxToRealCoordinates(Vector(0., 1., 0.)),
+                self.boxToRealCoordinates(Vector(0., 0., 1.))]
 
-    def reciprocalBasisVectors(self):
-        return [Vector(1., 0., 0.)/self.data[0],
-                Vector(0., 1., 0.)/self.data[1],
-                Vector(0., 0., 1.)/self.data[2]]
-
-    def cellVolume(self):
-        return N.multiply.reduce(self.data)
-
-    def largestDistance(self):
-        return 0.5*N.minimum.reduce(self.data)
+    def randomPoint(self):
+        rf = Random.randomPointInBox(1., 1., 1.)-Vector(0.5, 0.5, 0.5)
+        return self.boxToRealCoordinates(rf)
 
     def contiguousObjectOffset(self, objects = None, conf = None,
                                box_coordinates = 0):
@@ -1184,9 +1092,107 @@ class OrthorhombicPeriodicUniverse(Universe):
                                      offset.array, box_coordinates, cell)
         return offset
 
-    def randomPoint(self):
-        return Random.randomPointInBox(self.data[0], self.data[1],
-                                       self.data[2])
+
+#
+# Orthorhombic universe with periodic boundary conditions
+#
+class OrthorhombicPeriodicUniverse(Periodic3DUniverse):
+
+    """Periodic universe with orthorhombic elementary cell.
+
+    A Glossary:Subclass of Class:MMTK.Universe.Universe.
+
+    Constructor: OrthorhombicPeriodicUniverse(|shape|, |forcefield|=None)
+
+    Arguments:
+    
+    |shape| -- a sequence of length three specifying the edge
+               lengths along the x, y, and z directions
+
+    |forcefield| -- a force field object, or 'None' for no force field
+    """
+
+    def __init__(self, size = None, forcefield = None, **properties):
+        Universe.__init__(self, forcefield, properties)
+        self.data = N.zeros((3,), N.Float)
+        if size is not None:
+            self.setSize(size)
+        self._createSpec()
+
+    is_periodic = 1
+
+    def __setstate__(self, state):
+        Universe.__setstate__(self, state)
+        if len(self.data.shape) == 2:
+            self.data = self.data[0]
+
+    def setSize(self, size):
+        self.data[:] = size
+
+    def scaleSize(self, factor):
+        "Multiplies all edge lengths by |factor|."
+        self.data[:] = factor*self.data
+        self._spec.foldCoordinatesIntoBox(self.configuration().array)
+
+    def setCellParameters(self, parameters):
+        if parameters is not None:
+            self.data[:] = parameters
+
+    def realToBoxCoordinates(self, vector):
+        x, y, z = vector
+        return Vector(x/self.data[0],
+                      y/self.data[1],
+                      z/self.data[2])
+
+    def boxToRealCoordinates(self, vector):
+        x, y, z = vector
+        return Vector(x*self.data[0],
+                      y*self.data[1],
+                      z*self.data[2])
+
+    def _realToBoxPointArray(self, array, parameters=None):
+        if parameters is None:
+            parameters = self.data
+        if parameters.shape == (3,):
+            parameters = parameters[N.NewAxis, :]
+        return array/parameters
+
+    def _boxToRealPointArray(self, array, parameters=None):
+        if parameters is None:
+            parameters = self.data
+        if parameters.shape == (3,):
+            parameters = parameters[N.NewAxis, :]
+        return array*parameters
+
+    def CdistanceFunction(self):
+        from MMTK_universe import orthorhombic_universe_distance_function
+        return orthorhombic_universe_distance_function, self.data
+
+    def CcorrectionFunction(self):
+        from MMTK_universe import orthorhombic_universe_correction_function
+        return orthorhombic_universe_correction_function, self.data
+
+    def CvolumeFunction(self):
+        from MMTK_universe import orthorhombic_universe_volume_function
+        return orthorhombic_universe_volume_function, self.data
+
+    def CboxTransformationFunction(self):
+        from MMTK_universe import orthorhombic_universe_box_transformation
+        return orthorhombic_universe_box_transformation, self.data
+
+    def cellParameters(self):
+        return self.data
+
+    def reciprocalBasisVectors(self):
+        return [Vector(1., 0., 0.)/self.data[0],
+                Vector(0., 1., 0.)/self.data[1],
+                Vector(0., 0., 1.)/self.data[2]]
+
+    def cellVolume(self):
+        return N.multiply.reduce(self.data)
+
+    def largestDistance(self):
+        return 0.5*N.minimum.reduce(self.data)
 
     def _createSpec(self):
         from MMTK_universe import OrthorhombicPeriodicUniverseSpec
@@ -1230,6 +1236,127 @@ class CubicPeriodicUniverse(OrthorhombicPeriodicUniverse):
             return '(0.)'
         else:
             return '(0.,%s)' % self._forcefield.description()
+
+#
+# Parallelepipedic universe with periodic boundary conditions
+#
+class ParallelepipedicPeriodicUniverse(Periodic3DUniverse):
+
+    """Periodic universe with parallelepipedic elementary cell.
+
+    A Glossary:Subclass of Class:MMTK.Universe.Universe.
+
+    Constructor: ParallelepipedicPeriodicUniverse(|shape|, |forcefield|=None)
+
+    Arguments:
+    
+    |shape| -- a sequence of three vectors specifying the three edges
+
+    |forcefield| -- a force field object, or 'None' for no force field
+    """
+
+    def __init__(self, shape = None, forcefield = None, **properties):
+        Universe.__init__(self, forcefield, properties)
+        self.data = N.zeros((19,), N.Float)
+        if shape is not None:
+            self.setShape(shape)
+        self._createSpec()
+
+    is_periodic = 1
+
+    def setShape(self, shape):
+        self.data[:9] = N.ravel(N.transpose([list(s) for s in shape]))
+        from MMTK_universe import parallelepiped_invert
+        parallelepiped_invert(self.data)
+
+    def scaleSize(self, factor):
+        "Multiplies all edges by |factor|."
+        self.data[:9] = factor*self.data[:9]
+        from MMTK_universe import parallelepiped_invert
+        parallelepiped_invert(self.data)
+        self._spec.foldCoordinatesIntoBox(self.configuration().array)
+
+    def setCellParameters(self, parameters):
+        if parameters is not None:
+            self.data[:9] = parameters
+            from MMTK_universe import parallelepiped_invert
+            parallelepiped_invert(self.data)
+
+    def realToBoxCoordinates(self, vector):
+        x, y, z = vector
+        return Vector(self.data[0+9]*x + self.data[1+9]*y + self.data[2+9]*z,
+                      self.data[3+9]*x + self.data[4+9]*y + self.data[5+9]*z,
+                      self.data[6+9]*x + self.data[7+9]*y + self.data[8+9]*z)
+
+    def boxToRealCoordinates(self, vector):
+        x, y, z = vector
+        return Vector(self.data[0]*x + self.data[1]*y + self.data[2]*z,
+                      self.data[3]*x + self.data[4]*y + self.data[5]*z,
+                      self.data[6]*x + self.data[7]*y + self.data[8]*z)
+
+    def _realToBoxPointArray(self, array, parameters=None):
+        if parameters is None:
+            matrix = N.reshape(self.data[9:18], (1, 3, 3))
+        else:
+            parameters = N.concatenate([parameters, N.zeros((10,), N.Float)])
+            from MMTK_universe import parallelepiped_invert
+            parallelepiped_invert(parameters)
+            matrix = N.reshape(parameters[9:18], (1, 3, 3))
+        return N.add.reduce(matrix*array[:, N.NewAxis, :], axis=-1)
+
+    def _boxToRealPointArray(self, array, parameters=None):
+        if parameters is None:
+            parameters = self.data[:9]
+        matrix = N.reshape(parameters, (1, 3, 3))
+        return N.add.reduce(matrix*array[:, N.NewAxis, :], axis=-1)
+
+    def CdistanceFunction(self):
+        from MMTK_universe import parallelepipedic_universe_distance_function
+        return parallelepipedic_universe_distance_function, self.data
+
+    def CcorrectionFunction(self):
+        from MMTK_universe import parallelepipedic_universe_correction_function
+        return parallelepipedic_universe_correction_function, self.data
+
+    def CvolumeFunction(self):
+        from MMTK_universe import parallelepipedic_universe_volume_function
+        return parallelepipedic_universe_volume_function, self.data
+
+    def CboxTransformationFunction(self):
+        from MMTK_universe import parallelepipedic_universe_box_transformation
+        return parallelepipedic_universe_box_transformation, self.data
+
+    def cellParameters(self):
+        return self.data[:9]
+
+    def reciprocalBasisVectors(self):
+        return [Vector(self.data[9:12]),
+                Vector(self.data[12:15]),
+                Vector(self.data[15:18])]
+
+    def cellVolume(self):
+        return abs(self.data[18])
+
+    def largestDistance(self):
+        return self.boxToRealCoordinates(Vector(0.5, 0.5, 0.5)).length()
+
+    def _createSpec(self):
+        from MMTK_universe import ParallelepipedicPeriodicUniverseSpec
+        self._spec = ParallelepipedicPeriodicUniverseSpec(self.data)
+
+    def _descriptionArguments(self):
+        if self._forcefield is None:
+            return '(Vector(0.,0.,0.),Vector(0.,0.,0.),Vector(0.,0.,0.))'
+        else:
+            return '(Vector(0.,0.,0.),Vector(0.,0.,0.),Vector(0.,0.,0.),%s)' \
+                   % self._forcefield.description()
+
+    def XMLSpec(self):
+        return 'topology="periodic3d" ' + \
+               'cellshape="parallelepipedic" ' + \
+               ('cellshape="%f %f %f %f %f %f %f %f %f" '
+                % tuple(self.data[:9])) + \
+               'units="units:nm"'
 
 #
 # Recognition functions

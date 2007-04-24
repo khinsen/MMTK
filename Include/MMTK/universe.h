@@ -1,7 +1,7 @@
 /* Include file for C universe-related functions.
  *
  * Written by Konrad Hinsen
- * last revision: 2000-3-8
+ * last revision: 2007-4-23
  */
 
 #ifndef MMTK_UNIVERSE_H
@@ -49,6 +49,7 @@ typedef struct {
 
 /* Macro definitions */
 
+/* Distance vector in infinite universe */
 #define distance_vector_1(d, r1, r2, data) \
   { \
     d[0] = r2[0]-r1[0]; \
@@ -56,6 +57,7 @@ typedef struct {
     d[2] = r2[2]-r1[2]; \
   }
 
+/* Distance vector in orthorhombic universe */
 #define distance_vector_2(d, r1, r2, data) \
   { \
     double xh = 0.5*(data)[0]; \
@@ -72,6 +74,25 @@ typedef struct {
     if (d[2] <= -zh) d[2] += (data)[2]; \
   }
 
+/* Distance vector in parallelepipedic universe */
+#define distance_vector_3(d, r1, r2, data) \
+  { \
+    double dx = (r2)[0]-(r1)[0]; \
+    double dy = (r2)[1]-(r1)[1]; \
+    double dz = (r2)[2]-(r1)[2]; \
+    double dfx = (data)[0+9]*dx + (data)[1+9]*dy + (data)[2+9]*dz; \
+    double dfy = (data)[3+9]*dx + (data)[4+9]*dy + (data)[5+9]*dz; \
+    double dfz = (data)[6+9]*dx + (data)[7+9]*dy + (data)[8+9]*dz; \
+    if (dfx > 0.5) dfx -= 1.; \
+    if (dfx <= -0.5) dfx += 1.; \
+    if (dfy > 0.5) dfy -= 1.; \
+    if (dfy <= -0.5) dfy += 1.; \
+    if (dfz > 0.5) dfz -= 1.; \
+    if (dfz <= -0.5) dfz += 1.; \
+    d[0] = (data)[0]*dfx + (data)[1]*dfy + (data)[2]*dfz; \
+    d[1] = (data)[3]*dfx + (data)[4]*dfy + (data)[5]*dfz; \
+    d[2] = (data)[6]*dfx + (data)[7]*dfy + (data)[8]*dfz; \
+  }
 
 /*
  * C API

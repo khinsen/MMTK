@@ -1,7 +1,7 @@
 # MMTK initialization
 #
 # Written by Konrad Hinsen
-# last revision: 2005-9-26
+# last revision: 2007-4-23
 #
 
 """MMTK is the base module of the Molecular Modelling Toolkit.
@@ -42,7 +42,7 @@ from sys import stdin, stdout, stderr
 #
 from ThreadManager import activeThreads, waitForThreads
 from Universe import InfiniteUniverse, OrthorhombicPeriodicUniverse, \
-                     CubicPeriodicUniverse
+                     CubicPeriodicUniverse, ParallelepipedicPeriodicUniverse
 from ParticleProperties import ParticleScalar, ParticleVector, \
                                ParticleTensor, SymmetricPairTensor, \
                                Configuration
