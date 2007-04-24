@@ -1,7 +1,7 @@
 /* Low-level functions for universes
  *
  * Written by Konrad Hinsen
- * last revision: 2007-4-23
+ * last revision: 2007-4-24
  */
 
 #define _UNIVERSE_MODULE
@@ -329,13 +329,33 @@ orthorhombic_bounding_box(vector3 *box1, vector3 *box2, vector3 *x,
   (*box1)[1] = -(*box2)[1];
   (*box1)[2] = -(*box2)[2];
 }
+
+static double
+max3(double a1, double a2, double a3)
+{
+  double max = fabs(a1);
+  if (fabs(a2) > max)
+    max = fabs(a2);
+  if (fabs(a3) > max)
+    max = fabs(a3);
+  if (fabs(a1+a2) > max)
+    max = fabs(a1+a2);
+  if (fabs(a1+a3) > max)
+    max = fabs(a1+a3);
+  if (fabs(a2+a3) > max)
+    max = fabs(a2+a3);
+  if (fabs(a1+a2+a3) > max)
+    max = fabs(a1+a2+a3);
+  return max;
+}
+
 static void
 parallelepipedic_bounding_box(vector3 *box1, vector3 *box2, vector3 *x,
 			      int n, double *data)
 {
-  (*box2)[0] = 0.5*(data[0]+data[3]+data[6]);
-  (*box2)[1] = 0.5*(data[1]+data[4]+data[7]);
-  (*box2)[2] = 0.5*(data[2]+data[5]+data[8]);
+  (*box2)[0] = 0.5*max3(data[0], data[3], data[6]);
+  (*box2)[1] = 0.5*max3(data[1], data[4], data[7]);
+  (*box2)[2] = 0.5*max3(data[2], data[5], data[8]);
   (*box1)[0] = -(*box2)[0];
   (*box1)[1] = -(*box2)[1];
   (*box1)[2] = -(*box2)[2];
@@ -372,6 +392,7 @@ universe_new(void)
   self->trajectory_function = NULL;
   self->bounding_box_function = NULL;
   self->is_periodic = 0;
+  self->is_orthogonal = 0;
 #ifdef WITH_THREAD
   error = 0;
   self->main_state_lock = PyThread_allocate_lock();
@@ -743,6 +764,7 @@ InfiniteUniverseSpec(PyObject *dummy, PyObject *args)
   new->trajectory_function = no_trajectory;
   new->bounding_box_function = infinite_bounding_box;
   new->is_periodic = 0;
+  new->is_orthogonal = 0;
   return (PyObject *)new;
 }
 
@@ -767,6 +789,7 @@ OrthorhombicPeriodicUniverseSpec(PyObject *dummy, PyObject *args)
   new->trajectory_function = orthorhombic_trajectory;
   new->bounding_box_function = orthorhombic_bounding_box;
   new->is_periodic = 1;
+  new->is_orthogonal = 1;
   return (PyObject *)new;
 }
 
@@ -796,6 +819,7 @@ ParallelepipedicPeriodicUniverseSpec(PyObject *dummy, PyObject *args)
   new->trajectory_function = parallelepipedic_trajectory;
   new->bounding_box_function = parallelepipedic_bounding_box;
   new->is_periodic = 1;
+  new->is_orthogonal = 0;
   return (PyObject *)new;
 }
 

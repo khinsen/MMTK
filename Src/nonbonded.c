@@ -1,7 +1,7 @@
 /* Low-level force field calculations: non-bonded interactions
  *
  * Written by Konrad Hinsen
- * last revision: 2006-5-10
+ * last revision: 2007-4-24
  */
 
 #define NO_IMPORT
@@ -52,29 +52,31 @@ nblist_update(PyNonbondedListObject *nblist, int natoms,
   
   nblist->universe_spec->correction_function(x, natoms, geometry_data);
   nblist->universe_spec->bounding_box_function(&box1, &box2, x, natoms,
-				      geometry_data);
+					       geometry_data);
   nblist->lastx = x;
 #if 0
   printf("box1: %lf, %lf, %lf\n", box1[0], box1[1], box1[2]);
   printf("box2: %lf, %lf, %lf\n", box2[0], box2[1], box2[2]);
   printf("cutoff: %lf\n", nblist->cutoff);
 #endif
-  if (nblist->cutoff > 0.) {
+  if (nblist->cutoff > 0. && (!nblist->universe_spec->is_periodic
+			      || nblist->universe_spec->is_orthogonal)) {
     int done = 0;
+    double factor = 1.;
     while (!done) {
       int nboxes;
       nblist->box_count[0] = (int)(NBLIST_NEIGHBORS*(box2[0]-box1[0])
-				   /nblist->cutoff);
+				   /(factor*nblist->cutoff));
       nblist->box_count[1] = (int)(NBLIST_NEIGHBORS*(box2[1]-box1[1])
-				   /nblist->cutoff);
+				   /(factor*nblist->cutoff));
       nblist->box_count[2] = (int)(NBLIST_NEIGHBORS*(box2[2]-box1[2])
-				   /nblist->cutoff);
+				   /(factor*nblist->cutoff));
       if (nblist->box_count[0] == 0) nblist->box_count[0] = 1;
       if (nblist->box_count[1] == 0) nblist->box_count[1] = 1;
       if (nblist->box_count[2] == 0) nblist->box_count[2] = 1;
       nboxes = nblist->box_count[0]*nblist->box_count[1]*nblist->box_count[2];
       if (nboxes > 2*natoms)
-	nblist->cutoff *= 1.1;
+	factor *= 1.1;
       else
 	done = 1;
     }
@@ -97,44 +99,33 @@ nblist_update(PyNonbondedListObject *nblist, int natoms,
   nblist->neighbors[0][1] = 0;
   nblist->neighbors[0][2] = 0;
   i = 1;
-  minx = miny = minz = -NBLIST_NEIGHBORS;
-  maxx = maxy = maxz = NBLIST_NEIGHBORS+1;
+  minx = -(int)((nblist->cutoff+box_size[0])/box_size[0]);
+  miny = -(int)((nblist->cutoff+box_size[1])/box_size[1]);
+  minz = -(int)((nblist->cutoff+box_size[2])/box_size[2]);
+  maxx = -minx+1;
+  maxy = -miny+1;
+  maxz = -minz+1;
   if (nblist->universe_spec->is_periodic) {
-    int unused = nblist->box_count[0] - (2*NBLIST_NEIGHBORS+1);
-    if (unused < 0) {
-      minx -= unused;
-      if (minx > 0) {
-	maxx -= minx;
-	minx = 0;
-      }
-    }
-    unused = nblist->box_count[1] - (2*NBLIST_NEIGHBORS+1);
-    if (unused < 0) {
-      miny -= unused;
-      if (miny > 0) {
-	maxy -= miny;
-	miny = 0;
-      }
-    }
-    unused = nblist->box_count[2] - (2*NBLIST_NEIGHBORS+1);
-    if (unused < 0) {
-      minz -= unused;
-      if (minz > 0) {
-	maxz -= minz;
-	minz = 0;
-      }
-    }
+    maxx = min(maxx, (nblist->box_count[0]+1)/2);
+    maxy = min(maxy, (nblist->box_count[1]+1)/2);
+    maxz = min(maxz, (nblist->box_count[2]+1)/2);
+    minx = max(minx, maxx-nblist->box_count[0]);
+    miny = max(miny, maxy-nblist->box_count[1]);
+    minz = max(minz, maxz-nblist->box_count[2]);
   }
   else {
+    maxx = min(maxx, nblist->box_count[0]);
+    maxy = min(maxy, nblist->box_count[1]);
+    maxz = min(maxz, nblist->box_count[2]);
     minx = max(minx, 1-nblist->box_count[0]);
     miny = max(miny, 1-nblist->box_count[1]);
     minz = max(minz, 1-nblist->box_count[2]);
-    maxx = min(maxx, nblist->box_count[0]);  
-    maxy = min(maxy, nblist->box_count[1]);  
-    maxz = min(maxz, nblist->box_count[2]);  
-}
+  }
 #if 0
   printf("Box neighbor list:\n");
+  printf("  minx: %d\tmaxx: %d\n", minx, maxx);
+  printf("  miny: %d\tmaxy: %d\n", miny, maxy);
+  printf("  minz: %d\tmaxz: %d\n", minz, maxz);
 #endif
   for (ix = minx; ix < maxx; ix++)
     for (iy = miny; iy < maxy; iy++)
@@ -155,6 +146,12 @@ nblist_update(PyNonbondedListObject *nblist, int natoms,
 #endif
 	    i++;
 	  }
+#if 0
+	  else {
+	    printf(" %d/%d/%d -> %f/%f/%f -> %f\n",
+		   ix, iy, iz, dx, dy, dz, sqrt(dx*dx+dy*dy+dz*dz));
+	  }
+#endif
 	}
   nblist->nneighbors = i;
 #if 0
@@ -199,6 +196,10 @@ nblist_update(PyNonbondedListObject *nblist, int natoms,
     if (n == nblist->box_count[2]) n--;
     box += nblist->box_count[0]*nblist->box_count[1]*n;
     nblist->box_number[ai] = box;
+#if 0
+    printf("Atom %d in box %d (%d/%d/%d)\n", ai, box,
+	   nblist->boxes[box].ix, nblist->boxes[box].iy, nblist->boxes[box].iz);
+#endif 
     nblist->boxes[box].n++;
   }
   p = nblist->box_atoms;
@@ -297,18 +298,21 @@ nblist_iterate(PyNonbondedListObject *nblist, struct nblist_iterator *iterator)
 	  else if (ix < 0 || iy < 0 || iz < 0
 		   || ix >= nblist->box_count[0]
 		   || iy >= nblist->box_count[1]
-		   || iz >= nblist->box_count[2])
+		   || iz >= nblist->box_count[2]) {
 	    use_box = 0;
+	  }
 	  iterator->jbox = ix + nblist->box_count[0]
 	                   *(iy + nblist->box_count[1]*iz);
 	  if (iterator->jbox < iterator->ibox)
 	    use_box = 0;
 	  if (use_box) {
-	    if (nblist->boxes[iterator->jbox].n == 0)
+	    if (nblist->boxes[iterator->jbox].n == 0) {
 	      use_box = 0;
+	    }
 	    if (iterator->ibox == iterator->jbox &&
-		nblist->boxes[iterator->jbox].n == 1)
+		nblist->boxes[iterator->jbox].n == 1) {
 	      use_box = 0;
+	    }
 	  }
 	} while (!use_box);
 	iterator->box2 = nblist->boxes+iterator->jbox;
@@ -949,6 +953,11 @@ es_mp_evaluator(PyFFEnergyTermObject *self,
   }
   else if (d_fn == orthorhombic_distance_vector_pointer) {
 #   define distance_vector_function distance_vector_2
+#   include "nonbonded1.i"
+#   undef distance_vector_function
+  }
+  else if (d_fn == parallelepipedic_distance_vector_pointer) {
+#   define distance_vector_function distance_vector_3
 #   include "nonbonded1.i"
 #   undef distance_vector_function
   }

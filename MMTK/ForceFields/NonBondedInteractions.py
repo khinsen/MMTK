@@ -2,7 +2,7 @@
 # for non-bonded interactions
 #
 # Written by Konrad Hinsen
-# last revision: 2006-11-17
+# last revision: 2007-4-24
 #
 
 _undocumented = 1
@@ -293,6 +293,8 @@ class ESEwaldForceField(NonBondedForceField):
         rsum = not self.options.get('no_reciprocal_sum', 0)
         if not universe.is_periodic and rsum:
             raise ValueError("Ewald method accepts only periodic universes")
+        if not universe.is_orthogonal and rsum:
+            raise ValueError("Ewald method implemented only for orthogonal universes")
         n = universe.numberOfPoints()
         charge = N.zeros((n,), N.Float)
         for o in universe:

@@ -7,6 +7,8 @@ Bug fixes:
   The copy contained the cell parameters of the current configuration of the
   universe instead.
 
+- Nonbonded list generation for periodic universes could in rare cases
+  miss atom pairs inside the cutoff.
 
 2.5.18 --> 2.5.19
 =================

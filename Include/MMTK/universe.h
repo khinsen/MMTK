@@ -43,6 +43,7 @@ typedef struct {
   int waiting_threads;
 #endif
   int is_periodic;
+  int is_orthogonal;
   int geometry_data_length;
 } PyUniverseSpecObject;
 

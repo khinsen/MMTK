@@ -1,7 +1,7 @@
 /* Low-level force field calculations
  *
  * Written by Konrad Hinsen
- * last revision: 2007-1-9
+ * last revision: 2007-4-24
  */
 
 #define _FORCEFIELD_MODULE
@@ -36,6 +36,7 @@
 double electrostatic_energy_factor;
 distance_fn *distance_vector_pointer;
 distance_fn *orthorhombic_distance_vector_pointer;
+distance_fn *parallelepipedic_distance_vector_pointer;
 
 static PyObject *PyExc_MPIError;
 
@@ -2003,6 +2004,10 @@ initMMTK_forcefield(void)
     fn = PyDict_GetItemString(module_dict,
 			      "orthorhombic_universe_distance_function");
     orthorhombic_distance_vector_pointer =
+                        (distance_fn *)PyCObject_AsVoidPtr(fn);
+    fn = PyDict_GetItemString(module_dict,
+			      "parallelepipedic_universe_distance_function");
+    parallelepipedic_distance_vector_pointer =
                         (distance_fn *)PyCObject_AsVoidPtr(fn);
   }
 

@@ -1,7 +1,7 @@
 /* Private include file for C force field calculations.
  *
  * Written by Konrad Hinsen
- * last revision: 2004-12-9
+ * last revision: 2007-4-24
  */
 
 #ifndef MMTK_FORCEFIELD_PRIVATE_H
@@ -14,6 +14,7 @@
 
 extern distance_fn *distance_vector_pointer;
 extern distance_fn *orthorhombic_distance_vector_pointer;
+extern distance_fn *parallelepipedic_distance_vector_pointer;
 
 /* Functions in MMTK/forcefieldmodule.c */
 

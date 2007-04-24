@@ -69,8 +69,9 @@ class Universe(Collections.GroupOfAtoms, Visualization.Viewable):
         self._version = 0
         self._np = None
 
-    is_universe = 1
-    is_periodic = 0
+    is_universe = True
+    is_periodic = False
+    is_orthogonal = False
 
     def __getstate__(self):
         state = copy.copy(self.__dict__)
@@ -1023,6 +1024,8 @@ class InfiniteUniverse(Universe):
 #
 class Periodic3DUniverse(Universe):
 
+    is_periodic = True
+
     def setVolume(self, volume):
         """Multiplies all edge lengths by the same factor such that the cell
         volume becomes |volume|."""
@@ -1119,7 +1122,7 @@ class OrthorhombicPeriodicUniverse(Periodic3DUniverse):
             self.setSize(size)
         self._createSpec()
 
-    is_periodic = 1
+    is_orthogonal = True
 
     def __setstate__(self, state):
         Universe.__setstate__(self, state)
