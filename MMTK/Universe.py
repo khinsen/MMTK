@@ -4,7 +4,7 @@
 # (boundary conditions, external fields, etc.)
 #
 # Written by Konrad Hinsen
-# last revision: 2007-4-24
+# last revision: 2007-4-25
 #
 
 import Bonds, ChemicalObjects, Collections, Environment, \
@@ -1095,7 +1095,6 @@ class Periodic3DUniverse(Universe):
                                      offset.array, box_coordinates, cell)
         return offset
 
-
 #
 # Orthorhombic universe with periodic boundary conditions
 #
@@ -1349,9 +1348,9 @@ class ParallelepipedicPeriodicUniverse(Periodic3DUniverse):
 
     def _descriptionArguments(self):
         if self._forcefield is None:
-            return '(Vector(0.,0.,0.),Vector(0.,0.,0.),Vector(0.,0.,0.))'
+            return '((Vector(0.,0.,0.),Vector(0.,0.,0.),Vector(0.,0.,0.)))'
         else:
-            return '(Vector(0.,0.,0.),Vector(0.,0.,0.),Vector(0.,0.,0.),%s)' \
+            return '((Vector(0.,0.,0.),Vector(0.,0.,0.),Vector(0.,0.,0.)),%s)'\
                    % self._forcefield.description()
 
     def XMLSpec(self):
