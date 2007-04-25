@@ -1,7 +1,7 @@
 # This module defines collections of chemical objects.
 #
 # Written by Konrad Hinsen
-# last revision: 2007-1-25
+# last revision: 2007-4-25
 #
 
 import ConfigIO, Utility, Units, ParticleProperties, Visualization
@@ -669,7 +669,7 @@ class Collection(GroupOfAtoms, Visualization.Viewable):
         for o in self.objects:
             lists.append(o._graphics(conf, distance_fn, model,
                                      module, options))
-        return reduce(operator.add, lists)
+        return reduce(operator.add, lists, [])
 
     def __copy__(self):
         return self.__class__(copy.copy(self.objects))

@@ -1095,6 +1095,27 @@ class Periodic3DUniverse(Universe):
                                      offset.array, box_coordinates, cell)
         return offset
 
+    def _graphics(self, conf, distance_fn, model, module, options):
+        objects = self._objects._graphics(conf, distance_fn, model,
+                                          module, options)
+        v1, v2, v3 = self.basisVectors()
+        p = -0.5*(v1+v2+v3)
+        color = options.get('color', 'white')
+        material = module.EmissiveMaterial(color)
+        objects.append(module.Line(p, p+v1, material=material))
+        objects.append(module.Line(p, p+v2, material=material))
+        objects.append(module.Line(p+v1, p+v1+v2, material=material))
+        objects.append(module.Line(p+v2, p+v1+v2, material=material))
+        objects.append(module.Line(p, p+v3, material=material))
+        objects.append(module.Line(p+v1, p+v1+v3, material=material))
+        objects.append(module.Line(p+v2, p+v2+v3, material=material))
+        objects.append(module.Line(p+v1+v2, p+v1+v2+v3, material=material))
+        objects.append(module.Line(p+v3, p+v1+v3, material=material))
+        objects.append(module.Line(p+v3, p+v2+v3, material=material))
+        objects.append(module.Line(p+v1+v3, p+v1+v2+v3, material=material))
+        objects.append(module.Line(p+v2+v3, p+v1+v2+v3, material=material))
+        return objects
+
 #
 # Orthorhombic universe with periodic boundary conditions
 #
