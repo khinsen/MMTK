@@ -359,6 +359,19 @@ if prog == 'vmd':
         file.write('color Name 1 white\n')
         file.write('color Name 2 white\n')
         file.write('color Name 3 white\n')
+        if Universe.isUniverse(object):
+            # add a box around periodic universes
+            basis = object.basisVectors()
+            if basis is not None:
+                v1, v2, v3 = basis
+                p = -0.5*(v1+v2+v3)
+                for p1, p2 in [(p, p+v1), (p, p+v2), (p+v1, p+v1+v2),
+                               (p+v2, p+v1+v2), (p, p+v3), (p+v1, p+v1+v3),
+                               (p+v2, p+v2+v3), (p+v1+v2, p+v1+v2+v3),
+                               (p+v3, p+v1+v3), (p+v3, p+v2+v3),
+                               (p+v1+v3, p+v1+v2+v3), (p+v2+v3, p+v1+v2+v3)]:
+                    file.write('graphics 0 line {%f %f %f} {%f %f %f}\n' %
+                               (tuple(p1/Units.Ang) + tuple(p2/Units.Ang)))
         file.write('file delete ' + filename + '\n')
         file.write('file delete ' + script + '\n')
         file.close()
