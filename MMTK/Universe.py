@@ -370,9 +370,6 @@ class Universe(Collections.GroupOfAtoms, Visualization.Viewable):
             self._configuration = 1 # a hack to prevent endless recursion
             self._configuration = \
                          ParticleProperties.Configuration(self, coordinates)
-            if N.logical_and.reduce(N.ravel(N.less(coordinates,
-                                                   Utility.undefined_limit))):
-                self._spec.foldCoordinatesIntoBox(coordinates)
         return self._configuration
 
     def copyConfiguration(self):
@@ -783,9 +780,9 @@ class Universe(Collections.GroupOfAtoms, Visualization.Viewable):
         """Returns configuration |conf| (default: current configuration)
         corrected by the contiguous object offsets for that
         configuration."""
-        offset = self.contiguousObjectOffset(objects, conf)
         if conf is None:
             conf = self.configuration()
+        offset = self.contiguousObjectOffset(objects, conf)
         if offset is not None:
             return conf + offset
         else:
