@@ -1,7 +1,7 @@
 # Brownian normal mode calculations.
 #
 # Written by Konrad Hinsen
-# last revision: 2006-9-22
+# last revision: 2007-4-26
 #
 
 """See also the Example:NormalModes example applications.
@@ -161,18 +161,19 @@ class BrownianModes(Core.NormalModes):
                             self.inv_relaxation_times[index],
                             self.array[index])
 
-    def fluctuations(self):
+    def fluctuations(self, first_mode=6):
         """Returns a Class:MMTK.ParticleScalar containing the thermal
         fluctuations for each atom in the universe."""
         f = ParticleProperties.ParticleScalar(self.universe)
-        for i in range(6, self.nmodes):
+        for i in range(first_mode, self.nmodes):
             mode = self.rawMode(i)
             f += (mode*mode)/mode.inv_relaxation_time
         f = Units.k_B*self.temperature*f/self.friction
         return f
 
     def meanSquareDisplacement(self, subset=None, weights=None,
-                               time_range = (0., None, None)):
+                               time_range = (0., None, None),
+                               first_mode = 6):
         """Returns the averaged mean-square displacement of the
         atoms in |subset| (default: all atoms) at time points
         defined by |time_range| using |weights| in the average
@@ -190,12 +191,12 @@ class BrownianModes(Core.NormalModes):
         weights = weights/(total*self.friction)
         first, last, step = (time_range + (None, None))[:3]
         if last is None:
-            last = 3./self.rawMode(6).inv_relaxation_time
+            last = 3./self.rawMode(first_mode).inv_relaxation_time
         if step is None:
             step = (last-first)/300.
         time = N.arange(first, last, step)
         msd = N.zeros(time.shape, N.Float)
-        for i in range(6, self.nmodes):
+        for i in range(first_mode, self.nmodes):
             mode = self.rawMode(i)
             rt = mode.inv_relaxation_time
             d = (weights*(mode*mode)).sumOverParticles()
@@ -204,7 +205,8 @@ class BrownianModes(Core.NormalModes):
         return InterpolatingFunction((time,), msd)
 
     def staticStructureFactor(self, q_range = (1., 15.), subset=None,
-                              weights=None, random_vectors=15):
+                              weights=None, random_vectors=15,
+                              first_mode = 6):
         if subset is None:
             subset = self.universe
         if weights is None:
@@ -226,7 +228,7 @@ class BrownianModes(Core.NormalModes):
         random_vectors = Random.randomDirections(random_vectors)
         for v in random_vectors:
             sab = N.zeros((natoms, natoms), N.Float)
-            for i in range(6, self.nmodes):
+            for i in range(first_mode, self.nmodes):
                 irt = self.rawMode(i).inv_relaxation_time
                 d = N.repeat((self.rawMode(i)*v).array, mask.array) \
                        / N.sqrt(friction)
@@ -242,7 +244,7 @@ class BrownianModes(Core.NormalModes):
 
     def coherentScatteringFunction(self, q, time_range = (0., None, None),
                                    subset=None, weights=None,
-                                   random_vectors=15):
+                                   random_vectors=15, first_mode = 6):
         if subset is None:
             subset = self.universe
         if weights is None:
@@ -255,7 +257,7 @@ class BrownianModes(Core.NormalModes):
 
         first, last, step = (time_range + (None, None))[:3]
         if last is None:
-            last = 3./self.rawMode(6).inv_relaxation_time
+            last = 3./self.rawMode(first_mode).inv_relaxation_time
         if step is None:
             step = (last-first)/300.
         time = N.arange(first, last, step)
@@ -268,7 +270,7 @@ class BrownianModes(Core.NormalModes):
             phase = N.exp(-1.j*q*N.dot(r, v.array))
             for ai in range(natoms):
                 fbt = N.zeros((natoms, len(time)), N.Float)
-                for i in range(6, self.nmodes):
+                for i in range(first_mode, self.nmodes):
                     irt = self.rawMode(i).inv_relaxation_time
                     d = q * N.repeat((self.rawMode(i)*v).array, mask.array) \
                         / N.sqrt(friction)
@@ -287,7 +289,8 @@ class BrownianModes(Core.NormalModes):
         return InterpolatingFunction((time,), fcoh.real/len(random_vectors))
 
     def incoherentScatteringFunction(self, q, time_range = (0., None, None),
-                                     subset=None, random_vectors=15):
+                                     subset=None, random_vectors=15,
+                                     first_mode = 6):
         if subset is None:
             subset = self.universe
         mask = subset.booleanMask()
@@ -300,7 +303,7 @@ class BrownianModes(Core.NormalModes):
 
         first, last, step = (time_range + (None, None))[:3]
         if last is None:
-            last = 3./self.weighedMode(6).inv_relaxation_time
+            last = 3./self.weighedMode(first_mode).inv_relaxation_time
         if step is None:
             step = (last-first)/300.
         time = N.arange(first, last, step)
@@ -314,7 +317,7 @@ class BrownianModes(Core.NormalModes):
             phase = N.exp(-1.j*q*N.dot(r, v.array))
             faat = N.zeros((natoms, len(time)), N.Float)
             eisf_sum = N.zeros((natoms,), N.Float)
-            for i in range(6, self.nmodes):
+            for i in range(first_mode, self.nmodes):
                 irt = self.rawMode(i).inv_relaxation_time
                 d = q * N.repeat((self.rawMode(i)*v).array, mask.array) \
                     / N.sqrt(friction)
@@ -332,7 +335,7 @@ class BrownianModes(Core.NormalModes):
 
 
     def EISF(self, q_range = (0., 15.), subset=None, weights = None,
-             random_vectors = 15):
+             random_vectors = 15, first_mode = 6):
         if subset is None:
             subset = self.universe
         if weights is None:
@@ -348,7 +351,7 @@ class BrownianModes(Core.NormalModes):
         q = N.arange(first, last, step)
 
         f = ParticleProperties.ParticleTensor(self.universe)
-        for i in range(6, self.nmodes):
+        for i in range(first_mode, self.nmodes):
             mode = self.rawMode(i)
             f = f + (1./mode.inv_relaxation_time)*mode.dyadicProduct(mode)
         f = Units.k_B*self.temperature*f/self.friction

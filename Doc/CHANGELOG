@@ -1,6 +1,31 @@
 2.5.19 --> 2.5.20hg
 ===================
 
+New features:
+
+- ParallelepipedicPeriodicUniverse makes it possible to work with
+  non-orthogonal universes that are periodic in three dimensions.
+  At the moment, energy evaluation is slow (the nonbonded list
+  iterates over all atom pairs), and the reciprocal part of the Ewald
+  sum is not yet implemented.
+
+- When the method view() is called on a universe object that represents a
+  periodic universe, the simulation box is shown as twelve lines
+  representing its edges, if VMD has been defined as PDBVIEWER.
+
+Modifications:
+
+- The method Universe.configuration() no longer folds the atomic coordinates
+  into the central box of a periodic universe. Sometimes this is not desired,
+  and when it it, it can always be achieved with an explicit call to
+  Universe.foldCoordinatesIntoBox().
+
+Improvements:
+
+- The methods that perform calculations on normal modes now all take
+  an optional argument first_mode (default: 6) that defines the first
+  mode to be taken into account.
+
 Bug fixes:
 
 - When Configuration objects were copied, the cell parameters were not copied.

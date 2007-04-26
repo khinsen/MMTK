@@ -1,7 +1,7 @@
 # Vibrational normal mode calculations.
 #
 # Written by Konrad Hinsen
-# last revision: 2007-3-22
+# last revision: 2007-4-26
 #
 
 """See also the Example:NormalModes example applications.
@@ -160,6 +160,7 @@ class VibrationalModes(Core.NormalModes):
         f = self.frequencies[index]
         if self.imaginary[index]:
             f = f*1.j
+        # !!
         if self.temperature is None or item < 6:
             amplitude = 1.
         else:
@@ -176,22 +177,22 @@ class VibrationalModes(Core.NormalModes):
             f = f*1.j
         return VibrationalMode(self.universe, item, f, self.array[index])
 
-    def fluctuations(self):
+    def fluctuations(self, first_mode=6):
         """Returns a Class:MMTK.ParticleScalar containing the thermal
         fluctuations for each atom in the universe."""
         f = ParticleProperties.ParticleScalar(self.universe)
-        for i in range(6, self.nmodes):
+        for i in range(first_mode, self.nmodes):
             mode = self.rawMode(i)
             f += (mode*mode)/mode.frequency**2
         f.array /= self.weights[:, 0]**2
         f.array *= Units.k_B*self.temperature/(2.*N.pi)**2
         return f
 
-    def anisotropicFluctuations(self):
+    def anisotropicFluctuations(self, first_mode=6):
         """Returns a Class:MMTK.ParticleTensor containing the thermal
         fluctuations for each atom in the universe."""
         f = ParticleProperties.ParticleTensor(self.universe)
-        for i in range(6, self.nmodes):
+        for i in range(first_mode, self.nmodes):
             mode = self.rawMode(i)
             array = mode.array
             f.array += (array[:, :, N.NewAxis]*array[:, N.NewAxis, :]) \
@@ -201,7 +202,8 @@ class VibrationalModes(Core.NormalModes):
         return f
 
     def meanSquareDisplacement(self, subset=None, weights=None,
-                               time_range = (0., None, None), tau=None):
+                               time_range = (0., None, None), tau=None,
+                               first_mode = 6):
         """Returns the averaged mean-square displacement of the
         atoms in |subset| (default: all atoms) at time points
         defined by |time_range| using |weights| in the average
@@ -221,14 +223,14 @@ class VibrationalModes(Core.NormalModes):
         weights = weights/total
         first, last, step = (time_range + (None, None))[:3]
         if last is None:
-            last = 20./self[6].frequency
+            last = 20./self[first_mode].frequency
         if step is None:
             step = (last-first)/300.
         time = N.arange(first, last, step)
         if tau is None: damping = 1.
         else: damping = N.exp(-(time/tau)**2)
         msd = N.zeros(time.shape, N.Float)
-        for i in range(6, self.nmodes):
+        for i in range(first_mode, self.nmodes):
             mode = self[i]
             omega = 2.*N.pi*mode.frequency
             d = (weights*(mode*mode)).sumOverParticles()
@@ -236,7 +238,7 @@ class VibrationalModes(Core.NormalModes):
         return InterpolatingFunction((time,), msd)
 
     def EISF(self, q_range = (0., 15.), subset=None, weights = None,
-             random_vectors = 15):
+             random_vectors = 15, first_mode = 6):
         if self.temperature is None:
             raise ValueError("no temperature available")
         if subset is None:
@@ -254,7 +256,7 @@ class VibrationalModes(Core.NormalModes):
         q = N.arange(first, last, step)
     
         f = MMTK.ParticleTensor(self.universe)
-        for i in range(6, self.nmodes):
+        for i in range(first_mode, self.nmodes):
             mode = self[i]
             f = f + mode.dyadicProduct(mode)
     
@@ -268,7 +270,7 @@ class VibrationalModes(Core.NormalModes):
 
     def incoherentScatteringFunction(self, q, time_range = (0., None, None),
                                      subset=None, weights=None, tau=None,
-                                     random_vectors=15):
+                                     random_vectors=15, first_mode = 6):
         if self.temperature is None:
             raise ValueError("no temperature available")
         if subset is None:
@@ -282,7 +284,7 @@ class VibrationalModes(Core.NormalModes):
     
         first, last, step = (time_range + (None, None))[:3]
         if last is None:
-            last = 20./self[6].frequency
+            last = 20./self[first_mode].frequency
         if step is None:
             step = (last-first)/400.
         time = N.arange(first, last, step)
@@ -296,7 +298,7 @@ class VibrationalModes(Core.NormalModes):
         for v in random_vectors:
             for a in subset.atomList():
                 msd = 0.
-                for i in range(6, self.nmodes):
+                for i in range(first_mode, self.nmodes):
                     mode = self[i]
                     d = (v*mode[a])**2
                     omega = 2.*N.pi*mode.frequency
