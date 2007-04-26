@@ -1,7 +1,7 @@
 /* Deformation energy calculation.
  *
  * Written by Konrad Hinsen
- * last revision: 2002-9-26
+ * last revision: 2007-4-26
  */
 
 #include "MMTK/universe.h"
@@ -607,6 +607,63 @@ CalphaTerm(PyObject *dummy, PyObject *args)
   return (PyObject *)self;
 }
 
+void
+an_evaluator(PyFFEnergyTermObject *self,
+	     PyFFEvaluatorObject *eval,
+	     energy_spec *input,
+	     energy_data *energy)
+{
+  vector3 *x = (vector3 *)input->coordinates->data;
+  distance_fn *d_fn = self->universe_spec->distance_function;
+  double *distance_data = self->universe_spec->geometry_data;
+
+  PyNonbondedListObject *nblist = (PyNonbondedListObject *)self->data[0];
+  struct nblist_iterator iterator;
+  double cutoff_sq = sqr(self->param[0]);
+  int k;
+
+  int states[2] = {nblist_start, nblist_start_excluded};
+  double factors[2] = {1., -1.};
+
+  if (energy->force_constants == NULL)
+    return;
+
+  for (k = 0; k < 2; k++) {
+    iterator.state = states[k];
+    while (PyNonbondedListIterate(nblist, &iterator)) {
+      double r_sq;
+      vector3 rij;
+      (*d_fn)(rij, x[iterator.a2], x[iterator.a1], distance_data);
+      r_sq = vector_length_sq(rij);
+      if (cutoff_sq == 0. || r_sq <= cutoff_sq) {
+        pair_term(energy, iterator.a1, iterator.a2, rij, r_sq,
+                  factors[k]*self->param[1]);
+      }
+    }
+  }
+}
+
+static PyObject *
+ANTerm(PyObject *dummy, PyObject *args)
+{
+  PyFFEnergyTermObject *self = PyFFEnergyTerm_New();
+  if (self == NULL)
+    return NULL;
+  if (!PyArg_ParseTuple(args, "O!Odd",
+                        &PyUniverseSpec_Type, &self->universe_spec,
+                        &self->data[0], &self->param[0], &self->param[1]))
+    return NULL;
+  Py_INCREF(self->universe_spec);
+  Py_INCREF(self->data[0]);
+  self->eval_func = an_evaluator;
+  self->evaluator_name = "anistropic_network";
+  self->term_names[0] = allocstring("anisotropic_network");
+  if (self->term_names[0] == NULL)
+    return PyErr_NoMemory();
+  self->nterms = 1;
+  return (PyObject *)self;
+}
+
 /*
  * List of functions defined in the module
  */
@@ -617,6 +674,7 @@ static PyMethodDef deformation_methods[] = {
   {"reduceFiniteDeformation", reduce_finite_deformation_py, 1},
   {"DeformationTerm", DeformationTerm, 1},
   {"CalphaTerm", CalphaTerm, 1},
+  {"ANTerm", ANTerm, 1},
   {NULL, NULL}          /* sentinel */
 };
 

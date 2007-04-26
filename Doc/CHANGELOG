@@ -13,6 +13,11 @@ New features:
   periodic universe, the simulation box is shown as twelve lines
   representing its edges, if VMD has been defined as PDBVIEWER.
 
+- New force field for C-alpha models of proteins: AnisotropicNetworkForceField.
+  This is very similar to DeformationForceField, the only difference being
+  that the pair force constant as a function of the pair distance is a step
+  function rather than an exponential.
+
 Modifications:
 
 - The method Universe.configuration() no longer folds the atomic coordinates
