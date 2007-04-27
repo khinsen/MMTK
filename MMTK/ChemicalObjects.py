@@ -2,7 +2,7 @@
 # complexes. They are made as copies from blueprints in the database.
 #
 # Written by Konrad Hinsen
-# last revision: 2007-3-21
+# last revision: 2007-4-27
 #
 
 import Bonds, Collections, ConfigIO, Database, Units, Utility, Visualization
@@ -994,7 +994,7 @@ class Molecule(CompositeChemicalObject, ChemicalObject):
         other = others[0]
         ref = (Objects3D.Plane(circle.center, circle.normal) \
                .projectionOf(other.position())-circle.center).normal()
-        p0 = circle.center + circle.radius*ref
+        p0 = circle.center + ref*circle.radius
         p0 = Objects3D.rotatePoint(p0,
                                   Objects3D.Line(circle.center, circle.normal),
                                   60.*Units.deg)
