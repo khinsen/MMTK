@@ -31,6 +31,8 @@ Improvements:
   an optional argument first_mode (default: 6) that defines the first
   mode to be taken into account.
 
+- Database entries for C- and N-terminal neutral lysine.
+
 Bug fixes:
 
 - When Configuration objects were copied, the cell parameters were not copied.
