@@ -2,14 +2,14 @@
 # places.
 #
 # Written by Konrad Hinsen
-# last revision: 2006-11-27
+# last revision: 2007-5-7
 #
 
 _undocumented = 1
 
 import Database
 import os, string, sys, types
-from Scientific import N as Numeric
+from Scientific import N
 
 # Constants
 
@@ -133,7 +133,7 @@ def isSequenceObject(object):
 def isDefinedPosition(p):
     if p is None:
         return 0
-    if Numeric.add.reduce(Numeric.greater(p.array, undefined_limit)) > 0:
+    if N.add.reduce(N.greater(p.array, undefined_limit)) > 0:
         return 0
     return 1
 
@@ -158,7 +158,15 @@ def warning(text):
 #
 # Pickler and unpickler taking care of non-pickled objects
 #
-class Pickler(Numeric.Pickler):
+
+if N.package == 'Numeric':
+    BasePickler = N.Pickler
+    BaseUnpickler = N.Unpickler
+else:
+    from pickle import Pickler as BasePickler
+    from pickle import Unpickler as BaseUnpickler
+
+class Pickler(BasePickler):
 
     def persistent_id(self, object):
         if hasattr(object, 'is_chemical_object_type'):
@@ -170,10 +178,10 @@ class Pickler(Numeric.Pickler):
 class _EmptyClass:
     pass
 
-class Unpickler(Numeric.Unpickler):
+class Unpickler(BaseUnpickler):
 
     def __init__(self, *args):
-        Numeric.Unpickler.__init__(self, *args)
+        BaseUnpickler.__init__(self, *args)
         self.dispatch['i'] = Unpickler.load_inst
 
     def persistent_load(self, id):
