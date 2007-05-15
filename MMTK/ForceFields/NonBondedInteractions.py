@@ -2,7 +2,7 @@
 # for non-bonded interactions
 #
 # Written by Konrad Hinsen
-# last revision: 2007-4-24
+# last revision: 2007-5-15
 #
 
 _undocumented = 1
@@ -116,11 +116,13 @@ class LJForceField(NonBondedForceField):
         n = universe.numberOfPoints()
         lj_type = -N.ones((n,), N.Int)
         atom_types = {}
+        atom_type_names = []
         for o in universe:
             for a in o.atomList():
                 t = self._atomType(o, a, global_data)
                 if not atom_types.has_key(t):
                     atom_types[t] = len(atom_types)
+                    atom_type_names.append(t)
                 lj_type[a.index] = atom_types[t]
         n_types = len(atom_types)
         eps_sigma = N.zeros((n_types, n_types, 2), N.Float)
@@ -151,6 +153,7 @@ class LJForceField(NonBondedForceField):
         excluded_pairs, one_four_pairs, atom_subset = \
                              self.excludedPairs(subset1, subset2, global_data)
         return {'lennard_jones': {'type': lj_type,
+                                  'type_names': atom_type_names,
                                   'epsilon_sigma': eps_sigma,
                                   'one_four_factor': self.lj_14_factor,
                                   'cutoff': cutoff},

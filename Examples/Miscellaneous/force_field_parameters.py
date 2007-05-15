@@ -24,6 +24,7 @@ documentation = {
     epsilon_sigma: 3D array. The first two indices are the atom type
                    numbers of the two atoms, the third index is 0
                    for epsilon and 1 for sigma
+    type_names: the atom type names from the force field (for documentation)
     """,
     "electrostatic":
     """
