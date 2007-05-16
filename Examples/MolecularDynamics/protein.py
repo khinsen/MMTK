@@ -12,7 +12,7 @@ from MMTK.Trajectory import Trajectory, TrajectoryOutput, \
                             trajectoryInfo
 
 # Define system
-universe = InfiniteUniverse(Amber99ForceField())
+universe = InfiniteUniverse(Amber99ForceField(mod_files=['frcmod.ff99SB']))
 universe.protein = Protein('bala1')
 
 # Initialize velocities

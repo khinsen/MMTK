@@ -1,7 +1,7 @@
 # This file provides the Amber force field, using Amber parameter files.
 #
 # Written by Konrad Hinsen
-# last revision: 2006-6-23
+# last revision: 2007-5-16
 #
 
 _undocumented = 1
@@ -20,6 +20,11 @@ OPLS = None
 
 this_directory = os.path.split(__file__)[0]
 
+def fullModFilePath(modfile):
+    if os.path.exists(modfile):
+        return modfile
+    return os.path.join(this_directory, os.path.basename(modfile))
+
 def readAmber94(main_file = None, mod_files = None):
     global Amber94
     if main_file is None and mod_files is None:
@@ -36,7 +41,7 @@ def readAmber94(main_file = None, mod_files = None):
     else:
         if main_file is None:
             main_file = os.path.join(this_directory, "amber_parm94")
-        mod_files = map(lambda mf: (mf, 'MOD4'), mod_files)
+        mod_files = map(lambda mf: (fullModFilePath(mf), 'MOD4'), mod_files)
         params = AmberData.AmberParameters(main_file, mod_files)
         params.lennard_jones_1_4 = 0.5
         params.electrostatic_1_4 = 1./1.2
@@ -60,7 +65,7 @@ def readAmber99(main_file = None, mod_files = None):
     else:
         if main_file is None:
             main_file = os.path.join(this_directory, "amber_parm99")
-        mod_files = map(lambda mf: (mf, 'MOD4'), mod_files)
+        mod_files = map(lambda mf: (fullModFilePath(mf), 'MOD4'), mod_files)
         params = AmberData.AmberParameters(main_file, mod_files)
         params.lennard_jones_1_4 = 0.5
         params.electrostatic_1_4 = 1./1.2
@@ -96,7 +101,7 @@ def readOPLS(main_file = None, mod_files = None):
     else:
         if main_file is None:
             main_file = os.path.join(this_directory, "opls_parm")
-        mod_files = map(lambda mf: (mf, 'OPLS'), mod_files)
+        mod_files = map(lambda mf: (fullModFilePath(mf), 'OPLS'), mod_files)
         params = AmberData.AmberParameters(main_file, mod_files)
         params.lennard_jones_1_4 = 0.125
         params.electrostatic_1_4 = 0.5
