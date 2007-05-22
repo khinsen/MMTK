@@ -1,7 +1,7 @@
 # This module defines scalar and vector fields in molecular systems
 #
 # Written by Konrad Hinsen
-# last revision: 2006-11-27
+# last revision: 2007-5-22
 #
 
 """This module defines field objects that are useful in the analysis
@@ -76,7 +76,7 @@ class AtomicField:
         inside = Numeric.zeros(tuple(map(len, axes)), Numeric.Float)
         for p, v in zip(points, values):
             indices = Numeric.floor((p-min)/self.box.partition_size+0.5)
-            indices = indices.astype(Numeric.Int)
+            indices = tuple(indices.astype(Numeric.Int))
             array[indices] = v
             inside[indices] = 1.
         self.field = self.field_class(axes, array, data.zero())
