@@ -42,6 +42,8 @@ Bug fixes:
 - Nonbonded list generation for periodic universes could in rare cases
   miss atom pairs inside the cutoff.
 
+- Multi-threaded energy evaluation got stuck for more than two threads.
+
 - NumPy compatibility fixes.
 
 2.5.18 --> 2.5.19

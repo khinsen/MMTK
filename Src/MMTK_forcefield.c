@@ -1,7 +1,7 @@
 /* Low-level force field calculations
  *
  * Written by Konrad Hinsen
- * last revision: 2007-4-24
+ * last revision: 2007-5-23
  */
 
 #define _FORCEFIELD_MODULE
@@ -725,6 +725,9 @@ evaluator(PyFFEvaluatorObject *self,
 #ifdef WITH_THREAD
   {
     threadinfo *tinfo = (threadinfo *)self->scratch;
+#if THREAD_DEBUG
+    printf("%d threads to be released\n", input.nthreads-1);
+#endif
     for (i = 1; i < input.nthreads; i++) {
       tinfo->input.coordinates = coordinates;
       tinfo->input.natoms = natoms;
@@ -742,8 +745,9 @@ evaluator(PyFFEvaluatorObject *self,
       if (tinfo->with_gradients) {
 	double *data = (double *)
 	  ((PyArrayObject *)tinfo->energy.gradients)->data;
-	for (i = 0; i < 3*natoms; i++)
-	  data[i] = 0.;
+	int j;
+	for (j = 0; j < 3*natoms; j++)
+	  data[j] = 0.;
       }
 #if THREAD_DEBUG
       printf("Releasing thread %d\n", tinfo->input.thread_id);
