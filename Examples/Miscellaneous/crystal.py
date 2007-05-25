@@ -4,7 +4,7 @@
 # Note that this will not necessarily work with any PDB file. Many files
 # use non-crystallographic symmetry information in a non-standard way.
 # This is usually explained in REMARK records, but those cannot be
-# evauluated automatically.
+# evaluated automatically.
 #
 
 from MMTK import *

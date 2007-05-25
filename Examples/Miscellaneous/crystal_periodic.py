@@ -4,7 +4,7 @@
 # Note that this will not necessarily work with any PDB file. Many files
 # use non-crystallographic symmetry information in a non-standard way.
 # This is usually explained in REMARK records, but those cannot be
-# evauluated automatically.
+# evaluated automatically.
 #
 
 from MMTK import *
@@ -21,8 +21,7 @@ def makeImage(object, transformation):
 
 # Read PDB configuration and create MMTK objects for all peptide chains.
 # A C-alpha model is used to reduce the system size. You can remove
-# 'model="calpha"' to get an all-atom model, but for insulin this will
-# create more than 380000 atoms for the 27-unit-cell crystal!
+# 'model="calpha"' to get an all-atom model.
 conf = PDBConfiguration('insulin.pdb')
 chains = Collection(conf.createPeptideChains(model="calpha"))
 
