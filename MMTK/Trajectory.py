@@ -1,7 +1,7 @@
 # This module implements trajetories and trajectory generators.
 #
 # Written by Konrad Hinsen
-# last revision: 2006-11-27
+# last revision: 2007-5-25
 #
 
 import Collections, Units, Universe, Utility, ParticleProperties, Visualization
@@ -181,7 +181,7 @@ class Trajectory:
         return self.trajectory.nsteps
 
     def __getitem__(self, item):
-        if type(item) != type(0):
+        if not isinstance(item, int):
             return SubTrajectory(self, Numeric.arange(len(self)))[item]
         if item < 0:
             item = item + len(self)
@@ -302,7 +302,7 @@ class SubTrajectory:
         return len(self.indices)
 
     def __getitem__(self, item):
-        if type(item) == type(0):
+        if isinstance(item, int):
             return self.trajectory[self.indices[item]]
         else:
             return SubTrajectory(self.trajectory, self.indices[item])
@@ -395,7 +395,7 @@ class TrajectoryVariable:
         return len(self.trajectory)
 
     def __getitem__(self, item):
-        if type(item) != type(0):
+        if not isinstance(item, int):
             return SubVariable(self, Numeric.arange(len(self)))[item]
         if item < 0:
             item = item + len(self.trajectory)
@@ -448,7 +448,7 @@ class SubVariable(TrajectoryVariable):
         return len(self.indices)
 
     def __getitem__(self, item):
-        if type(item) == type(0):
+        if isinstance(item, int):
             return self.variable[self.indices[item]]
         else:
             return SubVariable(self.variable, self.indices[item])
@@ -529,7 +529,7 @@ class TrajectorySet:
         return self.nsteps[-1]
 
     def __getitem__(self, item):
-        if type(item) != type(0):
+        if not isinstance(item, int):
             return SubTrajectory(self, Numeric.arange(len(self)))[item]
         if item >= len(self):
             raise IndexError
@@ -692,7 +692,7 @@ class TrajectorySetVariable(TrajectoryVariable):
         return len(self.trajectory_set)
 
     def __getitem__(self, item):
-        if type(item) != type(0):
+        if not isinstance(item, int):
             return SubVariable(self, Numeric.arange(len(self)))[item]
         if item >= len(self.trajectory_set):
             raise IndexError
@@ -715,7 +715,7 @@ class ParticleTrajectoryReader:
         self.cache_lifetime = 2
 
     def __call__(self, atom, variable, first, last, skip, correct, box):
-        if type(atom) != type(0):
+        if not isinstance(atom, int):
             index = atom.index
         else:
             index = atom

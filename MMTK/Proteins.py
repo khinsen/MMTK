@@ -1,7 +1,7 @@
 # This module implements classes for peptide chains and proteins.
 #
 # Written by Konrad Hinsen
-# last revision: 2007-2-28
+# last revision: 2007-5-25
 #
 
 import Biopolymers, Bonds, ChemicalObjects, Collections, ConfigIO, Database
@@ -738,7 +738,7 @@ class Protein(ChemicalObjects.Complex):
         return len(self.chains)
 
     def __getitem__(self, item):
-        if type(item) == type(0):
+        if isinstance(item, int):
             m, c, name = self.chains[item]
         else:
             for m, c, name in self.chains:

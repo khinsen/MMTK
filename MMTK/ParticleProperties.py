@@ -2,7 +2,7 @@
 # simulation, i.e. configurations, force vectors, etc.
 #
 # Written by Konrad Hinsen
-# last revision: 2007-4-23
+# last revision: 2007-5-25
 #
 
 from MMTK import Utility
@@ -162,12 +162,12 @@ class ParticleScalar(ParticleProperty):
 		raise ValueError('Data incompatible with universe')
 
     def __getitem__(self, item):
-        if type(item) != type(0):
+        if not isinstance(item, int):
             item = item.index
         return self.array[item]
 
     def __setitem__(self, item, value):
-        if type(item) != type(0):
+        if not isinstance(item, int):
             item = item.index
         self.array[item] = value
 
@@ -221,12 +221,12 @@ class ParticleVector(ParticleProperty):
 		raise ValueError('Data incompatible with universe')
 
     def __getitem__(self, item):
-        if type(item) != type(0):
+        if not isinstance(item, int):
             item = item.index
         return Vector(self.array[item])
 
     def __setitem__(self, item, value):
-        if type(item) != type(0):
+        if not isinstance(item, int):
             item = item.index
         self.array[item] = value.array
 
@@ -398,12 +398,12 @@ class ParticleTensor(ParticleProperty):
         return self.n
 
     def __getitem__(self, item):
-        if type(item) != type(0):
+        if not isinstance(item, int):
             item = item.index
         return Tensor(self.array[item])
 
     def __setitem__(self, item, value):
-        if type(item) != type(0):
+        if not isinstance(item, int):
             item = item.index
         self.array[item] = value.array
 
@@ -453,9 +453,9 @@ class SymmetricPairTensor(ParticleProperty):
 
     def __getitem__(self, item):
         i1, i2 = item
-        if type(i1) != type(0):
+        if not isinstance(i1, int):
             i1 = i1.index
-        if type(i2) != type(0):
+        if not isinstance(i2, int):
             i2 = i2.index
         if i1 > i2:
             i1, i2 = i2, i1
@@ -465,9 +465,9 @@ class SymmetricPairTensor(ParticleProperty):
 
     def __setitem__(self, item, value):
         i1, i2 = item
-        if type(i1) != type(0):
+        if not isinstance(i1, int):
             i1 = i1.index
-        if type(i2) != type(0):
+        if not isinstance(i2, int):
             i2 = i2.index
         if i1 > i2:
             i1, i2 = i2, i1
