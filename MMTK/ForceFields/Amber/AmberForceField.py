@@ -1,7 +1,7 @@
 # This file provides the Amber force field, using Amber parameter files.
 #
 # Written by Konrad Hinsen
-# last revision: 2007-5-16
+# last revision: 2007-5-28
 #
 
 _undocumented = 1
@@ -21,6 +21,8 @@ OPLS = None
 this_directory = os.path.split(__file__)[0]
 
 def fullModFilePath(modfile):
+    if not isinstance(modfile, str):
+        return modfile
     if os.path.exists(modfile):
         return modfile
     return os.path.join(this_directory, os.path.basename(modfile))
@@ -118,7 +120,8 @@ class Amber94ForceField(MMForceField.MMForceField):
     """Amber 94 force field
 
     Constructor: Amber94ForceField(|lennard_jones_options|,
-                                   |electrostatic_options|)
+                                   |electrostatic_options|,
+                                   |mod_files| = [])
 
     Arguments:
 
@@ -145,6 +148,14 @@ class Amber94ForceField(MMForceField.MMForceField):
         entry "cutoff"), "ewald" (Ewald summation, only for periodic
         universes), "screened" (see below),
         or "multipole" (fast-multipole method).
+
+    |mod_files| -- a list of parameter modification files. The file
+                   format is the one defined by AMBER. Each item
+                   in the list can be either a file object
+                   or a filename, filenames are looked up
+                   first relative to the current directory and then
+                   relative to the directory containing MMTK's
+                   AMBER parameter files.
 
     Pair interactions in periodic systems are calculated using the
     minimum-image convention; the cutoff should therefore never be
@@ -210,7 +221,8 @@ class Amber99ForceField(MMForceField.MMForceField):
     """Amber 99 force field
 
     Constructor: Amber99ForceField(|lennard_jones_options|,
-                                   |electrostatic_options|)
+                                   |electrostatic_options|,
+                                   |mod_files| = [])
 
     Arguments:
 
@@ -237,6 +249,14 @@ class Amber99ForceField(MMForceField.MMForceField):
         entry "cutoff"), "ewald" (Ewald summation, only for periodic
         universes), "screened" (see below),
         or "multipole" (fast-multipole method).
+
+    |mod_files| -- a list of parameter modification files. The file
+                   format is the one defined by AMBER. Each item
+                   in the list can be either a file object
+                   or a filename, filenames are looked up
+                   first relative to the current directory and then
+                   relative to the directory containing MMTK's
+                   AMBER parameter files.
 
     Pair interactions in periodic systems are calculated using the
     minimum-image convention; the cutoff should therefore never be

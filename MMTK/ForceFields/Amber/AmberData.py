@@ -1,7 +1,7 @@
 # This module handles input and application of Amber parameter files.
 #
 # Written by Konrad Hinsen
-# last revision: 2007-4-17
+# last revision: 2007-5-28
 #
 
 _undocumented = 1
@@ -22,8 +22,9 @@ amber_fc_angle_unit = Units.rad
 #
 class AmberParameters:
 
-    def __init__(self, filename, modifications=[]):
-        file = TextFile(filename)
+    def __init__(self, file, modifications=[]):
+        if isinstance(file, str):
+            file = TextFile(file)
         title = file.readline()[:-1]
 
         self.atom_types = DictWithDefault(None)
@@ -82,7 +83,10 @@ class AmberParameters:
         file.close()
 
         for mod, ljname in modifications:
-            file = TextFile(mod)
+            if isinstance(mod, str):
+                file = TextFile(mod)
+            else:
+                file = mod
             title = file.readline()[:-1]
             blank = file.readline()[:-1]
             while 1:
