@@ -2,7 +2,7 @@
 # complexes. They are made as copies from blueprints in the database.
 #
 # Written by Konrad Hinsen
-# last revision: 2007-4-27
+# last revision: 2007-5-28
 #
 
 import Bonds, Collections, ConfigIO, Database, Units, Utility, Visualization
@@ -319,18 +319,21 @@ class CompositeChemicalObject:
 
     def getAtomProperty(self, atom, property, levels = None):
         try:
-            return getattr(self, property)[self.getReference(atom)]
-        except (AttributeError, KeyError):
-            if levels is None:
-                object = atom
-                levels = []
-                while object != self:
-                    levels.append(object)
-                    object = object.parent
-            if not levels:
-                raise KeyError('Property ' + property +
-                                ' not defined for  ', `atom`)
-            return levels[-1].getAtomProperty(atom, property, levels[:-1])
+            return atom.__dict__[property]
+        except KeyError:
+            try:
+                return getattr(self, property)[self.getReference(atom)]
+            except (AttributeError, KeyError):
+                if levels is None:
+                    object = atom
+                    levels = []
+                    while object != self:
+                        levels.append(object)
+                        object = object.parent
+                if not levels:
+                    raise KeyError('Property ' + property +
+                                    ' not defined for  ', `atom`)
+                return levels[-1].getAtomProperty(atom, property, levels[:-1])
 
     def deleteUndefinedAtoms(self):
         delete = []
