@@ -1,7 +1,7 @@
 /* Low-level functions for universes
  *
  * Written by Konrad Hinsen
- * last revision: 2007-4-24
+ * last revision: 2007-5-30
  */
 
 #define _UNIVERSE_MODULE
@@ -142,11 +142,11 @@ orthorhombic_correction(vector3 *x, int natoms, double *data)
 #else
   if (a > 0. && b > 0. && c > 0.)
     for (i = 0; i < natoms; i++) {
-      while (x[i][0] > ah) x[i][0] -= a;
+      while (x[i][0] >= ah) x[i][0] -= a;
       while (x[i][0] < -ah) x[i][0] += a;
-      while (x[i][1] > bh) x[i][1] -= b;
+      while (x[i][1] >= bh) x[i][1] -= b;
       while (x[i][1] < -bh) x[i][1] += b;
-      while (x[i][2] > ch) x[i][2] -= c;
+      while (x[i][2] >= ch) x[i][2] -= c;
       while (x[i][2] < -ch) x[i][2] += c;
     }
 #endif
@@ -162,11 +162,11 @@ parallelepipedic_correction(vector3 *x, int natoms, double *data)
     xf = data[0+9]*x[i][0] + data[1+9]*x[i][1] + data[2+9]*x[i][2];
     yf = data[3+9]*x[i][0] + data[4+9]*x[i][1] + data[5+9]*x[i][2];
     zf = data[6+9]*x[i][0] + data[7+9]*x[i][1] + data[8+9]*x[i][2];
-    while (xf > 0.5) xf -= 1.;
+    while (xf >= 0.5) xf -= 1.;
     while (xf < -0.5) xf += 1.;
-    while (yf > 0.5) yf -= 1.;
+    while (yf >= 0.5) yf -= 1.;
     while (yf < -0.5) yf += 1.;
-    while (zf > 0.5) zf -= 1.;
+    while (zf >= 0.5) zf -= 1.;
     while (zf < -0.5) zf += 1.;
     x[i][0] = data[0]*xf + data[1]*yf + data[2]*zf;
     x[i][1] = data[3]*xf + data[4]*yf + data[5]*zf;
