@@ -1,7 +1,7 @@
 # Harmonic restraint terms that can be added to a force field.
 #
 # Written by Konrad Hinsen
-# last revision: 2006-11-27
+# last revision: 2007-5-31
 #
 
 """This module contains harmonic restraint terms that can be added
@@ -48,7 +48,7 @@ class HarmonicDistanceRestraint(ForceField):
     """
 
     def __init__(self, atom1, atom2, distance, force_constant):
-        if type(atom1) is type(0) and type(atom2) is type(0):
+        if isinstance(atom1, int) and isinstance(atom2, int):
             self.index1 = atom1
             self.index2 = atom2
             self.atom1 = None
@@ -118,8 +118,8 @@ class HarmonicAngleRestraint(ForceField):
     """
 
     def __init__(self, atom1, atom2, atom3, angle, force_constant):
-        if type(atom1) is type(0) and type(atom2) is type(0) and \
-               type(atom3) is type(0):
+        if isinstance(atom1, int) and isinstance(atom2, int) and \
+           isinstance(atom3, int):
             self.index1 = atom1
             self.index2 = atom2
             self.index3 = atom3
@@ -185,8 +185,8 @@ class HarmonicDihedralRestraint(ForceField):
     """
 
     def __init__(self, atom1, atom2, atom3, atom4, dihedral, force_constant):
-        if type(atom1) is type(0) and type(atom2) is type(0) and \
-               type(atom3) is type(0) and type(atom4) is type(0):
+        if isinstance(atom1, int) and isinstance(atom2, int) and \
+           isinstance(atom3, int) and isinstance(atom4, int):
             self.index1 = atom1
             self.index2 = atom2
             self.index3 = atom3
