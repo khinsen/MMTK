@@ -2,6 +2,7 @@ include README LICENSE LICENCE MANIFEST.in
 include tviewer
 include MMTK/ForceFields/force_fields
 include MMTK/ForceFields/Amber/*parm*
+include MMTK/ForceFields/Amber/frcmod*
 include MMTK/Database/Atoms/*
 include MMTK/Database/Groups/*
 include MMTK/Database/Molecules/*
