@@ -1,7 +1,7 @@
 # Functions for finding random points and orientations.
 #
 # Written by: Konrad Hinsen
-# Last revision: 2006-11-29
+# Last revision: 2007-5-31
 # 
 
 """This module defines various random quantities that are useful in
@@ -87,6 +87,8 @@ else:
             x = _gaussian_generator.sample(n)
             x.shape = shape
         return mean+std*x
+
+del numeric
 
 #
 # Random point in a rectangular box centered around the origin

@@ -1,7 +1,7 @@
 # Common aspects of normal mode calculations.
 #
 # Written by Konrad Hinsen
-# last revision: 2007-4-17
+# last revision: 2007-5-31
 #
 
 _undocumented = 1
@@ -13,8 +13,13 @@ import copy
 #
 # Import LAPACK routines or equivalents
 #
+try:
+    array_package = N.package
+except AttributeError:
+    array_package = "Numeric"
+
 symeig = None
-if N.package == "NumPy":
+if array_package == "NumPy":
     # Use symeig (http://mdp-toolkit.sourceforge.net/symeig.html)
     # if it is installed and if NumPy is used (symeig works only
     # with NumPy). Symeig uses the LAPACK routine dsyevr, which
@@ -28,7 +33,7 @@ if N.package == "NumPy":
 dsyevd = None
 dgesdd = None
 try:
-    if N.package == "Numeric":
+    if array_package == "Numeric":
         from lapack_lite import dsyevd, dgesdd, LapackError
     else:
         from numpy.linalg.lapack_lite import dsyevd, dgesdd, LapackError
@@ -64,6 +69,8 @@ if dsyevd:
         except LapackError:
             pass
     del n, array, ev, work, iwork, int_types
+
+del array_package
 
 #
 # Class for a single mode

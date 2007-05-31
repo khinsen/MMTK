@@ -2,7 +2,7 @@
 # places.
 #
 # Written by Konrad Hinsen
-# last revision: 2007-5-7
+# last revision: 2007-5-31
 #
 
 _undocumented = 1
@@ -159,12 +159,17 @@ def warning(text):
 # Pickler and unpickler taking care of non-pickled objects
 #
 
-if N.package == 'Numeric':
+try:
+    array_package = N.package
+except AttributeError:
+    array_package = 'Numeric'
+if array_package == 'Numeric':
     BasePickler = N.Pickler
     BaseUnpickler = N.Unpickler
 else:
     from pickle import Pickler as BasePickler
     from pickle import Unpickler as BaseUnpickler
+del array_package
 
 class Pickler(BasePickler):
 
