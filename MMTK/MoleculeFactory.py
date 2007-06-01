@@ -2,7 +2,7 @@
 # in code, without a database definition.
 #
 # Written by Konrad Hinsen
-# last revision: 2006-4-10
+# last revision: 2007-6-1
 #
 
 """See also the example in Example:Miscellaneous.
@@ -239,7 +239,6 @@ class MoleculeFactory:
             atom2 = self.namePath(object, atom2)
             object.bonds.append(Bonds.Bond((atom1, atom2)))
         for name, vector in template.positions.items():
-            print name, vector
             path = name.split('.')
             self.namePath(object, path).setPosition(vector)
         return object
