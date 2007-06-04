@@ -44,7 +44,16 @@ Bug fixes:
 
 - Multi-threaded energy evaluation got stuck for more than two threads.
 
+- CompoundForceField objects could not be pickled.
+
+- Dihedral energy terms were wrong for phase offsets other than
+  0 and pi. Note: this has no incidence on AMBER and OPLS force fields
+  because they use only offsets of 0 and pi.
+
+- MoleculeFactory.retrieveMolecule had a left-over print statement.
+
 - NumPy compatibility fixes.
+
 
 2.5.18 --> 2.5.19
 =================

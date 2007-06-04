@@ -1,7 +1,7 @@
 /* Low-level force field calculations: bonded interactions
  *
  * Written by Konrad Hinsen
- * last revision: 2001-4-27
+ * last revision: 2007-6-4
  */
 
 #define NO_IMPORT
@@ -446,7 +446,7 @@ cosine_dihedral_evaluator(PyFFEnergyTermObject *self,
 	if (sin_phi == 2.)
 	  sin_phi = sqrt(1.-sqr_cos_phi)*sign_phi;
 	e += param[3]*(1.+cos_n_phi*cos_phase
-		       - sin_n_phi_ratio*sin_phi*sin_phase);
+		       + sin_n_phi_ratio*sin_phi*sin_phase);
       }
     }
     if (energy->gradients != NULL || energy->force_constants != NULL) {
@@ -457,8 +457,8 @@ cosine_dihedral_evaluator(PyFFEnergyTermObject *self,
       else {
 	if (sin_phi == 2.)
 	  sin_phi = sqrt(1.-sqr_cos_phi)*sign_phi;
-	deriv = -n*param[3]*(sin_n_phi_ratio*sin_phi*cos_phase +
-			     cos_n_phi*sin_phase);
+	deriv = n*param[3]*(-sin_n_phi_ratio*sin_phi*cos_phase
+			    +cos_n_phi*sin_phase);
       }
       vector_copy(di, rij_cross_rkj);
       vector_scale(di, lrkj/sqr(lm));
@@ -525,7 +525,7 @@ cosine_dihedral_evaluator(PyFFEnergyTermObject *self,
 	  deriv2 = 2.*param[3];
 	else
 	  deriv2 = -n*n*param[3]*(cos_n_phi*cos_phase 
-				  - sin_n_phi_ratio*sin_phi*sin_phase);
+				  + sin_n_phi_ratio*sin_phi*sin_phase);
 
 	/************/
 	cross(ga, rkj, rij_cross_rkj);
