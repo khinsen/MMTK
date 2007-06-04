@@ -1,14 +1,44 @@
 # Energy tests
 #
 # Written by Konrad Hinsen
-# last revision: 2007-4-24
+# last revision: 2007-6-4
 #
 
 import unittest
 from MMTK import *
+from MMTK.MoleculeFactory import MoleculeFactory
+from MMTK.ForceFields import Amber99ForceField
 from MMTK_forcefield import NonbondedList
 from MMTK.Random import randomPointInBox
 from Scientific import N
+from cStringIO import StringIO
+
+
+factory = MoleculeFactory()
+factory.createGroup('dihedral_test')
+
+factory.addAtom('dihedral_test', 'C1', 'C')
+factory.addAtom('dihedral_test', 'C2', 'C')
+factory.addAtom('dihedral_test', 'C3', 'C')
+factory.addAtom('dihedral_test', 'C4', 'C')
+
+factory.addBond('dihedral_test', 'C1', 'C2')
+factory.addBond('dihedral_test', 'C2', 'C3')
+factory.addBond('dihedral_test', 'C3', 'C4')
+
+factory.setAttribute('dihedral_test', 'C1.amber_atom_type', 'D1')
+factory.setAttribute('dihedral_test', 'C2.amber_atom_type', 'D2')
+factory.setAttribute('dihedral_test', 'C3.amber_atom_type', 'D3')
+factory.setAttribute('dihedral_test', 'C4.amber_atom_type', 'D4')
+factory.setAttribute('dihedral_test', 'C1.amber_charge', 0.)
+factory.setAttribute('dihedral_test', 'C2.amber_charge', 0.)
+factory.setAttribute('dihedral_test', 'C3.amber_charge', 0.)
+factory.setAttribute('dihedral_test', 'C4.amber_charge', 0.)
+
+factory.setPosition('dihedral_test', 'C1', Vector(1., 0., 0.))
+factory.setPosition('dihedral_test', 'C2', Vector(0., 0., 0.))
+factory.setPosition('dihedral_test', 'C3', Vector(0., 0., 1.))
+factory.setPosition('dihedral_test', 'C4', Vector(1., 0., 1.))
 
 
 def sorted_tuple(pair):
@@ -17,6 +47,70 @@ def sorted_tuple(pair):
     else:
         return (pair[1], pair[0])
 
+
+class DihedralTest(unittest.TestCase):
+
+    def setUp(self):
+        self.universe = InfiniteUniverse()
+        self.universe.addObject(factory.retrieveMolecule('dihedral_test'))
+        self.mod_template = """Amber parameters
+
+MASS
+D1 12.0
+D2 12.0
+D3 12.0
+D4 12.0
+
+BOND
+D1-D2    0.0    1.000
+D2-D3    0.0    1.000
+D3-D4    0.0    1.000
+
+ANGL
+D1-D2-D3      0.0      90.0
+D2-D3-D4      0.0      90.0
+
+DIHEDRAL
+D1-D2-D3-D4   1%15.6f%15.6f%15.6f
+
+NONB
+  D1          1.0000    0.0000   0.00000
+  D2          1.0000    0.0000   0.00000
+  D3          1.0000    0.0000   0.00000
+  D4          1.0000    0.0000   0.00000
+"""
+
+    def _dihedralTerm(self, n, phase, V):
+
+        mod_file = self.mod_template % \
+                   (V/(Units.kcal/Units.mol), phase/Units.deg, n)
+        ff = Amber99ForceField(mod_files=[StringIO(mod_file)])
+        self.universe.setForceField(ff)
+
+        param = self.universe.energyEvaluatorParameters()
+        i1, i2, i3, i4, n_test, phase_test, V_test = \
+            param['cosine_dihedral_term'][0]
+        self.assertEqual(n_test, n)
+        # The accuracy is no better than five digits because the
+        # parameters pass through a text representation.
+        self.assertAlmostEqual(phase_test, phase, 5)
+        self.assertAlmostEqual(V_test, V, 5)
+
+        two_pi = 2.*N.pi
+        m = self.universe[0]
+        for angle in N.arange(0., two_pi, 0.1):
+            m.C4.setPosition(Vector(N.cos(angle), N.sin(angle), 1.))
+            e = self.universe.energyTerms()['cosine dihedral angle']
+            da = self.universe.dihedral(m.C1, m.C2, m.C3, m.C4)
+            e_ref = V*(1.+N.cos(n*angle-phase))
+            self.assertAlmostEqual(angle % two_pi, da % two_pi, 14)
+            self.assertAlmostEqual(e, e_ref, 5)
+
+    def test_dihedral(self):
+        for n in [1, 2, 3, 4]:
+            for phase in N.arange(0., 6., 0.5):
+                for V in [-10., 2.]:
+                    self._dihedralTerm(n, phase, V)
 
 class NonbondedListTest:
 
