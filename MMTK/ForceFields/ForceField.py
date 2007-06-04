@@ -2,7 +2,7 @@
 # and force field evaluators.
 #
 # Written by Konrad Hinsen
-# last revision: 2006-11-27
+# last revision: 2007-6-1
 #
 
 _undocumented = 1
@@ -79,6 +79,7 @@ class CompoundForceField(ForceField):
         self.fflist = list(args)
         self.name = '*'
         self.type = 'compound'
+        self.arguments = args
 
     is_compound_force_field = 1
 
