@@ -1,7 +1,7 @@
 # This file provides the Amber force field, using Amber parameter files.
 #
 # Written by Konrad Hinsen
-# last revision: 2007-5-28
+# last revision: 2007-6-10
 #
 
 _undocumented = 1
@@ -205,13 +205,13 @@ class Amber94ForceField(MMForceField.MMForceField):
 
     def __init__(self, lj_options = None, es_options = None,
                  bonded_scale_factor = 1., **kwargs):
-        self.arguments = (lj_options, es_options, bonded_scale_factor)
         main_file = kwargs.get('parameter_file', None)
         mod_files = kwargs.get('mod_files', None)
         parameters = readAmber94(main_file, mod_files)
         MMForceField.MMForceField.__init__(self, 'Amber94', parameters,
                                            lj_options, es_options,
                                            bonded_scale_factor)
+        self.arguments = (lj_options, es_options, bonded_scale_factor)
 
 AmberForceField = Amber94ForceField
 
@@ -306,36 +306,36 @@ class Amber99ForceField(MMForceField.MMForceField):
 
     def __init__(self, lj_options = None, es_options = None,
                  bonded_scale_factor = 1., **kwargs):
-        self.arguments = (lj_options, es_options, bonded_scale_factor)
         main_file = kwargs.get('parameter_file', None)
         mod_files = kwargs.get('mod_files', None)
         parameters = readAmber99(main_file, mod_files)
         MMForceField.MMForceField.__init__(self, 'Amber99', parameters,
                                            lj_options, es_options,
                                            bonded_scale_factor)
+        self.arguments = (lj_options, es_options, bonded_scale_factor)
 
 
 class Amber91ForceField(MMForceField.MMForceField):
 
     def __init__(self, lj_options = None, es_options = None,
                  bonded_scale_factor=1., **kwargs):
-        self.arguments = (lj_options, es_options, bonded_scale_factor)
         readAmber91()
         MMForceField.MMForceField.__init__(self, 'Amber91', Amber91,
                                            lj_options, es_options,
                                            bonded_scale_factor)
+        self.arguments = (lj_options, es_options, bonded_scale_factor)
 
 class OPLSForceField(MMForceField.MMForceField):
 
     def __init__(self, lj_options = None, es_options = None,
                  bonded_scale_factor = 1., **kwargs):
-        self.arguments = (lj_options, es_options, bonded_scale_factor)
         main_file = kwargs.get('parameter_file', None)
         mod_files = kwargs.get('mod_files', None)
         parameters = readOPLS(main_file, mod_files)
         MMForceField.MMForceField.__init__(self, 'OPLS', parameters,
                                            lj_options, es_options,
                                            bonded_scale_factor)
+        self.arguments = (lj_options, es_options, bonded_scale_factor)
 
 #
 # The following classes provides access to individual terms of the
@@ -349,9 +349,9 @@ class OPLSForceField(MMForceField.MMForceField):
 class AmberBondedForceField(MMForceField.MMBondedForceField):
 
     def __init__(self):
-        self.arguments = ()
         readAmber94()
         MMForceField.MMBondedForceField.__init__(self, 'Amber_bonded', Amber94)
+        self.arguments = ()
 
 #
 # Nonbonded interactions
@@ -359,37 +359,37 @@ class AmberBondedForceField(MMForceField.MMBondedForceField):
 class AmberLJForceField(MMForceField.MMLJForceField):
 
     def __init__(self, cutoff = None):
-        self.arguments = (cutoff,)
         readAmber94()
         MMForceField.MMLJForceField.__init__(self, 'Amber_LJ', Amber94, cutoff)
+        self.arguments = (cutoff,)
 
 class AmberESForceField(MMForceField.MMESForceField):
 
     def __init__(self, cutoff = None):
-        self.arguments = (cutoff,)
         readAmber94()
         MMForceField.MMESForceField.__init__(self, 'Amber_ES', Amber94, cutoff)
+        self.arguments = (cutoff,)
 
 class AmberEwaldESForceField(MMForceField.MMEwaldESForceField):
 
     def __init__(self, options = {}):
-        self.arguments = (options,)
         readAmber94()
         MMForceField.MMEwaldForceESField.__init__(self, 'Amber_ES',
                                                   Amber94, options)
+        self.arguments = (options,)
 
 class AmberMPESForceField(MMForceField.MMMPESForceField):
 
     def __init__(self, options = {}):
-        self.arguments = (options,)
         readAmber94()
         MMForceField.MMMPESForceField.__init__(self, 'Amber_ES',
                                                Amber94, options)
+        self.arguments = (options,)
 
 class AmberNonbondedForceField(MMForceField.MMNonbondedForceField):
 
     def __init__(self, lj_options = None, es_options = None):
-        self.arguments = (lj_options, es_options)
         readAmber94()
         MMForceField.MMNonbondedForceField.__init__(self, 'Amber_NB', Amber94,
                                                     lj_options, es_options)
+        self.arguments = (lj_options, es_options)
