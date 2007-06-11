@@ -1,7 +1,7 @@
 # Energy tests
 #
 # Written by Konrad Hinsen
-# last revision: 2007-6-4
+# last revision: 2007-6-11
 #
 
 import unittest
@@ -10,6 +10,8 @@ from MMTK.MoleculeFactory import MoleculeFactory
 from MMTK.ForceFields import Amber99ForceField
 from MMTK_forcefield import NonbondedList
 from MMTK.Random import randomPointInBox
+from MMTK.Utility import pairs
+from Scientific.Geometry import ex, ey, ez
 from Scientific import N
 from cStringIO import StringIO
 
@@ -80,6 +82,39 @@ NONB
   D4          1.0000    0.0000   0.00000
 """
 
+    def _gradientTest(self, delta = 0.0001):
+        e0, grad = self.universe.energyAndGradients()
+        atoms = self.universe.atomList()
+        for a in atoms:
+            num_grad = []
+            for v in [ex, ey, ez]:
+                x = a.position()
+                a.setPosition(x+delta*v)
+                eplus = self.universe.energy()
+                a.setPosition(x-delta*v)
+                eminus = self.universe.energy()
+                a.setPosition(x)
+                num_grad.append(0.5*(eplus-eminus)/delta)
+            self.assert_((Vector(num_grad)-grad[a]).length() < 1.e-2)
+
+    def _forceConstantTest(self, delta = 0.0001):
+        e0, grad0, fc = self.universe.energyGradientsAndForceConstants()
+        atoms = self.universe.atomList()
+        for a1, a2 in zip(atoms, atoms) + pairs(atoms):
+            num_fc = []
+            for v in [ex, ey, ez]:
+                x = a1.position()
+                a1.setPosition(x+delta*v)
+                e_plus, grad_plus = self.universe.energyAndGradients()
+                a1.setPosition(x-delta*v)
+                e_minus, grad_minus = self.universe.energyAndGradients()
+                a1.setPosition(x)
+                num_fc.append(0.5*(grad_plus[a2]-grad_minus[a2])/delta)
+            num_fc = N.array([a.array for a in num_fc])
+            diff = N.fabs(N.ravel(num_fc-fc[a1, a2].array))
+            error = N.maximum.reduce(diff)
+            self.assert_(error < 5.e-2)
+            
     def _dihedralTerm(self, n, phase, V):
 
         mod_file = self.mod_template % \
@@ -105,12 +140,16 @@ NONB
             e_ref = V*(1.+N.cos(n*angle-phase))
             self.assertAlmostEqual(angle % two_pi, da % two_pi, 14)
             self.assertAlmostEqual(e, e_ref, 5)
+            self._gradientTest()
+            self._forceConstantTest()
 
     def test_dihedral(self):
         for n in [1, 2, 3, 4]:
             for phase in N.arange(0., 6., 0.5):
                 for V in [-10., 2.]:
                     self._dihedralTerm(n, phase, V)
+
+
 
 class NonbondedListTest:
 
