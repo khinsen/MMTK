@@ -33,6 +33,8 @@ Improvements:
 
 - Database entries for C- and N-terminal neutral lysine.
 
+- More unt tests.
+
 Bug fixes:
 
 - When Configuration objects were copied, the cell parameters were not copied.
@@ -51,6 +53,9 @@ Bug fixes:
   because they use only offsets of 0 and pi.
 
 - MoleculeFactory.retrieveMolecule had a left-over print statement.
+
+- TrajectoryViewer crashed when single-precision trajectories had
+  a discontinuous time axis.
 
 - NumPy compatibility fixes.
 

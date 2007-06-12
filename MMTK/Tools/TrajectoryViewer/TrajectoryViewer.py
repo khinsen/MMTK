@@ -579,7 +579,8 @@ class TrajectoryViewer(Tkwindow):
                 for jump in jumps[::-1]:
                     dt = self.time[jump-1] + self.time[jump+1] \
                          - 2*self.time[jump]
-                    self.time[jump:] += dt
+                    self.time[jump:] = (self.time[jump:] + dt)\
+                                       .astype(self.time.typecode())
         except KeyError:
             self.time = 1.*Numeric.arange(self.inspector.numberOfSteps())
         self.plotlist = []
