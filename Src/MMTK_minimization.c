@@ -1,7 +1,7 @@
 /* Low-level minimization
  *
  * Written by Konrad Hinsen
- * last revision: 2000-6-12
+ * last revision: 2007-6-13
  */
 
 #include "MMTK/universe.h"
@@ -134,9 +134,13 @@ steepestDescent(PyObject *dummy, PyObject *args)
     return NULL;
 
   /* Create gradient array */
+#if defined(NUMPY)
+  gradients = (PyArrayObject *)PyArray_Copy(configuration);
+#else
   gradients = (PyArrayObject *)PyArray_FromDims(configuration->nd,
 						configuration->dimensions,
 						PyArray_DOUBLE);
+#endif
   if (gradients == NULL)
     return NULL;
   /* Set some convenient variables */
@@ -303,21 +307,33 @@ conjugateGradient(PyObject *dummy, PyObject *args)
     return NULL;
 
   /* Create gradient and direction arrays */
+#if defined(NUMPY)
+  gradients1 = (PyArrayObject *)PyArray_Copy(configuration);
+#else
   gradients1 = (PyArrayObject *)PyArray_FromDims(configuration->nd,
 						 configuration->dimensions,
 						 PyArray_DOUBLE);
+#endif
   if (gradients1 == NULL)
     return NULL;
+#if defined(NUMPY)
+  gradients2 = (PyArrayObject *)PyArray_Copy(configuration);
+#else
   gradients2 = (PyArrayObject *)PyArray_FromDims(configuration->nd,
 						 configuration->dimensions,
 						 PyArray_DOUBLE);
+#endif
   if (gradients2 == NULL) {
     Py_DECREF(gradients1);
     return NULL;
   }
+#if defined(NUMPY)
+  direction = (PyArrayObject *)PyArray_Copy(configuration);
+#else
   direction = (PyArrayObject *)PyArray_FromDims(configuration->nd,
 						configuration->dimensions,
 						PyArray_DOUBLE);
+#endif
   if (direction == NULL) {
     Py_DECREF(gradients1);
     Py_DECREF(gradients2);

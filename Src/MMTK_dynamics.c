@@ -1,7 +1,7 @@
 /* Low-level dynamics integrators
  *
  * Written by Konrad Hinsen
- * last revision: 2002-7-20
+ * last revision: 2007-6-13
  */
 
 #include "MMTK/universe.h"
@@ -452,9 +452,13 @@ integrateVV(PyObject *dummy, PyObject *args)
     return NULL;
 
   /* Create gradient array */
+#if defined(NUMPY)
+  gradients = (PyArrayObject *)PyArray_Copy(configuration);
+#else
   gradients = (PyArrayObject *)PyArray_FromDims(configuration->nd,
 						configuration->dimensions,
 						PyArray_DOUBLE);
+#endif
   if (gradients == NULL)
     return NULL;
 
