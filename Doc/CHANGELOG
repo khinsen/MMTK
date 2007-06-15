@@ -57,6 +57,9 @@ Bug fixes:
 - TrajectoryViewer crashed when single-precision trajectories had
   a discontinuous time axis.
 
+- The charges for the Amber force field in the database files for nucleotides
+  were lacking the last digit.
+
 - NumPy compatibility fixes.
 
 

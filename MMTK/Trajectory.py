@@ -1,7 +1,7 @@
 # This module implements trajetories and trajectory generators.
 #
 # Written by Konrad Hinsen
-# last revision: 2007-5-25
+# last revision: 2007-6-15
 #
 
 import Collections, Units, Universe, Utility, ParticleProperties, Visualization
@@ -232,7 +232,7 @@ class Trajectory:
 
     def defaultStep(self):
         try:
-            step = self.trajectory.file.last_step[0]
+            step = int(self.trajectory.file.last_step[0])
         except AttributeError:
             step = 0
         return step
