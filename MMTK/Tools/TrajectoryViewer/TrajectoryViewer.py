@@ -1,7 +1,7 @@
 # Trajectory viewer for MMTK trajectory files
 #
 # Written by Konrad Hinsen
-# last revision: 2006-11-27
+# last revision: 2007-6-19
 #
 
 from Tkinter import *
@@ -579,8 +579,13 @@ class TrajectoryViewer(Tkwindow):
                 for jump in jumps[::-1]:
                     dt = self.time[jump-1] + self.time[jump+1] \
                          - 2*self.time[jump]
-                    self.time[jump:] = (self.time[jump:] + dt)\
-                                       .astype(self.time.typecode())
+                    try:
+                        # Numeric
+                        typecode = self.time.typecode()
+                    except AttributeError:
+                        # numpy
+                        typecode = self.time.dtype.char
+                    self.time[jump:] = (self.time[jump:] + dt).astype(typecode)
         except KeyError:
             self.time = 1.*Numeric.arange(self.inspector.numberOfSteps())
         self.plotlist = []
