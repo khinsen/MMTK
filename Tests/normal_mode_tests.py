@@ -1,7 +1,7 @@
 # Normal mode tests
 #
 # Written by Konrad Hinsen
-# last revision: 2007-3-22
+# last revision: 2007-6-19
 #
 
 import unittest

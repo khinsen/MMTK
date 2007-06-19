@@ -9,6 +9,7 @@ import unittest
 from MMTK import *
 from MMTK.Trajectory import Trajectory, SnapshotGenerator, TrajectoryOutput
 from Scientific import N
+import os
 
 class InfiniteUniverseTest:
 
@@ -18,6 +19,7 @@ class InfiniteUniverseTest:
                                          position = Vector(-0.2, 0., 0.)))
         self.universe.addObject(Molecule('water',
                                          position = Vector(0.2, 0., 0.)))
+
 
 class OrthorhombicUniverseTest:
 
@@ -53,6 +55,12 @@ class DoublePrecisionTest:
 
 
 class TrajectoryTest:
+
+    def tearDown(self):
+        try:
+            os.remove('test.nc')
+        except OSError:
+            pass
 
     def test_snapshot(self):
 
@@ -108,30 +116,35 @@ class InfiniteUniverseTestDP(unittest.TestCase,
                              TrajectoryTest,
                              DoublePrecisionTest):
     setUp = InfiniteUniverseTest.setUp
+    tearDown = TrajectoryTest.tearDown
 
 class OrthorhombicUniverseTestSP(unittest.TestCase,
                                  OrthorhombicUniverseTest,
                                  TrajectoryTest,
                                  SinglePrecisionTest):
     setUp = OrthorhombicUniverseTest.setUp
+    tearDown = TrajectoryTest.tearDown
 
 class OrthorhombicUniverseTestDP(unittest.TestCase,
                                  OrthorhombicUniverseTest,
                                  TrajectoryTest,
                                  DoublePrecisionTest):
     setUp = OrthorhombicUniverseTest.setUp
+    tearDown = TrajectoryTest.tearDown
 
 class ParallelepipedicUniverseTestSP(unittest.TestCase,
                                      ParallelepipedicUniverseTest,
                                      TrajectoryTest,
                                      SinglePrecisionTest):
     setUp = ParallelepipedicUniverseTest.setUp
+    tearDown = TrajectoryTest.tearDown
 
 class ParallelepipedicUniverseTestDP(unittest.TestCase,
                                      ParallelepipedicUniverseTest,
                                      TrajectoryTest,
                                      DoublePrecisionTest):
     setUp = ParallelepipedicUniverseTest.setUp
+    tearDown = TrajectoryTest.tearDown
 
 
 if __name__ == '__main__':
