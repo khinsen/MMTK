@@ -1,7 +1,7 @@
 # This module deals with input and output of configurations in PDB format.
 #
 # Written by Konrad Hinsen
-# last revision: 2007-4-18
+# last revision: 2007-6-29
 #
 
 """This module provides classes that represent molecules in PDB file.
@@ -208,6 +208,20 @@ class PDBConfiguration(Scientific.IO.PDB.Structure):
                 n += 1
 
     def _convertUnits(self):
+        for residue in self.residues:
+            for atom in residue:
+                atom.position = atom.position*Units.Ang
+                try:
+                    b = atom.properties['temperature_factor']
+                    atom.properties['temperature_factor'] = b*Units.Ang**2
+                except KeyError:
+                    pass
+                try:
+                    u = atom.properties['u']
+                    atom.properties['u'] = u*Units.Ang**2
+                except KeyError:
+                    pass
+
         # All these attributes exist only if ScientificPython >= 2.7.5 is used.
         # The Scaling transformation was introduced with the same version,
         # so if it exists, the rest should work as well.
@@ -307,7 +321,7 @@ class PDBConfiguration(Scientific.IO.PDB.Structure):
                                 except IOError:
                                     a = ChemicalObjects.Atom(aname[:1],
                                                              name = aname)
-                            a.setPosition(atom.position*Units.Ang)
+                            a.setPosition(atom.position)
                             atoms.append(a)
                             pdbdict[atom.name] = Database.AtomReference(i)
                             i = i + 1
@@ -379,7 +393,7 @@ def setResidueConfiguration(object, pdb_residue, pdbmap, altmap,
                                pdb_residue.name+' not found in residue ' +
                                pdbmap[0] + ' of object ' + object.fullName())
         if pdbname:
-            object.setPosition(pdbname, atom.position*Units.Ang)
+            object.setPosition(pdbname, atom.position)
             try:
                 object.setIndex(pdbname, atom.number-1)
             except ValueError:

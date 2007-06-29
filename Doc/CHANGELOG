@@ -1,3 +1,15 @@
+2.5.20 --> 2.5.21hg
+===================
+
+Incompatible changes:
+
+- PDB.PDBConfiguration stores atom positions and temperature factors
+  (isotropic and anisotropic) in internal units (nm, nm**2) rather than
+  in PDB units (Ang, Ang**2).
+
+  Scripts that access these parameters directly must be updated!
+
+
 2.5.19 --> 2.5.20
 =================
 
