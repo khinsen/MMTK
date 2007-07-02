@@ -201,6 +201,10 @@ class BondList(UserList):
         self.data.append(item)
         self._clearCache()
 
+    def extend(self, items):
+        self.data.extend(items)
+        self._clearCache()
+
     def insert(self, i, item):
         self.data.insert(i, item)
         self._clearCache()

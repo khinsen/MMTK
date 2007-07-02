@@ -9,6 +9,11 @@ Incompatible changes:
 
   Scripts that access these parameters directly must be updated!
 
+Bug fixes:
+
+- Hierarchical molecule definitions (using groups) in a MoleculeFactory
+  lacked the bonds from the subgroups.
+
 
 2.5.19 --> 2.5.20
 =================

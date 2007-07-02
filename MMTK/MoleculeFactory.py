@@ -221,6 +221,7 @@ class MoleculeFactory:
                 group = self.makeChemicalObjects(child, False)
                 object.groups.append(group)
                 object.atoms.extend(group.atoms)
+                object.bonds.extend(group.bonds)
                 group.parent = object
                 child_objects.append(group)
             else:
