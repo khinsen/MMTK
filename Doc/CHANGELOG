@@ -1,6 +1,11 @@
 2.5.20 --> 2.5.21hg
 ===================
 
+New features:
+
+- New module PDBMoleculeFactory permits to work with molecule objects
+  that represent exactly the contents of a PDB file.
+
 Incompatible changes:
 
 - PDB.PDBConfiguration stores atom positions and temperature factors
