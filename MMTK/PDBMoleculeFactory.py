@@ -3,7 +3,7 @@
 # given in the file.
 #
 # Written by Konrad Hinsen
-# last revision: 2007-7-2
+# last revision: 2007-7-4
 #
 
 """
@@ -45,13 +45,24 @@ class PDBMoleculeFactory(MoleculeFactory):
         one molecule. For residues that are neither amino acids nor
         nucleic acids, each residue becomes one molecule.
 
+        Chain molecules (peptide and nucleotide chains) can be iterated
+        over to retrieve the individual residues. The residues can also
+        be accessed as attributes whose names are the three-letter
+        residue name (upper case) followed by an underscore and the
+        residue number from the PDB file (e.g. 'GLY_34').
+
+        Each object that corresponds to a PDB residue (i.e. each
+        residue in a chain and each non-chain molecule) has the
+        attributes 'residue_name' and 'residue_number'. Each atom has
+        the attributes 'serial_number', 'occupancy' and
+        'temperature_factor'. Atoms for which a ANISOU record exists
+        also have an attribute 'u' whose value is a tensor object.
+        
         @returns: a list of Molecule objects
         @rtype: C{list}
         """
         objects = []
-        for chain in self.peptide_chains:
-            objects.append(self.retrieveMolecule(chain))
-        for chain in self.nucleotide_chains:
+        for chain in self.peptide_chains + self.nucleotide_chains:
             objects.append(self.retrieveMolecule(chain))
         for mollist in self.molecules.values():
             for residue in mollist:
@@ -113,7 +124,6 @@ class PDBMoleculeFactory(MoleculeFactory):
         universe = self.retrieveUniverse()
         for symop in self.pdb_conf.cs_transformations:
             rotation = symop.asLinearTransformation().tensor
-            print rotation
             asu = MMTK.Collection(self.retrieveMolecules())
             for atom in asu.atomList():
                 atom.setPosition(symop(atom.position()))
@@ -181,19 +191,20 @@ class PDBMoleculeFactory(MoleculeFactory):
         self.setAttribute(chain_id, 'sequence', local_resnames)
         for i in range(1, len(chain)):
             if chain[i-1].number == chain[i].number-1:
-                if chain[i-1].atoms.has_key('C') and \
-                       chain[i].atoms.has_key('N'):
-                    # Peptide chain
-                    self.addBond(chain_id, local_resnames[i-1]+'.C',
-                                 local_resnames[i]+'.N')
-                elif chain[i-1].atoms.has_key('O3*') and \
-                         chain[i].atoms.has_key('P'):
-                    # Nucleotide chain
-                    self.addBond(chain_id, local_resnames[i-1]+'.O3*',
-                                 local_resnames[i]+'.P')
-
+                for atom1 in chain[i-1]:
+                    for atom2 in chain[i]:
+                        if self.assumeBond(atom1.properties['element'],
+                                           atom1.position,
+                                           atom2.properties['element'],
+                                           atom2.position):
+                            self.addBond(chain_id,
+                                         local_resnames[i-1]+'.'+atom1.name,
+                                         local_resnames[i]+'.'+atom2.name)
+                       
     def makeResidue(self, residue, group_name):
         self.createGroup(group_name)
+        self.setAttribute(group_name, 'residue_name', residue.name)
+        self.setAttribute(group_name, 'residue_number', residue.number)
         atoms = []
         for atom in residue:
             atoms.append((atom.name, atom.properties['element'],
@@ -202,6 +213,8 @@ class PDBMoleculeFactory(MoleculeFactory):
             self.setPosition(group_name, atom.name, atom.position)
             self.setAttribute(group_name, atom.name+'.temperature_factor',
                               atom.properties['temperature_factor'])
+            self.setAttribute(group_name, atom.name+'.occupancy',
+                              atom.properties['occupancy'])
             self.setAttribute(group_name, atom.name+'.serial_number',
                               atom.properties['serial_number'])
             if atom.properties.has_key('u'):

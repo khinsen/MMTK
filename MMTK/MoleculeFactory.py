@@ -207,7 +207,10 @@ class MoleculeFactory:
     def makeChemicalObjects(self, template, top_level):
         self.groups[template.name].locked = True
         if top_level:
-            object = ChemicalObjects.Molecule(None)
+            if template.attributes.has_key('sequence'):
+                object = ChemicalObjects.ChainMolecule(None)
+            else:
+                object = ChemicalObjects.Molecule(None)
         else:
             object = ChemicalObjects.Group(None)
         object.atoms = []
