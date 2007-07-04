@@ -1,7 +1,7 @@
 # Deformation force field
 #
 # Written by Konrad Hinsen
-# last revision: 2006-11-27
+# last revision: 2007-7-4
 #
 
 _undocumented = 1
@@ -38,9 +38,12 @@ class DeformationForceField(ForceField):
     larger than half the smallest edge length of the elementary
     cell.
 
-    The pair interaction energy has the form
-    U(r)=|factor|*exp(-(r-0.01)**2/|range|**2). The default value
+    The pair interaction force constant has the form
+    k(r)=|factor|*exp(-(r**2-0.01)/|range|**2). The default value
     for |range| is appropriate for a C-alpha model of a protein.
+    The offset of 0.01 is a convenience for defining |factor|;
+    with this definition, |factor| is the force constant for a
+    distance of 0.1nm.
     See [Article:Hinsen1998] for details.
     """
 
