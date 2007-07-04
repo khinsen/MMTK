@@ -2,7 +2,7 @@
 # for bonded interactions.
 #
 # Written by Konrad Hinsen
-# last revision: 2006-11-27
+# last revision: 2007-7-4
 #
 
 _undocumented = 1
@@ -128,8 +128,6 @@ class BondedForceField(ForceField):
     def addDihedralTerm(self, data, dihedral, object, global_data):
         raise AttributeError
     def addImproperTerm(self, data, improper, object, global_data):
-        raise AttributeError
-    def evalObject(self, global_data):
         raise AttributeError
 
     # The following methods are recommended for derived classes.
