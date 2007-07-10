@@ -26,6 +26,7 @@ class BondedForceField(ForceField):
 
     def evaluatorParameters(self, universe, subset1, subset2, global_data):
         data = ForceFieldData()
+        data.set('universe', universe)
         if subset1 is not None:
             label1 = Utility.uniqueAttribute()
             label2 = Utility.uniqueAttribute()
