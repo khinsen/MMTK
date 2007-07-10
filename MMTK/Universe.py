@@ -4,7 +4,7 @@
 # (boundary conditions, external fields, etc.)
 #
 # Written by Konrad Hinsen
-# last revision: 2007-4-25
+# last revision: 2007-7-10
 #
 
 import Bonds, ChemicalObjects, Collections, Environment, \
@@ -1045,11 +1045,11 @@ class Periodic3DUniverse(Universe):
                                box_coordinates = 0):
         from MMTK_universe import contiguous_object_offset
         if objects is None or objects == self or objects == [self]:
-            default = 1
+            default = True
             objects = self._objects.objectList()
             pairs = self._bond_pairs
         else:
-            default = 0
+            default = False
             pairs = None
         if conf is None:
             conf = self.configuration()
@@ -1058,7 +1058,7 @@ class Periodic3DUniverse(Universe):
         if pairs is None:
             pairs = []
             for o in objects:
-                new_object = 1
+                new_object = True
                 if ChemicalObjects.isChemicalObject(o):
                     units = o.bondedUnits()
                 elif Collections.isCollection(o) or isUniverse(o):
@@ -1066,7 +1066,7 @@ class Periodic3DUniverse(Universe):
                     for element in o:
                         top = element.topLevelChemicalObject()
                         for u in top.bondedUnits():
-                            included[u] = 1
+                            included[u] = True
                     units = included.keys()
                 else:
                     raise ValueError(str(o) + " not a chemical object")
@@ -1077,10 +1077,10 @@ class Periodic3DUniverse(Universe):
                         first = atoms[0].index
                         for a in atoms[1:]:
                             mpairs.append((first, a.index))
-                    if not new_object and len(pairs) > 0:
-                        pairs.append((pairs[-1][1], mpairs[0][0]))
-                    new_object = 0
-                    pairs = pairs + mpairs
+#                    if not new_object and len(pairs) > 0:
+#                        pairs.append((pairs[-1][1], mpairs[0][0]))
+                    new_object = False
+                    pairs.extend(mpairs)
             pairs = N.array(pairs)
             if default:
                 self._bond_pairs = pairs
