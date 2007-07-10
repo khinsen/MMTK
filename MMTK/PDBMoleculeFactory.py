@@ -15,7 +15,8 @@ systems generated in this way.
 
 import MMTK
 from MMTK.MoleculeFactory import MoleculeFactory
-from Scientific.Geometry import Vector
+from Scientific.Geometry import Vector, delta
+from Scientific import N
 
 class PDBMoleculeFactory(MoleculeFactory):
 
@@ -122,13 +123,22 @@ class PDBMoleculeFactory(MoleculeFactory):
         @rtype: L{MMTK.Universe.Universe}
         """
         universe = self.retrieveUniverse()
+        asu_count = 0
         for symop in self.pdb_conf.cs_transformations:
-            rotation = symop.asLinearTransformation().tensor
+            transformation = symop.asLinearTransformation()
+            rotation = transformation.tensor
+            translation = transformation.vector
+            is_asu = translation.length() < 1.e-8 and \
+                     N.maximum.reduce(N.ravel(N.fabs((rotation
+                                                      -delta).array))) < 1.e-8
+            if is_asu:
+                asu_count += 1
             asu = MMTK.Collection(self.retrieveMolecules())
             for atom in asu.atomList():
                 atom.setPosition(symop(atom.position()))
                 if hasattr(atom, 'u'):
                     atom.u = rotation.dot(atom.u.dot(rotation.transpose()))
+                atom.in_asu = is_asu
             if compact:
                 cm = asu.centerOfMass()
                 cm_fr = self.pdb_conf.to_fractional(cm)
@@ -137,6 +147,7 @@ class PDBMoleculeFactory(MoleculeFactory):
                 cm = self.pdb_conf.from_fractional(cm_fr)
                 asu.translateTo(cm)
             universe.addObject(asu)
+        assert asu_count == 1
         return universe
 
     def makeAll(self):
