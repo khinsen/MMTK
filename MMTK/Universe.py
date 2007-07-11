@@ -688,6 +688,17 @@ class Universe(Collections.GroupOfAtoms, Visualization.Viewable):
         eval(0, 0, small_change)
         return eval.lastEnergyTerms()
 
+    def configurationDifference(self, conf1, conf2):
+        """Returns a ParticleVectors containing for each atom the
+        difference vector from its position in conf1 to its position
+        in conf2. The result takes the universe topology
+        (periodic boundary conditions etc.) into account."""
+        d = conf2-conf1
+        cell = conf1.cell_parameters
+        if cell is not None:
+            self._spec.foldCoordinatesIntoBox(d.array)
+        return d
+            
     def distanceVector(self, p1, p2, conf=None):
         """Returns the distance vector between |p1| and |p2| (i.e. the
         vector from |p1| to |p2|) in the
