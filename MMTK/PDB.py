@@ -1,7 +1,7 @@
 # This module deals with input and output of configurations in PDB format.
 #
 # Written by Konrad Hinsen
-# last revision: 2007-6-29
+# last revision: 2007-8-7
 #
 
 """This module provides classes that represent molecules in PDB file.
@@ -239,8 +239,21 @@ class PDBConfiguration(Scientific.IO.PDB.Structure):
                 setattr(self, attribute, value*Units.deg)
         if self.to_fractional is not None:
             self.to_fractional = self.to_fractional*Scaling(1./Units.Ang)
+            v1 = self.to_fractional(Vector(1., 0., 0.))
+            v2 = self.to_fractional(Vector(0., 1., 0.))
+            v3 = self.to_fractional(Vector(0., 0., 1.))
+            self.reciprocal_basis = (Vector(v1[0], v2[0], v3[0]),
+                                     Vector(v1[1], v2[1], v3[1]),
+                                     Vector(v1[2], v2[2], v3[2]))
+        else:
+            self.reciprocal_basis = None
         if self.from_fractional is not None:
             self.from_fractional = Scaling(Units.Ang)*self.from_fractional
+            self.basis = (self.from_fractional(Vector(1., 0., 0.)),
+                          self.from_fractional(Vector(0., 1., 0.)),
+                          self.from_fractional(Vector(0., 0., 1.)))
+        else:
+            self.basis = None
         for i in range(len(self.ncs_transformations)):
             tr = self.ncs_transformations[i]
             tr_new = Scaling(Units.Ang)*tr*Scaling(1./Units.Ang)
