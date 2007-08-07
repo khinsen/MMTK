@@ -1,7 +1,7 @@
 # Common aspects of normal mode calculations.
 #
 # Written by Konrad Hinsen
-# last revision: 2007-5-31
+# last revision: 2007-8-7
 #
 
 _undocumented = 1
@@ -237,9 +237,9 @@ class NormalModes:
             self.array = N.transpose(modes)
         elif dsyevd is None:
             ev, modes = Heigenvectors(self.array)
-            self.array = modes
             ev = ev.real
             modes = modes.real
+            self.array = modes
         else:
             ev = N.zeros((self.nmodes,), N.Float)
             work = N.zeros((1,), N.Float)
