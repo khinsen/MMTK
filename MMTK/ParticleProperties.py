@@ -2,7 +2,7 @@
 # simulation, i.e. configurations, force vectors, etc.
 #
 # Written by Konrad Hinsen
-# last revision: 2007-5-25
+# last revision: 2007-8-8
 #
 
 from MMTK import Utility
@@ -432,6 +432,11 @@ class ParticleTensor(ParticleProperty):
 
     def sumOverParticles(self):
         return Tensor(N.add.reduce(self.array, 0))
+
+    def trace(self):
+        return ParticleScalar(self.universe,
+                              self.array[:, 0, 0] + self.array[:, 1, 1]
+                              + self.array[:, 2, 2])
 
 ParticleTensor.return_class = ParticleTensor
 
