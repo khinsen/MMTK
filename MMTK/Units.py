@@ -1,7 +1,7 @@
 # Define unit conversion factors and physical constants
 #
 # Written by Konrad Hinsen
-# last revision: 2006-8-18
+# last revision: 2007-9-11
 #
 
 """This module defines constants and prefactors that convert between
@@ -156,7 +156,10 @@ K = 1                       # Kelvin
 # internal unit: kJ/mol/nm**3
 
 Pa = J/m**3                 # Pascal
+MPa = mega*Pa
+GPa = giga*Pa
 bar = 1.e5*Pa               # bar
+kbar = kilo*bar
 atm = 101325*Pa             # atmosphere
 
 # Constants
