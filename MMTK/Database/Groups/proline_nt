@@ -1,4 +1,4 @@
-sidechain = Group('pro_sidechain')
+sidechain = Group('pro_sidechain_nt')
 peptide = Group('peptide_proline_nt')
 bonds = [Bond(peptide.C_alpha, sidechain.C_beta), Bond(peptide.N, sidechain.C_delta), ]
 symbol = 'Pro'
