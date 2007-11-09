@@ -4,7 +4,7 @@
 # (boundary conditions, external fields, etc.)
 #
 # Written by Konrad Hinsen
-# last revision: 2007-7-10
+# last revision: 2007-11-9
 #
 
 import Bonds, ChemicalObjects, Collections, Environment, \
@@ -1049,8 +1049,7 @@ class Periodic3DUniverse(Universe):
                 self.boxToRealCoordinates(Vector(0., 0., 1.))]
 
     def randomPoint(self):
-        rf = Random.randomPointInBox(1., 1., 1.)-Vector(0.5, 0.5, 0.5)
-        return self.boxToRealCoordinates(rf)
+        return self.boxToRealCoordinates(Random.randomPointInBox(1., 1., 1.))
 
     def contiguousObjectOffset(self, objects = None, conf = None,
                                box_coordinates = 0):
