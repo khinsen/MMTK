@@ -2,7 +2,7 @@
 # complexes. They are made as copies from blueprints in the database.
 #
 # Written by Konrad Hinsen
-# last revision: 2007-7-4
+# last revision: 2007-10-5
 #
 
 import Bonds, Collections, ConfigIO, Database, Units, Utility, Visualization
@@ -837,6 +837,8 @@ class Molecule(CompositeChemicalObject, ChemicalObject):
                             self._C3oneH(a, known, list)
                         else:
                             self._C3twoH(a, known, list)
+                    elif n == 2:
+                            self._C2oneH(a, known, list)
                     else:
                         print a
                         raise ValueError("Can't handle C with "+`n`+" bonds")
@@ -853,6 +855,8 @@ class Molecule(CompositeChemicalObject, ChemicalObject):
                             self._N3oneH(a, known, list)
                         elif nb == 2:
                             self._N3twoH(a, known, list)
+                    elif n == 2:
+                            self._N2oneH(a, known, list)
                     else:
                         print a
                         raise ValueError("Can't handle N with "+`n`+" bonds")
@@ -915,7 +919,13 @@ class Molecule(CompositeChemicalObject, ChemicalObject):
         r1 = known[0].position()
         others = filter(lambda a: a.symbol != 'H', known[0].bondedTo())
         r2 = others[0].position()
-        plane = Objects3D.Plane(r, r1, r2)
+        try:
+            plane = Objects3D.Plane(r, r1, r2)
+        except ZeroDivisionError:
+            # We get here if all three points are colinear.
+            # Add a small random displacement as a fix.
+            from MMTK.Random import randomPointInSphere
+            plane = Objects3D.Plane(r, r1, r2 + randomPointInSphere(0.001))
         axis = (r-r1).normal()
         cone = Objects3D.Cone(r, axis, 0.5*self._hch_angle)
         sphere = Objects3D.Sphere(r, self._ch_bond)
@@ -923,6 +933,31 @@ class Molecule(CompositeChemicalObject, ChemicalObject):
         points = circle.intersectWith(plane)
         unknown[0].setPosition(points[0])
         unknown[1].setPosition(points[1])
+
+    def _C2oneH(self, atom, known, unknown):
+        r = atom.position()
+        r1 = known[0].position()
+        x = r + self._ch_bond * (r - r1).normal()
+        unknown[0].setPosition(x)
+
+    def _N2oneH(self, atom, known, unknown):
+        r = atom.position()
+        r1 = known[0].position()
+        others = filter(lambda a: a.symbol != 'H', known[0].bondedTo())
+        r2 = others[0].position()
+        try:
+            plane = Objects3D.Plane(r, r1, r2)
+        except ZeroDivisionError:
+            # We get here when all three points are colinear.
+            # Add a small random displacement as a fix.
+            from MMTK.Random import randomPointInSphere
+            plane = Objects3D.Plane(r, r1, r2 + randomPointInSphere(0.001))
+        axis = (r-r1).normal()
+        cone = Objects3D.Cone(r, axis, 0.5*self._hch_angle)
+        sphere = Objects3D.Sphere(r, self._nh_bond)
+        circle = sphere.intersectWith(cone)
+        points = circle.intersectWith(plane)
+        unknown[0].setPosition(points[0])
 
     def _N3oneH(self, atom, known, unknown):
         r = atom.position()
