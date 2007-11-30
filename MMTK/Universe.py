@@ -818,6 +818,24 @@ class Universe(Collections.GroupOfAtoms, Visualization.Viewable):
     def _boxToRealPointArray(self, array, parameters=None):
         return array
 
+    def cartesianToFractional(self, vector):
+        """Returns the fractional coordinate equivalent of |vector|.
+        Fractional coordinates are defined only for periodic universes;
+        their components have values between 0. and 1."""
+        raise ValueError("Universe is not periodic")
+
+    def cartesianToFractionalMatrix(self):
+        raise ValueError("Universe is not periodic")
+
+    def fractionalToCartesian(self, array):
+        """Returns the real-space equivalent of the fractional
+        coordinates stored in |array|. Fractional coordinates are
+        defined only for periodic universes."""
+        raise ValueError("Universe is not periodic")
+
+    def fractionalToCartesianMatrix(self):
+        raise ValueError("Universe is not periodic")
+
     def foldCoordinatesIntoBox(self):
         return
 
@@ -1047,6 +1065,20 @@ class Periodic3DUniverse(Universe):
         return [self.boxToRealCoordinates(Vector(1., 0., 0.)),
                 self.boxToRealCoordinates(Vector(0., 1., 0.)),
                 self.boxToRealCoordinates(Vector(0., 0., 1.))]
+
+    def cartesianToFractional(self, vector):
+        r1, r2, r3 = self.reciprocalBasisVectors()
+        return N.array([r1*vector, r2*vector, r3*vector])
+
+    def cartesianToFractionalMatrix(self):
+        return N.array(self.reciprocalBasisVectors())
+
+    def fractionalToCartesian(self, array):
+        e1, e2, e3 = self.basisVectors()
+        return array[0]*e1 + array[1]*e2 + array[2]*e3
+
+    def fractionalToCartesianMatrix(self):
+        return N.transpose(self.basisVectors())
 
     def randomPoint(self):
         return self.boxToRealCoordinates(Random.randomPointInBox(1., 1., 1.))
