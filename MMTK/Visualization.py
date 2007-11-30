@@ -207,11 +207,12 @@ def genericViewConfiguration(object, configuration = None, format = 'pdb',
             win32api.ShellExecute(0, "open", filename, None, "", 1)
         except win32api.error, error_number:
             #Looking for error 31, SE_ERR_NOASSOC, in particular
+            file_type = os.path.splitext(filename)[1]
             if error_number[0]==31:
-                print 'There is no program associated with .WRL files,' + \
-                      ' please install a VRML2 viewer'
+                print ('There is no program associated with .%s files,' + \
+                       ' please install a suitable viewer') % file_type
             else:
-                print 'Unexpected error attempting to open .WRL file'
+                print 'Unexpected error attempting to open .%s file' % file_type
                 print sys.exc_value
     else:
         object.writeToFile(filename, configuration, format)
