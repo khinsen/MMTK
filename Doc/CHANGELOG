@@ -1,3 +1,24 @@
+2.5.21 --> 2.5.22
+=================
+
+Bug fixes:
+
+- The Amber atom type of HD in N-terminal proline was wrong.
+
+- Make CYM a known amino acid residue (useable in PDB files).
+
+- Universe.randomPoint() returned points shifted by half the box size.
+
+- When opening a PDB file in a PDB viewer fails under Windows, the
+  error message given mentioned VRML instead of PDB.
+
+Improvements:
+
+- Hydrogen placement extended to more situations.
+
+- Universe objects have a few new methods introduced for CDTK compatibility.
+
+
 2.5.20 --> 2.5.21
 =================
 

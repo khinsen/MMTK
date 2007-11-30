@@ -2,7 +2,7 @@
  * Include file for trajectory objects
  *
  * Written by Konrad Hinsen
- * last revision: 2000-8-4
+ * last revision: 2007-11-27
  */
 
 #ifndef MMTK_TRAJECTORY_H
@@ -11,7 +11,11 @@
 
 #include "MMTK/core.h"
 #include "Scientific/netcdfmodule.h"
-#include "netcdf.h"
+#ifdef USE_NETCDF_H_FROM_SCIENTIFIC
+# include "Scientific/netcdf.h"
+#else
+# include "netcdf.h"
+#endif
 #include <time.h>
 
 /* Unit names */

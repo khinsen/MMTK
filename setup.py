@@ -34,10 +34,13 @@ if not scientific_ok:
 compile_args = []
 include_dirs = ['Include']
 
-# Take care of the common problem that netcdf is in /usr/local but
-# /usr/local/include is not on $CPATH.
-if os.path.exists('/usr/local/include/netcdf.h'):
-    include_dirs.append('/usr/local/include')
+if int(scientific_version[1]) >= 7:
+    compile_args.append("-DUSE_NETCDF_H_FROM_SCIENTIFIC=1")
+else:
+    # Take care of the common problem that netcdf is in /usr/local but
+    # /usr/local/include is not on $CPATH.
+    if os.path.exists('/usr/local/include/netcdf.h'):
+        include_dirs.append('/usr/local/include')
 
 from Scientific import N
 try:
@@ -182,7 +185,7 @@ if sys.version_info[0] == 2 and sys.version_info[1] >= 2:
 # System-specific optimization options
 
 low_opt = []
-if sysconfig['CC'][:3] == 'gcc':
+if sys.platform != 'win32' and sysconfig['CC'][:3] == 'gcc':
     low_opt = ['-O0']
 
 high_opt = []
