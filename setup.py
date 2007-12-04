@@ -22,6 +22,8 @@ execfile('MMTK/__pkginfo__.py', pkginfo.__dict__)
 # Check that we have Scientific 2.6 or higher
 try:
     from Scientific import __version__ as scientific_version
+    if scientific_version[-2:] == 'hg':
+        scientific_version = scientific_version[:-2]
     scientific_version = scientific_version.split('.')
     scientific_ok = int(scientific_version[0]) >= 2 and \
                     int(scientific_version[1]) >= 6
@@ -34,7 +36,8 @@ if not scientific_ok:
 compile_args = []
 include_dirs = ['Include']
 
-if int(scientific_version[1]) >= 7:
+if int(scientific_version[1]) >= 8 or \
+       (int(scientific_version[1]) == 7 and int(scientific_version[2]) >= 8):
     compile_args.append("-DUSE_NETCDF_H_FROM_SCIENTIFIC=1")
 else:
     # Take care of the common problem that netcdf is in /usr/local but
