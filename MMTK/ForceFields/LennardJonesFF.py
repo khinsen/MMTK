@@ -1,7 +1,7 @@
 # A Lennard-Jones force fields for simple liquids
 #
 # Written by Konrad Hinsen
-# last revision: 2006-11-16
+# last revision: 2007-12-4
 #
 
 _undocumented = 1
@@ -38,7 +38,7 @@ class LennardJonesForceField(LJForceField):
         LJForceField.__init__(self, 'LJ', cutoff)
         self.lj_14_factor = 1.
 
-    def ready(self):
+    def ready(self, global_data):
         return 1
 
     def collectParameters(self, universe, global_data):
