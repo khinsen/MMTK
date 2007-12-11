@@ -712,7 +712,7 @@ class Universe(Collections.GroupOfAtoms, Visualization.Viewable):
         if conf is None:
             return Vector(self._spec.distanceVector(p1.array, p2.array))
         else:
-            cell = conf.cell_parameters
+            cell = self._fixCellParameters(conf.cell_parameters)
             if cell is None:
                 return Vector(self._spec.distanceVector(p1.array, p2.array))
             else:
@@ -1095,7 +1095,7 @@ class Periodic3DUniverse(Universe):
             pairs = None
         if conf is None:
             conf = self.configuration()
-        cell = conf.cell_parameters
+        cell = self._fixCellParameters(conf.cell_parameters)
         offset = ParticleProperties.ParticleVector(self)
         if pairs is None:
             pairs = []
@@ -1133,6 +1133,9 @@ class Periodic3DUniverse(Universe):
             contiguous_object_offset(self._spec, pairs, conf.array,
                                      offset.array, box_coordinates, cell)
         return offset
+
+    def _fixCellParameters(self, cell_parameters):
+        return cell_parameters
 
     def _graphics(self, conf, distance_fn, model, module, options):
         objects = self._objects._graphics(conf, distance_fn, model,
@@ -1343,6 +1346,13 @@ class ParallelepipedicPeriodicUniverse(Periodic3DUniverse):
             self.data[:9] = parameters
             from MMTK_universe import parallelepiped_invert
             parallelepiped_invert(self.data)
+
+    def _fixCellParameters(self, cell_parameters):
+        full_parameters = 0.*self.data
+        full_parameters[:9] = cell_parameters
+        from MMTK_universe import parallelepiped_invert
+        parallelepiped_invert(full_parameters)
+        return full_parameters
 
     def realToBoxCoordinates(self, vector):
         x, y, z = vector
