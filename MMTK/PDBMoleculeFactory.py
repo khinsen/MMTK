@@ -3,7 +3,7 @@
 # given in the file.
 #
 # Written by Konrad Hinsen
-# last revision: 2007-7-4
+# last revision: 2007-12-13
 #
 
 """
@@ -17,23 +17,56 @@ import MMTK
 from MMTK.MoleculeFactory import MoleculeFactory
 from Scientific.Geometry import Vector, delta
 from Scientific import N
+import copy
 
 class PDBMoleculeFactory(MoleculeFactory):
 
     """
     A PDBMoleculeFactory generates molecules and universes from the
-    contents of a PDBConfiguration. Nothing is added or left out, and
+    contents of a PDBConfiguration. Nothing is added or left out
+    (except as defined by the optional residue and atom filters), and
     the atom and residue names are exactly those of the original PDB
     file.
     """
 
-    def __init__(self, pdb_conf):
+    def __init__(self, pdb_conf, residue_filter=None, atom_filter=None):
         """
         @param pdb_conf: a PDBConfiguration
         @type pdb_conf: L{MMTK.PDB.PDBConfiguration}
+        @param residue_filter: a function taking a residue object
+                               (as defined in Scientific.IO.PDB)
+                               and returning True if that residue is
+                               to be kept in the molecule factory
+        @type residue_filter: callable
+        @param atom_filter: a function taking a residue object and an
+                            atom object (as defined in Scientific.IO.PDB)     
+                            and returning True if that atom is 
+                            to be kept in the molecule factory
+        @type atom_filter: callable
         """
         MoleculeFactory.__init__(self)
-        self.pdb_conf = pdb_conf
+
+        if residue_filter is None and atom_filter is None:
+            self.pdb_conf = pdb_conf
+        else:
+            self.pdb_conf = copy.deepcopy(pdb_conf)
+            for residue in self.pdb_conf.residues:
+                delete = []
+                for atom in residue:
+                    if atom_filter is not None \
+                           and not atom_filter(residue, atom):
+                        delete.append(atom)
+                for atom in delete:
+                    residue.deleteAtom(atom)
+            delete = []
+            for residue in self.pdb_conf.residues:
+                if len(residue) == 0 or \
+                       (residue_filter is not None
+                        and not residue_filter(residue)):
+                    delete.append(residue)
+            for residue in delete:
+                self.pdb_conf.deleteResidue(residue)
+
         self.peptide_chains = []
         self.nucleotide_chains = []
         self.molecules = {}
