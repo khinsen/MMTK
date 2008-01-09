@@ -771,9 +771,10 @@ class Universe(Collections.GroupOfAtoms, Visualization.Viewable):
         return None
 
     def largestDistance(self):
-        """Returns the largest possible distance that any two points
-        can have in the universe. Returns 'None' if no such upper limit
-        exists."""
+        """Returns the largest possible distance between any two points
+        that can be represented independent of orientation, i.e. the
+        radius of the largest sphere that fits into the simulation cell.
+        Returns 'None' if no such upper limit exists."""
         return None
 
     def contiguousObjectOffset(self, objects = None, conf = None,
@@ -1410,7 +1411,7 @@ class ParallelepipedicPeriodicUniverse(Periodic3DUniverse):
         return abs(self.data[18])
 
     def largestDistance(self):
-        return self.boxToRealCoordinates(Vector(0.5, 0.5, 0.5)).length()
+        return min([0.5/v.length() for v in self.reciprocalBasisVectors()])
 
     def _createSpec(self):
         from MMTK_universe import ParallelepipedicPeriodicUniverseSpec
