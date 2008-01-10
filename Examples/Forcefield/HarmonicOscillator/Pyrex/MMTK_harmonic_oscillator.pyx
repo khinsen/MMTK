@@ -29,12 +29,12 @@ cdef class HarmonicOscillatorTerm(EnergyTerm):
     cdef double ref_x, ref_y, ref_z
     cdef double k
 
-    def __init__(self, universe, atom, reference, force_constant):
+    def __init__(self, universe, atom_index, reference, force_constant):
         cdef ArrayType ref_array
         EnergyTerm.__init__(self, universe,
                             "harmonic_oscillator", ("harmonic_oscillator",))
         self.eval_func = <void *>HarmonicOscillatorTerm.evaluate
-        self.atom_index = atom.index
+        self.atom_index = atom_index
         ref_array = reference.array
         self.ref_x = (<double *>ref_array.data)[0]
         self.ref_y = (<double *>ref_array.data)[1]

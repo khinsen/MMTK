@@ -2,7 +2,7 @@
 # and force field evaluators.
 #
 # Written by Konrad Hinsen
-# last revision: 2007-6-1
+# last revision: 2008-1-10
 #
 
 _undocumented = 1
@@ -69,6 +69,23 @@ class ForceField:
 
     def description(self):
         return 'ForceFields.' + self.__class__.__name__ + `self.arguments`
+
+    def getAtomParameterIndices(self, atoms):
+        universe = None
+        indices = []
+        for a in atoms:
+            if isinstance(a, int):
+                indices.append(a)
+            else:
+                if universe is None:
+                    universe = a.universe()
+                    universe.configuration()
+                else:
+                    if universe is not a.universe():
+                        raise ValueError("Atom parameters %s are not all "
+                                         "in the same universe" % repr(atoms))
+                indices.append(a.index)
+        return tuple(indices)
 
 #
 # A CompoundForceField represents the sum of its component force fields

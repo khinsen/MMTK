@@ -23,16 +23,19 @@ class HarmonicOscillatorForceField(ForceField):
     """
 
     def __init__(self, atom, center, force_constant):
-        # We call this for its side effect: it makes sure that all
-        # atoms have a correct index assigned to them.
-        atom.universe().configuration()
+        # Get the internal index of the atom if the argument is an
+        # atom object. It is the index that is stored internally,
+        # and when the force field is recreated from a specification
+        # in a trajectory file, it is the index that is passed instead
+        # of the atom object itself. Calling this method takes care
+        # of all the necessary checks and conversions.
+        self.atom_index = self.getAtomParameterIndices([atom])[0]
         # Store arguments that recreate the force field from a pickled
         # universe or from a trajectory.
-        self.arguments = (atom, center, force_constant)
+        self.arguments = (self.atom_index, center, force_constant)
         # Initialize the ForceField class, giving a name to this one.
         ForceField.__init__(self, 'harmonic_oscillator')
         # Store the parameters for later use.
-        self.atom = atom
         self.center = center
         self.force_constant = force_constant
 
@@ -55,7 +58,7 @@ class HarmonicOscillatorForceField(ForceField):
         # Here we pass all the parameters to the Pyrex code
         # that handles energy calculations.
         return [HarmonicOscillatorTerm(universe,
-                                       self.atom,
+                                       self.atom_index,
                                        self.center,
                                        self.force_constant)]
 

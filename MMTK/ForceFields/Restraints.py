@@ -1,7 +1,7 @@
 # Harmonic restraint terms that can be added to a force field.
 #
 # Written by Konrad Hinsen
-# last revision: 2007-5-31
+# last revision: 2008-1-10
 #
 
 """This module contains harmonic restraint terms that can be added
@@ -48,30 +48,13 @@ class HarmonicDistanceRestraint(ForceField):
     """
 
     def __init__(self, atom1, atom2, distance, force_constant):
-        if isinstance(atom1, int) and isinstance(atom2, int):
-            self.index1 = atom1
-            self.index2 = atom2
-            self.atom1 = None
-            self.atom2 = None
-            self.universe = None
-        else:
-            self.atom1 = atom1
-            self.atom2 = atom2
-            self.universe = atom1.universe()
-            if self.universe is not atom2.universe():
-                raise ValueError("Atoms " + `self.atom1` + 'and' +
-                                  `self.atom2` + 'are not in the same universe')
-            self.universe.configuration()
-            self.index1 = self.atom1.index
-            self.index2 = self.atom2.index
+        self.index1, self.index2 = self.getAtomParameterIndices((atom1, atom2))
         self.arguments = (self.index1, self.index2, distance, force_constant) 
         self.distance = distance
         self.force_constant = force_constant
         ForceField.__init__(self, 'harmonic distance restraint')
 
     def evaluatorParameters(self, universe, subset1, subset2, global_data):
-        if self.universe is not None and self.universe is not universe:
-            raise ValueError("Atoms are not in universe " + `universe`)
         if subset1 is not None:
             s1 = subset1.atomList()
             s2 = subset2.atomList()
@@ -118,29 +101,8 @@ class HarmonicAngleRestraint(ForceField):
     """
 
     def __init__(self, atom1, atom2, atom3, angle, force_constant):
-        if isinstance(atom1, int) and isinstance(atom2, int) and \
-           isinstance(atom3, int):
-            self.index1 = atom1
-            self.index2 = atom2
-            self.index3 = atom3
-            self.atom1 = None
-            self.atom2 = None
-            self.atom3 = None
-            self.universe = None
-        else:
-            self.atom1 = atom1
-            self.atom2 = atom2
-            self.atom3 = atom3
-            self.universe = atom1.universe()
-            if self.universe is not atom2.universe() or \
-                   self.universe is not atom3.universe():
-                raise ValueError("Atoms " + `self.atom1` + ', ' +
-                                  `self.atom2` + 'and' +
-                                  `self.atom3` + 'are not in the same universe')
-            self.universe.configuration()
-            self.index1 = self.atom1.index
-            self.index2 = self.atom2.index
-            self.index3 = self.atom3.index
+        self.index1, self.index2, self.index3 = \
+                    self.getAtomParameterIndices((atom1, atom2, atom3))
         self.arguments = (self.index1, self.index2, self.index3,
                           angle, force_constant) 
         self.angle = angle
@@ -148,8 +110,6 @@ class HarmonicAngleRestraint(ForceField):
         ForceField.__init__(self, 'harmonic angle restraint')
 
     def evaluatorParameters(self, universe, subset1, subset2, global_data):
-        if self.universe is not None and self.universe is not universe:
-            raise ValueError("Atoms are not in universe " + `universe`)
         return {'harmonic_angle_term':
                  [(self.index1, self.index2, self.index3,
                    self.angle, self.force_constant)]}
@@ -185,34 +145,8 @@ class HarmonicDihedralRestraint(ForceField):
     """
 
     def __init__(self, atom1, atom2, atom3, atom4, dihedral, force_constant):
-        if isinstance(atom1, int) and isinstance(atom2, int) and \
-           isinstance(atom3, int) and isinstance(atom4, int):
-            self.index1 = atom1
-            self.index2 = atom2
-            self.index3 = atom3
-            self.index4 = atom4
-            self.atom1 = None
-            self.atom2 = None
-            self.atom3 = None
-            self.atom4 = None
-            self.universe = None
-        else:
-            self.atom1 = atom1
-            self.atom2 = atom2
-            self.atom3 = atom3
-            self.atom4 = atom4
-            self.universe = atom1.universe()
-            if self.universe is not atom2.universe() or \
-                   self.universe is not atom3.universe() or \
-                   self.universe is not atom3.universe():
-                raise ValueError("Atoms " + `self.atom1` + ', ' +
-                                  `self.atom2` + ', ' + `self.atom3` + 'and' +
-                                  `self.atom4` + 'are not in the same universe')
-            self.universe.configuration()
-            self.index1 = self.atom1.index
-            self.index2 = self.atom2.index
-            self.index3 = self.atom3.index
-            self.index4 = self.atom4.index
+        self.index1, self.index2, self.index3, self.index4 = \
+                   self.getAtomParameterIndices((atom1, atom2, atom3, atom4))
         self.dihedral = dihedral
         self.force_constant = force_constant
         self.arguments = (self.index1, self.index2, self.index3, self.index4,
@@ -220,8 +154,6 @@ class HarmonicDihedralRestraint(ForceField):
         ForceField.__init__(self, 'harmonic dihedral restraint')
 
     def evaluatorParameters(self, universe, subset1, subset2, global_data):
-        if self.universe is not None and self.universe is not universe:
-            raise ValueError("Atoms are not in universe " + `universe`)
         return {'cosine_dihedral_term': [(self.index1, self.index2,
                                           self.index3, self.index4,
                                           0., self.dihedral,
