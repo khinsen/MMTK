@@ -61,9 +61,3 @@ class HarmonicOscillatorForceField(ForceField):
                                        self.atom_index,
                                        self.center[0], self.center[1],
                                        self.center[2], self.force_constant)]
-
-    # This method returns the string that is inserted into the universe
-    # descriptions in trajectories. It is the class name followed by
-    # the arguments, just what it takes to re-create an equivalent object.
-    def description(self):
-        return self.__class__.__name__ + `self.arguments`

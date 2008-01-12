@@ -1,8 +1,10 @@
 # Force field initialization
 #
 # Written by Konrad Hinsen
-# last revision: 2002-2-26
+# last revision: 2008-1-12
 #
+
+import os, string, sys
 
 class _ForceFieldLoader:
 
@@ -15,9 +17,11 @@ class _ForceFieldLoader:
 
     def __call__(self, *args, **kw):
         ffc = getattr(__import__(self.module, self.globals), self.object)
+        ffc.description = _description
         return apply(ffc, args, kw)
 
-import os, string, sys
+def _description(self):
+    return 'ForceFields.' + self.__class__.__name__ + `self.arguments`
 
 ff_list = open(os.path.join(os.path.split(__file__)[0],
                             'force_fields')).readlines()

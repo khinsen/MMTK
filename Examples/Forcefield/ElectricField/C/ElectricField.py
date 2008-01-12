@@ -58,9 +58,3 @@ class ElectricField(ForceField):
         return [ElectricFieldTerm(universe._spec, charges.array,
                                   self.strength[0], self.strength[1],
                                   self.strength[2])]
-
-    # This method returns the string that is inserted into the universe
-    # descriptions in trajectories. It is the class name followed by
-    # the arguments, just what it takes to re-create an equivalent object.
-    def description(self):
-        return self.__class__.__name__ + `self.arguments`

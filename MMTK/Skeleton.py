@@ -1,7 +1,7 @@
 # This module handles the skeleton descriptions stored in trajectory files.
 #
 # Written by Konrad Hinsen
-# last revision: 2001-4-19
+# last revision: 2008-1-12
 #
 
 _undocumented = 1
@@ -9,7 +9,7 @@ _undocumented = 1
 import MMTK
 import MMTK.Environment
 import MMTK.ForceFields
-import string, types
+import copy, sys, types
 
 #
 # Atoms
@@ -93,7 +93,7 @@ class N(Composite):
     def make(self, info, conf = None):
         import MMTK.NucleicAcids
 	n_residues = len(self.type)/3
-	residues = map(lambda i, s = self.type: string.strip(s[3*i:3*i+3]),
+	residues = map(lambda i, s = self.type: s[3*i:3*i+3].strip(),
                        range(n_residues))
 	self.kwargs['name'] = self.name
 	chain = apply(MMTK.NucleicAcids.NucleotideChain, (residues,),
@@ -112,11 +112,10 @@ class c:
 	self.objects = objects
 
     def make(self, info, conf = None):
-	local = {}
-        collection = eval(self.creation, vars(MMTK), local)
+        collection = _evalString(self.creation)
         attr = None
 	for o in self.objects:
-            if type(o) == types.StringType:
+            if isinstance(o, str):
                 attr = o
             elif attr:
                 setattr(collection, attr, o.make(info, conf))
@@ -150,6 +149,39 @@ class o:
 	self.creation = creation
 
     def make(self, info, conf = None):
-	local = {}
-	object = eval(self.creation, vars(MMTK), local)
-	return object
+	return _evalString(self.creation)
+
+#
+# Evaluate description string
+# In case of a NameError, suppose the missing name is the name of a
+# module, import that module, and try again. In case of an AttributeError,
+# suppose that the missing attribute is a subpackage, import that subpackage,
+# and try again.
+#
+def _evalString(description):
+    local = {}
+    namespace = copy.copy(vars(MMTK))
+    imported = []
+    done = False
+    while not done:
+        try:
+            o = eval(description, namespace, local)
+            done = True
+        except NameError, exception:
+            name = exception.message.split("'")[1]
+            __import__(name)
+            namespace[name] = sys.modules[name]
+            imported.append(name)
+        except AttributeError, exception:
+            if exception.message.split("'")[1] == "module":
+                name = exception.message.split("'")[3]
+                for m in imported:
+                    try:
+                        module_name = "%s.%s" % (m, name)
+                        __import__(module_name)
+                        imported.append(module_name)
+                    except ImportError:
+                        pass
+            else:
+                raise
+    return o
