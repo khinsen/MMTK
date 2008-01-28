@@ -168,13 +168,13 @@ def _evalString(description):
             o = eval(description, namespace, local)
             done = True
         except NameError, exception:
-            name = exception.message.split("'")[1]
+            name = str(exception).split("'")[1]
             __import__(name)
             namespace[name] = sys.modules[name]
             imported.append(name)
         except AttributeError, exception:
-            if exception.message.split("'")[1] == "module":
-                name = exception.message.split("'")[3]
+            if str(exception).split("'")[1] == "module":
+                name = str(exception).split("'")[3]
                 for m in imported:
                     try:
                         module_name = "%s.%s" % (m, name)
