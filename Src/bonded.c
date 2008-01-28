@@ -1,7 +1,7 @@
 /* Low-level force field calculations: bonded interactions
  *
  * Written by Konrad Hinsen
- * last revision: 2007-6-4
+ * last revision: 2008-1-28
  */
 
 #define NO_IMPORT
@@ -34,7 +34,16 @@ harmonic_bond_evaluator(PyFFEnergyTermObject *self,
   index += 2*term;
   param += 2*term;
 
+  /* Loop over bond terms */
   while (term++ < last_term) {
+    /*
+     * E = k (r-r0)^2
+     * r = | R_i-R_j |
+     *
+     * index[0], index[1]: particle indices i, j
+     * param[0]: r0
+     * param[1]: k
+     */
     int i = index[0];
     int j = index[1];
     vector3 rij;
@@ -45,9 +54,6 @@ harmonic_bond_evaluator(PyFFEnergyTermObject *self,
     dr = lrij-param[0];
     e += param[1]*sqr(dr);
     v += -2.*param[1]*dr*lrij;
-#if 0
-    printf("%d, %d -> %lf, %lf, %lf\n", i, j, lrij, dr, param[1]);
-#endif
     if (energy->gradients != NULL) {
       double deriv = 2.*param[1]*dr/lrij;
       vector3 grad;
@@ -106,7 +112,17 @@ harmonic_angle_evaluator(PyFFEnergyTermObject *self,
   index += 3*term;
   param += 2*term;
 
+  /* Loop over bond angle terms */
   while (term++ < last_term) {
+    /*
+     * E = k (theta-theta0)^2
+     * cos theta = (R_i-R_j)*(R_k-R_j)
+     *
+     * index[1]: index of central particle j
+     * index[0], index[2]: indices of outer particles i, k
+     * param[0]: theta0 (radians)
+     * param[1]: k
+     */
     int i = index[0];
     int j = index[1];
     int k = index[2];
@@ -348,7 +364,21 @@ cosine_dihedral_evaluator(PyFFEnergyTermObject *self,
   index += 4*term;
   param += 4*term;
 
+  /* Loop over dihedral angle terms */
   while (term++ < last_term) {
+    /*
+     * E = V [1 + cos(n phi-gamma)]
+     * phi = angle between plane1 and plane2 using the IUPAC sign convention
+     * plane1 defined by R_i, R_j, R_k
+     * plane2 defined by R_j, R_k, R_l
+     *
+     * index[1], index[1]: indices of the axis particles j, k
+     * index[0], index[3]: indices of outer particles i, l
+     * param[0]: n = int(param[0])
+     * param[1]: cos gamma
+     * param[2]: sin gamma
+     * param[3]: V
+     */
     int i = index[0];
     int j = index[1];
     int k = index[2];
