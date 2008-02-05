@@ -216,8 +216,20 @@ class PDBMoleculeFactory(MoleculeFactory):
         for molname, mollist in self.pdb_conf.molecules.items():
             self.molecules[molname] = []
             for residue in mollist:
-                resname = residue.name + '_' + str(residue.number)
-                self.makeResidue(residue, resname)
+                base_resname = residue.name + '_' + str(residue.number)
+                suffix = 1
+                resname = base_resname
+                done = False
+                while not done:
+                    try:
+                        self.makeResidue(residue, resname)
+                        done = True
+                    except ValueError, e:
+                        if str(e).split()[0] == "redefinition":
+                            resname = base_resname + "_" + str(suffix)
+                            suffix += 1
+                        else:
+                            raise
                 self.molecules[molname].append(resname)
 
     def makeChain(self, chain, chain_id):
