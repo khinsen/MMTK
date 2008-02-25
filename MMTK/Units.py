@@ -143,7 +143,7 @@ dyn = 1.e-5*N
 e = 1.
 C = 6.24150636309e18*e      # Coulomb (SI)
 A = C/s                     # Ampere (SI)
-D = 3.336e-30*C*m           # Debye
+D = 1.e-15*C/c              # Debye
 V = J/C                     # Volt
 eV = e*V                    # electron volt
 
