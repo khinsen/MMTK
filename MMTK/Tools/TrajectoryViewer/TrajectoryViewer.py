@@ -962,7 +962,7 @@ class ModeProjector:
         for conf in self.raw_trajectory:
             conf = self.universe.contiguousObjectConfiguration(self.proteins,
                                                                conf)
-            array = Numeric.take(conf, self.map)
+            array = Numeric.take(conf.array, self.map)
             conf_calpha = MMTK.ParticleVector(universe_calpha, array)
             tr, rms = universe_calpha.findTransformation(conf_calpha)
             tr = tr.inverse()
