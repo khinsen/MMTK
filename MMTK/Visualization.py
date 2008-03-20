@@ -2,7 +2,7 @@
 # and a visualization base class
 #
 # Written by Konrad Hinsen
-# last revision: 2006-11-27
+# last revision: 2008-3-20
 #
 
 """This module provides visualization of chemical objects and animated
@@ -32,7 +32,7 @@ directory specification.
 
 import ConfigIO, PDB, Universe, Units, Utility
 from Scientific import N as Numeric
-import string, sys, tempfile, os
+import subprocess, sys, tempfile, os
 
 #
 # If you want temporary files in a non-standard directory, make
@@ -44,14 +44,40 @@ tempdir = None
 # Get visualization program names
 #
 viewer = {}
-prog = None
 try:
-    viewer['pdb'] = os.environ['PDBVIEWER']
-    prog = os.path.split(string.split(viewer['pdb'])[0])[1]
+    pdbviewer = os.environ['PDBVIEWER']
+    prog = os.path.split(pdbviewer)[1].lower().split('.')[0]
+    viewer['pdb'] = (prog, pdbviewer)
 except KeyError: pass
 try:
-    viewer['vrml'] = os.environ['VRMLVIEWER']
+    vrmlviewer = os.environ['VRMLVIEWER']
+    prog = os.path.split(vrmlviewer)[1].lower().split('.')[0]
+    viewer['vrml'] = (prog, vrmlviewer)
 except KeyError: pass
+
+
+def definePDBViewer(progname, exec_path):
+    """
+    Define the program used to view PDB files.
+    @param progname: the canonical name of the PDB viewer. If it is
+                     a known one (one of "vmd", "xmol", "imol"),
+                     special features such as animation may be
+                     available.
+    @type progname: C{string}
+    @param exec_path: the path to the executable program
+    @type exec_path: C{string}
+    """
+    viewer['pdb'] = (prog.lower(), exec_path)
+
+def defineVRMLiewer(progname, exec_path):
+    """
+    Define the program used to view VRML files.
+    @param progname: the canonical name of the VRML viewer
+    @type progname: C{string}
+    @param exec_path: the path to the executable program
+    @type exec_path: C{string}
+    """
+    viewer['vrml'] = (prog.lower(), exec_path)
 
 #
 # Visualization base class. Defines methods for general visualization
@@ -170,7 +196,7 @@ def view(object, *parameters):
 #
 def genericViewConfiguration(object, configuration = None, format = 'pdb',
                              label = None):
-    format = string.lower(format)
+    format = format.lower()
     if format[:6] == 'opengl':
         from Scientific.Visualization import PyOpenGL
         model = format[7:]
@@ -188,11 +214,11 @@ def genericViewConfiguration(object, configuration = None, format = 'pdb',
         if len(viewer) == 0:
             Utility.warning('No PDB or VRML viewer defined.')
             return
-        format = string.lower(format)
-        viewer_format = string.split(format, '.')[0]
+        format = format.lower()
+        viewer_format = format.split('.')[0]
         if not viewer.has_key(viewer_format):
             format = viewer.keys()[0]
-            viewer_format = string.split(format, '.')[0]
+            viewer_format = format.split('.')[0]
     tempfile.tempdir = tempdir
     filename = tempfile.mktemp()
     tempfile.tempdir = None
@@ -217,16 +243,22 @@ def genericViewConfiguration(object, configuration = None, format = 'pdb',
     else:
         object.writeToFile(filename, configuration, format)
         if os.fork() == 0:
-            pipe = os.popen(viewer[viewer_format] + ' ' + filename + \
+            pipe = os.popen(viewer[format][1] + ' ' + filename + \
                             ' 1> /dev/null 2>&1', 'w')
             pipe.close()
             os.unlink(filename)
             os._exit(0)
 
-viewConfiguration = genericViewConfiguration
+def viewConfiguration(*args, **kwargs):
+    pdbviewer, exec_path = viewer.get('pdb', (None, None))
+    function = {'vmd': viewConfigurationVMD,
+                'xmol': viewConfigurationXMol,
+                'imol': viewConfigurationIMol,
+                None: genericViewConfiguration}[pdbviewer]
+    function(*args, **kwargs)
 
 #
-# Normal mode and trajectory animation: in general not available
+# Normal mode and trajectory animation
 #
 def viewSequence(object, conf_list, periodic = 0, label = None):
     """Launches an external viewer with animation capabilities
@@ -240,7 +272,16 @@ def viewSequence(object, conf_list, periodic = 0, label = None):
     use to pass a description of the object to the visualization
     system.
     """
-    Utility.warning('No viewer with animation feature defined.')
+    pdbviewer, exec_path = viewer.get('pdb', (None, None))
+    function = {'vmd': viewSequenceVMD,
+                'xmol': viewSequenceXMol,
+                'imol': viewSequenceIMol,
+                None: None}[pdbviewer]
+    if function is None:
+        Utility.warning('No viewer with animation feature defined.')
+    else:
+        function(object, conf_list, periodic, label)
+
 
 def viewTrajectory(trajectory, first=0, last=None, step=1, subset = None,
                    label = None):
@@ -278,165 +319,211 @@ def viewMode(mode, factor=1., subset=None, label=None):
 #
 # XMol support
 #    
-if prog == 'xmol':
-    #
-    # Animation with XMol.
-    #
-    def viewSequence(object, conf_list, periodic = 0, label = None):
-        """Launches an external viewer with animation capabilities
-        to display |object| in the configurations given in
-        |conf_list|, which can be any sequence of configurations,
-        including the variable "configuration" from a
-        Class:MMTK.Trajectory.Trajectory object. If |periodic|
-        is 1, the configurations will be repeated periodically,
-        provided that the external viewers supports this operation.
-        """
-        tempfile.tempdir = tempdir
+
+#
+# Animation with XMol.
+#
+viewConfigurationXMol = viewConfiguration
+
+def viewSequenceXMol(object, conf_list, periodic = 0, label = None):
+    tempfile.tempdir = tempdir
+    file_list = []
+    for conf in conf_list:
+        file = tempfile.mktemp()
+        file_list.append(file)
+        object.writeToFile(file, conf, 'pdb')
+    bigfile = tempfile.mktemp()
+    tempfile.tempdir = None
+    os.system('cat ' + ' '.join(file_list) + ' > ' + bigfile)
+    for file in file_list:
+        os.unlink(file)
+    if os.fork() == 0:
+        pipe = os.popen('xmol -readFormat pdb ' + bigfile + \
+                        ' 1> /dev/null 2>&1', 'w')
+        pipe.close()
+        os.unlink(bigfile)
+        os._exit(0)
+
+
+#
+# VMD support
+#
+
+#
+# View configuration
+#
+def isCalpha(object):
+    from Proteins import isProtein, isPeptideChain
+    from Universe import isUniverse
+    from Collections import isCollection
+    if isProtein(object):
+       chain_list = list(object)
+    elif isPeptideChain(object):
+        chain_list = [object]
+    elif isUniverse(object) or isCollection(object):
+        chain_list = []
+        for element in object:
+            if isProtein(element):
+                chain_list = chain_list + list(element)
+            elif isPeptideChain(element):
+                chain_list.append(element)
+            else:
+                return 0
+    else:
+        return 0
+    for chain in chain_list:
+        try:
+            if chain.model != 'calpha':
+                return 0
+        except AttributeError:
+            return 0
+    return 1
+
+def viewConfigurationVMD(object, configuration = None, format = 'pdb',
+                      label = None):
+    format = format.lower()
+    if format != 'pdb':
+        return genericViewConfiguration(object, configuration, format)
+    tempfile.tempdir = tempdir
+    filename = tempfile.mktemp()
+    filename_tcl = filename.replace('\\', '\\\\')
+    script = tempfile.mktemp()
+    script_tcl = script.replace('\\', '\\\\')
+    tempfile.tempdir = None
+    object.writeToFile(filename, configuration, format)
+    file = open(script, 'w')
+    file.write('mol load pdb ' + filename_tcl + '\n')
+    if isCalpha(object):
+        file.write('mol modstyle 0 all trace\n')
+    file.write('color Name 1 white\n')
+    file.write('color Name 2 white\n')
+    file.write('color Name 3 white\n')
+    if Universe.isUniverse(object):
+        # add a box around periodic universes
+        basis = object.basisVectors()
+        if basis is not None:
+            v1, v2, v3 = basis
+            p = -0.5*(v1+v2+v3)
+            for p1, p2 in [(p, p+v1), (p, p+v2), (p+v1, p+v1+v2),
+                           (p+v2, p+v1+v2), (p, p+v3), (p+v1, p+v1+v3),
+                           (p+v2, p+v2+v3), (p+v1+v2, p+v1+v2+v3),
+                           (p+v3, p+v1+v3), (p+v3, p+v2+v3),
+                           (p+v1+v3, p+v1+v2+v3), (p+v2+v3, p+v1+v2+v3)]:
+                file.write('graphics 0 line {%f %f %f} {%f %f %f}\n' %
+                           (tuple(p1/Units.Ang) + tuple(p2/Units.Ang)))
+    file.write('file delete ' + filename_tcl + '\n')
+    if sys.platform != 'win32':
+            # Under Windows, it seems to be impossible to delete
+            # the script file while it is still in use. For the moment
+            # we just don't delete it at all.
+        file.write('file delete ' + script_tcl + '\n')
+    file.close()
+    subprocess.Popen([viewer['pdb'][1], '-nt', '-e', script])
+
+#
+# Animate sequence
+#
+def viewSequenceVMD(object, conf_list, periodic = 0, label=None):
+    tempfile.tempdir = tempdir
+    script = tempfile.mktemp()
+    script_tcl = script.replace('\\', '\\\\')
+    np = object.numberOfPoints()
+    universe = object.universe()
+    if np == universe.numberOfPoints() \
+       and len(conf_list) > 2:
+        import DCD
+        pdbfile = tempfile.mktemp()
+        pdbfile_tcl = pdbfile.replace('\\', '\\\\')
+        dcdfile = tempfile.mktemp()
+        dcdfile_tcl = dcdfile.replace('\\', '\\\\')
+        tempfile.tempdir = None
+        sequence = DCD.writePDB(universe, conf_list[0], pdbfile)
+        indices = map(lambda a: a.index, sequence)
+        DCD.writeDCD(conf_list[1:], dcdfile, 1./Units.Ang, indices)
+        file = open(script, 'w')
+        file.write('mol load pdb ' + pdbfile_tcl + '\n')
+        if isCalpha(object):
+            file.write('mol modstyle 0 all trace\n')
+        file.write('animate read dcd ' + dcdfile_tcl + '\n')
+        if periodic:
+            file.write('animate style loop\n')
+        else:
+            file.write('animate style once\n')
+        file.write('animate forward\n')
+        file.write('file delete ' + pdbfile_tcl + '\n')
+        file.write('file delete ' + dcdfile_tcl + '\n')
+        if sys.platform != 'win32':
+            # Under Windows, it seems to be impossible to delete
+            # the script file while it is still in use. For the moment
+            # we just don't delete it at all.
+            file.write('file delete ' + script_tcl + '\n')
+        file.close()
+    else:
         file_list = []
         for conf in conf_list:
             file = tempfile.mktemp()
             file_list.append(file)
             object.writeToFile(file, conf, 'pdb')
-        bigfile = tempfile.mktemp()
         tempfile.tempdir = None
-        os.system('cat ' + string.join(file_list, ' ') + ' > ' + bigfile)
-        for file in file_list:
-            os.unlink(file)
-        if os.fork() == 0:
-            pipe = os.popen('xmol -readFormat pdb ' + bigfile + \
-                            ' 1> /dev/null 2>&1', 'w')
-            pipe.close()
-            os.unlink(bigfile)
-            os._exit(0)
-
-#
-# VMD support
-#
-if prog == 'vmd':
-    #
-    # View configuration
-    #
-    def isCalpha(object):
-        from Proteins import isProtein, isPeptideChain
-        from Universe import isUniverse
-        from Collections import isCollection
-        if isProtein(object):
-           chain_list = list(object)
-        elif isPeptideChain(object):
-            chain_list = [object]
-        elif isUniverse(object) or isCollection(object):
-            chain_list = []
-            for element in object:
-                if isProtein(element):
-                    chain_list = chain_list + list(element)
-                elif isPeptideChain(element):
-                    chain_list.append(element)
-                else:
-                    return 0
-        else:
-            return 0
-        for chain in chain_list:
-            try:
-                if chain.model != 'calpha':
-                    return 0
-            except AttributeError:
-                return 0
-        return 1
-
-    def viewConfiguration(object, configuration = None, format = 'pdb',
-                          label = None):
-        format = string.lower(format)
-        if format != 'pdb':
-            return genericViewConfiguration(object, configuration, format)
-        tempfile.tempdir = tempdir
-        filename = tempfile.mktemp()
-        script = tempfile.mktemp()
-        tempfile.tempdir = None
-        object.writeToFile(filename, configuration, format)
         file = open(script, 'w')
-        file.write('mol load pdb ' + filename + '\n')
-        if isCalpha(object):
-            file.write('mol modstyle 0 all trace\n')
-        file.write('color Name 1 white\n')
-        file.write('color Name 2 white\n')
-        file.write('color Name 3 white\n')
-        if Universe.isUniverse(object):
-            # add a box around periodic universes
-            basis = object.basisVectors()
-            if basis is not None:
-                v1, v2, v3 = basis
-                p = -0.5*(v1+v2+v3)
-                for p1, p2 in [(p, p+v1), (p, p+v2), (p+v1, p+v1+v2),
-                               (p+v2, p+v1+v2), (p, p+v3), (p+v1, p+v1+v3),
-                               (p+v2, p+v2+v3), (p+v1+v2, p+v1+v2+v3),
-                               (p+v3, p+v1+v3), (p+v3, p+v2+v3),
-                               (p+v1+v3, p+v1+v2+v3), (p+v2+v3, p+v1+v2+v3)]:
-                    file.write('graphics 0 line {%f %f %f} {%f %f %f}\n' %
-                               (tuple(p1/Units.Ang) + tuple(p2/Units.Ang)))
-        file.write('file delete ' + filename + '\n')
-        file.write('file delete ' + script + '\n')
-        file.close()
-        os.system(viewer[format] + ' -nt -e ' + script + ' 1> /dev/null 2>&1')
-    #
-    # Animate sequence
-    #
-    def viewSequence(object, conf_list, periodic = 0, label=None):
-        """Launches an external viewer with animation capabilities
-        to display |object| in the configurations given in
-        |conf_list|, which can be any sequence of configurations,
-        including the variable "configuration" from a
-        Class:MMTK.Trajectory.Trajectory object. If |periodic|
-        is 1, the configurations will be repeated periodically,
-        provided that the external viewers supports this operation.
-        """
-        tempfile.tempdir = tempdir
-        script = tempfile.mktemp()
-        np = object.numberOfPoints()
-        universe = object.universe()
-        if np == universe.numberOfPoints() \
-           and len(conf_list) > 2:
-            import DCD
-            pdbfile = tempfile.mktemp()
-            dcdfile = tempfile.mktemp()
-            tempfile.tempdir = None
-            sequence = DCD.writePDB(universe, conf_list[0], pdbfile)
-            indices = map(lambda a: a.index, sequence)
-            DCD.writeDCD(conf_list[1:], dcdfile, 1./Units.Ang, indices)
-            file = open(script, 'w')
-            file.write('mol load pdb ' + pdbfile + '\n')
-            if isCalpha(object):
-                file.write('mol modstyle 0 all trace\n')
-            file.write('animate read dcd ' + dcdfile + '\n')
-            if periodic:
-                file.write('animate style loop\n')
-            else:
-                file.write('animate style once\n')
-            file.write('animate forward\n')
-            file.write('file delete ' + pdbfile + '\n')
-            file.write('file delete ' + dcdfile + '\n')
-            file.write('file delete ' + script + '\n')
-            file.close()
+        file.write('mol load pdb ' + file_list[0] + '\n')
+        for conf in file_list[1:]:
+            file.write('animate read pdb ' + conf.replace('\\', '\\\\') + '\n')
+        if periodic:
+            file.write('animate style loop\n')
         else:
-            file_list = []
-            for conf in conf_list:
-                file = tempfile.mktemp()
-                file_list.append(file)
-                object.writeToFile(file, conf, 'pdb')
-            tempfile.tempdir = None
-            file = open(script, 'w')
-            file.write('mol load pdb ' + file_list[0] + '\n')
-            for conf in file_list[1:]:
-                file.write('animate read pdb ' + conf + '\n')
-            if periodic:
-                file.write('animate style loop\n')
-            else:
-                file.write('animate style once\n')
-            file.write('animate forward\n')
-            for conf in file_list:
-                file.write('file delete ' + conf + '\n')
-            file.write('file delete ' + script + '\n')
-            file.close()
-        os.system(viewer['pdb'] + ' -nt -e ' + script + ' 1> /dev/null 2>&1')
+            file.write('animate style once\n')
+        file.write('animate forward\n')
+        for conf in file_list:
+            file.write('file delete ' + conf.replace('\\', '\\\\') + '\n')
+        if sys.platform != 'win32':
+            # Under Windows, it seems to be impossible to delete
+            # the script file while it is still in use. For the moment
+            # we just don't delete it at all.
+            file.write('file delete ' + script_tcl + '\n')
+        file.close()
+    subprocess.Popen([viewer['pdb'][1], '-nt', '-e', script])
+
+#
+# iMol support
+#
+
+#
+# View configuration
+#
+def viewConfigurationIMol(object, configuration = None, format = 'pdb',
+                      label = None):
+    format = format.lower()
+    if format != 'pdb':
+        return genericViewConfiguration(object, configuration, format)
+    tempfile.tempdir = tempdir
+    filename = tempfile.mktemp() + '.pdb'
+    tempfile.tempdir = None
+    object.writeToFile(filename, configuration, format)
+    os.system('open -a %s %s ' % (prog, filename))
+
+#
+# Animate sequence
+#
+def viewSequenceIMol(object, conf_list, periodic = 0, label=None):
+    """Launches an external viewer with animation capabilities
+    to display |object| in the configurations given in
+    |conf_list|, which can be any sequence of configurations,
+    including the variable "configuration" from a
+    Class:MMTK.Trajectory.Trajectory object. If |periodic|
+    is 1, the configurations will be repeated periodically,
+    provided that the external viewers supports this operation.
+    """
+    tempfile.tempdir = tempdir
+    filename = tempfile.mktemp() + '.pdb'
+    file = PDB.PDBOutputFile(filename)
+    for conf in conf_list:
+        file.nextModel()
+        file.write(object, conf)
+    file.close()
+    tempfile.tempdir = None
+    os.system('open -a %s %s ' % (prog, filename))
+
 
 #
 # PyMOL support
@@ -474,42 +561,3 @@ if PyMOL.in_pymol:
         genericViewMode(mode, factor, subset, label)
 
 
-#
-# iMol support
-#
-if prog == 'iMol.app':
-    #
-    # View configuration
-    #
-    def viewConfiguration(object, configuration = None, format = 'pdb',
-                          label = None):
-        format = string.lower(format)
-        if format != 'pdb':
-            return genericViewConfiguration(object, configuration, format)
-        tempfile.tempdir = tempdir
-        filename = tempfile.mktemp() + '.pdb'
-        tempfile.tempdir = None
-        object.writeToFile(filename, configuration, format)
-        os.system('open -a %s %s ' % (prog, filename))
-
-    #
-    # Animate sequence
-    #
-    def viewSequence(object, conf_list, periodic = 0, label=None):
-        """Launches an external viewer with animation capabilities
-        to display |object| in the configurations given in
-        |conf_list|, which can be any sequence of configurations,
-        including the variable "configuration" from a
-        Class:MMTK.Trajectory.Trajectory object. If |periodic|
-        is 1, the configurations will be repeated periodically,
-        provided that the external viewers supports this operation.
-        """
-        tempfile.tempdir = tempdir
-        filename = tempfile.mktemp() + '.pdb'
-        file = PDB.PDBOutputFile(filename)
-        for conf in conf_list:
-            file.nextModel()
-            file.write(object, conf)
-        file.close()
-        tempfile.tempdir = None
-        os.system('open -a %s %s ' % (prog, filename))
