@@ -3,7 +3,7 @@
 # given in the file.
 #
 # Written by Konrad Hinsen
-# last revision: 2007-12-13
+# last revision: 2008-4-3
 #
 
 """
@@ -112,19 +112,7 @@ class PDBMoleculeFactory(MoleculeFactory):
         @returns: a universe
         @rtype: L{MMTK.Universe.Universe}
         """
-        e1 = self.pdb_conf.from_fractional(Vector(1., 0., 0.))
-        e2 = self.pdb_conf.from_fractional(Vector(0., 1., 0.))
-        e3 = self.pdb_conf.from_fractional(Vector(0., 0., 1.))
-        if abs(e1.normal()*Vector(1., 0., 0.)-1.) < 1.e-15 \
-               and abs(e2.normal()*Vector(0., 1., 0.)-1.) < 1.e-15 \
-               and abs(e3.normal()*Vector(0., 0., 1.)-1.) < 1.e-15:
-            universe = \
-               MMTK.OrthorhombicPeriodicUniverse((e1.length(),
-                                                  e2.length(),
-                                                  e3.length()))
-        else:
-            universe = MMTK.ParallelepipedicPeriodicUniverse((e1, e2, e3))
-        return universe
+        return self.pdb_conf.createUnitCellUniverse()
 
     def retrieveAsymmetricUnit(self):
         """

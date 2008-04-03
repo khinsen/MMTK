@@ -1,3 +1,15 @@
+2.5.23 --> 2.5.24hg
+===================
+
+New features:
+
+- PDBConfiguration: new method createUnitCellUniverse() creates an empty
+  universe that has the shape of the unit cell from the PDB file.
+
+- PDBConfiguration: new method asuToUnitCell() applies crystallographic
+  symmetry operations to the molecules in the asymmetric unit.
+
+
 2.5.22 --> 2.5.23
 =================
 

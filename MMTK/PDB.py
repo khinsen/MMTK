@@ -1,7 +1,7 @@
 # This module deals with input and output of configurations in PDB format.
 #
 # Written by Konrad Hinsen
-# last revision: 2007-8-7
+# last revision: 2008-4-3
 #
 
 """This module provides classes that represent molecules in PDB file.
@@ -14,7 +14,7 @@ that module are also available.
 import ChemicalObjects, Collections, Database, Units, Universe, Utility
 from Scientific.Geometry import Vector
 import Scientific.IO.PDB
-import os, string
+import copy, os, string
 
 #
 # The chain classes from Scientific.IO.PDB are extended by methods
@@ -265,6 +265,29 @@ class PDBConfiguration(Scientific.IO.PDB.Structure):
             tr_new = Scaling(Units.Ang)*tr*Scaling(1./Units.Ang)
             self.cs_transformations[i] = tr_new
 
+    def createUnitCellUniverse(self):
+        """
+        Constructs an empty universe (OrthrhombicPeriodicUniverse or
+        ParallelepipedicPeriodicUniverse) representing the
+        unit cell of the crystal.
+        
+        @returns: a universe
+        @rtype: L{MMTK.Universe.Universe}
+        """
+        e1 = self.from_fractional(Vector(1., 0., 0.))
+        e2 = self.from_fractional(Vector(0., 1., 0.))
+        e3 = self.from_fractional(Vector(0., 0., 1.))
+        if abs(e1.normal()*Vector(1., 0., 0.)-1.) < 1.e-15 \
+               and abs(e2.normal()*Vector(0., 1., 0.)-1.) < 1.e-15 \
+               and abs(e3.normal()*Vector(0., 0., 1.)-1.) < 1.e-15:
+            universe = \
+               Universe.OrthorhombicPeriodicUniverse((e1.length(),
+                                                      e2.length(),
+                                                      e3.length()))
+        else:
+            universe = Universe.ParallelepipedicPeriodicUniverse((e1, e2, e3))
+        return universe
+
     def createPeptideChains(self, model='all'):
         """Returns a list of PeptideChain objects, one for each
         peptide chain in the PDB file. The parameter |model|
@@ -373,6 +396,37 @@ class PDBConfiguration(Scientific.IO.PDB.Structure):
         molecules = self.createMolecules(molecule_names, permit_undefined)
         collection.addObject(molecules)
         return collection
+
+    def asuToUnitCell(self, asu_contents, compact=True):
+        """
+        @param asu_contents: the molecules in the asymmetric unit, usually
+                             obtained from PDBConfiguration.createAll().
+        @param compact: if C{True}, all molecules images are shifted such that
+                        their centers of mass lie inside the unit cell.
+        @type compact: C{bool}
+        @returns: a collection containing all molecules in the unit cell,
+                  obtained by copying and moving the molecules from the
+                  asymmetric unit according to the crystallographic
+                  symmetry operations.
+        @rtype: L{MMTK.Collection}
+        """
+        unit_cell_contents = Collections.Collection()
+        for symop in self.cs_transformations:
+            transformation = symop.asLinearTransformation()
+            rotation = transformation.tensor
+            translation = transformation.vector
+            image = copy.deepcopy(asu_contents)
+            for atom in image.atomList():
+                atom.setPosition(symop(atom.position()))
+            if compact:
+                cm = image.centerOfMass()
+                cm_fr = self.to_fractional(cm)
+                cm_fr = Vector(cm_fr[0] % 1., cm_fr[1] % 1., cm_fr[2] % 1.) \
+                        - Vector(0.5, 0.5, 0.5)
+                cm = self.from_fractional(cm_fr)
+                image.translateTo(cm)
+            unit_cell_contents.addObject(image)
+        return unit_cell_contents
 
     def applyTo(self, object, atom_map=None):
         """Sets the configuration of |object| from the coordinates in the
