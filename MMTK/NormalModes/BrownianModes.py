@@ -1,7 +1,7 @@
 # Brownian normal mode calculations.
 #
 # Written by Konrad Hinsen
-# last revision: 2007-4-26
+# last revision: 2008-4-7
 #
 
 """See also the Example:NormalModes example applications.
@@ -71,10 +71,7 @@ class BrownianModes(Core.NormalModes):
                   i.e. they have the dimension of an inverse time.
 
     |temperature| -- the temperature for which the amplitudes of the
-                     atomic displacement vectors are calculated. A
-                     value of 'None' can be specified to have no scaling
-                     at all. In that case the mass-weighted norm
-                     of each normal mode is one.
+                     atomic displacement vectors are calculated.
 
     |subspace| -- the basis for the subspace in which the normal modes
                   are calculated (or, more precisely, a set of vectors

@@ -1,7 +1,7 @@
 # Energetic normal mode calculations.
 #
 # Written by Konrad Hinsen
-# last revision: 2007-4-26
+# last revision: 2008-4-7
 #
 
 """See also the Example:NormalModes example applications.
@@ -160,7 +160,8 @@ class EnergeticModes(Core.NormalModes):
         for i in range(first_mode, self.nmodes):
             mode = self.rawMode(i)
             f += (mode*mode)/mode.force_constant
-        f.array *= Units.k_B*self.temperature
+        if self.temperature is not None:
+            f.array *= Units.k_B*self.temperature
         return f
 
     def anisotropicFluctuations(self, first_mode=6):
@@ -172,5 +173,6 @@ class EnergeticModes(Core.NormalModes):
             array = mode.array
             f.array += (array[:, :, N.NewAxis]*array[:, N.NewAxis, :]) \
                        / mode.force_constant
-        f.array *= Units.k_B*self.temperature
+        if self.temperature is not None:
+            f.array *= Units.k_B*self.temperature
         return f

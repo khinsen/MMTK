@@ -1,7 +1,7 @@
 # Vibrational normal mode calculations.
 #
 # Written by Konrad Hinsen
-# last revision: 2007-4-26
+# last revision: 2008-4-7
 #
 
 """See also the Example:NormalModes example applications.
@@ -185,7 +185,10 @@ class VibrationalModes(Core.NormalModes):
             mode = self.rawMode(i)
             f += (mode*mode)/mode.frequency**2
         f.array /= self.weights[:, 0]**2
-        f.array *= Units.k_B*self.temperature/(2.*N.pi)**2
+        s = 1./(2.*N.pi)**2
+        if self.temperature is not None:
+            s *= Units.k_B*self.temperature
+        f.array *= s
         return f
 
     def anisotropicFluctuations(self, first_mode=6):
@@ -197,8 +200,10 @@ class VibrationalModes(Core.NormalModes):
             array = mode.array
             f.array += (array[:, :, N.NewAxis]*array[:, N.NewAxis, :]) \
                        / mode.frequency**2
-        f.array *= Units.k_B*self.temperature/(2.*N.pi)**2
-        f.array /= self.universe.masses().array[:, N.NewAxis, N.NewAxis]
+        s = (2.*N.pi)**2
+        if self.temperature is not None:
+            s /= Units.k_B*self.temperature
+        f.array /= s*self.universe.masses().array[:, N.NewAxis, N.NewAxis]
         return f
 
     def meanSquareDisplacement(self, subset=None, weights=None,
