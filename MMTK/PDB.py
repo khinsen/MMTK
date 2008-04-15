@@ -1,7 +1,7 @@
 # This module deals with input and output of configurations in PDB format.
 #
 # Written by Konrad Hinsen
-# last revision: 2008-4-3
+# last revision: 2008-4-15
 #
 
 """This module provides classes that represent molecules in PDB file.
@@ -269,24 +269,25 @@ class PDBConfiguration(Scientific.IO.PDB.Structure):
         """
         Constructs an empty universe (OrthrhombicPeriodicUniverse or
         ParallelepipedicPeriodicUniverse) representing the
-        unit cell of the crystal.
+        unit cell of the crystal. If the PDB file does not define
+        a unit cell at all, an InfiniteUniverse is returned.
         
         @returns: a universe
         @rtype: L{MMTK.Universe.Universe}
         """
+        if self.from_fractional is None:
+            return Universe.InfiniteUniverse()
         e1 = self.from_fractional(Vector(1., 0., 0.))
         e2 = self.from_fractional(Vector(0., 1., 0.))
         e3 = self.from_fractional(Vector(0., 0., 1.))
         if abs(e1.normal()*Vector(1., 0., 0.)-1.) < 1.e-15 \
                and abs(e2.normal()*Vector(0., 1., 0.)-1.) < 1.e-15 \
                and abs(e3.normal()*Vector(0., 0., 1.)-1.) < 1.e-15:
-            universe = \
+            return \
                Universe.OrthorhombicPeriodicUniverse((e1.length(),
                                                       e2.length(),
                                                       e3.length()))
-        else:
-            universe = Universe.ParallelepipedicPeriodicUniverse((e1, e2, e3))
-        return universe
+        return Universe.ParallelepipedicPeriodicUniverse((e1, e2, e3))
 
     def createPeptideChains(self, model='all'):
         """Returns a list of PeptideChain objects, one for each

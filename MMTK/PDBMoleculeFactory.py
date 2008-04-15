@@ -3,7 +3,7 @@
 # given in the file.
 #
 # Written by Konrad Hinsen
-# last revision: 2008-4-3
+# last revision: 2008-4-15
 #
 
 """
@@ -107,7 +107,8 @@ class PDBMoleculeFactory(MoleculeFactory):
         """
         Constructs an empty universe (OrthrhombicPeriodicUniverse or
         ParallelepipedicPeriodicUniverse) representing the
-        unit cell of the crystal.
+        unit cell of the crystal. If the PDB file does not define
+        a unit cell at all, an InfiniteUniverse is returned.
         
         @returns: a universe
         @rtype: L{MMTK.Universe.Universe}
@@ -143,6 +144,8 @@ class PDBMoleculeFactory(MoleculeFactory):
         @returns: a universe
         @rtype: L{MMTK.Universe.Universe}
         """
+        if not self.pdb_conf.cs_transformations:
+            return self.retrieveAsymmetricUnit()
         universe = self.retrieveUniverse()
         asu_count = 0
         for symop in self.pdb_conf.cs_transformations:
