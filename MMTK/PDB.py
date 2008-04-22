@@ -1,7 +1,7 @@
 # This module deals with input and output of configurations in PDB format.
 #
 # Written by Konrad Hinsen
-# last revision: 2008-4-15
+# last revision: 2008-4-22
 #
 
 """This module provides classes that represent molecules in PDB file.
@@ -176,12 +176,12 @@ class PDBConfiguration(Scientific.IO.PDB.Structure):
     of the molecules, or to change the configuration of an existing
     system.
 
-    Constructor: PDBConfiguration(|filename|, |model|='0',
+    Constructor: PDBConfiguration(|file_or_filename|, |model|='0',
                                   |alternate_code|='"A"')
 
     Arguments:
 
-    |filename| -- the name of a PDB file
+    |file_or_filename| -- the name of a PDB file, or a file object
 
     |model| -- the number of the model to be used from a multiple model file
 
@@ -189,9 +189,10 @@ class PDBConfiguration(Scientific.IO.PDB.Structure):
                         alternate positions
     """
     
-    def __init__(self, filename, model = 0, alternate_code = 'A'):
-        filename = Database.PDBPath(filename)
-        Scientific.IO.PDB.Structure.__init__(self, filename,
+    def __init__(self, file_or_filename, model = 0, alternate_code = 'A'):
+        if isinstance(file_or_filename, str):
+            file_or_filename = Database.PDBPath(file_or_filename)
+        Scientific.IO.PDB.Structure.__init__(self, file_or_filename,
                                              model, alternate_code)
         self._numberAtoms()
         self._convertUnits()
