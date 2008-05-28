@@ -52,9 +52,13 @@ except AttributeError:
     num_package = "Numeric"
 if num_package == "NumPy":
     compile_args.append("-DNUMPY=1")
-    include_dirs.append(os.path.join(sys.prefix,
+    if sys.platform == 'win32':
+        include_dirs.append(os.path.join(sys.prefix,
+                            "Lib/site-packages/numpy/core/include"))
+    else:
+        include_dirs.append(os.path.join(sys.prefix,
                             "lib/python%s.%s/site-packages/numpy/core/include"
-                                 % sys.version_info [:2]))
+                             % sys.version_info [:2]))
 
 headers = glob(os.path.join ("Include", "MMTK", "*.h"))
 
