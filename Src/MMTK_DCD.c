@@ -2,7 +2,7 @@
  *
  * Written by Lutz Ehrlich
  * Adapted to MMTK conventions by Konrad Hinsen
- * last revision: 2004-2-23
+ * last revision: 2008-5-21
  */
 
 #include "MMTK/universe.h"
@@ -123,7 +123,11 @@ readDCD(PyObject *dummy, PyObject *args)
   dcdErrcode = read_dcdheader(dcdFile, &dcdAtoms, &dcdNFrames, 
 			      &dcdFrameStart,  &dcdFrameSkip, &dcdTimeStep,
 			      &dcdNamnf, &dcdFreeatoms);
-  if ( dcdErrcode != 0 ) {
+  if ( dcdErrcode == DCD_BADFORMAT ) {
+    PyErr_SetString(PyExc_IOError, "Not a DCD file");
+    goto error;
+  }
+  else if ( dcdErrcode != 0 ) {
     PyErr_SetString(PyExc_IOError, "DCD reading error");
     goto error;
   }
