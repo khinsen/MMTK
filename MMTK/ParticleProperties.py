@@ -153,13 +153,13 @@ class ParticleScalar(ParticleProperty):
     """
 
     def __init__(self, universe, data_array=None):
-	ParticleProperty.__init__(self, universe, 1, 0)
-	if data_array is None:
-	    self.array = N.zeros((self.n,), N.Float)
-	else:
-	    self.array = data_array
-	    if data_array.shape[0] != self.n:
-		raise ValueError('Data incompatible with universe')
+        ParticleProperty.__init__(self, universe, 1, 0)
+        if data_array is None:
+            self.array = N.zeros((self.n,), N.Float)
+        else:
+            self.array = data_array
+            if data_array.shape[0] != self.n:
+                raise ValueError('Data incompatible with universe')
 
     def __getitem__(self, item):
         if not isinstance(item, int):
@@ -212,13 +212,13 @@ class ParticleVector(ParticleProperty):
     """
 
     def __init__(self, universe, data_array=None):
-	ParticleProperty.__init__(self, universe, 1, 1)
-	if data_array is None:
-	    self.array = N.zeros((self.n, 3), N.Float)
-	else:
-	    self.array = data_array
-	    if data_array.shape[0] != self.n:
-		raise ValueError('Data incompatible with universe')
+        ParticleProperty.__init__(self, universe, 1, 1)
+        if data_array is None:
+            self.array = N.zeros((self.n, 3), N.Float)
+        else:
+            self.array = data_array
+            if data_array.shape[0] != self.n:
+                raise ValueError('Data incompatible with universe')
 
     def __getitem__(self, item):
         if not isinstance(item, int):
@@ -236,17 +236,17 @@ class ParticleVector(ParticleProperty):
                 raise ValueError('Variables are for different universes')
             if other.value_rank == 0:
                 return ParticleVector(self.universe,
-                                     self.array*other.array[:,N.NewAxis])
+                                      self.array*other.array[:,N.NewAxis])
             elif other.value_rank == 1:
                 return ParticleScalar(self.universe,
                                       N.add.reduce(self.array * \
-                                                         other.array, -1))
+                                                   other.array, -1))
             else:
                 raise TypeError('not yet implemented')
         elif isVector(other):
             return ParticleScalar(self.universe,
                                   N.add.reduce(
-                                     self.array*other.array[N.NewAxis,:],
+                                      self.array*other.array[N.NewAxis,:],
                                       -1))
         elif isTensor(other):
             raise TypeError('not yet implemented')
@@ -264,7 +264,7 @@ class ParticleVector(ParticleProperty):
         for each particle."""
         return ParticleScalar(self.universe,
                               N.sqrt(N.add.reduce(self.array**2,
-                                                              -1)))
+                                                  -1)))
 
     def sumOverParticles(self):
         return Vector(N.add.reduce(self.array, 0))
@@ -291,8 +291,8 @@ class ParticleVector(ParticleProperty):
         3N-dimensional vector."""
         m = self.universe.masses().array
         return N.sqrt(N.sum(N.ravel(m[:, N.NewAxis] *
-                                                      self.array**2))
-                            / N.sum(m))
+                                    self.array**2))
+                      / N.sum(m))
 
     def scaledToMassWeightedNorm(self, norm):
         f = norm/self.massWeightedNorm()
@@ -306,7 +306,7 @@ class ParticleVector(ParticleProperty):
             raise ValueError('Variables are for different universes')
         m = self.universe.masses().array
         return N.add.reduce(N.ravel(self.array * other.array * \
-                                                m[:, N.NewAxis]))
+                                    m[:, N.NewAxis]))
 
     def dyadicProduct(self, other):
         """Returns a Class:MMTK.ParticleTensor object representing the dyadic
@@ -335,11 +335,11 @@ class Configuration(ParticleVector):
     """
 
     def __init__(self, universe, data_array=None, cell = None):
-	ParticleVector.__init__(self, universe, data_array)
-	if cell is None:
-	    self.cell_parameters = universe.cellParameters()
-	else:
-	    self.cell_parameters = cell
+        ParticleVector.__init__(self, universe, data_array)
+        if cell is None:
+            self.cell_parameters = universe.cellParameters()
+        else:
+            self.cell_parameters = cell
 
     is_configuration = 1
 
@@ -386,13 +386,13 @@ class ParticleTensor(ParticleProperty):
     """
 
     def __init__(self, universe, data_array=None):
-	ParticleProperty.__init__(self, universe, 1, 2)
-	if data_array is None:
-	    self.array = N.zeros((self.n, 3, 3), N.Float)
-	else:
-	    self.array = data_array
-	    if data_array.shape[0] != self.n:
-		raise ValueError('Data incompatible with universe')
+        ParticleProperty.__init__(self, universe, 1, 2)
+        if data_array is None:
+            self.array = N.zeros((self.n, 3, 3), N.Float)
+        else:
+            self.array = data_array
+            if data_array.shape[0] != self.n:
+                raise ValueError('Data incompatible with universe')
 
     def __len__(self):
         return self.n
@@ -446,15 +446,15 @@ ParticleTensor.return_class = ParticleTensor
 class SymmetricPairTensor(ParticleProperty):
 
     def __init__(self, universe, data_array=None):
-	ParticleProperty.__init__(self, universe, 2, 2)
-	if data_array is None:
-	    self.array = N.zeros((self.n,3, self.n,3), N.Float)
-	else:
-	    self.array = data_array
-	    if data_array.shape[0] != self.n or \
-	       data_array.shape[2] != self.n:
-		raise ValueError('Data incompatible with universe')
-	self.symmetrized = 0
+        ParticleProperty.__init__(self, universe, 2, 2)
+        if data_array is None:
+            self.array = N.zeros((self.n,3, self.n,3), N.Float)
+        else:
+            self.array = data_array
+            if data_array.shape[0] != self.n or \
+               data_array.shape[2] != self.n:
+                raise ValueError('Data incompatible with universe')
+        self.symmetrized = 0
 
     def __getitem__(self, item):
         i1, i2 = item
@@ -507,7 +507,7 @@ class SymmetricPairTensor(ParticleProperty):
                 return ParticleVector(self.universe, N.dot(sa, oa))
             else:
                 raise TypeError('not yet implemented')
-            
+
 
 SymmetricPairTensor.return_class = SymmetricPairTensor
 
