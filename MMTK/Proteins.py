@@ -58,15 +58,21 @@ class Residue(Biopolymers.Residue):
         if self.model == 'calpha':
             self.peptide = self
 
+    def isNTerminus(self):
+        return hasattr(self.peptide, 'H_3')
+
+    def isCTerminus(self):
+        return hasattr(self.peptide, 'O_2')
+
     def _makeCystine(self):
         if self.model == 'calpha':
             return self
         if string.lower(self.symbol) != 'cys':
             raise ValueError(`self` + " is not cysteine.")
         new_residue = 'cystine_ss'
-        if hasattr(self.peptide, 'H_3'):
+        if self.isNTerminus():
             new_residue = new_residue + '_nt'
-        elif hasattr(self.peptide, 'O_2'):
+        elif self.isCTerminus():
             new_residue = new_residue + '_ct'
         new_residue = Residue(new_residue, self.model)
         for g in ['peptide', 'sidechain']:
@@ -371,14 +377,21 @@ class PeptideChain(Biopolymers.ResidueChain):
             peptide_old = self.bonds.bondsOf(r_old.peptide.N)
             if peptide_old:
                 self.bonds.remove(peptide_old[0])
-            self.bonds.append(Bonds.Bond((self.groups[n-1].peptide.C,
-                                          self.groups[n].peptide.N)))
+            if not (self.groups[n-1].isCTerminus()
+                    or self.groups[n].isNTerminus()):
+                # ConnectedChain objects can have N/C-terminal
+                # residues inside the (virtual) chain, so the
+                # test is necessary.
+                self.bonds.append(Bonds.Bond((self.groups[n-1].peptide.C,
+                                              self.groups[n].peptide.N)))
         if n < len(self.groups)-1:
             peptide_old = self.bonds.bondsOf(r_old.peptide.C)
             if peptide_old:
                 self.bonds.remove(peptide_old[0])
-            self.bonds.append(Bonds.Bond((self.groups[n].peptide.C,
-                                          self.groups[n+1].peptide.N)))
+            if not (self.groups[n].isCTerminus()
+                    or self.groups[n+1].isNTerminus()):
+                self.bonds.append(Bonds.Bond((self.groups[n].peptide.C,
+                                              self.groups[n+1].peptide.N)))
         if isinstance(self.parent, ChemicalObjects.Complex):
             self.parent.recreateAtomList()
         universe = self.universe()
@@ -552,14 +565,16 @@ class ConnectedChains(PeptideChain):
             self.parent = None
             self.type = None
             self.configurations = {}
-            for i in range(len(self.chains)):
-                c = self.chains[i]
-                sub_chain = SubChain(self, self.groups[c[1]:c[2]], c[0])
-                sub_chain.version_spec = c[3]
-                for g in sub_chain.groups:
-                    g.parent = sub_chain
-                self.chains[i] = sub_chain
     is_connected_chains = 1
+
+    def _finalize(self):
+        for i in range(len(self.chains)):
+            c = self.chains[i]
+            sub_chain = SubChain(self, self.groups[c[1]:c[2]], c[0])
+            sub_chain.version_spec = c[3]
+            for g in sub_chain.groups:
+                g.parent = sub_chain
+            self.chains[i] = sub_chain
 
     def __len__(self):
         return len(self.chains)
@@ -687,13 +702,15 @@ class Protein(ChemicalObjects.Complex):
             bonds = m[1]
             if len(m[0]) == 1:
                 m = m[0][0]
+                m._addSSBridges(bonds)
             else:
                 numbers = reduce(operator.add, map(lambda i: i._numbers, m[0]))
                 m = ConnectedChains(m[0])
                 m._numbers = numbers
+                m._addSSBridges(bonds)
+                m._finalize()
                 for c in m:
                     c.parent = self
-            m._addSSBridges(bonds)
             m.parent = self
             self.molecules.append(m)
 
