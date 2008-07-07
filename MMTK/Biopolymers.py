@@ -2,11 +2,11 @@
 # nucleic acid chains.
 #
 # Written by Konrad Hinsen
-# last revision: 2007-4-18
+# last revision: 2008-7-7
 #
 
 import Bonds, ChemicalObjects, Collections, Database, PDB
-import string
+import Scientific.IO.PDB
 
 class Residue(ChemicalObjects.Group):
 
@@ -94,10 +94,10 @@ class ResidueChain(ChemicalObjects.Molecule):
     def residuesOfType(self, *types):
         """Returns a collection that contains all residues whose type
         (residue code) is contained in |types|."""
-        types = map(string.lower, types)
+        types = [t.lower() for t in types]
         rlist = []
         for r in self.groups:
-            if string.lower(r.type.symbol) in types:
+            if r.type.symbol.lower() in types:
                 rlist.append(r)
         return Collections.Collection(rlist)
 
@@ -107,79 +107,89 @@ class ResidueChain(ChemicalObjects.Molecule):
 
     def sequence(self):
         "Returns the sequence as a list of residue code."
-        return map(lambda r: string.lower(r.type.symbol), self.groups)
+        return map(lambda r: r.type.symbol.lower(), self.groups)
 
 #
 # Find the full name of a residue
 #
 def _fullName(residue):
-    return _residue_names[string.lower(residue)]
+    residue = residue.lower()
+    try:
+        return _aa_residue_names[residue]
+    except KeyError:
+        return _na_residue_names[residue]
 
-_residue_names = {'ala': 'alanine',          'a': 'alanine',
-                  'arg': 'arginine',         'r': 'arginine',
-                  'asn': 'asparagine',       'n': 'asparagine',
-                  'asp': 'aspartic_acid',    'd': 'aspartic_acid',
-                  'cys': 'cysteine',         'c': 'cysteine',
-                  'gln': 'glutamine',        'q': 'glutamine',
-                  'glu': 'glutamic_acid',    'e': 'glutamic_acid',
-                  'gly': 'glycine',          'g': 'glycine',
-                  'his': 'histidine',        'h': 'histidine',
-                  'ile': 'isoleucine',       'i': 'isoleucine',
-                  'leu': 'leucine',          'l': 'leucine',
-                  'lys': 'lysine',           'k': 'lysine',
-                  'met': 'methionine',       'm': 'methionine',
-                  'phe': 'phenylalanine',    'f': 'phenylalanine',
-                  'pro': 'proline',          'p': 'proline',
-                  'ser': 'serine',           's': 'serine',
-                  'thr': 'threonine',        't': 'threonine',
-                  'trp': 'tryptophan',       'w': 'tryptophan',
-                  'tyr': 'tyrosine',         'y': 'tyrosine',
-                  'val': 'valine',           'v': 'valine',
-                  'cyx': 'cystine_ss',
-                  'cym': 'cysteine_with_negative_charge',
-                  'app': 'aspartic_acid_neutral',
-                  'glp': 'glutamic_acid_neutral',
-                  'hsd': 'histidine_deltah', 'hse': 'histidine_epsilonh',
-                  'hsp': 'histidine_plus',
-                  'hid': 'histidine_deltah', 'hie': 'histidine_epsilonh',
-                  'hip': 'histidine_plus',
-                  'lyp': 'lysine_neutral',
-                  'ace': 'ace_beginning',    'nme': 'nmethyl',
-                  'nhe': 'amide',
+_aa_residue_names = {'ala': 'alanine',          'a': 'alanine',
+                     'arg': 'arginine',         'r': 'arginine',
+                     'asn': 'asparagine',       'n': 'asparagine',
+                     'asp': 'aspartic_acid',    'd': 'aspartic_acid',
+                     'cys': 'cysteine',         'c': 'cysteine',
+                     'gln': 'glutamine',        'q': 'glutamine',
+                     'glu': 'glutamic_acid',    'e': 'glutamic_acid',
+                     'gly': 'glycine',          'g': 'glycine',
+                     'his': 'histidine',        'h': 'histidine',
+                     'ile': 'isoleucine',       'i': 'isoleucine',
+                     'leu': 'leucine',          'l': 'leucine',
+                     'lys': 'lysine',           'k': 'lysine',
+                     'met': 'methionine',       'm': 'methionine',
+                     'phe': 'phenylalanine',    'f': 'phenylalanine',
+                     'pro': 'proline',          'p': 'proline',
+                     'ser': 'serine',           's': 'serine',
+                     'thr': 'threonine',        't': 'threonine',
+                     'trp': 'tryptophan',       'w': 'tryptophan',
+                     'tyr': 'tyrosine',         'y': 'tyrosine',
+                     'val': 'valine',           'v': 'valine',
+                     'cyx': 'cystine_ss',
+                     'cym': 'cysteine_with_negative_charge',
+                     'app': 'aspartic_acid_neutral',
+                     'glp': 'glutamic_acid_neutral',
+                     'hsd': 'histidine_deltah', 'hse': 'histidine_epsilonh',
+                     'hsp': 'histidine_plus',
+                     'hid': 'histidine_deltah', 'hie': 'histidine_epsilonh',
+                     'hip': 'histidine_plus',
+                     'lyp': 'lysine_neutral',
+                     'ace': 'ace_beginning',    'nme': 'nmethyl',
+                     'nhe': 'amide',
+                     }
 
-                  'da': 'd-adenosine',
-                  'da5': 'd-adenosine_5ter',
-                  'da3': 'd-adenosine_3ter',
-                  'dan': 'd-adenosine_5ter_3ter',
-                  'dc': 'd-cytosine',
-                  'dc5': 'd-cytosine_5ter',
-                  'dc3': 'd-cytosine_3ter',
-                  'dcn': 'd-cytosine_5ter_3ter',
-                  'dg': 'd-guanosine',
-                  'dg5': 'd-guanosine_5ter',
-                  'dg3': 'd-guanosine_3ter',
-                  'dgn': 'd-guanosine_5ter_3ter',
-                  'dt': 'd-thymine',
-                  'dt5': 'd-thymine_5ter',
-                  'dt3': 'd-thymine_3ter',
-                  'dtn': 'd-thymine_5ter_3ter',
-                  'ra': 'r-adenosine',
-                  'ra5': 'r-adenosine_5ter',
-                  'ra3': 'r-adenosine_3ter',
-                  'ran': 'r-adenosine_5ter_3ter',
-                  'rc': 'r-cytosine',
-                  'rc5': 'r-cytosine_5ter',
-                  'rc3': 'r-cytosine_3ter',
-                  'rcn': 'r-cytosine_5ter_3ter',
-                  'rg': 'r-guanosine',
-                  'rg5': 'r-guanosine_5ter',
-                  'rg3': 'r-guanosine_3ter',
-                  'rgn': 'r-guanosine_5ter_3ter',
-                  'ru': 'r-uracil',
-                  'ru5': 'r-uracil_5ter',
-                  'ru3': 'r-uracil_3ter',
-                  'run': 'r-uracil_5ter_3ter',
-                  }
+_na_residue_names = {'da': 'd-adenosine',
+                     'da5': 'd-adenosine_5ter',
+                     'da3': 'd-adenosine_3ter',
+                     'dan': 'd-adenosine_5ter_3ter',
+                     'dc': 'd-cytosine',
+                     'dc5': 'd-cytosine_5ter',
+                     'dc3': 'd-cytosine_3ter',
+                     'dcn': 'd-cytosine_5ter_3ter',
+                     'dg': 'd-guanosine',
+                     'dg5': 'd-guanosine_5ter',
+                     'dg3': 'd-guanosine_3ter',
+                     'dgn': 'd-guanosine_5ter_3ter',
+                     'dt': 'd-thymine',
+                     'dt5': 'd-thymine_5ter',
+                     'dt3': 'd-thymine_3ter',
+                     'dtn': 'd-thymine_5ter_3ter',
+                     'ra': 'r-adenosine',
+                     'ra5': 'r-adenosine_5ter',
+                     'ra3': 'r-adenosine_3ter',
+                     'ran': 'r-adenosine_5ter_3ter',
+                     'rc': 'r-cytosine',
+                     'rc5': 'r-cytosine_5ter',
+                     'rc3': 'r-cytosine_3ter',
+                     'rcn': 'r-cytosine_5ter_3ter',
+                     'rg': 'r-guanosine',
+                     'rg5': 'r-guanosine_5ter',
+                     'rg3': 'r-guanosine_3ter',
+                     'rgn': 'r-guanosine_5ter_3ter',
+                     'ru': 'r-uracil',
+                     'ru5': 'r-uracil_5ter',
+                     'ru3': 'r-uracil_3ter',
+                     'run': 'r-uracil_5ter_3ter',
+                     }
+
+for code in _aa_residue_names:
+    Scientific.IO.PDB.defineAminoAcidResidue(code)
+for code in _na_residue_names:
+    Scientific.IO.PDB.defineNucleicAcidResidue(code)
 
 #
 # Add a residue to the residue list
@@ -194,17 +204,16 @@ def defineAminoAcidResidue(full_name, code3, code1 = None):
     Once added to the residue table, the new residue can be used
     like any of the standard residues in the creation of peptide chains.
     """
-    code3 = string.lower(code3)
+    code3 = code3.lower()
     if code1 is not None:
-        code1 = string.lower(code1)
-    if _residue_names.has_key(code3):
+        code1 = code1.lower()
+    if _aa_residue_names.has_key(code3) or _na_residue_names.has_key(code3):
         raise ValueError("residue name " + code3 + " already used")
-    if _residue_names.has_key(code1):
+    if _aa_residue_names.has_key(code1):
         raise ValueError("residue name " + code1 + " already used")
-    _residue_names[code3] = full_name
+    _aa_residue_names[code3] = full_name
     if code1 is not None:
-        _residue_names[code1] = full_name
-    import Scientific.IO.PDB
+        _aa_residue_names[code1] = full_name
     Scientific.IO.PDB.defineAminoAcidResidue(code3)
 
 def defineNucleicAcidResidue(full_name, code):
@@ -217,8 +226,7 @@ def defineNucleicAcidResidue(full_name, code):
     like any of the standard residues in the creation of nucleotide
     chains.
     """
-    if _residue_names.has_key(code):
+    if _aa_residue_names.has_key(code) or _na_residue_names.has_key(code):
         raise ValueError("residue name " + code + " already used")
-    _residue_names[code] = full_name
-    import Scientific.IO.PDB
+    _na_residue_names[code] = full_name
     Scientific.IO.PDB.defineNucleicAcidResidue(code)
