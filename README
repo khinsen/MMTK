@@ -6,7 +6,7 @@ information about MMTK, look at the manual (in the directories
 Doc/HTML and Doc/PDF) and at the examples in the directory Examples.
 
 Please remember that MMTK, like Python, comes with neither a price tag
-nor any warranty (see the file COPYRIGHT for details). I use it for my
+nor any warranty (see the file LICENSE for details). I use it for my
 own work, and I consider it reasonably stable, but your mileage may
 vary. If you find any problems with MMTK, please let me know, but
 understand that I cannot promise extensive support (I am a scientist,
@@ -21,7 +21,7 @@ Installation
 
 Prerequisites: Python 2.2 or higher, ScientificPython 2.4 or higher,
                Numerical Python 22.x or 23.x (various problems have been
-               reported with 24.x)
+               reported with 24.x) or NumPy 1.x.
 
 On most Unix systems, installation requires two commands:
 
@@ -61,9 +61,7 @@ be maintained and further developed.
 MMTK was originally written for Numeric, but recent releases are also
 compatible with NumPy. When MMTK is installed, it checks whether
 ScientificPython was compiled for Numeric or for NumPy, and uses the
-same package. Note that at the time of this writing, NumPy support is
-still new and not very well tested. Numeric remains the preferred
-package for using MMTK.
+same package.
 
 MMTK does not support numarray at all. Since numarray development has
 stopped, this is not likely to change in the future.
@@ -229,10 +227,10 @@ This is a low-traffic list; there is little reason not to subscribe.
 License
 =======
 
-MMTK is licensed under the GNU Lesser Public License. See the file
-LICENSE for the text of this license. The DPMTA library (everything in
-the directory Src/dpmta-2.7) is not part of MMTK and therefore not
-subject to this license.
+MMTK is licensed under the CeCILL-C license. See the file LICENSE for
+the text of this license. The DPMTA library (everything in the
+directory Src/dpmta-2.7) is not part of MMTK and therefore not subject
+to this license.
 
 
 Acknowledgements
