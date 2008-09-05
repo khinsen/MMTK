@@ -1,5 +1,9 @@
-2.5.23 --> 2.5.24hg
-===================
+2.5.23 --> 2.5.24
+=================
+
+License change: MMTK is now distributed under the CeCILL-C license,
+which is an adaptation of the LGPL to French law. The previously used
+CeCILL license, similar to the GPL, was considered too restrictive.
 
 New features:
 
@@ -8,6 +12,35 @@ New features:
 
 - PDBConfiguration: new method asuToUnitCell() applies crystallographic
   symmetry operations to the molecules in the asymmetric unit.
+
+- PDBConfiguration: accept file objects as well as file names.
+
+
+Improvements:
+
+- The residue name list in Scientific.IO.PDB is now synchronized with the
+  one in MMTK, meaning that all residues defined as such in MMTK will
+  also be recognized when reading PDB files.
+
+
+Bug fixes:
+
+- NormalModes objects handle temperature=None correctly when calculating
+  fluctuations.
+
+- PDBMoleculeFactory now works with PDB configurations that have no
+  symmetry information.
+
+- Opening a trajectory for reading could crash depending on the force field
+  used in the system.
+
+- Proteins with disulphide bonds between chains had an inconsistent
+  internal representation that would cause a crash when writing
+  to a PDB file.
+
+- More alternative PDB atom names for ribose.
+
+- Fixed installation with NumPy under Windows.
 
 
 2.5.22 --> 2.5.23
