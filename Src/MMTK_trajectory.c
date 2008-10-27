@@ -2,7 +2,7 @@
  * Trajectory objects using netCDF files.
  *
  * Written by Konrad Hinsen
- * last revision: 2006-8-25
+ * last revision: 2008-10-27
  */
 
 #define _TRAJECTORY_MODULE
@@ -91,6 +91,19 @@ static int
 PyTrajectory_Flush(PyTrajectoryObject *trajectory)
 {
   return PyNetCDFFile_Sync(trajectory->file);
+}
+
+static PyObject *
+trajectory_flush(PyTrajectoryObject *self, PyObject *args)
+{
+  if (!PyArg_ParseTuple(args, ""))
+    return NULL;
+  if (PyTrajectory_Flush(self) == 0) {
+    Py_INCREF(Py_None);
+    return Py_None;
+  }
+  else
+    return NULL;
 }
 
 /* Retrieve variable, or create it if it doesn't exist */
@@ -649,6 +662,7 @@ static PyMethodDef trajectory_methods[] = {
   {"readParticleTrajectories",
                    (PyCFunction)trajectory_read_particle_trajectories, 1},
   {"close", (PyCFunction)trajectory_close, 1},
+  {"flush", (PyCFunction)trajectory_flush, 1},
   {NULL, NULL}		/* sentinel */
 };
 

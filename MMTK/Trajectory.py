@@ -1,7 +1,7 @@
 # This module implements trajetories and trajectory generators.
 #
 # Written by Konrad Hinsen
-# last revision: 2007-6-15
+# last revision: 2008-10-27
 #
 
 import Collections, Units, Universe, Utility, ParticleProperties, Visualization
@@ -170,6 +170,11 @@ class Trajectory:
         if initialize and conf is not None:
             self.universe.setFromTrajectory(self)
         self.particle_trajectory_reader = ParticleTrajectoryReader(self)
+
+    def flush(self):
+        """Make sure that all data that has been written to the trajectory
+        is also written to the file."""
+        self.trajectory.flush()
 
     def close(self):
         """Close the trajectory file. Must be called after writing to
