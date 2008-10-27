@@ -1,7 +1,7 @@
 # This module defines collections of chemical objects.
 #
 # Written by Konrad Hinsen
-# last revision: 2007-4-25
+# last revision: 2008-2-12
 #
 
 import ConfigIO, Utility, Units, ParticleProperties, Visualization
@@ -120,11 +120,9 @@ class GroupOfAtoms:
     def rotationalConstants(self, conf=None):
         """Returns a sorted array of rotational constants A, B, C
         in internal units."""
-        from Scientific.N import sort
-        from Units import h, pi
         com, i = self.centerAndMomentOfInertia(conf)
         pmi = i.eigenvalues()
-        return sort(h / (8.*pi*pi*pmi))[::-1]
+        return Numeric.sort(Units.h / (8.*Numeric.pi*Numeric.pi*pmi))[::-1]
 
     def boundingBox(self, conf = None):
         """Returns two opposite corners of a bounding box around the
