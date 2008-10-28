@@ -4,16 +4,31 @@
 # last revision: 2007-4-23
 #
 
-"""MMTK is the base module of the Molecular Modelling Toolkit.
+"""
+MMTK is the base module of the Molecular Modelling Toolkit.
 It contains the most common objects and all submodules. As a convenience
 to the user, it also imports some commonly used objects from other
 libraries:
+ - 'Vector' from 'Scientific.Geometry'
+ - 'Translation' and 'Rotation' from 'Scientific.Geometry.Transformation'
+ - 'copy' and 'deepcopy' from 'copy'
+ - 'stdin', 'stdout', and 'stderr' from 'sys'
 
-- 'Vector' from 'Scientific.Geometry'
-- 'Translation' and 'Rotation' from 'Scientific.Geometry.Transformation'
-- 'copy' and 'deepcopy' from 'copy'
-- 'stdin', 'stdout', and 'stderr' from 'sys'
+@undocumented: __pkginfo__
+@undocumented: AtomEnvironment
+@undocumented: GroupEnvironment
+@undocumented: MoleculeEnvironment
+@undocumented: ProteinEnvironment
+@undocumented: ComplexEnvironment
+@undocumented: CrystalEnvironment
+@undocumented: Installation
+@undocumented: NewModuleNames
+@undocumented: surfm
+@undocumented: tess
 """
+
+__docformat__ = 'epytext'
+
 
 #
 # Package information
