@@ -1,7 +1,7 @@
 # Subspace tests
 #
 # Written by Konrad Hinsen
-# last revision: 2007-6-19
+# last revision: 2008-10-29
 #
 
 import unittest
@@ -270,6 +270,14 @@ class PeptideTest(unittest.TestCase):
         self.assertAlmostEqual(p, 0.021465578636)
         p = self.pd.projectionOf(self.emodes.rawMode(65)).norm()
         self.assertAlmostEqual(p, 0.0166782530763)
+
+
+def suite():
+    loader = unittest.TestLoader()
+    s = unittest.TestSuite()
+    s.addTest(loader.loadTestsFromTestCase(PeptideTest))
+    return s
+
 
 if __name__ == '__main__':
     unittest.main()

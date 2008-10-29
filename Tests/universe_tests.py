@@ -1,7 +1,7 @@
 # Universe tests
 #
 # Written by Konrad Hinsen
-# last revision: 2007-4-24
+# last revision: 2008-10-29
 #
 
 import unittest
@@ -99,6 +99,14 @@ class OrthorhombicPeriodicUniverseTest(unittest.TestCase,
                                                       self.b.length(),
                                                       self.c.length()))
         self.universe.addObject(Molecule('water'))
+
+
+def suite():
+    loader = unittest.TestLoader()
+    s = unittest.TestSuite()
+    s.addTest(loader.loadTestsFromTestCase(ParallelepipedicPeriodicUniverseTest))
+    s.addTest(loader.loadTestsFromTestCase(OrthorhombicPeriodicUniverseTest))
+    return s
 
 
 if __name__ == '__main__':

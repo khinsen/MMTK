@@ -1,3 +1,9 @@
+# Basic tests
+#
+# Written by Konrad Hinsen
+# last revision: 2008-10-29
+#
+
 import unittest
 import MMTK
 
@@ -16,6 +22,9 @@ class GroupOfAtomTest(unittest.TestCase):
         self.assertEqual(self.molecule.numberOfAtoms(),
                          self.results['numberOfAtoms'])
 
+
+def suite():
+    return unittest.TestLoader().loadTestsFromTestCase(GroupOfAtomTest)
 
 if __name__ == '__main__':
     unittest.main()

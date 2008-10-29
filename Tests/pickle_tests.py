@@ -1,7 +1,7 @@
 # Pickle tests
 #
 # Written by Konrad Hinsen
-# last revision: 2007-5-8
+# last revision: 2008-10-29
 #
 
 import unittest
@@ -83,6 +83,15 @@ class WaterTest(unittest.TestCase):
         MMTK.save(self.universe.water1, 'test.pickle')
         restored_molecule = MMTK.load('test.pickle')
         self.assertEqual(restored_molecule.type, self.universe.water1.type)
+
+
+def suite():
+    loader = unittest.TestLoader()
+    s = unittest.TestSuite()
+    s.addTest(loader.loadTestsFromTestCase(PeptideTest))
+    s.addTest(loader.loadTestsFromTestCase(WaterTest))
+    return s
+
 
 if __name__ == '__main__':
     unittest.main()

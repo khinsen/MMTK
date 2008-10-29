@@ -1,7 +1,7 @@
 # Energy tests
 #
 # Written by Konrad Hinsen
-# last revision: 2007-6-11
+# last revision: 2008-10-29
 #
 
 import unittest
@@ -209,6 +209,16 @@ class ParallelepipedicUniverseNonbondedListTest(unittest.TestCase,
         for i in range(100):
             p = self.universe.boxToRealCoordinates(randomPointInBox(1.))
             self.universe.addObject(Atom('C', position = p))
+
+
+def suite():
+    loader = unittest.TestLoader()
+    s = unittest.TestSuite()
+    s.addTest(loader.loadTestsFromTestCase(DihedralTest))
+    s.addTest(loader.loadTestsFromTestCase(InfiniteUniverseNonbondedListTest))
+    s.addTest(loader.loadTestsFromTestCase(OrthorhombicUniverseNonbondedListTest))
+    s.addTest(loader.loadTestsFromTestCase(ParallelepipedicUniverseNonbondedListTest))
+    return s
 
 
 if __name__ == '__main__':

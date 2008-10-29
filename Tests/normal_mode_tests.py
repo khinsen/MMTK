@@ -1,7 +1,7 @@
 # Normal mode tests
 #
 # Written by Konrad Hinsen
-# last revision: 2007-6-19
+# last revision: 2008-10-29
 #
 
 import unittest
@@ -203,6 +203,15 @@ class PeptideTest(unittest.TestCase):
         self.assertAlmostEqual(vmodes[15].norm(), 0.0109610042085, 5)
         self.assertAlmostEqual(vmodes[16].norm(), 0.0057883026904, 5)
         self.assertAlmostEqual(vmodes[17].norm(), 0.0054875425125, 5)
+
+
+def suite():
+    loader = unittest.TestLoader()
+    s = unittest.TestSuite()
+    s.addTest(loader.loadTestsFromTestCase(WaterTest))
+    s.addTest(loader.loadTestsFromTestCase(PeptideTest))
+    return s
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -1,7 +1,7 @@
 # Trajectory tests
 #
 # Written by Konrad Hinsen
-# last revision: 2007-4-25
+# last revision: 2008-10-29
 #
 
 
@@ -145,6 +145,18 @@ class ParallelepipedicUniverseTestDP(unittest.TestCase,
                                      DoublePrecisionTest):
     setUp = ParallelepipedicUniverseTest.setUp
     tearDown = TrajectoryTest.tearDown
+
+
+def suite():
+    loader = unittest.TestLoader()
+    s = unittest.TestSuite()
+    s.addTest(loader.loadTestsFromTestCase(InfiniteUniverseTestSP))
+    s.addTest(loader.loadTestsFromTestCase(InfiniteUniverseTestDP))
+    s.addTest(loader.loadTestsFromTestCase(OrthorhombicUniverseTestSP))
+    s.addTest(loader.loadTestsFromTestCase(OrthorhombicUniverseTestDP))
+    s.addTest(loader.loadTestsFromTestCase(ParallelepipedicUniverseTestSP))
+    s.addTest(loader.loadTestsFromTestCase(ParallelepipedicUniverseTestDP))
+    return s
 
 
 if __name__ == '__main__':
