@@ -2,7 +2,7 @@
 # places.
 #
 # Written by Konrad Hinsen
-# last revision: 2007-5-31
+# last revision: 2008-10-29
 #
 
 _undocumented = 1
@@ -72,30 +72,31 @@ del parallel
 # specified by a dictionary.
 # Attention: For some object types, substitution is destructive!
 #
-def substitute(object, *exchange):
+def substitute(obj, *exchange):
     if len(exchange) == 1:
         exchange = exchange[0]
     else:
         dict = {}
         map(lambda k, v, d=dict: _put(d, k, v), exchange[0], exchange[1])
         exchange = dict
-    if type(object) == types.ListType:
-        return map(lambda e, x=exchange: substitute(e, x), object)
-    if type(object) == types.TupleType:
-        return tuple(map(lambda e, x=exchange: substitute(e, x), object))
-    elif type(object) == types.DictionaryType:
+    if type(obj) == types.ListType:
+        return map(lambda e, x=exchange: substitute(e, x), obj)
+    if type(obj) == types.TupleType:
+        return tuple(map(lambda e, x=exchange: substitute(e, x), obj))
+    elif type(obj) == types.DictionaryType:
         newdict = {}
-        for key, value in object.items():
+        for key, value in obj.items():
             newdict[substitute(key, exchange)] = substitute(value, exchange)
         return newdict
-    elif type(object) == types.InstanceType and hasattr(object, 'substitute'):
-        for attr in dir(object):
-            setattr(object, attr, substitute(getattr(object, attr), exchange))
-        return object
-    elif exchange.has_key(object):
-        return exchange[object]
+    elif not isinstance(obj, type) and hasattr(obj, '_substitute'):
+        for attr in dir(obj):
+            if attr[:2] != '__':
+                setattr(obj, attr, substitute(getattr(obj, attr), exchange))
+        return obj
+    elif exchange.has_key(obj):
+        return exchange[obj]
     else:
-        return object
+        return obj
 
 def _put(dict, key, value):
     dict[key] = value
@@ -122,11 +123,11 @@ def pairs(list):
 #
 # Type check for sequence objects
 #
-def isSequenceObject(object):
-    t = type(object)
+def isSequenceObject(obj):
+    t = type(obj)
     return t == types.ListType or t == types.TupleType \
-           or (t == types.InstanceType and hasattr(object, '__getitem__') \
-               and hasattr(object, '__len__'))
+           or (t == types.InstanceType and hasattr(obj, '__getitem__') \
+               and hasattr(obj, '__len__'))
 #
 # Check if an object represents a well-defined position
 #
@@ -173,9 +174,9 @@ del array_package
 
 class Pickler(BasePickler):
 
-    def persistent_id(self, object):
-        if hasattr(object, 'is_chemical_object_type'):
-            id = object._restoreId()
+    def persistent_id(self, obj):
+        if hasattr(obj, 'is_chemical_object_type'):
+            id = obj._restoreId()
             return id
         else:
             return None
@@ -246,19 +247,19 @@ class Unpickler(BaseUnpickler):
 #
 # General routines for writing objects to files and reading them back
 #
-def save(object, filename):
-    """Writes |object| to a newly created file with the name |filename|,
+def save(obj, filename):
+    """Writes |obj| to a newly created file with the name |filename|,
     for later retrieval by 'load()'."""
     import ChemicalObjects
     filename = os.path.expanduser(filename)
     file = open(filename, 'wb')
-    if ChemicalObjects.isChemicalObject(object):
-        parent = object.parent
-        object.parent = None
-        Pickler(file).dump(object)
-        object.parent = parent
+    if ChemicalObjects.isChemicalObject(obj):
+        parent = obj.parent
+        obj.parent = None
+        Pickler(file).dump(obj)
+        obj.parent = parent
     else:
-        Pickler(file).dump(object)
+        Pickler(file).dump(obj)
     file.close()
 
 def load(filename):
@@ -266,9 +267,9 @@ def load(filename):
     by 'save()', and returns the object stored in that file."""
     filename = os.path.expanduser(filename)
     file = open(filename, 'rb')
-    object = Unpickler(file).load()
+    obj = Unpickler(file).load()
     file.close()
-    return object
+    return obj
 
 #
 # URL related functions

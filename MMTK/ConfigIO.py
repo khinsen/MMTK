@@ -1,59 +1,64 @@
 # This module deals with input and output of configurations.
 #
 # Written by Konrad Hinsen
-# last revision: 2006-11-27
+# last revision: 2008-10-29
 #
 
-_undocumented = 1
+"""
+I/O of molecular configurations
 
-import ChemicalObjects, PDB, Units, Universe, Utility
+Input: Z-Matrix and Cartesian
+Output: VRML
+PDB files are handled in L{MMTK.PDB}.
+"""
+
+__docformat__ = 'epytext'
+
+from MMTK import PDB, Units, Utility
 from Scientific.Geometry.Objects3D import Sphere, Cone, Plane, Line, \
                                           rotatePoint
 from Scientific.Geometry import Vector
 from Scientific.Visualization import VRML
-from Scientific import N as Numeric
-import os, string
+from Scientific import N
+import os
 
 #
 # This class represents a Z-Matrix. Z-Matrix data consists of a list
 # with one element for each atom being defined. Each entry is a
 # list containing the data defining the atom.
 #
-class ZMatrix:
+class ZMatrix(object):
 
-    """Z-Matrix specification of a molecule conformation
+    """
+    Z-Matrix specification of a molecule conformation
 
     ZMatrix objects can be used in chemical database entries
     to specify molecule conformations by internal coordinates.
     With the exception of the three first atoms, each atom is
     defined relative to three previously atoms by a distance,
     an angle, and a dihedral angle.
-
-    Constructor: ZMatrix(|data|)
-
-    Arguments:
-
-    |data| -- a list of atom definitions. Each atom definition (except
-              for the first three ones) is a list containing seven elements:
-
-              - the atom to be defined
-
-              - a previously defined atom and the distance to it
-
-              - another previously defined atom and the angle to it
-
-              - a third previously defined atom and the dihedral angle to it
-
-              The definition of the first atom contains only the first
-              element, the second atom needs the first three elements,
-              and the third atom is defined by the first five elements.
     """
 
     def __init__(self, data):
+        """
+        @param data: a list of atom definitions. Each atom definition (except
+                     for the first three ones) is a list containing seven
+                     elements:
+
+                       - the atom to be defined
+                       - a previously defined atom and the distance to it
+                       - another previously defined atom and the angle to it
+                       - a third previously defined atom and the dihedral
+                         angle to it
+
+                     The definition of the first atom contains only the first
+                     element, the second atom needs the first three elements,
+                     and the third atom is defined by the first five elements.
+        """
         self.data = data
         self.coordinates = {}
 
-    substitute = 1
+    _substitute = True
 
     def findPositions(self):
         # First atom at origin
@@ -107,8 +112,12 @@ class ZMatrix:
             self.coordinates[entry[0]] = p
 
     def applyTo(self, object):
-        """Define the positions of the atoms in |object| by the
-        internal coordinates of the Z-Matrix."""
+        """
+        Define the positions of the atoms in a chemical object by the
+        internal coordinates of the Z-Matrix.
+
+        @param object: the object to which the Z-Matrix is applied
+        """
         if not len(self.coordinates):
             self.findPositions()
         for entry in self.coordinates.items():
@@ -118,29 +127,31 @@ class ZMatrix:
 #
 # This class represents a dictionary of Cartesian positions
 #
-class Cartesian:
+class Cartesian(object):
 
-    """Cartesian specification of a molecule conformation
+    """
+    Cartesian specification of a molecule conformation
 
     Cartesian objects can be used in chemical database entries
     to specify molecule conformations by Cartesian coordinates.
-
-    Constructor: Cartesian(|data|)
-
-    Arguments:
-
-    |data| -- a dictionary mapping atoms to tuples of length three
-              that define its Cartesian coordinates
     """
     
     def __init__(self, dict):
+        """
+        @param data: a dictionary mapping atoms to tuples of length three
+                     that define its Cartesian coordinates
+        """
         self.dict = dict
 
-    substitute = 1
+    _substitute = True
 
     def applyTo(self, object):
-        """Define the positions of the atoms in |object| by the
-        stored coordinates."""
+        """
+        Define the positions of the atoms in a chemical object by the
+        stored coordinates.
+
+        @param object: the object to which the coordinates are applied
+        """
         for a, r in self.dict.items():
             object.setPosition(a, Vector(r[0], r[1], r[2]))
 
@@ -154,17 +165,19 @@ class VRMLWireframeFile(VRML.VRMLFile):
         self.warning = 0
         self.color_values = color_values
         if self.color_values is not None:
-            lower = Numeric.minimum.reduce(color_values.array)
-            upper = Numeric.maximum.reduce(color_values.array)
+            lower = N.minimum.reduce(color_values.array)
+            upper = N.maximum.reduce(color_values.array)
             self.color_scale = VRML.ColorScale((lower, upper))
 
     def write(self, object, configuration = None, distance = None):
+        from MMTK.ChemicalObjects import isChemicalObject
+        from MMTK.Universe import InfiniteUniverse
         if distance is None:
             try:
                 distance = object.universe().distanceVector
             except AttributeError:
-                distance = Universe.InfiniteUniverse().distanceVector
-        if not ChemicalObjects.isChemicalObject(object):
+                distance = InfiniteUniverse().distanceVector
+        if not isChemicalObject(object):
             for o in object:
                 self.write(o, configuration, distance)
         else:
@@ -321,7 +334,7 @@ _file_compressions = ['.gz', '.Z']
 def OutputFile(filename, format = None):
     if format is None:
         format = fileFormatFromExtension(filename)
-    format = tuple(string.split(format, '.'))
+    format = tuple(format.split('.'))
     try:
         return _file_types[format](filename)
     except KeyError:
