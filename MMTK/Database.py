@@ -1,26 +1,31 @@
-# This module manages the chemical database, which contains
-# definitions for atoms, groups, molecules, and complexes.
-#
-# Each definition is a Python file that is executed in the
-# global environment of the module "XEnvironment" (X standing
-# for 'Atom', 'Group', 'Molecule', or 'Complex'). Definitions
-# made in that file will end up as attributes of an object
-# that is later used as a blueprint to create 'real' chemical objects.
+# This module manages the chemical database.
 #
 # Written by Konrad Hinsen
-# last revision: 2005-8-30
+# last revision: 2008-10-29
 #
 
-_undocumented = 1
+"""
+Management of the chemical database
 
-import Utility
-import copy, operator, os, string, sys, types
+The database contains definitions for atoms, groups, molecules, and
+complexes. Each definition is a Python file that is executed in the
+global environment of the module 'XEnvironment' (X standing for
+'Atom', 'Group', 'Molecule', 'Complex', 'Protein', or 'Crystal').
+Definitions made in that file will end up as attributes of an object
+that is later used as a blueprint to create chemical objects.
+"""
+
+__docformat__ = 'epytext'
+
+from MMTK import Utility
+import copy
+import os
 
 #
 # Find database path
 #
 try:
-    path = string.split(os.environ['MMTKDATABASE'])
+    path = os.environ['MMTKDATABASE'].split()
 except KeyError:
     path = ['~/.mmtk/Database',
             os.path.join(os.path.split(__file__)[0], 'Database')]
@@ -63,7 +68,7 @@ def addDatabaseDirectory(directory):
 # The class that represents a database. There will be one instance
 # for atoms, one for groups etc.
 # 
-class Database:
+class Database(object):
 
     def __init__(self, directory, type_constructor):
         self.directory = directory
@@ -71,7 +76,7 @@ class Database:
         self.types = {}
 
     def findType(self, name):
-        name = string.lower(name)
+        name = name.lower()
         if not self.types.has_key(name):
             filename = databasePath(name, self.directory, 0)
             self.types[name] = self.type_constructor(filename)
@@ -81,7 +86,7 @@ class Database:
 # The base class for all the type classes. It defines how definitions
 # are loaded from the database.
 #
-class ChemicalObjectType:
+class ChemicalObjectType(object):
 
     def __init__(self, filename, module, instancevars):
         self.filename = filename
@@ -189,18 +194,17 @@ class AtomType(ChemicalObjectType):
     error = 'AtomTypeError'
 
     def __init__(self, filename):
-        import AtomEnvironment
+        from MMTK import AtomEnvironment
         ChemicalObjectType.__init__(self, filename, AtomEnvironment, ())
-        if type(self.mass) != type([]):
+        if not isinstance(self.mass, list):
             self.mass = [(self.mass, 100.)]
-        total_probability = reduce(operator.add, map(lambda m: m[1], self.mass))
+        total_probability = sum([m[1] for m in self.mass])
         if abs(total_probability-100.) > 1.e-4:
             raise self.error('Inconsistent mass specification: ' +
                               `total_probability-100.` + ' percent missing')
-        self.average_mass = reduce(operator.add,
-                                   map(lambda m: m[0]*m[1], self.mass))/100
+        self.average_mass = sum([m[0]*m[1] for m in self.mass])/100
         if not hasattr(self, 'pdbmap'):
-            name = string.upper(self.symbol)
+            name = self.symbol.upper()
             self.pdbmap = [(name, {name: None})]
 
     def _restoreId(self):
@@ -221,7 +225,7 @@ class GroupType(ChemicalObjectType):
     error = 'GroupTypeError'
 
     def __init__(self, filename):
-        import GroupEnvironment
+        from MMTK import GroupEnvironment
         ChemicalObjectType.__init__(self, filename, GroupEnvironment,
                                     ('atoms', 'groups', 'bonds',
                                      'chain_links'))
@@ -242,7 +246,7 @@ class MoleculeType(ChemicalObjectType):
     error = 'MoleculeTypeError'
 
     def __init__(self, filename):
-        import MoleculeEnvironment
+        from MMTK import MoleculeEnvironment
         ChemicalObjectType.__init__(self, filename, MoleculeEnvironment,
                                     ('atoms', 'groups', 'bonds'))
         for g in self.groups:
@@ -262,7 +266,7 @@ class CrystalType(ChemicalObjectType):
     error = 'CrystalTypeError'
 
     def __init__(self, filename):
-        import CrystalEnvironment
+        from MMTK import CrystalEnvironment
         ChemicalObjectType.__init__(self, filename, CrystalEnvironment,
                                     ('atoms', 'groups', 'molecules', 'bonds'))
         for g in self.groups:
@@ -302,7 +306,7 @@ class ComplexType(ChemicalObjectType):
 # object contains only the number of the atom in the list of
 # atoms of its parent object.
 #
-class AtomReference:
+class AtomReference(object):
 
     def __init__(self, number):
         self.number = number
@@ -325,7 +329,7 @@ class AtomReference:
 # the file names. These are for objects that tend to be big
 # and used only in small numbers.
 #
-class ReferenceType:
+class ReferenceType(object):
 
     def __init__(self, filename, environment):
         self.filename = filename
@@ -338,7 +342,7 @@ class ReferenceType:
 class ProteinType(ReferenceType):
 
     def __init__(self, filename):
-        import ProteinEnvironment
+        from MMTK import ProteinEnvironment
         ReferenceType.__init__(self, filename, ProteinEnvironment)
 
     def _restoreId(self):
@@ -363,10 +367,10 @@ protein_types = Database('Proteins', ProteinType)
 # e.g. each hydrogen atom in a molecule must be represented
 # by a different object.
 #
-class BlueprintObject:
+class BlueprintObject(object):
 
     def __init__(self, original, database, memo):
-        if type(original) == type(''):
+        if isinstance(original, str):
             original = database.findType(original)
             self.type = original
         elif hasattr(original, 'is_blueprint'):
@@ -418,10 +422,10 @@ class BlueprintComplex(BlueprintObject):
 #
 # Blueprint class corresponding to ReferenceType
 #
-class ReferenceBlueprint:
+class ReferenceBlueprint(object):
 
     def __init__(self, original, database):
-        if type(original) == type(''):
+        if isinstance(original, str):
             self.type = database.findType(original)
         elif hasattr(original, 'is_blueprint'):
             self.type = original.type
@@ -442,9 +446,12 @@ class BlueprintProtein(ReferenceBlueprint):
 #
 def _blueprintCopy(object, memo):
     key = id(object)
-    if memo.has_key(key): return memo[key]
-    if type(object) == types.ListType:
-        return map(lambda o, m=memo: _blueprintCopy(o, m), object)
+    try:
+        return memo[key]
+    except KeyError:
+        pass
+    if isinstance(object, list):
+        return [_blueprintCopy(o, memo) for o in object]
     if hasattr(object, 'is_blueprint'):
         new = object.__class__(object, memo)
     elif hasattr(object, '_blueprintCopy'):
@@ -457,7 +464,7 @@ def _blueprintCopy(object, memo):
 #
 # The bond class just keeps track of the two atoms involved.
 #
-class BlueprintBond:
+class BlueprintBond(object):
 
     def __init__(self, a1, a2):
         self.a1 = a1
@@ -483,14 +490,17 @@ class BlueprintBond:
 #
 def instantiate(blueprint, memo):
     key = id(blueprint)
-    if memo.has_key(key): return memo[key]
-    if type(blueprint) == types.ListType:
-        newobject = map(lambda e, m = memo: instantiate(e, m), blueprint)
-    elif type(blueprint) == types.InstanceType \
-         and _instanceclass.has_key(blueprint.__class__):
-        newobject = _instanceclass[blueprint.__class__](blueprint, memo)
+    try:
+        return memo[key]
+    except KeyError:
+        pass
+    if isinstance(blueprint, list):
+        newobject = [instantiate(e, memo) for e in blueprint]
     else:
-        newobject = blueprint
+        try:
+            newobject = _instanceclass[blueprint.__class__](blueprint, memo)
+        except KeyError:
+            newobject = blueprint
     memo[key] = newobject
     return newobject
 
