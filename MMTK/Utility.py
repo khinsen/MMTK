@@ -124,10 +124,12 @@ def pairs(list):
 # Type check for sequence objects
 #
 def isSequenceObject(obj):
-    t = type(obj)
-    return t == types.ListType or t == types.TupleType \
-           or (t == types.InstanceType and hasattr(obj, '__getitem__') \
-               and hasattr(obj, '__len__'))
+    try:
+        it = iter(obj)
+        return True
+    except:
+        return False
+
 #
 # Check if an object represents a well-defined position
 #

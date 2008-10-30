@@ -1,14 +1,20 @@
 # This module defines collections of chemical objects.
 #
 # Written by Konrad Hinsen
-# last revision: 2008-2-12
+# last revision: 2008-10-30
 #
 
-import ConfigIO, Utility, Units, ParticleProperties, Visualization
+"""
+Collections of chemical objects
+"""
+
+__docformat__ = 'epytext'
+
+from MMTK import ConfigIO, Utility, Units, ParticleProperties, Visualization
 from Scientific.Geometry import Vector, Tensor, Objects3D
 from Scientific.Geometry import Quaternion, Transformation
-from Scientific import N as Numeric
-import copy, operator, types
+from Scientific import N
+import copy
 
 #
 # This class defines groups of atoms. It is used as a base class
@@ -16,34 +22,41 @@ import copy, operator, types
 # universes etc., but it can't be used directly. All its subclasses
 # must define a method atomList() that returns a list of all their atoms.
 #
-class GroupOfAtoms:
+class GroupOfAtoms(object):
 
-    """Anything that consists of atoms
+    """
+    Anything that consists of atoms
 
-    This class is a Glossary:MixInClass that defines a large set
-    of operations which are common to all objects that consist of
-    atoms, i.e. any subset of a chemical system. Examples are
-    atoms, molecules, collections, or universes.
+    A mix-in class that defines a large set of operations which are
+    common to all objects that consist of atoms, i.e. any subset of
+    a chemical system. Examples are atoms, molecules, collections,
+    or universes.
     """
     
     def numberOfAtoms(self):
-        "Returns the number of atoms."
+        """
+        @returns: the number of atoms
+        @rtype: C{int}
+        """
         return len(self.atomList())
 
     def numberOfPoints(self):
-        """Returns the number of geometrical points that define the
-        object. It is currently always equal to the number of atoms,
-        but could be different e.g. for quantum systems, in which
-        each atom is described by a wave function or a path integral."""
-        n = 0
-        for a in self.atomList():
-            n = n + a.numberOfPoints()
-        return n
+        """
+        @returns: the number of geometrical points that define the
+                  object. It is currently equal to the number of atoms,
+                  but could be different e.g. for quantum systems, in which
+                  each atom is described by a wave function or a path integral.
+        @rtype: C{int}
+        """
+        return sum([a.numberOfPoints() for a in self.atomList()])
 
     numberOfCartesianCoordinates = numberOfPoints
 
     def numberOfFixedAtoms(self):
-        "Returns the number of atoms that are fixed, i.e. cannot move."
+        """
+        @returns: the number of atoms that are fixed, i.e. that cannot move
+        @rtype: C{int}
+        """
         n = 0
         for a in self.atomList():
             try:
@@ -52,29 +65,44 @@ class GroupOfAtoms:
         return n
 
     def degreesOfFreedom(self):
-        "Returns the number of mechanical degrees of freedom."
+        """
+        @returns: the number of mechanical degrees of freedom
+        @rtype: C{int}
+        """
         return 3*(self.numberOfAtoms()-self.numberOfFixedAtoms())
 
     def atomCollection(self):
-        "Returns a collection containing all atoms in the object."
+        """
+        @returns: a collection containing all atoms in the object
+        """
         return Collection(self.atomList())
 
     def atomsWithDefinedPositions(self, conf = None):
-        "Returns a collection of all atoms that have a definite position."
-        return Collection(filter(lambda a, c=conf:
-                                 Utility.isDefinedPosition(a.position(c)),
-                                 self.atomList()))
+        """
+        @param conf: a configuration object, or C{None} for the
+                     current configuration
+        @type conf: L{MMTK.Configuration} or C{NoneType}
+        @returns: a collection of all atoms that have a position in the
+                  given configuration
+        """
+        return Collection([a for a in self.atomList()
+                           if Utility.isDefinedPosition(a.position(conf))])
 
     def mass(self):
-        "Returns the total mass."
-        atoms = self.atomList()
-        if atoms:
-            return reduce(operator.add, map(lambda a: a._mass, atoms))
-        else:
-            return 0.
+        """
+        @returns: the total mass
+        @rtype: C{float}
+        """
+        return sum(a._mass for a in self.atomList())
 
     def centerOfMass(self, conf = None):
-        "Returns the center of mass."
+        """
+        @param conf: a configuration object, or C{None} for the
+                     current configuration
+        @type conf: L{MMTK.Configuration} or C{NoneType}
+        @returns: the center of mass in the given configuration
+        @rtype: L{Scientific.Geometry.Vector}
+        """
         offset = None
         universe = self.universe()
         if universe is not None:
@@ -83,18 +111,24 @@ class GroupOfAtoms:
         mr = Vector(0.,0.,0.)
         if offset is None:
             for a in self.atomList():
-                m = m + a._mass
-                mr = mr + a._mass * a.position(conf)
+                m += a._mass
+                mr += a._mass * a.position(conf)
         else:
             for a in self.atomList():
-                m = m + a._mass
-                mr = mr + a._mass * (a.position(conf)+offset[a])
+                m += a._mass
+                mr += a._mass * (a.position(conf)+offset[a])
         return mr/m
 
     position = centerOfMass
 
     def centerAndMomentOfInertia(self, conf = None):
-        "Returns the center of mass and the moment of inertia tensor."
+        """
+        @param conf: a configuration object, or C{None} for the
+                     current configuration
+        @type conf: L{MMTK.Configuration} or C{NoneType}
+        @returns: the center of mass and the moment of inertia tensor
+                  in the given configuration
+        """
         from Scientific.Geometry import delta
         offset = None
         universe = self.universe()
@@ -109,61 +143,84 @@ class GroupOfAtoms:
                 r = a.position(conf)
             else:
                 r = a.position(conf)+offset[a]
-            m = m + ma
-            mr = mr + ma*r
-            t = t + ma*r.dyadicProduct(r)
+            m += ma
+            mr += ma*r
+            t += ma*r.dyadicProduct(r)
         cm = mr/m
-        t = t - m*cm.dyadicProduct(cm)
+        t -= m*cm.dyadicProduct(cm)
         t = t.trace()*delta - t
         return cm, t
 
     def rotationalConstants(self, conf=None):
-        """Returns a sorted array of rotational constants A, B, C
-        in internal units."""
+        """
+        @param conf: a configuration object, or C{None} for the
+                     current configuration
+        @type conf: L{MMTK.Configuration} or C{NoneType}
+        @returns: a sorted array of rotational constants A, B, C
+                  in internal units
+        """
         com, i = self.centerAndMomentOfInertia(conf)
         pmi = i.eigenvalues()
-        return Numeric.sort(Units.h / (8.*Numeric.pi*Numeric.pi*pmi))[::-1]
+        return N.sort(Units.h / (8.*N.pi*N.pi*pmi))[::-1]
 
     def boundingBox(self, conf = None):
-        """Returns two opposite corners of a bounding box around the
-        object. The bounding box is the smallest rectangular bounding box
-        with edges parallel to the coordinate axes."""
+        """
+        @param conf: a configuration object, or C{None} for the
+                     current configuration
+        @type conf: L{MMTK.Configuration} or C{NoneType}
+        @returns: two opposite corners of a bounding box around the
+                  object. The bounding box is the smallest rectangular
+                  bounding box with edges parallel to the coordinate axes.
+        @rtype: C{tuple} of two C{Scientific.Geometry.Vector}
+        """
         atoms = self.atomList()
         min = atoms[0].position(conf).array
         max = min
         for a in atoms[1:]:
             r = a.position(conf).array
-            min = Numeric.minimum(min, r)
-            max = Numeric.maximum(max, r)
+            min = N.minimum(min, r)
+            max = N.maximum(max, r)
         return Vector(min), Vector(max)
 
     def boundingSphere(self, conf = None):
-        """Returns a sphere that contains all atoms in the object.
-        This is *not* the minimal bounding sphere, just *some*
-        bounding sphere."""
+        """
+        @param conf: a configuration object, or C{None} for the
+                     current configuration
+        @type conf: L{MMTK.Configuration} or C{NoneType}
+        @returns: a sphere that contains all atoms in the object.
+                  This is B{not} the minimal bounding sphere, just B{some}
+                  bounding sphere.
+        @rtype: Scientific.Geometry.Objects3D.Sphere
+        """
         atoms = self.atomList()
-        r = Vector(0., 0., 0.)
-        for a in atoms:
-            r = r + a.position(conf)
-        center = r/len(atoms)
+        center = sum((a.position(conf) for a in atoms),
+                     Vector(0., 0., 0.)) / len(atoms)
         r = 0.
-        for a in self.atomList():
+        for a in atoms:
             r = max(r, (a.position(conf)-center).length())
         return Objects3D.Sphere(center, r)
 
     def rmsDifference(self, conf1, conf2 = None):
-        """Returns the RMS (root-mean-square) difference between the
-        conformations of the object in two universe configurations, |conf1|
-        and |conf2| (the latter defaults to the current configuration)."""
+        """
+        @param conf1: a configuration object
+        @type conf1: L{MMTK.Configuration}
+        @param conf2: a configuration object, or C{None} for the
+                      current configuration
+        @type conf2: L{MMTK.Configuration} or C{NoneType}
+        @returns: the RMS (root-mean-square) difference between the
+                  conformations of the object in two universe configurations,
+                  conf1 and conf2
+        @rtype: C{float}
+        """
         universe = conf1.universe
         m = 0.
         rms = 0.
         for a in self.atomList():
             ma = a._mass
             dr = universe.distanceVector(a.position(conf1), a.position(conf2))
-            m = m + ma
-            rms = rms + ma*dr*dr
-        return Numeric.sqrt(rms/m)
+            m += ma
+            rms += ma*dr*dr
+        return N.sqrt(rms/m)
 
     def findTransformationAsQuaternion(self, conf1, conf2 = None):
         universe = self.universe()
@@ -179,18 +236,18 @@ class GroupOfAtoms:
         weights = universe.masses()
         weights = weights/self.mass()
         ref_cms = self.centerOfMass(ref).array
-        pos = Numeric.zeros((3,), Numeric.Float)
+        pos = N.zeros((3,), N.Float)
         possq = 0.
-        cross = Numeric.zeros((3, 3), Numeric.Float)
+        cross = N.zeros((3, 3), N.Float)
         for a in self.atomList():
             r = a.position(conf).array
             r_ref = a.position(ref).array-ref_cms
             w = weights[a]
             pos = pos + w*r
-            possq = possq + w*Numeric.add.reduce(r*r) \
-                          + w*Numeric.add.reduce(r_ref*r_ref)
-            cross = cross + w*r[:, Numeric.NewAxis]*r_ref[Numeric.NewAxis, :]
-        k = Numeric.zeros((4, 4), Numeric.Float)
+            possq = possq + w*N.add.reduce(r*r) \
+                          + w*N.add.reduce(r_ref*r_ref)
+            cross = cross + w*r[:, N.NewAxis]*r_ref[N.NewAxis, :]
+        k = N.zeros((4, 4), N.Float)
         k[0, 0] = -cross[0, 0]-cross[1, 1]-cross[2, 2]
         k[0, 1] = cross[1, 2]-cross[2, 1]
         k[0, 2] = cross[2, 0]-cross[0, 2]
@@ -206,26 +263,34 @@ class GroupOfAtoms:
                 k[i, j] = k[j, i]
         k = 2.*k
         for i in range(4):
-            k[i, i] = k[i, i] + possq - Numeric.add.reduce(pos*pos)
+            k[i, i] = k[i, i] + possq - N.add.reduce(pos*pos)
         from Scientific import LA
         e, v = LA.eigenvectors(k)
-        i = Numeric.argmin(e)
+        i = N.argmin(e)
         v = v[i]
         if v[0] < 0: v = -v
         if e[i] <= 0.:
             rms = 0.
         else:
-            rms = Numeric.sqrt(e[i])
+            rms = N.sqrt(e[i])
         return Quaternion.Quaternion(v), Vector(ref_cms), \
                Vector(pos), rms
 
     def findTransformation(self, conf1, conf2 = None):
-        """Returns the linear transformation that, when applied to
-        the object in configuration |conf1|, minimizes the RMS distance
-        to the conformation in |conf2|, and the minimal RMS distance.
-        If |conf2| is 'None', returns the transformation from the
-        current configuration to |conf1| and the associated RMS distance.
-        The algorithm is described in [Article:Kneller1990]."""
+        """
+        @param conf1: a configuration object
+        @type conf1: L{MMTK.Configuration}
+        @param conf2: a configuration object, or C{None} for the
+                      current configuration
+        @type conf2: L{MMTK.Configuration} or C{NoneType}
+        @returns: the linear transformation that, when applied to
+                  the object in configuration conf1, minimizes the
+                  RMS distance to the conformation in conf2, and the
+                  minimal RMS distance.
+                  If conf2 is C{None}, returns the transformation from the
+                  current configuration to conf1 and the associated
+                  RMS distance.
+        """
         q, cm1, cm2, rms = self.findTransformationAsQuaternion(conf1, conf2)
         return Transformation.Translation(cm2) * \
                q.asRotation() * \
@@ -233,47 +298,63 @@ class GroupOfAtoms:
                rms
 
     def translateBy(self, vector):
-        "Translates the object by the displacement |vector|."
+        """
+        Translate the object by a displacement vector
+        
+        @param vector: the displacement vector
+        @type vector: C{Scientific.Geometry.Vector}
+        """
         for a in self.atomList():
             a.translateBy(vector)
 
     def translateTo(self, position):
-        "Translates the object such that its center of mass is at |position|."
+        """
+        Translate the object such that its center of mass is at position
+        @param position: the final position
+        @type position: C{Scientific.Geometry.Vector}
+        """
         self.translateBy(position-self.centerOfMass())
 
     def normalizePosition(self):
+        """
+        Translate the center of mass to the coordinate origin
+        """
         self.translateTo(Vector(0., 0., 0.))
 
     def normalizeConfiguration(self, repr=None):
-        """Applies a linear transformation such that the coordinate
-        origin becomes the center of mass of the object and its
-        principal axes of inertia are parallel to the three coordinate
-        axes.
+        """
+        Apply a linear transformation such that the center of mass of
+        the object is translated to the coordinate origin and its
+        principal axes of inertia become parallel to the three
+        coordinate axes.
 
-        A specific representation can be chosen by setting |repr| to
-          Ir    : x y z <--> b c a
-          IIr   : x y z <--> c a b
-          IIIr  : x y z <--> a b c
-          Il    : x y z <--> c b a
-          IIl   : x y z <--> a c b
-          IIIl  : x y z <--> b a c
+        @param repr: the specific representation for axis alignment:
+          - Ir    : x y z <--> b c a
+          - IIr   : x y z <--> c a b
+          - IIIr  : x y z <--> a b c
+          - Il    : x y z <--> c b a
+          - IIl   : x y z <--> a c b
+          - IIIl  : x y z <--> b a c        
         """
         transformation = self.normalizingTransformation(repr)
         self.applyTransformation(transformation)
 
     def normalizingTransformation(self, repr=None):
-        """Returns a linear transformation that shifts the center of mass
+        """
+        Calculate a linear transformation that shifts the center of mass
         of the object to the coordinate origin and makes its
         principal axes of inertia parallel to the three coordinate
         axes.
 
-        A specific representation can be chosen by setting |repr| to
+        @param repr: the specific representation for axis alignment:
           Ir    : x y z <--> b c a
           IIr   : x y z <--> c a b
           IIIr  : x y z <--> a b c
           Il    : x y z <--> c b a
           IIl   : x y z <--> a c b
           IIIl  : x y z <--> b a c
+        @returns: the normalizing transformation
+        @rtype: L{Scientific.Geometry.Transformations.RigidBodyTransformation}
         """
         from Scientific.LA import determinant
         cm, inertia = self.centerAndMomentOfInertia()
@@ -281,31 +362,40 @@ class GroupOfAtoms:
         if determinant(diag.array) < 0:
             diag.array[0] = -diag.array[0]
         if repr != None:
-            seq = Numeric.argsort(ev)
+            seq = N.argsort(ev)
             if repr == 'Ir':
-                seq = Numeric.array([seq[1], seq[2], seq[0]])
+                seq = N.array([seq[1], seq[2], seq[0]])
             elif repr == 'IIr':
-                seq = Numeric.array([seq[2], seq[0], seq[1]])
+                seq = N.array([seq[2], seq[0], seq[1]])
             elif repr == 'Il':
-                seq = Numeric.seq[2::-1]
+                seq = N.seq[2::-1]
             elif repr == 'IIl':
-                seq[1:3] = Numeric.array([seq[2], seq[1]])
+                seq[1:3] = N.array([seq[2], seq[1]])
             elif repr == 'IIIl':
-                seq[0:2] = Numeric.array([seq[1], seq[0]])
+                seq[0:2] = N.array([seq[1], seq[0]])
             elif repr != 'IIIr':
                 print 'unknown representation'
-            diag.array = Numeric.take(diag.array, seq)                
+            diag.array = N.take(diag.array, seq)                
         return Transformation.Rotation(diag)*Transformation.Translation(-cm)
 
     def applyTransformation(self, t):
-        "Applies the transformation |t| to the object."
+        """
+        Apply a transformation to the object
+
+        @param t: the transformation to be applied
+        @type t: C{Scientific.Geometry.Transformation}
+        """
         for a in self.atomList():
             a.setPosition(t(a.position()))
 
     def displacementUnderTransformation(self, t):
-        """Returns the displacement vectors (in a ParticleVector)
-        for the atoms in the object that correspond to the
-        transformation |t|."""
+        """
+        @param t: the transformation to be applied
+        @type t: C{Scientific.Geometry.Transformation}
+        @returns: the displacement vectors for the atoms in the object
+                  that correspond to the transformation |t|.
+        @rtype: L{MMTK.ParticlVector}
+        """
         d = ParticleProperties.ParticleVector(self.universe())
         for a in self.atomList():
             r = a.position()
@@ -313,43 +403,69 @@ class GroupOfAtoms:
         return d
 
     def rotateAroundCenter(self, axis_direction, angle):
-        """Rotates the object by the given |angle| around an axis
-        that passes through its center of mass and has the given
-        |direction|."""
+        """
+        Rotate the object around an axis that passes through its center
+        of mass.
+
+        @param axis_direction: the direction of the axis of rotation
+        @type axis_direction: C{Scientific.Geometry.Vector}
+        @param angle: the rotation angle (in radians)
+        @type angle: C{float}
+        """
         cm = self.centerOfMass()
         t = Transformation.Translation(cm) * \
             Transformation.Rotation(axis_direction, angle) * \
             Transformation.Translation(-cm)
         self.applyTransformation(t)
 
-    def rotateAroundOrigin(self, axis, angle):
-        """Rotates the object by the given |angle| around an axis
-        that passes through the coordinate origin and has the given
-        |direction|."""
-        self.applyTransformation(Transformation.Rotation(axis, angle))
+    def rotateAroundOrigin(self, axis_direction, angle):
+        """
+        Rotate the object around an axis that passes through the
+        coordinate origin.
+
+        @param axis_direction: the direction of the axis of rotation
+        @type axis_direction: C{Scientific.Geometry.Vector}
+        @param angle: the rotation angle (in radians)
+        @type angle: C{float}
+        """
+        self.applyTransformation(Transformation.Rotation(axis_direction, angle))
 
     def rotateAroundAxis(self, point1, point2, angle):
-        """Rotates the object by the given |angle| around the axis
-        that passes through |point1| and |point2|"""
+        """
+        Rotate the object arond an axis specified by two points
+
+        @param point1: the first point
+        @type point1: L{Scientific.Geometry.Vector}
+        @param point2: the second point
+        @type point2: L{Scientific.Geometry.Vector}
+        @param angle: the rotation angle (in radians)
+        @type angle: C{float}
+        """
         tr1 = Transformation.Translation(-point1)
         tr2 = Transformation.Rotation(point2-point1, angle)
         tr3 = tr1.inverse()
         self.applyTransformation(tr3*tr2*tr1)
 
     def writeToFile(self, filename, configuration = None, format = None):
-        """Writes a representation of the object in the given
-        |configuration| to the file identified by |filename|.
-        The |format| can be either "pdb" or "vrml"; if no format is
-        specified, it is deduced from the filename. An optional subformat
-        specification can be added to the format name, separated
-        by a dot. The subformats of "pdb" are defined by the
-        module 'Scientific.IO.PDB', the subformats of "vrml" are
-        "wireframe" (the default, yielding a wireframe representation),
-        "ball_and_stick" (yielding a ball-and-stick representation),
-        "highlight" (like wireframe, but with a small sphere for
-        all atoms that have an attribute "highlight" with a non-zero value),
-        and "charge" (wireframe plus small spheres for the atoms with colors
-        from a red-to-green color scale to indicate the charge).
+        """
+        Write a representation of the object in a given
+        configuration to a file.
+
+        @param filename: the name of the file
+        @type filename: C{str}
+        @param configuration: a configuration object, or C{None} for the
+                              current configuration
+        @type configuration: L{MMTK.Configuration} or C{NoneType}
+        @param format: 'pdb' or 'vrml' (default: guess from filename)
+                       A subformat specification can be added, separated
+                       by a dot. Subformats of 'vrml' are 'wireframe'
+                       (default), 'ball_and_stick', 'highlight' (like
+                       'wireframe', but with a small sphere for
+                       all atoms that have an attribute 'highlight' with a
+                       non-zero value), and 'charge' (wireframe plus small
+                       spheres for the atoms whose color indicates the
+                       charge on a red-to-green color scale)
+        @type format: C{str}
         """
         universe = self.universe()
         if universe is not None:
@@ -360,19 +476,17 @@ class GroupOfAtoms:
         file.close()
 
     def view(self, configuration = None, format = 'pdb'):
-        """Starts an external viewer for the object in the given
-        |configuration|. The optional parameter |format| indicates
-        which format (and hence which viewer) should be used;
-        the formats are "pdb" and "vrml". An optional subformat
-        specification can be added to the format name, separated
-        by a dot. The subformats of "pdb" are defined by the
-        module 'Scientific.IO.PDB', the subformats of "vrml" are
-        "wireframe" (the default, yielding a wireframe representation),
-        "ball_and_stick" (yielding a ball-and-stick representation),
-        "highlight" (like wireframe, but with a small sphere for
-        all atoms that have an attribute "highlight" with a non-zero value),
-        and "charge" (wireframe plus small spheres for the atoms with colors
-        from a red-to-green color scale to indicate the charge)."""
+        """
+        Start an external viewer for the object in the given
+        configuration.
+
+        @param configuration: the configuration to be visualized
+        @type configuration: L{MMTK.Configuration}
+        @param format: 'pdb' (for running $PDBVIEWER) or 'vrml'
+                       (for running $VRMLVIEWER). An optional
+                       subformat specification can be added, see
+                       L{writeToFile} for the details.
+        """
         universe = self.universe()
         if universe is not None:
             configuration = universe.contiguousObjectConfiguration([self],
@@ -380,7 +494,13 @@ class GroupOfAtoms:
         Visualization.viewConfiguration(self, configuration, format)
 
     def kineticEnergy(self, velocities = None):
-        "Returns the kinetic energy."
+        """
+        @param velocities: a set of velocities for all atoms, or
+                           C{None} for the current velocities
+        @type velocities: L{MMTK.ParticleVector}
+        @returns: the kinetic energy
+        @rtype: C{float}
+        """
         if velocities is None:
             velocities = self.atomList()[0].universe().velocities()
         energy = 0.
@@ -390,42 +510,72 @@ class GroupOfAtoms:
         return 0.5*energy
 
     def temperature(self, velocities = None):
-        "Returns the temperature."
+        """
+        @param velocities: a set of velocities for all atoms, or
+                           C{None} for the current velocities
+        @type velocities: L{MMTK.ParticleVector}
+        @returns: the temperature
+        @rtype: C{float}
+        """
         energy = self.kineticEnergy(velocities)
         return 2.*energy/(self.degreesOfFreedom()*Units.k_B)
 
     def momentum(self, velocities = None):
-        "Returns the momentum."
+        """
+        @param velocities: a set of velocities for all atoms, or
+                           C{None} for the current velocities
+        @type velocities: L{MMTK.ParticleVector}
+        @returns: the momentum
+        @rtype: C{Scientific.Geometry.Vector}
+        """
         if velocities is None:
             velocities = self.atomList()[0].universe().velocities()
-        p = Vector(0., 0., 0.)
-        for a in self.atomList():
-            p = p + a._mass*velocities[a]
-        return p
+        return sum((a._mass*velocities[a] for a in self.atomList()),
+                   Vector(0., 0., 0.))
 
     def angularMomentum(self, velocities = None, conf = None):
-        "Returns the angular momentum."
+        """
+        @param velocities: a set of velocities for all atoms, or
+                           C{None} for the current velocities
+        @type velocities: L{MMTK.ParticleVector}
+        @param conf: a configuration object, or C{None} for the
+                     current configuration
+        @type conf: L{MMTK.Configuration}
+        @returns: the angluar momentum
+        @rtype: C{Scientific.Geometry.Vector}
+        """
         if velocities is None:
             velocities = self.atomList()[0].universe().velocities()
         cm = self.centerOfMass(conf)
-        l = Vector(0., 0., 0.)
-        for a in self.atomList():
-            l = l + a._mass*a.position(conf).cross(velocities[a])
-        return l
+        return sum((a._mass*a.position(conf).cross(velocities[a])
+                    for a in self.atomList()),
+                   Vector(0., 0., 0.))
 
     def angularVelocity(self, velocities = None, conf = None):
-        "Returns the angular velocity."
+        """
+        @param velocities: a set of velocities for all atoms, or
+                           C{None} for the current velocities
+        @type velocities: L{MMTK.ParticleVector}
+        @param conf: a configuration object, or C{None} for the
+                     current configuration
+        @type conf: L{MMTK.Configuration}
+        @returns: the angluar velocity
+        @rtype: C{Scientific.Geometry.Vector}
+        """
         if velocities is None:
             velocities = self.atomList()[0].universe().velocities()
         cm, inertia = self.centerAndMomentOfInertia(conf)
-        l = Vector(0., 0., 0.)
-        for a in self.atomList():
-            l = l + a._mass*a.position(conf).cross(velocities[a])
+        l = sum((a._mass*a.position(conf).cross(velocities[a])
+                 for a in self.atomList()),
+                Vector(0., 0., 0.))
         return inertia.inverse()*l
         
     def universe(self):
-        """Returns the universe of which the object is part. For an
-        object that is not part of a universe, the result is 'None'."""
+        """
+        @returns: the universe of which the object is part. For an
+                  object that is not part of a universe, the result is
+                  C{None}
+        """
         atoms = self.atomList()
         if not atoms:
             return None
@@ -436,25 +586,34 @@ class GroupOfAtoms:
         return universe
 
     def charge(self):
-        """Returns the total charge of the object. This is defined only
-        for objects that are part of a universe with a force field that
-        defines charges."""
+        """
+        @returns: the total charge of the object. This is defined only
+                  for objects that are part of a universe with a force
+                  field that defines charges.
+        @rtype: C{float}
+        """
         return self.universe().forcefield().charge(self)
 
     def dipole(self, reference = None):
-        """Returns the total dipole moment of the object. This is defined only
-        for objects that are part of a universe with a force field that
-        defines charges."""
+        """
+        @returns: the total dipole moment of the object. This is defined only
+                  for objects that are part of a universe with a force field
+                  that defines charges.
+        @rtype: C{Scientific.Geometry.Vector}
+        """
         return self.universe().forcefield().dipole(self, reference)
 
     def booleanMask(self):
-        """Returns a ParticleScalar object that contains a value of 1
-        for each atom that is in the object and a value of 0 for all
-        other atoms in the universe."""
+        """
+        @returns: a ParticleScalar object that contains a value of 1
+                  for each atom that is in the object and a value of 0 for all
+                  other atoms in the universe
+        @rtype: L{MMTK.ParticleScalar}
+        """
         universe = self.universe()
         if universe is None:
             raise ValueError("object not in a universe")
-        array = Numeric.zeros((universe.numberOfAtoms(),), Numeric.Int)
+        array = N.zeros((universe.numberOfAtoms(),), N.Int)
         mask = ParticleProperties.ParticleScalar(universe, array)
         for a in self.atomList():
             mask[a] = 1
@@ -464,25 +623,14 @@ class GroupOfAtoms:
 # This class defines a general collection that can contain
 # chemical objects and other collections.
 #
-import ChemicalObjects
-
 class Collection(GroupOfAtoms, Visualization.Viewable):
 
-    """Collection of chemical objects
-
-    A Glossary:Subclass of Class:MMTK.Collections.GroupOfAtoms
-    and Class:MMTK.Visualization.Viewable.
+    """
+    Collection of chemical objects
 
     Collections permit the grouping of arbitrary chemical objects
     (atoms, molecules, etc.) into one object for the purpose of analysis
     or manipulation.
-
-    Constructor: Collection(|objects|=None)
-
-    Arguments:
-
-    |objects| -- a chemical object or a sequence of chemical objects that
-                 define the initial content of the collection.
 
     Collections permit length inquiry, item extraction by indexing,
     and iteration, like any Python sequence object. Two collections
@@ -490,21 +638,30 @@ class Collection(GroupOfAtoms, Visualization.Viewable):
     elements.
     """
 
-    def __init__(self, *args):
+    def __init__(self, *objects):
+        """
+        @param objects: a chemical object or a sequence of chemical objects that
+                        define the initial content of the collection.
+        """
         self.objects = []
-        self.addObject(args)
+        self.addObject(objects)
 
     is_collection = 1
 
     def addObject(self, object):
-        """Adds |object| to the collection. If |object| is another collection
-        or a list, all of its elements are added."""
-        if ChemicalObjects.isChemicalObject(object):
+        """
+        Add objects to the collection.
+
+        @param object: the object(s) to be added. If it is another collection
+                       or a list, all of its elements are added
+        """
+        from MMTK.ChemicalObjects import isChemicalObject
+        if isChemicalObject(object):
             self.addChemicalObject(object)
         elif isCollection(object):
             self.addChemicalObjectList(object.objectList())
         elif Utility.isSequenceObject(object):
-            if object and ChemicalObjects.isChemicalObject(object[0]):
+            if object and isChemicalObject(object[0]):
                 self.addChemicalObjectList(list(object))
             else:
                 for o in object:
@@ -516,13 +673,20 @@ class Collection(GroupOfAtoms, Visualization.Viewable):
         self.objects.append(object)
 
     def addChemicalObjectList(self, list):
-        self.objects = self.objects + list
+        self.objects.extend(list)
 
     def removeObject(self, object):
-        """Removes |object| from the collection. If |object| is a collection
-        or a list, each of its elements is removed. The object to be removed
-        must be an element of the collection."""
-        if ChemicalObjects.isChemicalObject(object):
+        """
+        Remove an object or a list or collection of objects from the
+        collection. The object(s) to be removed must be elements of the
+        collection.
+
+        @param object: the object to be removed, or a list or collection
+                       of objects whose elements are to be removed
+        @raises ValueError: if the object is not an element of the collection
+        """
+        from MMTK.ChemicalObjects import isChemicalObject
+        if isChemicalObject(object):
             self.removeChemicalObject(object)
         elif isCollection(object) or Utility.isSequenceObject(object):
             for o in object:
@@ -537,8 +701,19 @@ class Collection(GroupOfAtoms, Visualization.Viewable):
             raise ValueError('Object not in this collection')
 
     def selectShell(self, point, r1, r2=0.):
-        """Return a collection of all elements whose
-        distance from |point| is between |r1| and |r2|."""
+        """
+        Select objects in a spherical shell around a central point.
+
+        @param point: the center of the spherical shell
+        @type point: C{Scientific.Geometry.Vector}
+        @param r1: inner or outer radius of the shell
+        @type r1: C{float}
+        @param r2: inner or outer radius of the shell (default: 0.)
+        @type r2: C{float}
+        @returns: a collection of all elements whose
+                  distance from point is between r1 and r2
+        @rtype: L{Collection}
+        """
         if r1 > r2:
             r1, r2 = r2, r1
         universe = self.universe()
@@ -552,48 +727,66 @@ class Collection(GroupOfAtoms, Visualization.Viewable):
         return Collection(in_shell)
 
     def selectBox(self, p1, p2):
-        """Return a collection of all elements that lie
-        within a box whose corners are given by |p1| and |p2|."""
-        x1 = Numeric.minimum(p1.array, p2.array)
-        x2 = Numeric.maximum(p1.array, p2.array)
+        """
+        Select objects in a rectangular volume
+
+        @param p1: one corner of the rectangular volume
+        @type p1: C{Scientific.Geometry.Vector}
+        @param p2: the other corner of the rectangular volume
+        @type p2: C{Scientific.Geometry.Vector}
+        @returns: a collection of all elements that lie
+                  within the rectangular volume
+        @rtype: L{Collection}
+        """
+        x1 = N.minimum(p1.array, p2.array)
+        x2 = N.maximum(p1.array, p2.array)
         in_box = []
         for o in self.objects:
             r = o.position().array
-            if Numeric.logical_and.reduce( \
-                Numeric.logical_and(Numeric.less_equal(x1, r),
-                                    Numeric.less(r, x2))):
+            if N.logical_and.reduce( \
+                N.logical_and(N.less_equal(x1, r),
+                              N.less(r, x2))):
                 in_box.append(o)
         return Collection(in_box)
 
-    def objectList(self, klass = None):
-        """Returns a list of all objects in the collection.
-        If |klass| is not None, only objects whose class is equal
-        to |klass| are returned."""
-        if klass is None:
+    def objectList(self, type = None):
+        """
+        Make a list of all objects in the collection that are instances
+        of a specific type or of one of its subtypes.
+
+        @param type: the type that serves as a filter. If C{None},
+                     all objects are returned
+        @returns: the objects that match the given type
+        @rtype: C{list}
+        """
+        if type is None:
             return self.objects
         else:
-            return filter(lambda o, k=klass: o.__class__ is k,
-                          self.objects)
+            return [o for o in self.objects if isinstance(o, type)]
 
     def atomList(self):
-        "Returns a list containing all atoms of all objects in the collection."
-        lists = map(lambda o: o.atomList(), self.objectList())
-        if lists:
-            return reduce(operator.add, lists)
-        else:
-            return []
+        """
+        @returns: a list containing all atoms of all objects in the collection
+        @rtype: C{list}
+        """
+        atoms = []
+        for o in self.objectList():
+            atoms.extend(o.atomList())
+        return atoms
 
     def numberOfAtoms(self):
-        "Returns the total number of atoms in the objects of the collection."
-        count = map(lambda o: o.numberOfAtoms(), self.objectList())
-        if count:
-            return reduce(operator.add, count)
-        else:
-            return 0
+        """
+        @returns: the total number of atoms in the objects of the collection
+        @rtype: C{int}
+        """
+        return sum(o.numberOfAtoms() for o in self.objectList())
     
     def universe(self):
-        """Returns the universe of which the objects in the collection
-        are part. If no such universe exists, the return value is 'None'."""
+        """
+        @returns: the universe of which all objects in the collection
+                  are part. If no such universe exists, the return value
+                  is C{None}
+        """
         if not self.objects:
             return None
         universe = self.objects[0].universe()
@@ -603,10 +796,22 @@ class Collection(GroupOfAtoms, Visualization.Viewable):
         return universe
 
     def __len__(self):
+        """
+        @returns: the number of objects in the collection
+        @rtype: C{int}
+        """
         return len(self.objects)
 
     def __getitem__(self, item):
+        """
+        @param item: an index into the object list
+        @type item: C{int}
+        @returns: the object with the given index
+        """
         return self.objects[item]
+
+    def __iter__(self):
+        return self.objects.__iter__()
 
     def __add__(self, other):
         return Collection(self.objectList(), other.objectList())
@@ -615,11 +820,18 @@ class Collection(GroupOfAtoms, Visualization.Viewable):
         return "Collection of %d objects" % len(self.objects)
 
     def map(self, function):
-        """Applies |function| to all objects in the collection and
-        returns the list of the results. If the results are chemical
-        objects, a Collection object is returned instead of a list."""
-        list = map(function, self.objectList())
-        if list and ChemicalObjects.isChemicalObject(list[0]):
+        """
+        Apply a function to all objects in the collection and
+        return the list of the results. If the results are chemical
+        objects, a Collection object is returned instead of a list.
+
+        @param function: the function to be applied
+        @type function: callable
+        @returns: the list or collection of the results
+        """
+        from MMTK.ChemicalObjects import isChemicalObject
+        list = [function(o) for o in self.objectList()]
+        if list and isChemicalObject(list[0]):
             return Collection(list)
         else:
             return list
@@ -635,28 +847,34 @@ class Collection(GroupOfAtoms, Visualization.Viewable):
                - self.numberOfDistanceConstraints()
 
     def distanceConstraintList(self):
-        "Returns the list of distance constraints."
+        """
+        @returns: the list of distance constraints
+        @rtype: C{list}
+        """
         dc = []
         for o in self.objects:
-            dc = dc + o.distanceConstraintList()
+            dc.extend(o.distanceConstraintList())
         return dc
 
     def numberOfDistanceConstraints(self):
-        "Returns the number of distance constraints."
-        n = 0
-        for o in self.objects:
-            n = n + o.numberOfDistanceConstraints()
-        return n
+        """
+        @returns: the number of distance constraints
+        """
+        return sum(o.numberOfDistanceConstraints() for o in self.objects)
 
     def setBondConstraints(self, universe=None):
-        "Sets distance constraints for all bonds."
+        """
+        Set distance constraints for all bonds
+        """
         if universe is None:
             universe = self.universe()
         for o in self.objects:
             o.setBondConstraints(universe)
 
     def removeDistanceConstraints(self, universe=None):
-        "Removes all distance constraints."
+        """
+        Remove all distance constraints
+        """
         if universe is None:
             universe = self.universe()
         for o in self.objects:
@@ -667,7 +885,7 @@ class Collection(GroupOfAtoms, Visualization.Viewable):
         for o in self.objects:
             lists.append(o._graphics(conf, distance_fn, model,
                                      module, options))
-        return reduce(operator.add, lists, [])
+        return sum(lists)
 
     def __copy__(self):
         return self.__class__(copy.copy(self.objects))
@@ -676,7 +894,10 @@ class Collection(GroupOfAtoms, Visualization.Viewable):
 # type check for collections
 
 def isCollection(object):
-    "Return 1 if |object| is a Collection."
+    """
+    @param object: any Python object
+    @returns: C{True} if the object is a L{Collection}
+    """
     return hasattr(object, 'is_collection')
 
 #
@@ -686,27 +907,22 @@ def isCollection(object):
 #
 class PartitionedCollection(Collection):
 
-    """Collection with cubic partitions
-
-    A Glossary:Subclass of Class:MMTK.Collection.
+    """
+    Collection with cubic partitions
 
     A PartitionedCollection differs from a plain Collection by
     sorting its elements into small cubic cells. This makes adding
     objects slower, but geometrical operations like 
     selectShell become much faster for a large number of
     objects.
-
-    Constructor: PartitionedCollection(|partition_size|, |objects|=None)
-
-    Arguments:
-    
-    |partition_size| -- the edge length of the cubic cells
-
-    |objects| -- a chemical object or a sequence of chemical objects that
-                 define the initial content of the collection.
     """
 
     def __init__(self, partition_size, *args):
+        """
+        @param partition_size: the edge length of the cubic cells
+        @param objects: a chemical object or a sequence of chemical objects that
+                        define the initial content of the collection.
+        """
         self.partition_size = 1.*partition_size
         self.undefined = []
         self.partition = {}
@@ -747,15 +963,15 @@ class PartitionedCollection(Collection):
         self.all = None
 
     def partitionIndex(self, x):
-        return (int(Numeric.floor(x[0]/self.partition_size)),
-                int(Numeric.floor(x[1]/self.partition_size)),
-                int(Numeric.floor(x[2]/self.partition_size)))
+        return (int(N.floor(x[0]/self.partition_size)),
+                int(N.floor(x[1]/self.partition_size)),
+                int(N.floor(x[2]/self.partition_size)))
 
     def objectList(self):
-        return reduce(operator.add, self.partition.values()+[self.undefined])
+        return sum(self.partition.values(), [self.undefined])
 
     def __len__(self):
-        return Numeric.add.reduce(map(len, self.partition.values())) + \
+        return sum(len(p) for p in self.partition.values()) + \
                len(self.undefined)
 
     def __getitem__(self, item):
@@ -771,9 +987,11 @@ class PartitionedCollection(Collection):
                               copy.copy(self.objectList()))
 
     def partitions(self):
-        """Returns a list of cubic partitions. Each partition is specified
-        by a tuple containing two vectors (describing the diagonally
-        opposite corners) and the list of objects in the partition."""
+        """
+        @returns: a list of cubic partitions. Each partition is specified
+                  by a tuple containing two vectors (describing the diagonally
+                  opposite corners) and the list of objects in the partition.
+        """
         list = []
         for index, objects in self.partition.items():
             min = Vector(index)*self.partition_size
@@ -786,7 +1004,7 @@ class PartitionedCollection(Collection):
         y = int(round(point[1]/self.partition_size))
         z = int(round(point[2]/self.partition_size))
         d = (Vector(x, y, z)*self.partition_size-point).length()
-        n = int(Numeric.ceil((edge + d)/(2.*self.partition_size)))
+        n = int(N.ceil((edge + d)/(2.*self.partition_size)))
         objects = []
         for nx in range(-n, n):
             for ny in range(-n, n):
@@ -803,11 +1021,11 @@ class PartitionedCollection(Collection):
         minsq = min**2
         maxsq = max**2
         for index in self.partition.keys():
-            d1 = self.partition_size*Numeric.array(index) - point.array
+            d1 = self.partition_size*N.array(index) - point.array
             d2 = d1 + self.partition_size
             dmin = (d1 > 0.)*d1 - (d2 < 0.)*d2
-            dminsq = Numeric.add.reduce(dmin**2)
-            dmaxsq = Numeric.add.reduce(Numeric.maximum(d1**2, d2**2))
+            dminsq = N.add.reduce(dmin**2)
+            dmaxsq = N.add.reduce(N.maximum(d1**2, d2**2))
             if dminsq >= minsq and dmaxsq <= maxsq:
                 objects.addObject(self.partition[index])
             elif dmaxsq >= minsq and dminsq <= maxsq:
@@ -817,8 +1035,13 @@ class PartitionedCollection(Collection):
         return objects
 
     def pairsWithinCutoff(self, cutoff):
-        """Returns a list containing all pairs of objects in the
-        collection whose center-of-mass distance is less than |cutoff|."""
+        """
+        @param cutoff: a cutoff for pair distances
+        @returns: a list containing all pairs of objects in the
+                  collection whose center-of-mass distance is less than
+                  the cutoff
+        @rtype: C{list}
+        """
         pairs = []
         positions = {}
         for index, objects in self.partition.items():
@@ -827,17 +1050,17 @@ class PartitionedCollection(Collection):
             for o1, o2 in Utility.pairs(zip(objects, pos)):
                 if (o2[1]-o1[1]).length() <= cutoff:
                     pairs.append((o1[0], o2[0]))
-        partition_cutoff = int(Numeric.floor((cutoff/self.partition_size)**2))
-        ones = Numeric.array([1,1,1])
-        zeros = Numeric.array([0,0,0])
+        partition_cutoff = int(N.floor((cutoff/self.partition_size)**2))
+        ones = N.array([1,1,1])
+        zeros = N.array([0,0,0])
         keys = self.partition.keys()
         for i in range(len(keys)):
             p1 = keys[i]
             for j in range(i+1, len(keys)):
                 p2 = keys[j]
-                d = Numeric.maximum(abs(Numeric.array(p2)-Numeric.array(p1)) -
-                                    ones, zeros)
-                if Numeric.add.reduce(d*d) <= partition_cutoff:
+                d = N.maximum(abs(N.array(p2)-N.array(p1)) -
+                              ones, zeros)
+                if N.add.reduce(d*d) <= partition_cutoff:
                     for o1, pos1 in zip(self.partition[p1],
                                         positions[p1]):
                         for o2, pos2 in zip(self.partition[p2],
@@ -852,22 +1075,12 @@ class PartitionedCollection(Collection):
 #
 class PartitionedAtomCollection(PartitionedCollection):
 
-    """Partitioned collection of atoms
-
-    A Glossary:Subclass of Class:MMTK.PartitionedCollection.
+    """
+    Partitioned collection of atoms
 
     PartitionedAtomCollection objects behave like PartitionedCollection
     atoms, except that they store only atoms. When a composite chemical
     object is added, its atoms are stored instead.
-
-    Constructor: PartitionedAtomCollection(|partition_size|, |objects|=None)
-
-    Arguments:
-    
-    |partition_size| -- the edge length of the cubic cells
-
-    |objects| -- a chemical object or a sequence of chemical objects that
-                 define the initial content of the collection.
     """
 
     def __init__(*args):
@@ -880,17 +1093,3 @@ class PartitionedAtomCollection(PartitionedCollection):
     def removeChemicalObject(self, object):
         for atom in object.atomList():
             PartitionedCollection.removeChemicalObject(self, atom)
-
-#
-# Test code
-#
-if __name__ == '__main__':
-
-    from Random import randomPointInBox
-    from copy import copy
-
-    box = PartitionedCollection(1.)
-
-    for i in xrange(100):
-        x = randomPointInBox(4., 4., 4.)
-        box.addObject(ChemicalObjects.Atom('c', position = x))
