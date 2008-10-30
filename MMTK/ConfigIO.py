@@ -136,12 +136,12 @@ class Cartesian(object):
     to specify molecule conformations by Cartesian coordinates.
     """
     
-    def __init__(self, dict):
+    def __init__(self, data):
         """
         @param data: a dictionary mapping atoms to tuples of length three
                      that define its Cartesian coordinates
         """
-        self.dict = dict
+        self.dict = data
 
     _substitute = True
 

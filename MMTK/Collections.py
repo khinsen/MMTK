@@ -354,7 +354,7 @@ class GroupOfAtoms(object):
           IIl   : x y z <--> a c b
           IIIl  : x y z <--> b a c
         @returns: the normalizing transformation
-        @rtype: L{Scientific.Geometry.Transformations.RigidBodyTransformation}
+        @rtype: L{Scientific.Geometry.Transformation.RigidBodyTransformation}
         """
         from Scientific.LA import determinant
         cm, inertia = self.centerAndMomentOfInertia()
@@ -394,7 +394,7 @@ class GroupOfAtoms(object):
         @type t: C{Scientific.Geometry.Transformation}
         @returns: the displacement vectors for the atoms in the object
                   that correspond to the transformation |t|.
-        @rtype: L{MMTK.ParticlVector}
+        @rtype: L{MMTK.ParticleVector}
         """
         d = ParticleProperties.ParticleVector(self.universe())
         for a in self.atomList():
@@ -917,7 +917,7 @@ class PartitionedCollection(Collection):
     objects.
     """
 
-    def __init__(self, partition_size, *args):
+    def __init__(self, partition_size, *objects):
         """
         @param partition_size: the edge length of the cubic cells
         @param objects: a chemical object or a sequence of chemical objects that
@@ -926,7 +926,7 @@ class PartitionedCollection(Collection):
         self.partition_size = 1.*partition_size
         self.undefined = []
         self.partition = {}
-        self.addObject(args)
+        self.addObject(objects)
 
     def addChemicalObject(self, object):
         p = object.position()

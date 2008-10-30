@@ -1,7 +1,7 @@
 # MMTK initialization
 #
 # Written by Konrad Hinsen
-# last revision: 2007-4-23
+# last revision: 2008-10-30
 #
 
 """
@@ -25,6 +25,7 @@ libraries:
 @undocumented: NewModuleNames
 @undocumented: surfm
 @undocumented: tess
+@undocumented: Utility
 """
 
 __docformat__ = 'epytext'
