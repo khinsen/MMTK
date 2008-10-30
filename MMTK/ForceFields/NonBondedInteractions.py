@@ -2,7 +2,7 @@
 # for non-bonded interactions
 #
 # Written by Konrad Hinsen
-# last revision: 2007-5-15
+# last revision: 2008-10-30
 #
 
 _undocumented = 1
@@ -41,8 +41,7 @@ class NonBondedForceField(ForceField):
                         try:
                             del set[a.index]
                         except KeyError: pass
-                    excluded_pairs = excluded_pairs + \
-                                     Utility.pairs(set.keys())
+                    excluded_pairs.extend(Utility.pairs(set.keys()))
                 set = {}
                 for a in subset1.atomList():
                     set[a.index] = None

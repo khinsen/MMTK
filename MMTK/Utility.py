@@ -2,13 +2,10 @@
 # places.
 #
 # Written by Konrad Hinsen
-# last revision: 2008-10-29
+# last revision: 2008-10-30
 #
 
-_undocumented = 1
-
-import Database
-import os, string, sys, types
+import os, sys
 from Scientific import N
 
 # Constants
@@ -48,18 +45,18 @@ class DeterministicUniqueIDGenerator:
 
     def registerObject(self, object):
         self.id[object] = self.number
-        self.number = self.number + 1
+        self.number += self.number
 
-parallel = 1
+parallel = True
 try:
     from Scientific.MPI import world
     if world is None:
-        parallel = 0
+        parallel = False
     elif world.size == 1:
-        parallel = 0
+        parallel = False
     del world
 except ImportError:
-    parallel = 0
+    parallel = False
 if parallel:
     uniqueID = DeterministicUniqueIDGenerator()
 else:
@@ -76,26 +73,23 @@ def substitute(obj, *exchange):
     if len(exchange) == 1:
         exchange = exchange[0]
     else:
-        dict = {}
-        map(lambda k, v, d=dict: _put(d, k, v), exchange[0], exchange[1])
-        exchange = dict
-    if type(obj) == types.ListType:
-        return map(lambda e, x=exchange: substitute(e, x), obj)
-    if type(obj) == types.TupleType:
-        return tuple(map(lambda e, x=exchange: substitute(e, x), obj))
-    elif type(obj) == types.DictionaryType:
+        exchange = dict(zip(exchange[0], exchange[1]))
+    if isinstance(obj, list):
+        return [substitute(e, exchange) for e in obj]
+    if isinstance(obj, tuple):
+        return tuple([substitute(e, exchange) for e in obj])
+    if isinstance(obj, dict):
         newdict = {}
         for key, value in obj.items():
             newdict[substitute(key, exchange)] = substitute(value, exchange)
         return newdict
-    elif not isinstance(obj, type) and hasattr(obj, '_substitute'):
-        for attr in dir(obj):
-            if attr[:2] != '__':
-                setattr(obj, attr, substitute(getattr(obj, attr), exchange))
+    if hasattr(obj, '_substitute'):
+        for attr in vars(obj).keys():
+            setattr(obj, attr, substitute(getattr(obj, attr), exchange))
         return obj
-    elif exchange.has_key(obj):
+    try:
         return exchange[obj]
-    else:
+    except KeyError:
         return obj
 
 def _put(dict, key, value):
@@ -111,14 +105,13 @@ def uniqueAttribute():
     return '_' + `_unique_attributes` + '__'
 
 #
-# Return a list of all pairs of objects in a given list
+# Return an iterator over all pairs of objects in a given list
 #
 def pairs(list):
-    p = []
-    for i in range(len(list)):
-        for j in range(i+1,len(list)):
-            p.append((list[i], list[j]))
-    return p
+    n = len(list)
+    for i in range(n):
+        for j in range(i+1, n):
+            yield (list[i], list[j])
 
 #
 # Type check for sequence objects
@@ -135,16 +128,16 @@ def isSequenceObject(obj):
 #
 def isDefinedPosition(p):
     if p is None:
-        return 0
+        return False
     if N.add.reduce(N.greater(p.array, undefined_limit)) > 0:
-        return 0
-    return 1
+        return False
+    return True
 
 #
 # Print a warning with reasonable line breaks.
 #
 def warning(text):
-    words = string.split(text)
+    words = text.split()
     text = 'Warning:'
     l = len(text)
     while words:
@@ -193,6 +186,7 @@ class Unpickler(BaseUnpickler):
         self.dispatch['i'] = Unpickler.load_inst
 
     def persistent_load(self, id):
+        from MMTK import Database
         return eval(id)
 
     def find_class(self, module, name):
@@ -216,20 +210,21 @@ class Unpickler(BaseUnpickler):
     # to have __getinitargs__ but don't have it any more.
     # This makes it possible to read pickle files from older MMTK versions.
     def load_inst(self):
+        import types
         k = self.marker()
         args = tuple(self.stack[k+1:])
         del self.stack[k:]
         module = self.readline()[:-1]
         name = self.readline()[:-1]
         klass = self.find_class(module, name)
-        instantiated = 0
+        instantiated = False
         if ((not args or hasattr(klass, "__had_initargs__"))
             and type(klass) is types.ClassType
             and not hasattr(klass, "__getinitargs__")):
             try:
                 value = _EmptyClass()
                 value.__class__ = klass
-                instantiated = 1
+                instantiated = True
             except RuntimeError:
                 # In restricted execution, assignment to inst.__class__ is
                 # prohibited
@@ -277,7 +272,7 @@ def load(filename):
 # URL related functions
 #
 def isURL(filename):
-    return string.find(filename, ':/') > 1
+    return filename.find(':/') > 1
 
 def joinURL(url, filename):
     if url[-1] == '/':
@@ -290,9 +285,9 @@ def checkURL(filename):
         import urllib
         try:
             urllib.urlopen(filename)
-            return 1
+            return True
         except IOError:
-            return 0
+            return False
     else:
         return os.path.exists(filename)
 

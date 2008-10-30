@@ -2,14 +2,14 @@
 # and force field evaluators.
 #
 # Written by Konrad Hinsen
-# last revision: 2008-1-10
+# last revision: 2008-10-30
 #
 
 _undocumented = 1
 
 from MMTK import ParticleProperties, Universe, Utility
 from Scientific import N as Numeric
-import copy, operator, string
+import copy, itertools, operator, string
 from MMTK_energy_term import PyEnergyTerm as EnergyTerm
 
 # Class definitions
@@ -200,7 +200,8 @@ def addToGradients(coordinates, indices, vectors):
 
 def addToForceConstants(total_fc, indices, small_fc):
     indices = zip(indices, range(len(indices)))
-    for i1, i2 in map(lambda i: (i,i), indices) + Utility.pairs(indices):
+    for i1, i2 in itertools.chain(itertools.izip(indices, indices),
+                                  Utility.pairs(indices)):
         ii1, jj1 = i1
         ii2, jj2 = i2
         if ii1 > ii2:

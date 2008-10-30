@@ -1,7 +1,7 @@
 # Energy tests
 #
 # Written by Konrad Hinsen
-# last revision: 2008-10-29
+# last revision: 2008-10-30
 #
 
 import unittest
@@ -14,7 +14,7 @@ from MMTK.Utility import pairs
 from Scientific.Geometry import ex, ey, ez
 from Scientific import N
 from cStringIO import StringIO
-
+import itertools
 
 factory = MoleculeFactory()
 factory.createGroup('dihedral_test')
@@ -100,7 +100,8 @@ NONB
     def _forceConstantTest(self, delta = 0.0001):
         e0, grad0, fc = self.universe.energyGradientsAndForceConstants()
         atoms = self.universe.atomList()
-        for a1, a2 in zip(atoms, atoms) + pairs(atoms):
+        for a1, a2 in itertools.chain(itertools.izip(atoms, atoms),
+                                      pairs(atoms)):
             num_fc = []
             for v in [ex, ey, ez]:
                 x = a1.position()

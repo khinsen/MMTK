@@ -1,7 +1,7 @@
 # This module implements test functions.
 #
 # Written by Konrad Hinsen
-# last revision: 2006-11-27
+# last revision: 2008-10-30
 #
 
 """Force field consistency tests
@@ -12,6 +12,7 @@ To be documented later!
 from MMTK import Utility
 from Scientific.Geometry import Vector, ex, ey, ez
 from Scientific import N as Numeric
+import itertools
 
 #
 # Check consistency of energies and gradients.
@@ -42,7 +43,8 @@ def forceConstantTest(universe, atoms = None, delta = 0.0001):
     e0, grad0, fc = universe.energyGradientsAndForceConstants()
     if atoms is None:
         atoms = universe.atomList()
-    for a1, a2 in map(lambda a: (a,a), atoms) + Utility.pairs(atoms):
+    for a1, a2 in itertools.chain(itertools.izip(atoms, atoms),
+                                  Utility.pairs(atoms)):
         print a1, a2
         print fc[a1, a2]
         num_fc = []
