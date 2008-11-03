@@ -2,13 +2,20 @@
 # bond angles, and dihedral angles.
 #
 # Written by Konrad Hinsen
-# last revision: 2005-11-7
+# last revision: 2008-11-3
 #
 
-_undocumented = 1
+"""
+Bonds, bond lists, bond angle lists, and dihedral angle lists
 
-from UserList import UserList
-import Database, Utility
+The classes in this module are normally not used directly from
+client code. They are used by the classes in ChemicalObjects and
+ForceField.
+"""
+
+__docformat__ = 'epytext'
+
+from MMTK import Database, Utility
 from copy import copy
 
 #
@@ -16,7 +23,13 @@ from copy import copy
 #
 # Bond objects are created from the specifications in the data base.
 #
-class Bond:
+class Bond(object):
+
+    """
+    Chemical bond
+
+    A bond links two atoms (attributes a1 and a2)
+    """
 
     def __init__(self, blueprint, memo = None):
         if type(blueprint) is type(()):
@@ -39,9 +52,21 @@ class Bond:
     __str__ = __repr__
 
     def hasAtom(self, a):
+        """
+        @param a: an atom
+        @type a: L{MMTK.Atom}
+        @returns: C{True} if a participates in the bond
+        """
         return a is self.a1 or a is self.a2
 
     def otherAtom(self, a):
+        """
+        @param a: an atom involved in the bond
+        @type a: L{MMTK.Atom}
+        @returns: the atom at the other end of the bond
+        @rtype: L{MMTK.Atom}
+        @raises ValueError: if a does not belong to the bond
+        """
         if a is self.a1:
             return self.a2
         elif a is self.a2:
@@ -51,7 +76,6 @@ class Bond:
 
     def _graphics(self, conf, distance_fn, model, module, options):
         objects = []
-        #PJC change:
         if model == 'ball_and_stick' or model == 'vdw_and_stick':
             radius = options.get('stick_radius', 0.01)
         elif model == 'wireframe':
@@ -91,7 +115,15 @@ Database.registerInstanceClass(Bond.blueprintclass, Bond)
 #
 # Bond angles
 #
-class BondAngle:
+class BondAngle(object):
+
+    """
+    Bond angle
+    
+    A bond angle is the angle between two bonds that share a common atom.
+    It is defined by two bond objects (attributes b1 and b2) and an atom
+    object (the common atom, attribute ca).
+    """
 
     def __init__(self, b1, b2, ca):
         self.b1 = b1 # bond 1
@@ -107,6 +139,13 @@ class BondAngle:
         return 'BondAngle(' + `self.a1` +',' + `self.ca` +','+ `self.a2` +')'
 
     def otherBond(self, bond):
+        """
+        @param bond: a bond involved in the angle
+        @type bond: L{Bond}
+        @returns: the other bond involved in the angle
+        @rtype: L{Bond}
+        @raises ValueError: if bond does not belong to the angle
+        """
         if bond is self.b1:
             return self.b2
         elif bond is self.b2:
@@ -117,7 +156,20 @@ class BondAngle:
 #
 # Dihedral angles
 #
-class DihedralAngle:
+class DihedralAngle(object):
+
+    """
+    Dihedral angle
+    
+    A dihedral angle is the angle between two planes that are defined by
+    BondAngle objects (attributes ba1 and ba2) and their common bond
+    (attribute cb).
+
+    There are proper dihedrals (four atoms linked by three bonds in
+    sequence) and improper dihedrals (a central atom linked to three
+    surrounding atoms by three bonds). The boolean attribute improper
+    indicates whether a dihedral is an improper one.    
+    """
 
     def __init__(self, ba1, ba2, cb):
         self.ba1 = ba1 # bond angle 1
@@ -164,13 +216,17 @@ class DihedralAngle:
 # for themselves. These are cached for efficiency. The cached
 # copy is deleted whenever the bond list is modified.
 #
-class BondList(UserList):
+class BondList(list):
 
-    def __init__(self, list=None):
-        UserList.__init__(self, list)
+    def __init__(self, initlist=None):
+        list.__init__(self, initlist)
         self._clearCache()
 
     __safe_for_unpickling__ = 1
+
+    def _clearCache(self):
+        self.bond_angles = None
+        self.dihedral_angles = None
 
     def __getinitargs__(self):
         return (None,)
@@ -179,50 +235,45 @@ class BondList(UserList):
         self._clearCache()
         return self.__dict__
 
-    def __copy__(self):
-        return BondList(copy(self.data))
-
     def __setitem__(self, i, item):
-        self.data[i] = item
+        list.__setitem__(self, i, item)
         self._clearCache()
 
-    def __setslice__(self, i, j, list):
-        if type(list) == type(self.data):
-            self.data[i:j] = list
-        else:
-            self.data[i:j] = list.data
+    def __setslice__(self, i, j, data):
+        list.__setslice__(self, i, j, data)
         self._clearCache()
 
     def __delslice__(self, i, j):
-        del self.data[i:j]
+        list.__delslice__(self, i, j)
         self._clearCache()
 
     def append(self, item):
-        self.data.append(item)
+        list.append(self, item)
         self._clearCache()
 
-    def extend(self, items):
-        self.data.extend(items)
+    def extend(self, data):
+        list.extend(self, data)
         self._clearCache()
 
     def insert(self, i, item):
-        self.data.insert(i, item)
+        list.insert(i, item)
         self._clearCache()
 
     def remove(self, item):
-        self.data.remove(item)
+        list.remove(self, item)
         self._clearCache()
 
-    def _clearCache(self):
-        self.bond_angles = None
-        self.dihedral_angles = None
-
     def bondAngles(self):
+        """
+        @returns: a list of all bond angles that can be formed from the
+                  bonds in the list
+        @rtype: L{BondAngleList}
+        """
         if self.bond_angles is None:
             # find all atoms that are involved in more than one bond
             bonds = {}
             atom_list = []
-            for bond in self.data:
+            for bond in self:
                 try:
                     bl = bonds[bond.a1]
                 except KeyError:
@@ -246,33 +297,53 @@ class BondList(UserList):
         return self.bond_angles
 
     def dihedralAngles(self):
+        """
+        @returns: a list of all dihedral angles that can be formed from the
+                  bonds in the list
+        @rtype: L{DihedralAngleList}
+        """
         if self.dihedral_angles is None:
             self.dihedral_angles = self.bondAngles().dihedralAngles()
         return self.dihedral_angles
 
     def bondedTo(self, atom):
-        list = []
-        for b in self.data:
-            if b.hasAtom(atom):
-                list.append(b.otherAtom(atom))
-        return list
+        """
+        @param atom: an atom
+        @type atom: L{MMTK.Atom}
+        @returns: a list of all atoms to which the given atom is bound
+        @rtype: C{list}
+        """
+        return [b.otherAtom(atom) for b in self if b.hasAtom(atom)]
 
     def bondsOf(self, atom):
-        list = []
-        for b in self.data:
-            if b.hasAtom(atom):
-                list.append(b)
-        return list
+        """
+        @param atom: an atom
+        @type atom: L{MMTK.Atom}
+        @returns: a list of all bonds in which the given atom is involved
+        @rtype: C{list}
+        """
+        return [b for b in self if b.hasAtom(atom)]
 
     def setBondAttributes(self):
-        for b in self.data:
+        """
+        Create an attribute in all atoms of all bonds that points to the
+        bonded atom.
+
+        @note: Bond attributes are only set temporarily for optimization
+               purposes.
+        """
+        for b in self:
             b.a1.setBondAttribute(b.a2)
             b.a2.setBondAttribute(b.a1)
 
 #
 # Bond angle lists
 #
-class BondAngleList:
+class BondAngleList(object):
+
+    """
+    Bond angle list
+    """
 
     def __init__(self, angles):
         self.data = angles
@@ -285,6 +356,11 @@ class BondAngleList:
         return self.data[i]
 
     def dihedralAngles(self):
+        """
+        @returns: a list of all dihedral angles that can be formed from the
+                  bond angles in the list
+        @rtype: L{DihedralAngleList}
+        """
         # find all bonds that are involved in more than one bond angle
         angles = {}
         bond_list = []
@@ -315,7 +391,11 @@ class BondAngleList:
 #
 # Dihedral angle lists
 #
-class DihedralAngleList:
+class DihedralAngleList(object):
+
+    """
+    Dihedral angle list
+    """
 
     def __init__(self, dihedrals):
         self.data = dihedrals
@@ -330,7 +410,7 @@ class DihedralAngleList:
 #
 # Dummy bond length database, for constraints without a force field
 #
-class DummyBondLengthDatabase:
+class DummyBondLengthDatabase(object):
 
     def __init__(self, universe):
         pass
