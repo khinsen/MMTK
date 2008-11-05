@@ -1,11 +1,9 @@
 # This module defines the environment in which molecule definition files
 # are executed.
 
-_undocumented = 1
-
-from Database import BlueprintAtom, BlueprintMolecule
-from ConfigIO import Cartesian, ZMatrix
-from PDB import PDBFile
-from Units import *
+from MMTK.Database import BlueprintAtom, BlueprintMolecule
+from MMTK.ConfigIO import Cartesian, ZMatrix
+from MMTK.PDB import PDBFile
+from MMTK.Units import *
 Atom = BlueprintAtom
 Molecule = BlueprintMolecule

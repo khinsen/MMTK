@@ -1,10 +1,8 @@
 # This module defines the environment in which group definition files
 # are executed.
 
-_undocumented = 1
-
-from Database import BlueprintAtom, BlueprintGroup, BlueprintBond
-from Units import *
+from MMTK.Database import BlueprintAtom, BlueprintGroup, BlueprintBond
+from MMTK.Units import *
 Atom = BlueprintAtom
 Group = BlueprintGroup
 Bond = BlueprintBond
