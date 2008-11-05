@@ -1,10 +1,13 @@
 # This module contains code for charge fitting.
 #
 # Written by Konrad Hinsen
-# last revision: 2006-11-27
+# last revision: 2008-11-5
 #
 
-"""This module implements a numerically stable method (based on
+"""
+Fit of point chages to an electrostatic potential surface
+
+This module implements a numerically stable method (based on
 Singular Value Decomposition) to fit point charges to values of an
 electrostatic potential surface. Two types of constraints are
 avaiable: a constraint on the total charge of the system or a subset
@@ -13,57 +16,60 @@ to be equal. There is also a utility function that selects suitable
 evaluation points for the electrostatic potential surface. For the
 potential evaluation itself, some quantum chemistry program is needed.
 
-The charge fitting method is described in [Article:Hinsen1997].
-See also Example:Miscellaneous:charge_fit.py.
+The charge fitting method is described in:
+
+  - K. Hinsen and B. Roux,
+    An accurate potential for simulating proton transfer in acetylacetone,
+    J. Comp. Chem. 18, 1997: 368
+
+See also Examples/Miscellaneous/charge_fit.py.
 """
 
+__docformat__ = 'epytext'
 
 from MMTK import Random, Units, Utility
-from Scientific import N as Numeric
-from Scientific import LA as LinearAlgebra
 from Scientific.Geometry import Vector
-import operator
+from Scientific import N
+from Scientific import LA
 
-class ChargeFit:
 
-    """Fit of point charges to an electrostatic potential surface
+class ChargeFit(object):
 
-    Constructor: ChargeFit(|system|, |points|, |constraints|=None)
-
-    Arguments:
-
-    |system| -- any chemical object, usually a molecule
-
-    |points| -- a list of point/potential pairs (a vector for the
-                evaluation point, a number for the potential),
-                or a dictionary whose keys are Configuration objects
-                and whose values are lists of point/potential pairs.
-                The latter case permits combined fits for several
-                conformations of the system.
-
-    |constraints| -- a list of constraint objects (TotalChargeConstraint
-                     and/or EqualityConstraint objects). If the constraints
-                     are inconsistent, a warning is printed and the result
-                     will satisfy the constraints only in a least-squares
-                     sense.
+    """
+    Fit of point charges to an electrostatic potential surface
 
     A ChargeFit object acts like a dictionary that stores the fitted charge
     value for each atom in the system.
     """
 
     def __init__(self, object, points, constraints = None):
+        """
+        @param system: any chemical object (usually a molecule)
+        @param points: a list of point/potential pairs (a vector for the
+                       evaluation point, a number for the potential),
+                       or a dictionary whose keys are Configuration objects
+                       and whose values are lists of point/potential pairs.
+                       The latter case permits combined fits for several
+                       conformations of the system.
+        @param constraints: an optional list of constraint objects
+                            (L{TotalChargeConstraint} and/or
+                            L{EqualityConstraint} objects). If the
+                            constraints are inconsistent, a warning is
+                            printed and the result will satisfy the
+                            constraints only in a least-squares sense.
+        """
         self.atoms = object.atomList()
         if type(points) != type({}):
             points = {None: points}
         if constraints is not None:
             constraints = ChargeConstraintSet(self.atoms, constraints)
-        npoints = reduce(operator.add, map(len, points.values()))
+        npoints = sum([len(v) for v in points.values()])
         natoms = len(self.atoms)
         if npoints < natoms:
             raise ValueError("Not enough data points for fit")
 
-        m = Numeric.zeros((npoints, natoms), Numeric.Float)
-        phi = Numeric.zeros((npoints,), Numeric.Float)
+        m = N.zeros((npoints, natoms), N.Float)
+        phi = N.zeros((npoints,), N.Float)
         i = 0
         for conf, pointlist in points.items():
             for r, p in pointlist:
@@ -77,22 +83,22 @@ class ChargeFit:
         phi_test = phi
 
         if constraints is not None:
-            phi = phi-Numeric.dot(m, constraints.bi_c)
-            m = Numeric.dot(m, constraints.p)
+            phi -= N.dot(m, constraints.bi_c)
+            m = N.dot(m, constraints.p)
             c_rank = constraints.rank
         else:
             c_rank = 0
 
-        u, s, vt = LinearAlgebra.singular_value_decomposition(m)
+        u, s, vt = LA.singular_value_decomposition(m)
         s_test = s[:len(s)-c_rank]
-        cutoff = 1.e-10*Numeric.maximum.reduce(s_test)
-        nonzero = Numeric.repeat(s_test, Numeric.not_equal(s_test, 0.))
+        cutoff = 1.e-10*N.maximum.reduce(s_test)
+        nonzero = N.repeat(s_test, N.not_equal(s_test, 0.))
         self.rank = len(nonzero)
-        self.condition = Numeric.maximum.reduce(nonzero) / \
-                         Numeric.minimum.reduce(nonzero)
-        self.effective_rank = Numeric.add.reduce(Numeric.greater(s, cutoff))
+        self.condition = N.maximum.reduce(nonzero) / \
+                         N.minimum.reduce(nonzero)
+        self.effective_rank = N.add.reduce(N.greater(s, cutoff))
         if self.effective_rank < self.rank:
-            self.effective_condition = Numeric.maximum.reduce(nonzero) / cutoff
+            self.effective_condition = N.maximum.reduce(nonzero) / cutoff
         else:
             self.effective_condition = self.condition
         if self.effective_rank < natoms-c_rank:
@@ -104,16 +110,15 @@ class ChargeFit:
                 s[i] = 1./s[i]
             else:
                 s[i] = 0.
-        q = Numeric.dot(Numeric.transpose(vt),
-                        s*Numeric.dot(Numeric.transpose(u)[:natoms, :], phi))
+        q = N.dot(N.transpose(vt),
+                  s*N.dot(N.transpose(u)[:natoms, :], phi))
         if constraints is not None:
-            q = constraints.bi_c + Numeric.dot(constraints.p, q)
+            q = constraints.bi_c + N.dot(constraints.p, q)
 
-        deviation = Numeric.dot(m_test, q)-phi_test
-        self.rms_error = Numeric.sqrt(Numeric.dot(deviation, deviation))
-        deviation = Numeric.fabs(deviation/phi_test)
-        self.relative_rms_error = Numeric.sqrt(Numeric.dot(deviation,
-                                                           deviation))
+        deviation = N.dot(m_test, q)-phi_test
+        self.rms_error = N.sqrt(N.dot(deviation, deviation))
+        deviation = N.fabs(deviation/phi_test)
+        self.relative_rms_error = N.sqrt(N.dot(deviation, deviation))
 
         self.charges = {}
         for i in range(natoms):
@@ -123,22 +128,21 @@ class ChargeFit:
         return self.charges[item]
 
 
-class TotalChargeConstraint:
+class TotalChargeConstraint(object):
 
-    """Constraint on the total system charge
+    """
+    Constraint on the total system charge
 
-    To be used with Class:MMTK.ChargeFit.ChargeFit.
-
-    Constructor:  TotalChargeConstraint(|object|, |charge|)
-
-    Arguments:
-
-    |object| -- any object whose total charge is to be constrained
-
-    |charge| -- the total charge value
+    To be used with L{ChargeFit}
     """
 
     def __init__(self, object, charge):
+        """
+        @param object: any chamical object whose total charge
+                       is to be constrained
+        @param charge: the total charge value
+        @type charge: number
+        """
         self.atoms = object.atomList()
         self.charge = charge
 
@@ -152,23 +156,26 @@ class TotalChargeConstraint:
         c[i] = self.charge
 
 
-class EqualityConstraint:
+class EqualityConstraint(object):
 
-    """Constraint forcing two charges to be equal
+    """
+    Constraint forcing two charges to be equal
 
-    To be used with Class:MMTK.ChargeFit.ChargeFit.
-
-    Constructor:  EqualityConstraint(|atom1|, |atom2|), where
-    |atom1| and |atom2| are the two atoms whose charges should be
-    equal.
+    To be used with L{ChargeFit}.
 
     Any atom may occur in more than one EqualityConstraint object,
     in order to keep the charges of more than two atoms equal.
     """
 
-    def __init__(self, a1, a2):
-        self.a1 = a1
-        self.a2 = a2
+    def __init__(self, atom1, atom2):
+        """
+        @param atom1: the first atom in the equality relation
+        @type atom1: L{MMTK.Atom}
+        @param atom2: the second atom in the equality relation
+        @type atom2: L{MMTK.Atom}
+        """
+        self.a1 = atom1
+        self.a2 = atom2
 
     def __len__(self):
         return 1
@@ -179,47 +186,56 @@ class EqualityConstraint:
         c[i] = 0.
 
 
-class ChargeConstraintSet:
+class ChargeConstraintSet(object):
 
     def __init__(self, atoms, constraints):
         self.atoms = atoms
         natoms = len(self.atoms)
-        nconst = reduce(operator.add, map(len, constraints))
-        b = Numeric.zeros((nconst, natoms), Numeric.Float)
-        c = Numeric.zeros((nconst,), Numeric.Float)
+        nconst = sum([len(c) for c in constraints])
+        b = N.zeros((nconst, natoms), N.Float)
+        c = N.zeros((nconst,), N.Float)
         i = 0
         for cons in constraints:
             cons.setCoefficients(self.atoms, b, c, i)
             i = i + len(cons)
-        u, s, vt = LinearAlgebra.singular_value_decomposition(b)
+        u, s, vt = LA.singular_value_decomposition(b)
         self.rank = 0
         for i in range(min(natoms, nconst)):
             if s[i] > 0.:
                 self.rank = self.rank + 1
         self.b = b
-        self.bi = LinearAlgebra.generalized_inverse(b)
-        self.p = Numeric.identity(natoms)-Numeric.dot(self.bi, self.b)
+        self.bi = LA.generalized_inverse(b)
+        self.p = N.identity(natoms)-N.dot(self.bi, self.b)
         self.c = c
-        self.bi_c = Numeric.dot(self.bi, c)
-        c_test = Numeric.dot(self.b, self.bi_c)
-        if Numeric.add.reduce((c_test-c)**2)/nconst > 1.e-12:
+        self.bi_c = N.dot(self.bi, c)
+        c_test = N.dot(self.b, self.bi_c)
+        if N.add.reduce((c_test-c)**2)/nconst > 1.e-12:
             Utility.warning("The charge constraints are inconsistent."
                             " They will be applied as a least-squares"
                             " condition.")
 
 
 def evaluationPoints(object, n, smallest = 0.3, largest = 0.5):
-    """Returns a list of |n| points suitable for the evaluation of
-    the electrostatic potential around |object|. The points are chosen
-    at random and uniformly in a shell around the object such that
-    no point has a distance larger than |largest| from any atom or
-    smaller than |smallest| from any non-hydrogen atom.
+    """
+    Generate points in space around a molecule that are suitable
+    for potential evaluation in view of a subsequent charge fit.
+    The points are chosen at random and uniformly in a shell around the object.
+
+    @param object: the chemical object for which the charges
+                   will be fitted
+    @param n: the number of evaluation points to be generated
+    @param smallest: the smallest allowed distance of any evaluation
+                     point from any non-hydrogen atom
+    @param largest: the largest allowed value for the distance
+                    from an evaluation point to the nearest atom
+    @returns: a list of evaluation points
+    @rtype: C{list} of C{Scientific.Geometry.Vector}
     """
     atoms = object.atomList()
     p1, p2 = object.boundingBox()
     margin = Vector(largest, largest, largest)
-    p1 = p1 - margin
-    p2 = p2 + margin
+    p1 -= margin
+    p2 += margin
     a, b, c = tuple(p2-p1)
     offset = 0.5*Vector(a, b, c)
     points = []
