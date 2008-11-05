@@ -2,17 +2,33 @@
 #
 # Written by Lutz Ehrlich
 # Adapted to MMTK conventions by Konrad Hinsen
-# last revision: 2006-11-27
-#
+# last revision: 2008-11-5
+
+
+"""
+Reading and writing of DCD trajectory files
+
+The DCD format for trajectories is used by CHARMM, X-Plor,
+and NAMD. It can be read by various visualization programs.
+
+The DCD format is defined as a binary (unformatted) Fortran
+format and is therefore platform-dependent.
+
+@undocumented: writePDB
+@undocumented: writeDCD
+"""
+
+__docformat__ = 'epytext'
+
 import MMTK_DCD
-import PDB, Trajectory, Units
-from Scientific import N as Numeric
-import copy, operator
+from MMTK import PDB, Trajectory, Units
+from Scientific import N
 
 
 class DCDReader(Trajectory.TrajectoryGenerator):
 
-    """Reader for DCD trajectories (CHARMM/X-Plor)
+    """
+    Reader for DCD trajectories (CHARMM/X-Plor)
 
     A DCDReader reads a DCD trajectory and "plays back" the
     data as if it were generated directly by an integrator.
@@ -23,29 +39,11 @@ class DCDReader(Trajectory.TrajectoryGenerator):
     compatible with the DCD file without leaving out any
     part of the system.
 
-    Constructor: DCDReader(|universe|, |**options|)
-
-    Arguments:
-
-    |universe| -- the universe for which the information from the
-                  trajectory file is read
-
-    |options| -- keyword options:
-
-      * dcd_file:  the name of the DCD trajecory file to be read
-      * actions: a list of actions to be executed periodically (default is
-                 none)
-
     Reading is started by calling the reader object.
-    All the keyword options listed above can be specified either when
-    creating the reader or when calling it.
-
     The following data categories and variables are available for
     output:
-
-    - category "time": time
-
-    - category "configuration": configuration
+      - category "time": time
+      - category "configuration": configuration
     """
 
     default_options = {}
@@ -55,6 +53,14 @@ class DCDReader(Trajectory.TrajectoryGenerator):
     restart_data = None
 
     def __init__(self, universe, **options):
+        """
+        @param universe: the universe for which the information from the
+                         trajectory file is read
+        @param options: keyword options
+        @keyword dcd_file: the name of the DCD trajecory file to be read
+        @keyword actions: a list of actions to be executed periodically
+                          (default is none)
+        """
         Trajectory.TrajectoryGenerator.__init__(self, universe, options)
 
     def __call__(self, **options):
@@ -69,9 +75,9 @@ def writeDCD(vector_list, dcd_file_name, factor, atom_order=None,
     universe = vector_list[0].universe
     natoms = universe.numberOfPoints()
     if atom_order is None:
-        atom_order = Numeric.arrayrange(natoms)
+        atom_order = N.arrayrange(natoms)
     else:
-        atom_order = Numeric.array(atom_order)
+        atom_order = N.array(atom_order)
 
     i_start = 0       # always start at frame 0
     n_savc  = 1       # save every frame
@@ -81,9 +87,9 @@ def writeDCD(vector_list, dcd_file_name, factor, atom_order=None,
         if conf_flag:
             vector = universe.contiguousObjectConfiguration(None, vector)
         array = factor*vector.array
-        x = Numeric.take(array[:, 0], atom_order).astype(Numeric.Float16)
-        y = Numeric.take(array[:, 1], atom_order).astype(Numeric.Float16)
-        z = Numeric.take(array[:, 2], atom_order).astype(Numeric.Float16)
+        x = N.take(array[:, 0], atom_order).astype(N.Float16)
+        y = N.take(array[:, 1], atom_order).astype(N.Float16)
+        z = N.take(array[:, 2], atom_order).astype(N.Float16)
         MMTK_DCD.writeDCDStep(fd, x, y, z)
     MMTK_DCD.writeCloseDCD(fd)
 
@@ -99,12 +105,18 @@ def writePDB(universe, configuration, pdb_file_name):
     return sequence
 
 def writeDCDPDB(conf_list, dcd_file_name, pdb_file_name, delta_t=0.1):
-    """Write the configurations in |conf_list| (any sequence of Configuration
-    objects) to a newly created DCD trajectory file with the name
-    |dcd_file_name|. Also write the first configuration to a PDB file
-    with the name |pdb_file_name|; this PDB file has the same atom order
-    as the DCD file. The time step between configurations can be specified
-    by |delta_t|.
+    """
+    Write a sequence of configurations to a DCD file and generate
+    a compatible PDB file.
+
+    @param conf_list: the sequence of configurations
+    @type conf_list: sequence of L{MMTK.Configuration}
+    @param dcd_file_name: the name of the DCD file
+    @type dcd_file_name: C{str}
+    @param pdb_file_name: the name of the PDB file
+    @type pdb_file_name: C{str}
+    @param delta_t: the time step between two configurations
+    @type delta_t: C{float}
     """
     universe = conf_list[0].universe
     sequence = writePDB(universe, conf_list[0], pdb_file_name)
@@ -113,12 +125,18 @@ def writeDCDPDB(conf_list, dcd_file_name, pdb_file_name, delta_t=0.1):
 
 
 def writeVelocityDCDPDB(vel_list, dcd_file_name, pdb_file_name, delta_t=0.1):
-    """Write the velocities in |vel_list| (any sequence of ParticleVector
-    objects) to a newly created DCD trajectory file with the name
-    |dcd_file_name|. Also write the first configuration to a PDB file
-    with the name |pdb_file_name|; this PDB file has the same atom order
-    as the DCD file. The time step between configurations can be specified
-    by |delta_t|.
+    """
+    Write a sequence of velocity particle vectors to a DCD file and generate
+    a compatible PDB file.
+
+    @param conf_list: the sequence of velocity particle vectors
+    @type conf_list: sequence of L{MMTK.ParticleVector}
+    @param dcd_file_name: the name of the DCD file
+    @type dcd_file_name: C{str}
+    @param pdb_file_name: the name of the PDB file
+    @type pdb_file_name: C{str}
+    @param delta_t: the time step between two velocity sets
+    @type delta_t: C{float}
     """
     universe = vel_list[0].universe
     sequence = writePDB(universe, universe.configuration(), pdb_file_name)
