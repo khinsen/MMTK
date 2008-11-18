@@ -2,7 +2,7 @@
 # and a visualization base class
 #
 # Written by Konrad Hinsen
-# last revision: 2008-3-20
+# last revision: 2008-11-18
 #
 
 """This module provides visualization of chemical objects and animated
@@ -67,7 +67,7 @@ def definePDBViewer(progname, exec_path):
     @param exec_path: the path to the executable program
     @type exec_path: C{string}
     """
-    viewer['pdb'] = (prog.lower(), exec_path)
+    viewer['pdb'] = (progname.lower(), exec_path)
 
 def defineVRMLiewer(progname, exec_path):
     """
@@ -77,7 +77,7 @@ def defineVRMLiewer(progname, exec_path):
     @param exec_path: the path to the executable program
     @type exec_path: C{string}
     """
-    viewer['vrml'] = (prog.lower(), exec_path)
+    viewer['vrml'] = (progname.lower(), exec_path)
 
 #
 # Visualization base class. Defines methods for general visualization
