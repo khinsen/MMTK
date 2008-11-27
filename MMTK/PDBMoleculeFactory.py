@@ -162,6 +162,7 @@ class PDBMoleculeFactory(MoleculeFactory):
                 atom.setPosition(symop(atom.position()))
                 if hasattr(atom, 'u'):
                     atom.u = rotation.dot(atom.u.dot(rotation.transpose()))
+                    atom.u = atom.u.symmetricalPart()
                 atom.in_asu = is_asu
             if compact:
                 cm = asu.centerOfMass()
