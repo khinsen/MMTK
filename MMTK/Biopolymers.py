@@ -2,17 +2,24 @@
 # nucleic acid chains.
 #
 # Written by Konrad Hinsen
-# last revision: 2008-7-7
+# last revision: 2008-11-27
 #
 
-import Bonds, ChemicalObjects, Collections, Database, PDB
+"""
+Base classes for proteins and nucleic acids
+"""
+
+from MMTK import Bonds, ChemicalObjects, Collections, Database, PDB
 import Scientific.IO.PDB
 
 class Residue(ChemicalObjects.Group):
 
+    """
+    Base class for aminoacid and nucleic acid residues
+    """
+
     def __setstate__(self, state):
-        for attr, value in state.items():
-            self.__dict__[attr] = value
+        self.__dict__.update(state)
         try:
             self.model = self.hydrogens
         except AttributeError:
@@ -42,12 +49,10 @@ class Residue(ChemicalObjects.Group):
 
 class ResidueChain(ChemicalObjects.Molecule):
 
-    """A chain of residues
+    """
+    Chain of residues
 
-    A Glossary:Subclass of Class:MMTK.Molecule.
-
-    This is an Glossary:AbstractBaseClass that defines operations
-    common to peptide chains and nucleic acid chains.
+    Base class for peptide chains and nucleotide chains
     """
     
     is_chain = 1
@@ -56,8 +61,8 @@ class ResidueChain(ChemicalObjects.Molecule):
         self.atoms = []
         self.bonds = []
         for g in self.groups:
-            self.atoms = self.atoms + g.atoms
-            self.bonds = self.bonds + g.bonds
+            self.atoms.extend(g.atoms)
+            self.bonds.extend(g.bonds)
         for i in range(len(self.groups)-1):
             link1 = self.groups[i].chain_links[1]
             link2 = self.groups[i+1].chain_links[0]
@@ -77,9 +82,11 @@ class ResidueChain(ChemicalObjects.Molecule):
             self.name = ''
         if conf:
             conf.applyTo(self)
-        if properties.has_key('position'):
+        try:
             self.translateTo(properties['position'])
             del properties['position']
+        except KeyError:
+            pass
         self.addProperties(properties)
 
     def __len__(self):
@@ -92,22 +99,30 @@ class ResidueChain(ChemicalObjects.Molecule):
         self.replaceResidue(self.groups[item], value)
 
     def residuesOfType(self, *types):
-        """Returns a collection that contains all residues whose type
-        (residue code) is contained in |types|."""
+        """
+        @param types: residue type codes
+        @type types: C{str}
+        @returns: a collection that contains all residues whose type
+        (residue code) is contained in types
+        @rtype: L{MMTK.Collection}
+        """
         types = [t.lower() for t in types]
-        rlist = []
-        for r in self.groups:
-            if r.type.symbol.lower() in types:
-                rlist.append(r)
+        rlist = [r for r in self.groups if r.type.symbol.lower() in types]
         return Collections.Collection(rlist)
 
     def residues(self):
-        "Returns a collection containing all residues."
+        """
+        @returns: a collection containing all residues
+        @rtype: L{MMTK.Collection}
+        """
         return Collections.Collection(self.groups)
 
     def sequence(self):
-        "Returns the sequence as a list of residue code."
-        return map(lambda r: r.type.symbol.lower(), self.groups)
+        """
+        @returns: the residue sequence as a list of residue codes
+        @rtype: C{list} of C{str}
+        """
+        return [r.type.symbol.lower() for r in self.groups]
 
 #
 # Find the full name of a residue
@@ -195,14 +210,17 @@ for code in _na_residue_names:
 # Add a residue to the residue list
 #
 def defineAminoAcidResidue(full_name, code3, code1 = None):
-    """Adds a non-standard amino acid residue to the residue table.
-    The definition of the residue must be accesible by |full_name|
-    in the chemical database. The three-letter code is specified
-    by |code3|, and an optional one-letter code can be specified by
-    |code1|.
-
+    """
+    Add a non-standard amino acid residue to the internal residue table.
     Once added to the residue table, the new residue can be used
     like any of the standard residues in the creation of peptide chains.
+
+    @param full_name: the name of the group definition in the chemical database
+    @type full_name: C{str}
+    @param code3: the three-letter residue code
+    @type code3: C{str}
+    @param code1: an optionel one-letter residue code
+    @type code1: C{str}
     """
     code3 = code3.lower()
     if code1 is not None:
@@ -217,15 +235,17 @@ def defineAminoAcidResidue(full_name, code3, code1 = None):
     Scientific.IO.PDB.defineAminoAcidResidue(code3)
 
 def defineNucleicAcidResidue(full_name, code):
-    """Adds a non-standard nucleic acid residue to the residue table.
-    The definition of the residue must be accesible by |full_name|
-    in the chemical database. The residue code is specified
-    by |code|.
-
-    Once added to the residue table, the new residue can be used
-    like any of the standard residues in the creation of nucleotide
-    chains.
     """
+    Add a non-standard nucleic acid residue to the internal residue table.
+    Once added to the residue table, the new residue can be used
+    like any of the standard residues in the creation of nucleotide chains.
+
+    @param full_name: the name of the group definition in the chemical database
+    @type full_name: C{str}
+    @param code: the residue code
+    @type code3: C{str}
+    """
+    code = code.lower()
     if _aa_residue_names.has_key(code) or _na_residue_names.has_key(code):
         raise ValueError("residue name " + code + " already used")
     _na_residue_names[code] = full_name
