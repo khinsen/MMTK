@@ -16,12 +16,12 @@
 # the generic force field classes defined here. This object provides
 # method that return the parameters for each force field term.
 #
-# The only concrete force field that has been implemented is Amber 94;
+# The only concrete force field that has been implemented is Amber 94/99;
 # implementing other MM force fields will probably require minor
 # modifications to this module.
 #
 # Written by Konrad Hinsen
-# last revision: 2006-11-17
+# last revision: 2008-1-15
 #
 
 _undocumented = 1
@@ -192,6 +192,11 @@ class MMLJForceField(MMAtomParameters, LJForceField):
         LJForceField.__init__(self, name, cutoff, scale_factor)
         self.lj_14_factor = self.dataset.lennard_jones_1_4
 
+    def evaluatorParameters(self, universe, subset1, subset2, global_data):
+        self.collectAtomTypesAndIndices(universe, global_data)
+        return LJForceField.evaluatorParameters(self, universe,
+                                                subset1, subset2,
+                                                global_data)
 
 class MMESForceField(MMAtomParameters, ElectrostaticForceField):
 
@@ -199,6 +204,12 @@ class MMESForceField(MMAtomParameters, ElectrostaticForceField):
         self.dataset = parameters
         ElectrostaticForceField.__init__(self, name, cutoff, scale_factor)
         self.es_14_factor = self.dataset.electrostatic_1_4
+
+    def evaluatorParameters(self, universe, subset1, subset2, global_data):
+        self.collectCharges(universe, global_data)
+        return ElectrostaticForceField.evaluatorParameters(self, universe,
+                                                           subset1, subset2,
+                                                           global_data)
 
 
 class MMEwaldESForceField(MMAtomParameters, ESEwaldForceField):
@@ -208,6 +219,12 @@ class MMEwaldESForceField(MMAtomParameters, ESEwaldForceField):
         ESEwaldForceField.__init__(self, name, options)
         self.es_14_factor = self.dataset.electrostatic_1_4
 
+    def evaluatorParameters(self, universe, subset1, subset2, global_data):
+        self.collectCharges(universe, global_data)
+        return ESEwaldForceField.evaluatorParameters(self, universe,
+                                                     subset1, subset2,
+                                                     global_data)
+
     
 class MMMPESForceField(MMAtomParameters, ESMPForceField):
 
@@ -215,6 +232,12 @@ class MMMPESForceField(MMAtomParameters, ESMPForceField):
         self.dataset = parameters
         ESMPForceField.__init__(self, name, options)
         self.es_14_factor = self.dataset.electrostatic_1_4
+
+    def evaluatorParameters(self, universe, subset1, subset2, global_data):
+        self.collectCharges(universe, global_data)
+        return ESMPForceField.evaluatorParameters(self, universe,
+                                                  subset1, subset2,
+                                                  global_data)
 
 
 class MMNonbondedForceField(MMAtomParameters, NonBondedForceField):
