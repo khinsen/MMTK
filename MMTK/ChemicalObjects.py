@@ -2,33 +2,36 @@
 # complexes. They are made as copies from blueprints in the database.
 #
 # Written by Konrad Hinsen
-# last revision: 2007-10-5
+# last revision: 2008-1-16
 #
 
-import Bonds, Collections, ConfigIO, Database, Units, Utility, Visualization
-from Scientific.Geometry import Vector, Tensor
-from Scientific.Geometry.Transformation import Rotation, Translation
-from Scientific.DictWithDefault import DictWithDefault
+"""
+Atoms, groups, molecules and similar objects
+"""
+
+__docformat__ = 'epytext'
+
+from MMTK import Bonds, Collections, ConfigIO, Database, \
+                 Units, Utility, Visualization
+from Scientific.Geometry import Vector
 from Scientific.Geometry import Objects3D
-from Scientific import N as Numeric
-import copy, operator, string, types
+from Scientific import N
+import copy
 
 #
 # The base class for all chemical objects.
 #
 class ChemicalObject(Collections.GroupOfAtoms, Visualization.Viewable):
 
-    """General chemical object
+    """
+    General chemical object
 
-    A Glossary:Subclass of Class:MMTK.Collections.GroupOfAtoms
-    and Class:MMTK.Visualization.Viewable.
-
-    This is an Glossary:abstract-base-class that implements methods which
+    This is an abstract base class that implements methods which
     are applicable to any chemical object (atom, molecule, etc.).
     """
 
     def __init__(self, blueprint, memo):
-        if type(blueprint) == types.StringType:
+        if isinstance(blueprint, str):
             blueprint = self.blueprintclass(blueprint)
         self.type = blueprint.type
         if hasattr(blueprint, 'name'):
@@ -39,12 +42,12 @@ class ChemicalObject(Collections.GroupOfAtoms, Visualization.Viewable):
             setattr(self, attr,
                     Database.instantiate(getattr(blueprint, attr), memo))
 
-    is_chemical_object = 1
-    is_incomplete = 0
-    is_modified = 0
+    is_chemical_object = True
+    is_incomplete = False
+    is_modified = False
 
-    __safe_for_unpickling__ = 1
-    __had_initargs__ = 1
+    __safe_for_unpickling__ = True
+    __had_initargs__ = True
 
     def __hash__(self):
         return id(self)
@@ -56,7 +59,7 @@ class ChemicalObject(Collections.GroupOfAtoms, Visualization.Viewable):
             return getattr(self.type, attr)
 
     def isSubsetModel(self):
-        return 0
+        return False
 
     def addProperties(self, properties):
         if properties:
@@ -83,33 +86,57 @@ class ChemicalObject(Collections.GroupOfAtoms, Visualization.Viewable):
             return self.parent.topLevelChemicalObject()
 
     def universe(self):
-        "Returns the universe to which the object belongs."
+        """
+        @returns: the universe to which the object belongs,
+                  or C{None} if the object does not belong to any universe
+        @rtype: L{MMTK.Universe}
+        """
         if self.parent is None:
             return None
         else:
             return self.parent.universe()
 
     def bondedUnits(self):
-        """Returns a list containing the subobjects which can
-        contain bonds. There are no bonds between any of the
-        subobjects in the list."""
+        """
+        @returns: the largest subobjects which can contain bonds.
+                  There are no bonds between any of the subobjects
+                  in the list.
+        @rtype: C{list}
+        """
         return [self]
 
+    def atomList(self):
+        """
+        @returns: a list containing all atoms in the object
+        @rtype: C{list}
+        """
+        pass
+
     def fullName(self):
-        """Returns the full name of the object. The full name
-        consists of the proper name of the object preceded by
-        the full name of its parent separated by a dot."""
+        """
+        @returns: the full name of the object. The full name consists
+                  of the proper name of the object preceded by
+                  the full name of its parent separated by a dot.
+        @rtype: C{str}
+        """
         if self.parent is None or not isChemicalObject(self.parent):
             return self.name
         else:
             return self.parent.fullName() + '.' + self.name
 
     def degreesOfFreedom(self):
+        """
+        @returns: the number of degrees of freedom of the object
+        @rtype: C{int}
+        """
         return Collections.GroupOfAtoms.degreesOfFreedom(self) \
                - self.numberOfDistanceConstraints()
 
     def distanceConstraintList(self):
-        "Returns the list of distance constraints."
+        """
+        @returns: the distance constraints of the object
+        @rtype: C{list}
+        """
         return []
 
     def _distanceConstraintList(self):
@@ -119,19 +146,28 @@ class ChemicalObject(Collections.GroupOfAtoms, Visualization.Viewable):
         return []
 
     def numberOfDistanceConstraints(self):
-        "Returns the number of distance constraints."
+        """
+        @returns: the number of distance constraints of the object
+        @rtype: C{int}
+        """
         return 0
 
     def setBondConstraints(self, universe=None):
-        "Sets distance constraints for all bonds."
+        """
+        Sets distance constraints for all bonds.
+        """
         pass
 
     def removeDistanceConstraints(self, universe=None):
-        "Removes all distance constraints."
+        """
+        Removes all distance constraints.
+        """
         pass
 
     def setRigidBodyConstraints(self, universe = None):
-        "Sets distance constraints that make the object fully rigid."
+        """
+        Sets distance constraints that make the object fully rigid.
+        """
         if universe is None:
             universe = self.universe()
         if universe is None:
@@ -156,8 +192,8 @@ class ChemicalObject(Collections.GroupOfAtoms, Visualization.Viewable):
                                            universe.distance(atoms[2], a))
 
     def getAtomProperty(self, atom, property):
-        """Returns the value of the specified |property| for the
-        given |atom| from the chemical database.
+        """
+        Retrieve atom properties from the chemical database.
 
         Note: the property is first looked up in the database entry
         for the object on which the method is called. If the lookup
@@ -170,7 +206,11 @@ class ChemicalObject(Collections.GroupOfAtoms, Visualization.Viewable):
         At the atom level, the property is retrieved from an attribute
         with the same name. This means that properties at the atom
         level can be defined both in the chemical database and for
-        each atom individually by assignment to the attribute."""
+        each atom individually by assignment to the attribute.
+        
+        @returns: the value of the specified property for the given
+                  atom from the chemical database.
+        """
 
     def writeXML(self, file, memo, toplevel=1):
         if self.type is None:
@@ -224,7 +264,7 @@ class ChemicalObject(Collections.GroupOfAtoms, Visualization.Viewable):
             atom_names = self.type.getXMLAtomOrder()
             atoms = []
             for name in atom_names:
-                parts = string.split(name, ':')
+                parts = name.split(':')
                 object = self
                 for attr in parts:
                     object = getattr(object, attr)
@@ -265,17 +305,20 @@ class ChemicalObject(Collections.GroupOfAtoms, Visualization.Viewable):
 # Type check
 
 def isChemicalObject(object):
-    "Returns 1 if |object| is a chemical object."
+    """
+    @returns: C{True} if object is a chemical object
+    """
     return hasattr(object, 'is_chemical_object')
 
 #
 # The second base class for all composite chemical objects.
 #
-class CompositeChemicalObject:
+class CompositeChemicalObject(object):
 
-    """Chemical object with subobjects
+    """
+    Chemical object containing subobjects
 
-    This is an Glossary:abstract-base-class that implements methods
+    This is an abstract base class that implements methods
     which can be used with any composite chemical object,
     i.e. any chemical object that is not an atom.
     """
@@ -294,7 +337,6 @@ class CompositeChemicalObject:
         self.addProperties(properties)
 
     def atomList(self):
-        "Returns a list containing all atoms in the object."
         return self.atoms
 
     def setPosition(self, atom, position):
@@ -336,16 +378,13 @@ class CompositeChemicalObject:
                 return levels[-1].getAtomProperty(atom, property, levels[:-1])
 
     def deleteUndefinedAtoms(self):
-        delete = []
-        for a in self.atoms:
-            if a.position() is None:
-                delete.append(a)
+        delete = [a for a in self.atoms if a.position() is None]
         for a in delete:
             a.delete()
 
     def _deleteAtom(self, atom):
         self.atoms.remove(atom)
-        self.is_modified = 1
+        self.is_modified = True
         self.type = None
         if self.parent is not None:
             self.parent._deleteAtom(atom)
@@ -363,9 +402,8 @@ class CompositeChemicalObject:
             return []
 
     def numberOfDistanceConstraints(self):
-        n = len(self._distanceConstraintList())
-        for o in self._subunits():
-            n = n + len(o._distanceConstraintList())
+        n = len(self._distanceConstraintList()) + \
+            sum(len(o._distanceConstraintList()) for o in self._subunits())
         return n
 
     def setBondConstraints(self, universe=None):
@@ -400,89 +438,86 @@ class CompositeChemicalObject:
     def traverseBondTree(self, function = None):
         self.setBondAttributes()
         todo = [self.atoms[0]]
-        done = {todo[0]: 1}
+        done = {todo[0]: True}
         bonds = []
         while todo:
             next_todo = []
             for atom in todo:
                 bonded = atom.bondedTo()
                 for other in bonded:
-                    if not done.get(other, 0):
+                    if not done.get(other, False):
                         if function is None:
                             bonds.append((atom, other))
                         else:
                             bonds.append((function(atom), function(other)))
                         next_todo.append(other)
-                        done[other] = 1
+                        done[other] = True
             todo = next_todo
         self.clearBondAttributes()
         return bonds
 
     def _description(self, tag, index_map, toplevel):
         letter, kwargs = self._descriptionSpec()
-        s = letter + '(' + `self.name` + ',['
-        for o in self._subunits():
-            s = s + o._description(tag, index_map, 0) + ','
-        for a in self.atoms:
-            if not hasattr(a, tag):
-                s = s + a._description(tag, index_map, 0) + ','
-        s = s + ']'
+        s = [letter, '(', `self.name`, ',[']
+        s.extend([o._description(tag, index_map, 0) + ','
+                  for o in self._subunits()])
+        s.extend([a._description(tag, index_map, 0) + ','
+                  for a in self.atoms if not hasattr(a, tag)])
+        s.append(']')
         if toplevel:
-            s = s + ',' + `self._typeName()`
+            s.extend([',', `self._typeName()`])
         if kwargs is not None:
-            s = s + ',' + kwargs
+            s.extend([',', kwargs])
         constraints = self._distanceConstraintList()
         if constraints:
-            s = s + ',dc=['
+            s.append(',dc=[')
             if index_map is None:
-                for c in constraints:
-                    s = s + '(%d,%d,%f),' % (c[0].index, c[1].index, c[2])
+                s.extend(['(%d,%d,%f),' % (c[0].index, c[1].index, c[2])
+                          for c in constraints])
             else:
-                for c in constraints:
-                    s = s + '(%d,%d,%f),' % (index_map[c[0].index],
-                                             index_map[c[1].index], c[2])
-            s = s + ']'
-        return s + ')'
+                s.extend(['(%d,%d,%f),' % (index_map[c[0].index],
+                                           index_map[c[1].index], c[2])
+                          for c in constraints])
+            s.append(']')
+        s.append(')')
+        return ''.join(s)
 
     def _typeName(self):
         return self.type.name
 
     def _graphics(self, conf, distance_fn, model, module, options):
-        lists = []
+        glist = []
         for bu in self.bondedUnits():
             for a in bu.atomList():
-                lists.append(a._graphics(conf, distance_fn, model,
+                glist.extend(a._graphics(conf, distance_fn, model,
                                          module, options))
             if hasattr(bu, 'bonds'):
                 for b in bu.bonds:
-                    lists.append(b._graphics(conf, distance_fn, model,
+                    glist.extend(b._graphics(conf, distance_fn, model,
                                              module, options))
-        return reduce(operator.add, lists)
+        return glist
 
 #
 # The classes for atoms, groups, molecules, and complexes.
 #
 class Atom(ChemicalObject):
 
-    """Atom
-
-    A Glossary:Subclass of Class:MMTK.ChemicalObjects.ChemicalObject.
-
-    Constructor: Atom(|element|, **|properties|)
-
-    Arguments:
-
-    |element| -- a string (not case sensitive) specifying the chemical element
-
-    |properties| -- optional keyword properties:
-
-      * position: the atom position (a vector)
-      * name: the atom name (a string)
+    """
+    Atom
     """
 
-    def __init__(self, blueprint, _memo = None, **properties):
+    def __init__(self, atom_spec, _memo = None, **properties):
+        """
+        @param atom_spec: a string (not case sensitive) specifying
+                          the chemical element
+        @type atom_spec: C{str}
+        @keyword position: the position of the atom
+        @type position: C{Scientific.Geometry.Vector}
+        @keyword name: a name given to the atom
+        @type name: C{str}
+        """
         Utility.uniqueID.registerObject(self)
-        ChemicalObject.__init__(self, blueprint, _memo)
+        ChemicalObject.__init__(self, atom_spec, _memo)
         self._mass = self.type.average_mass
         self.array = None
         self.index = None
@@ -504,7 +539,11 @@ class Atom(ChemicalObject):
         return [self]
 
     def setPosition(self, position):
-        "Changes the position to |position|."
+        """
+        Changes the position of the atom.
+        @param position: the new position
+        @type position: C{Scientific.Geometry.Vector}
+        """
         if position is None:
             if self.array is None:
                 try: del self.pos
@@ -524,9 +563,11 @@ class Atom(ChemicalObject):
     translateTo = setPosition
 
     def position(self, conf = None):
-        """Returns the position in configuration |conf|. If |conf| is
-        'None', use the current configuration. If the atom has not been
-        assigned a position, the return value is 'None'."""
+        """
+        @returns: the position in configuration conf. If conf is 
+                  'None', use the current configuration. If the atom has
+                  not been assigned a position, the return value is C{None}.
+        """
         if conf is None:
             if self.array is None:
                 try:
@@ -534,9 +575,9 @@ class Atom(ChemicalObject):
                 except AttributeError:
                     return None
             else:
-                if Numeric.logical_or.reduce(
-                    Numeric.greater(self.array[self.index,:],
-                                    Utility.undefined_limit)):
+                if N.logical_or.reduce(
+                    N.greater(self.array[self.index, :],
+                              Utility.undefined_limit)):
                     return None
                 else:
                     return Vector(self.array[self.index,:])
@@ -546,7 +587,11 @@ class Atom(ChemicalObject):
     centerOfMass = position
 
     def setMass(self, mass):
-        "Set the atom mass to |mass|."
+        """
+        Changes the mass of the atom.
+        @param mass: the mass
+        @type mass: C{float}
+        """
         self._mass = mass
 
     def getAtom(self, atom):
@@ -575,13 +620,13 @@ class Atom(ChemicalObject):
             index = indices[0]
         else:
             if self.index is None or self.index not in indices:
-                return 0
+                return False
             index = self.index
             indices.remove(index)
         if array is None:
             self.index = index
             self.array = None
-            return 1
+            return True
         if self.array is None:
             try:
                 array[index, :] = self.pos.array
@@ -594,7 +639,7 @@ class Atom(ChemicalObject):
         try:
             del self.pos
         except AttributeError: pass
-        return 1
+        return True
 
     def getArray(self):
         return self.array
@@ -612,7 +657,10 @@ class Atom(ChemicalObject):
             pass
 
     def bondedTo(self):
-        "Returns a list of all atoms to which a chemical bond exists."
+        """
+        @returns: a list of all atoms to which a chemical bond exists.
+        @rtype: C{list}
+        """
         try:
             return self.bonded_to__
         except AttributeError:
@@ -676,38 +724,34 @@ class Atom(ChemicalObject):
 
 class Group(CompositeChemicalObject, ChemicalObject):
 
-    """Group of bonded atoms
-
-    A Glossary:Subclass of Class:MMTK.ChemicalObjects.ChemicalObject.
+    """
+    Group of bonded atoms
 
     Groups can contain atoms and other groups, and link them by chemical
     bonds. They are used to represent functional groups or any other
     part of a molecule that has a well-defined identity.
 
     Groups cannot be created in application programs, but only in
-    database definitions for molecules.
-
-    Constructor: Group(|species|, **|properties|)
-
-    Arguments:
-
-    |species| -- a string (not case sensitive) that specifies the group
-                 name in the chemical database
-
-    |properties| -- optional keyword properties:
-
-      * position: the center-of-mass position (a vector)
-      * name: the atom name (a string)
+    database definitions for molecules or through a MoleculeFactory.
     """
 
-    def __init__(self, blueprint, _memo = None, **properties):
-        if blueprint is not None:
-            # blueprint is None when called from MoleculeFactory
-            ChemicalObject.__init__(self, blueprint, _memo)
+    def __init__(self, group_spec, _memo = None, **properties):
+        """
+        @param group_spec: a string (not case sensitive) that specifies
+                           the group name in the chemical database
+        @type group_spec: C{str}
+        @keyword position: the position of the center of mass of the group
+        @type position: C{Scientific.Geometry.Vector}
+        @keyword name: a name given to the group
+        @type name: C{str}
+        """
+        if group_spec is not None:
+            # group_spec is None when called from MoleculeFactory
+            ChemicalObject.__init__(self, group_spec, _memo)
             self.addProperties(properties)
 
     blueprintclass = Database.BlueprintGroup
-    is_incomplete = 1
+    is_incomplete = True
 
     def bondedTo(self, atom):
         if self.parent is None or not isChemicalObject(self.parent):
@@ -731,33 +775,30 @@ class Molecule(CompositeChemicalObject, ChemicalObject):
 
     """Molecule
 
-    A Glossary:Subclass of Class:MMTK.ChemicalObjects.ChemicalObject.
-
     Molecules consist of atoms and groups linked by bonds.
-
-    Constructor: Molecule(|species|, **|properties|)
-
-    Arguments:
-
-    |species| -- a string (not case sensitive) that specifies the molecule
-                 name in the chemical database
-
-    |properties| -- optional keyword properties:
-
-      * position: the center-of-mass position (a vector)
-      * configuration: the name of a configuration listed in the database
-                       definition of the molecule, which is used to
-                       initialize the atom positions. If no configuration
-                       is specified, the configuration named "default" will
-                       be used, if it exists. Otherwise the atom positions
-                       are undefined.
-      * name: the atom name (a string)
     """
 
-    def __init__(self, blueprint, _memo = None, **properties):
-        if blueprint is not None:
-            # blueprint is None when called from MoleculeFactory
-            ChemicalObject.__init__(self, blueprint, _memo)
+    def __init__(self, molecule_spec, _memo = None, **properties):
+        """
+        @param molecule_spec: a string (not case sensitive) that specifies
+                              the molecule name in the chemical database
+        @type molecule_spec: C{str}
+        @keyword position: the position of the center of mass of the molecule
+        @type position: C{Scientific.Geometry.Vector}
+        @keyword name: a name given to the molecule
+        @type name: C{str}
+        @keyword configuration: the name of a configuration listed in the
+                                database definition of the molecule, which
+                                is used to initialize the atom positions.
+                                If no configuration is specified, the
+                                configuration named "default" will be used,
+                                if it exists. Otherwise the atom positions
+                                are undefined.
+        @type configuration: C{str}
+        """
+        if molecule_spec is not None:
+            # molecule_spec is None when called from MoleculeFactory
+            ChemicalObject.__init__(self, molecule_spec, _memo)
             properties = copy.copy(properties)
             CompositeChemicalObject.__init__(self, properties)
             self.bonds = Bonds.BondList(self.bonds)
@@ -784,8 +825,7 @@ class Molecule(CompositeChemicalObject, ChemicalObject):
         for a1, a2 in bond_atom_pairs:
             o1 = a1.topLevelChemicalObject()
             o2 = a2.topLevelChemicalObject()
-            if not (o1 == self and o2 == group) \
-               and not(o2 == self and o1 == group):
+            if set([o1, o2]) != set([self, group]):
                 raise ValueError("bond %s-%s outside object" %
                                   (str(a1), str(a2)))
         self.groups.append(group)
@@ -799,82 +839,43 @@ class Molecule(CompositeChemicalObject, ChemicalObject):
 
     # construct positions of missing hydrogens
     def findHydrogenPositions(self):
-        """Find reasonable positions for hydrogen atoms that have no
+        """
+        Find reasonable positions for hydrogen atoms that have no
         position assigned.
 
         This method uses a heuristic approach based on standard geometry
         data. It was developed for proteins and DNA and may not give
         good results for other molecules. It raises an exception
-        if presented with a topology it cannot handle."""
+        if presented with a topology it cannot handle.
+        """
         self.setBondAttributes()
         try:
-            unknown = DictWithDefault([])
+            unknown = {}
             for a in self.atoms:
                 if a.position() is None:
                     if a.symbol != 'H':
                         raise ValueError('position of ' + a.fullName() + \
                                           ' is undefined')
                     bonded = a.bondedTo()[0]
-                    unknown[bonded].append(a)
+                    unknown.setdefault(bonded, []).append(a)
             for a, list in unknown.items():
                 bonded = a.bondedTo()
                 n = len(bonded)
-                known = []
-                for b in bonded:
-                    if b.position() is not None:
-                        known.append(b)
+                known = [b for b in bonded if b.position() is not None]
                 nb = len(list)
-                if a.symbol == 'C':
-                    if n == 4:
-                        if nb == 1:
-                            self._C4oneH(a, known, list)
-                        elif nb == 2:
-                            self._C4twoH(a, known, list)
-                        elif nb == 3:
-                            self._C4threeH(a, known, list)
-                    elif n == 3:
-                        if nb == 1:
-                            self._C3oneH(a, known, list)
-                        else:
-                            self._C3twoH(a, known, list)
-                    elif n == 2:
-                            self._C2oneH(a, known, list)
-                    else:
-                        print a
-                        raise ValueError("Can't handle C with "+`n`+" bonds")
-                elif a.symbol == 'N':
-                    if n == 4:
-                        if nb == 3:
-                            self._N4threeH(a, known, list)
-                        elif nb == 2:
-                            self._N4twoH(a, known, list)
-                        elif nb == 1:
-                            self._N4oneH(a, known, list)
-                    elif n == 3:
-                        if nb == 1:
-                            self._N3oneH(a, known, list)
-                        elif nb == 2:
-                            self._N3twoH(a, known, list)
-                    elif n == 2:
-                            self._N2oneH(a, known, list)
-                    else:
-                        print a
-                        raise ValueError("Can't handle N with "+`n`+" bonds")
-                elif a.symbol == 'O' and n == 2:
-                    self._O2(a, known, list)
-                elif a.symbol == 'S' and n == 2:
-                    self._S2(a, known, list)
-                else:
-                    print a
+                try:
+                    method = self._h_methods[a.symbol][n][nb]
+                except KeyError:
                     raise ValueError("Can't handle this yet: " +
                                       a.symbol + ' with ' + `n` + ' bonds (' +
                                       a.fullName() + ').')
+                method(a, known, list)
         finally:
             self.clearBondAttributes()
 
     # default C-H bond length and X-C-H angle
     _ch_bond = 1.09*Units.Ang
-    _hch_angle = Numeric.arccos(-1./3.)*Units.rad
+    _hch_angle = N.arccos(-1./3.)*Units.rad
     _nh_bond = 1.03*Units.Ang
     _hnh_angle = 120.*Units.deg
     _oh_bond = 0.95*Units.Ang
@@ -1024,7 +1025,7 @@ class Molecule(CompositeChemicalObject, ChemicalObject):
     def _tetrahedralH(self, atom, known, unknown, bond):
         r = atom.position()
         n = (known[0].position()-r).normal()
-        cone = Objects3D.Cone(r, n, Numeric.arccos(-1./3.))
+        cone = Objects3D.Cone(r, n, N.arccos(-1./3.))
         sphere = Objects3D.Sphere(r, bond)
         circle = sphere.intersectWith(cone)
         others = filter(lambda a: a.symbol != 'H', known[0].bondedTo())
@@ -1057,10 +1058,27 @@ class Molecule(CompositeChemicalObject, ChemicalObject):
                 unknown.setPosition(p)
                 break
 
+    _h_methods = {'C': {4: {3: _C4threeH,
+                            2: _C4twoH,
+                            1: _C4oneH},
+                        3: {2: _C3twoH,
+                            1: _C3oneH},
+                        2: {1: _C2oneH}},
+                  'N': {4: {3: _N4threeH,
+                            2: _N4twoH,
+                            1: _N4oneH},
+                        3: {2: _N3twoH,
+                            1: _N3oneH},
+                        2: {1: _N2oneH}},
+                  'O': {2: {1: _O2}},
+                  'S': {2: {1: _S2}},
+                  }
+
 
 class ChainMolecule(Molecule):
 
-    """ChainMolecule
+    """
+    ChainMolecule
 
     ChainMolecules are generated by a MoleculeFactory from
     templates that have a sequence attribute.
@@ -1091,30 +1109,32 @@ class Crystal(CompositeChemicalObject, ChemicalObject):
 
 class Complex(CompositeChemicalObject, ChemicalObject):
 
-    """Complex
-
-    A Glossary:Subclass of Class:MMTK.ChemicalObjects.ChemicalObject.
+    """
+    Complex
 
     A complex is an assembly of molecules that are not connected by
     chemical bonds.
-
-    Constructor: Complex(|species|, **|properties|)
-
-    Arguments:
-
-    |species| -- a string (not case sensitive) that specifies the complex
-                 name in the chemical database
-
-    |properties| -- optional keyword properties:
-
-      * position: the center-of-mass position (a vector)
-      * configuration: the name of a configuration listed in the database
-                       definition of the complex
-      * name: the atom name (a string)
     """
 
-    def __init__(self, blueprint, _memo = None, **properties):
-        ChemicalObject.__init__(self, blueprint, _memo)
+    def __init__(self, complex_spec, _memo = None, **properties):
+        """
+        @param complex_spec: a string (not case sensitive) that specifies
+                              the complex name in the chemical database
+        @type complex_spec: C{str}
+        @keyword position: the position of the center of mass of the complex
+        @type position: C{Scientific.Geometry.Vector}
+        @keyword name: a name given to the complex
+        @type name: C{str}
+        @keyword configuration: the name of a configuration listed in the
+                                database definition of the complex, which
+                                is used to initialize the atom positions.
+                                If no configuration is specified, the
+                                configuration named "default" will be used,
+                                if it exists. Otherwise the atom positions
+                                are undefined.
+        @type configuration: C{str}
+        """
+        ChemicalObject.__init__(self, complex_spec, _memo)
         properties = copy.copy(properties)
         CompositeChemicalObject.__init__(self, properties)
 
@@ -1178,28 +1198,24 @@ Database.registerInstanceClass(Complex.blueprintclass, Complex)
 
 class AtomCluster(CompositeChemicalObject, ChemicalObject):
 
-    """An agglomeration of atoms
-
-    A Glossary:Subclass of Class:MMTK.ChemicalObjects.ChemicalObject.
+    """
+    An agglomeration of atoms
 
     An atom cluster acts like a molecule without any bonds or atom
     properties. It can be used to represent a group of atoms that
     are known to form a chemical unit but whose chemical properties
     are not sufficiently known to define a molecule.
-
-    Constructor: AtomCluster(|atoms|, **|properties|)
-
-    Arguments:
-
-    |atoms| -- a list of atom objects
-
-    |properties| -- optional keyword properties:
-
-      * position: the center-of-mass position (a vector)
-      * name: the atom name (a string)
     """
 
     def __init__(self, atoms, **properties):
+        """
+        @param atoms: a list of atoms in the cluster
+        @type atoms: C{list}
+        @keyword position: the position of the center of mass of the cluster
+        @type position: C{Scientific.Geometry.Vector}
+        @keyword name: a name given to the cluster
+        @type name: C{str}
+        """
         self.atoms = list(atoms)
         self.parent = None
         self.type = None
