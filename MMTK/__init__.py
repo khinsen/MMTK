@@ -1,7 +1,7 @@
 # MMTK initialization
 #
 # Written by Konrad Hinsen
-# last revision: 2008-10-30
+# last revision: 2009-1-16
 #
 
 """
@@ -21,8 +21,6 @@ libraries:
 @undocumented: ProteinEnvironment
 @undocumented: ComplexEnvironment
 @undocumented: CrystalEnvironment
-@undocumented: Installation
-@undocumented: NewModuleNames
 @undocumented: surfm
 @undocumented: tess
 @undocumented: Utility

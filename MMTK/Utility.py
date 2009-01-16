@@ -2,7 +2,7 @@
 # places.
 #
 # Written by Konrad Hinsen
-# last revision: 2008-10-30
+# last revision: 2009-1-16
 #
 
 import os, sys
@@ -191,20 +191,8 @@ class Unpickler(BaseUnpickler):
 
     def find_class(self, module, name):
         env = {}
-        try:
-            exec 'from %s import %s' % (module, name) in env
-            klass = env[name]
-        except ImportError:
-            from NewModuleNames import new_name
-            nmodule, nname = new_name.get((module, name),
-                                          ("MMTK."+module, name))
-            try:
-                exec 'from %s import %s' % (nmodule, nname) in env
-                klass = env[nname]
-            except ImportError:
-                raise SystemError("Failed to import class %s from module %s" %
-                                   (name, module))
-        return klass
+        exec 'from %s import %s' % (module, name) in env
+        return env[name]
 
     # Modified load_inst removes argument lists for classes that used
     # to have __getinitargs__ but don't have it any more.
