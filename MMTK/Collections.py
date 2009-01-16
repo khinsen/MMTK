@@ -1,7 +1,7 @@
 # This module defines collections of chemical objects.
 #
 # Written by Konrad Hinsen
-# last revision: 2008-10-30
+# last revision: 2009-1-16
 #
 
 """
@@ -101,7 +101,7 @@ class GroupOfAtoms(object):
                      current configuration
         @type conf: L{MMTK.Configuration} or C{NoneType}
         @returns: the center of mass in the given configuration
-        @rtype: L{Scientific.Geometry.Vector}
+        @rtype: C{Scientific.Geometry.Vector}
         """
         offset = None
         universe = self.universe()
@@ -354,7 +354,7 @@ class GroupOfAtoms(object):
           IIl   : x y z <--> a c b
           IIIl  : x y z <--> b a c
         @returns: the normalizing transformation
-        @rtype: L{Scientific.Geometry.Transformation.RigidBodyTransformation}
+        @rtype: C{Scientific.Geometry.Transformation.RigidBodyTransformation}
         """
         from Scientific.LA import determinant
         cm, inertia = self.centerAndMomentOfInertia()
@@ -435,9 +435,9 @@ class GroupOfAtoms(object):
         Rotate the object arond an axis specified by two points
 
         @param point1: the first point
-        @type point1: L{Scientific.Geometry.Vector}
+        @type point1: C{Scientific.Geometry.Vector}
         @param point2: the second point
-        @type point2: L{Scientific.Geometry.Vector}
+        @type point2: C{Scientific.Geometry.Vector}
         @param angle: the rotation angle (in radians)
         @type angle: C{float}
         """

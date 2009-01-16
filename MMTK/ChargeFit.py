@@ -1,7 +1,7 @@
 # This module contains code for charge fitting.
 #
 # Written by Konrad Hinsen
-# last revision: 2008-11-5
+# last revision: 2009-1-16
 #
 
 """
@@ -42,7 +42,7 @@ class ChargeFit(object):
     value for each atom in the system.
     """
 
-    def __init__(self, object, points, constraints = None):
+    def __init__(self, system, points, constraints = None):
         """
         @param system: any chemical object (usually a molecule)
         @param points: a list of point/potential pairs (a vector for the
@@ -58,7 +58,7 @@ class ChargeFit(object):
                             printed and the result will satisfy the
                             constraints only in a least-squares sense.
         """
-        self.atoms = object.atomList()
+        self.atoms = system.atomList()
         if type(points) != type({}):
             points = {None: points}
         if constraints is not None:
@@ -136,14 +136,14 @@ class TotalChargeConstraint(object):
     To be used with L{ChargeFit}
     """
 
-    def __init__(self, object, charge):
+    def __init__(self, system, charge):
         """
-        @param object: any chamical object whose total charge
+        @param system: any chamical object whose total charge
                        is to be constrained
         @param charge: the total charge value
         @type charge: number
         """
-        self.atoms = object.atomList()
+        self.atoms = system.atomList()
         self.charge = charge
 
     def __len__(self):
@@ -215,13 +215,13 @@ class ChargeConstraintSet(object):
                             " condition.")
 
 
-def evaluationPoints(object, n, smallest = 0.3, largest = 0.5):
+def evaluationPoints(system, n, smallest = 0.3, largest = 0.5):
     """
     Generate points in space around a molecule that are suitable
     for potential evaluation in view of a subsequent charge fit.
-    The points are chosen at random and uniformly in a shell around the object.
+    The points are chosen at random and uniformly in a shell around the system.
 
-    @param object: the chemical object for which the charges
+    @param system: the chemical object for which the charges
                    will be fitted
     @param n: the number of evaluation points to be generated
     @param smallest: the smallest allowed distance of any evaluation
@@ -231,8 +231,8 @@ def evaluationPoints(object, n, smallest = 0.3, largest = 0.5):
     @returns: a list of evaluation points
     @rtype: C{list} of C{Scientific.Geometry.Vector}
     """
-    atoms = object.atomList()
-    p1, p2 = object.boundingBox()
+    atoms = system.atomList()
+    p1, p2 = system.boundingBox()
     margin = Vector(largest, largest, largest)
     p1 -= margin
     p2 += margin

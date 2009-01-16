@@ -2,7 +2,7 @@
 #
 # Written by Lutz Ehrlich
 # Adapted to MMTK conventions by Konrad Hinsen
-# last revision: 2008-11-5
+# last revision: 2009-1-16
 
 
 """
@@ -129,8 +129,8 @@ def writeVelocityDCDPDB(vel_list, dcd_file_name, pdb_file_name, delta_t=0.1):
     Write a sequence of velocity particle vectors to a DCD file and generate
     a compatible PDB file.
 
-    @param conf_list: the sequence of velocity particle vectors
-    @type conf_list: sequence of L{MMTK.ParticleVector}
+    @param vel_list: the sequence of velocity particle vectors
+    @type vel_list: sequence of L{MMTK.ParticleVector}
     @param dcd_file_name: the name of the DCD file
     @type dcd_file_name: C{str}
     @param pdb_file_name: the name of the PDB file
