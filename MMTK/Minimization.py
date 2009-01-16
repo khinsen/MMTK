@@ -1,13 +1,17 @@
 # This module implements energy minimizers.
 #
 # Written by Konrad Hinsen
-# last revision: 2006-11-27
+# last revision: 2009-1-16
 #
 
-import Features, ThreadManager, Trajectory, Units
+"""
+Energy minimizers
+"""
+
+__docformat__ = 'epytext'
+
+from MMTK import Features, ThreadManager, Trajectory, Units
 from MMTK_minimization import conjugateGradient, steepestDescent
-from Scientific import N as Numeric
-import operator
 
 try:
     import threading
@@ -63,56 +67,63 @@ class Minimizer(Trajectory.TrajectoryGenerator):
 #
 class SteepestDescentMinimizer(Minimizer):
 
-    """Steepest-descent minimizer
+    """
+    Steepest-descent minimizer
 
     The minimizer can handle fixed atoms, but no distance constraints.
     It is fully thread-safe.
 
-    Constructor: SteepestDescentMinimizer(|universe|, |**options|)
-
-    Arguments:
-
-    |universe| -- the universe on which the minimizer acts
-
-    |options| -- keyword options:
-
-      * steps: the number of minimization steps (default is 100)
-      * step_size: the initial size of a minimization step
-                   (default is 0.002 nm)
-      * convergence: the root-mean-square gradient length at which
-                     minimization stops (default is 0.01 kJ/mol/nm)
-      * actions: a list of actions to be executed periodically (default is
-                 none)
-      * threads: the number of threads to use in energy evaluation
-                 (default set by MMTK_ENERGY_THREADS)
-      * background: if true, the minimization is executed as a separate thread
-                    (default: 0)
-      * mpi_communicator: an MPI communicator object, or None, meaning
-                          no parallelization (default: None)
-
     The minimization is started by calling the minimizer object.
-    All the keyword options listed above can be specified either when
-    creating the minimizer or when calling it.
+    All the keyword options (see documnentation of __init__) can be
+    specified either when creating the minimizer or when calling it.
 
     The following data categories and variables are available for
     output:
 
-    - category "configuration": configuration and box size (for
-      periodic universes)
+     - category "configuration": configuration and box size (for
+       periodic universes)
 
-    - category "gradients": energy gradients for each atom
+     - category "gradients": energy gradients for each atom
 
-    - category "energy": potential energy and
-                         norm of the potential energy gradient
+     - category "energy": potential energy and
+                          norm of the potential energy gradient
     """
 
     def __init__(self, universe, **options):
+        """
+        @param universe: the universe on which the integrator acts
+        @type universe: L{MMTK.Universe}
+        @keyword steps: the number of minimization steps (default is 100)
+        @type steps: C{int}
+        @keyword step_size: the initial size of a minimization step
+                            (default is 0.002 nm)
+        @type step_size: C{float}
+        @keyword convergence: the root-mean-square gradient length at which
+                              minimization stops (default is 0.01 kJ/mol/nm)
+        @type convergence: C{float}
+        @keyword actions: a list of actions to be executed periodically
+                          (default is none)
+        @type actions: C{list}
+        @keyword threads: the number of threads to use in energy evaluation
+                          (default set by MMTK_ENERGY_THREADS)
+        @type threads: C{int}
+        @keyword background: if True, the integration is executed as a
+                             separate thread (default: False)
+        @type background: C{bool}
+        @keyword mpi_communicator: an MPI communicator object, or C{None},
+                                   meaning no parallelization (default: C{None})
+        @type mpi_communicator: C{Scientific.MPI.MPICommunicator}
+        """
 	Minimizer.__init__(self, universe, options)
 	self.features = [Features.FixedParticleFeature,
 			 Features.NoseThermostatFeature,
                          Features.AndersenBarostatFeature]
 
     def __call__(self, **options):
+        """
+        Run the minimizer. The keyword options are the same as described
+        under L{__init__}.
+        """
 	self.setCallOptions(options)
 	Features.checkFeatures(self, self.universe)
 	configuration = self.universe.configuration()
@@ -140,53 +151,59 @@ class SteepestDescentMinimizer(Minimizer):
 #
 class ConjugateGradientMinimizer(Minimizer):
 
-    """Conjugate gradient minimizer
+    """
+    Conjugate gradient minimizer
 
     The minimizer can handle fixed atoms, but no distance constraints.
     It is fully thread-safe.
 
-    Constructor: ConjugateGradientMinimizer(|universe|, |**options|)
-
-    Arguments:
-
-    |universe| -- the universe on which the minimizer acts
-
-    |options| -- keyword options:
-
-      * steps: the number of minimization steps (default is 100)
-      * step_size: the initial size of a minimization step
-                   (default is 0.002 nm)
-      * convergence: the root-mean-square gradient length at which
-                     minimization stops (default is 0.01 kJ/mol/nm)
-      * actions: a list of actions to be executed periodically (default is
-                 none)
-      * threads: the number of threads to use in energy evaluation
-                 (default set by MMTK_ENERGY_THREADS)
-      * background: if true, the minimization is executed as a separate thread
-                    (default: 0)
-
     The minimization is started by calling the minimizer object.
-    All the keyword options listed above can be specified either when
+    All the keyword options can be specified either when
     creating the minimizer or when calling it.
 
     The following data categories and variables are available for
     output:
 
-    - category "configuration": configuration and box size (for
-      periodic universes)
+     - category "configuration": configuration and box size (for
+       periodic universes)
 
-    - category "gradients": energy gradients for each atom
+     - category "gradients": energy gradients for each atom
 
-    - category "energy": potential energy and
-                         norm of the potential energy gradient
+     - category "energy": potential energy and
+                          norm of the potential energy gradient
     """
 
     def __init__(self, universe, **options):
+        """
+        @param universe: the universe on which the integrator acts
+        @type universe: L{MMTK.Universe}
+        @keyword steps: the number of minimization steps (default is 100)
+        @type steps: C{int}
+        @keyword step_size: the initial size of a minimization step
+                            (default is 0.002 nm)
+        @type step_size: C{float}
+        @keyword convergence: the root-mean-square gradient length at which
+                              minimization stops (default is 0.01 kJ/mol/nm)
+        @type convergence: C{float}
+        @keyword actions: a list of actions to be executed periodically
+                          (default is none)
+        @type actions: C{list}
+        @keyword threads: the number of threads to use in energy evaluation
+                          (default set by MMTK_ENERGY_THREADS)
+        @type threads: C{int}
+        @keyword background: if True, the integration is executed as a
+                             separate thread (default: False)
+        @type background: C{bool}
+        """
 	Minimizer.__init__(self, universe, options)
 	self.features = [Features.FixedParticleFeature,
 			 Features.NoseThermostatFeature]
 
     def __call__(self, **options):
+        """
+        Run the minimizer. The keyword options are the same as described
+        under L{__init__}.
+        """
 	self.setCallOptions(options)
 	Features.checkFeatures(self, self.universe)
 	configuration = self.universe.configuration()
