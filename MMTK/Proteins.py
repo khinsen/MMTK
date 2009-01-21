@@ -1,51 +1,53 @@
 # This module implements classes for peptide chains and proteins.
 #
 # Written by Konrad Hinsen
-# last revision: 2007-5-25
+# last revision: 2009-1-21
 #
 
-import Biopolymers, Bonds, ChemicalObjects, Collections, ConfigIO, Database
-import Units, Universe, Utility
-from Scientific.Geometry import Vector
-import operator, string
+"""
+Peptide chains and proteins
+"""
 
-from Biopolymers import defineAminoAcidResidue
+__docformat__ = 'epytext'
+
+from MMTK import Biopolymers, Bonds, ChemicalObjects, Collections, \
+                 ConfigIO, Database, Units, Universe, Utility
+from Scientific.Geometry import Vector
+
+from MMTK.Biopolymers import defineAminoAcidResidue
 
 #
 # Residues are special groups
 #
 class Residue(Biopolymers.Residue):
 
-    """Amino acid residue
+    """
+    Amino acid residue
 
-    A Glossary:Subclass of Class:MMTK.ChemicalObjects.Group.
-
-    Amino acid residues are a special kind of group. Like any other
-    group, they are defined in the chemical database. Each residue
-    has two subgroups ('peptide' and 'sidechain') and is usually
-    connected to other residues to form a peptide chain. The database
-    contains three variants of each residue (N-terminal, C-terminal,
+    Amino acid residues are a special kind of group. They are defined
+    in the chemical database. Each residue has two subgroups
+    ('peptide' and 'sidechain') and is usually connected to other
+    residues to form a peptide chain. The database contains three
+    variants of each residue (N-terminal, C-terminal,
     non-terminal) and various models (all-atom, united-atom,
     C_alpha).
-
-    Constructor: Residue(|kind|, |model|="all")
-
-    Arguments:
-
-    |kind| -- the name of the residue in the chemical database. This
-              is the full name of the residue plus the suffix
-              "_nt" or "_ct" for the terminal variants.
-
-    |model| -- one of "all" (all-atom), "none" (no hydrogens),
-               "polar" (united-atom with only polar hydrogens),
-               "polar_charmm" (like "polar", but defining
-               polar hydrogens like in the CHARMM force field),
-               "polar_opls" (like "polar", but defining
-               polar hydrogens like in the latest OPLS force field),
-               "calpha" (only the C_alpha atom)
     """
 
     def __init__(self, name = None, model = 'all'):
+        """
+        @param name: the name of the residue in the chemical database. This
+                     is the full name of the residue plus the suffix
+                     "_nt" or "_ct" for the terminal variants.
+        @type name: C{str}
+        @param model: one of "all" (all-atom), "none" (no hydrogens),
+                      "polar" (united-atom with only polar hydrogens),
+                      "polar_charmm" (like "polar", but defining
+                      polar hydrogens like in the CHARMM force field),
+                      "polar_opls" (like "polar", but defining
+                      polar hydrogens like in the latest OPLS force field),
+                      "calpha" (only the C_alpha atom).
+        @type model: C{str}
+        """
         if name is not None:
             blueprint = _residueBlueprint(name, model)
             ChemicalObjects.Group.__init__(self, blueprint)
@@ -67,7 +69,7 @@ class Residue(Biopolymers.Residue):
     def _makeCystine(self):
         if self.model == 'calpha':
             return self
-        if string.lower(self.symbol) != 'cys':
+        if self.symbol.lower() != 'cys':
             raise ValueError(`self` + " is not cysteine.")
         new_residue = 'cystine_ss'
         if self.isNTerminus():
@@ -78,25 +80,33 @@ class Residue(Biopolymers.Residue):
         for g in ['peptide', 'sidechain']:
             g_old = getattr(self, g)
             g_new = getattr(new_residue, g)
-            atoms = map(lambda a: a.name, getattr(g_new, 'atoms'))
-            for a in atoms:
-                set_method = getattr(getattr(g_new, a), 'setPosition')
-                set_method(getattr(getattr(g_old, a), 'position')())
+            for a in getattr(g_new, 'atoms'):
+                set_method = getattr(getattr(g_new, a.name), 'setPosition')
+                set_method(getattr(getattr(g_old, a.name), 'position')())
         return new_residue
 
     def isSubsetModel(self):
         return self.model == 'calpha'
 
     def backbone(self):
-        "Returns the peptide group."
+        """
+        @returns: the peptide group
+        @rtype: L{MMTK.ChemicalObjects.Group}
+        """
         return self.peptide
 
     def sidechains(self):
-        "Returns the sidechain group."
+        """
+        @returns: the sidechain group
+        @rtype: L{MMTK.ChemicalObjects.Group}
+        """
         return self.sidechain
 
     def phiPsi(self, conf = None):
-        "Returns the values of the backbone dihedral angles phi and psi."
+        """
+        @returns: the values of the backbone dihedral angles phi and psi.
+        @rtype: C{(float, float)}
+        """
         universe = self.universe()
         if universe is None:
             universe = Universe.InfiniteUniverse()
@@ -123,8 +133,10 @@ class Residue(Biopolymers.Residue):
         return phi, psi
 
     def phiAngle(self):
-        """Returns a Class:MMTK.InternalCoordinates.DihedralAngle object
-        representing the phi angle."""
+        """
+        @returns: an object representing the phi angle and allowing to modify it
+        @rtype: MMTK.InternalCoordinates.DihedralAngle
+        """
         from MMTK.InternalCoordinates import DihedralAngle
         C = None
         for a in self.peptide.N.bondedTo():
@@ -137,8 +149,10 @@ class Residue(Biopolymers.Residue):
                              self.peptide.N, C)
 
     def psiAngle(self):
-        """Returns a Class:MMTK.InternalCoordinates.DihedralAngle object
-        representing the psi angle."""
+        """
+        @returns: an object representing the psi angle and allowing to modify it
+        @rtype: MMTK.InternalCoordinates.DihedralAngle
+        """
         from MMTK.InternalCoordinates import DihedralAngle
         N = None
         for a in self.peptide.C.bondedTo():
@@ -151,8 +165,10 @@ class Residue(Biopolymers.Residue):
                              self.peptide.N)
 
     def chiAngle(self):
-        """Returns a Class:MMTK.InternalCoordinates.DihedralAngle object
-        representing the chi angle."""
+        """
+        @returns: an object representing the chi angle and allowing to modify it
+        @rtype: MMTK.InternalCoordinates.DihedralAngle
+        """
         from MMTK.InternalCoordinates import DihedralAngle
         try:
             C_beta = self.sidechain.C_beta
@@ -197,79 +213,72 @@ _residue_blueprints = {}
 #
 class PeptideChain(Biopolymers.ResidueChain):
 
-    """Peptide chain
-
-    A Glossary:Subclass of Class:MMTK.Biopolymers.ResidueChain.
+    """
+    Peptide chain
 
     Peptide chains consist of amino acid residues that are linked
     by peptide bonds. They are a special kind of molecule, i.e.
     all molecule operations are available.
 
-    Constructor: PeptideChain(|sequence|, **|properties|)
-
-    Arguments:
-
-    |sequence| -- the amino acid sequence. This can be a string
-                  containing the one-letter codes, or a list
-                  of three-letter codes, or a PDBPeptideChain object.
-                  If a PDBPeptideChain object is supplied, the atomic
-                  positions it contains are assigned to the atoms
-                  of the newly generated peptide chain, otherwise the
-                  positions of all atoms are undefined.
-
-    |properties| -- optional keyword properties:
-
-    - model: one of "all" (all-atom), "no_hydrogens" or "none" (no hydrogens),
-             "polar_hydrogens" or "polar" (united-atom with only polar
-             hydrogens), "polar_charmm" (like "polar", but defining
-             polar hydrogens like in the CHARMM force field),
-             "polar_opls" (like "polar", but defining
-             polar hydrogens like in the latest OPLS force field),
-             "calpha" (only the C_alpha atom of each residue). Default
-             is "all".
-
-    - n_terminus: 1 if the first residue should be constructed using the
-                  N-terminal variant, 0 if the non-terminal version should
-                  be used. Default is 1.
-
-    - c_terminus: 1 if the last residue should be constructed using the
-                  C-terminal variant, 0 if the non-terminal version should
-                  be used. Default is 1.
-
-    - circular: 1 if a peptide bond should be constructed between the first
-                and the last residue. Default is 0.
-
-    - name: a name for the chain (a string)
-
-
-    Peptide chains act as sequences of residues. If 'p' is a PeptideChain
+    Peptide chains act as sequences of residues. If C{p} is a PeptideChain
     object, then
-
-    - 'len(p)' yields the number of residues
-
-    - 'p[i]' yields residue number 'i' (counting from zero)
-
-    - 'p[i:j]' yields the subchain from residue number 'i' up to but excluding
-               residue number 'j'
+     - C{len(p)} yields the number of residues
+     - C{p[i]} yields residue number C{i}
+     - C{p[i:j]} yields the subchain from residue number C{i} up to
+                 but excluding residue number C{j}
     """
 
     def __init__(self, sequence, **properties):
+        """
+        @param sequence: the amino acid sequence. This can be a string
+                         containing the one-letter codes, or a list
+                         of three-letter codes, or a
+                         L{MMTK.PDB.PDBPeptideChain} object.
+                         If a PDBPeptideChain object is supplied, the atomic
+                         positions it contains are assigned to the atoms
+                         of the newly generated peptide chain, otherwise the
+                         positions of all atoms are undefined.
+        @keyword model: one of "all" (all-atom), "no_hydrogens" or "none"
+                        (no hydrogens), "polar_hydrogens" or "polar"
+                        (united-atom with only polar hydrogens),
+                        "polar_charmm" (like "polar", but defining
+                        polar hydrogens like in the CHARMM force field),
+                        "polar_opls" (like "polar", but defining
+                        polar hydrogens like in the latest OPLS force field),
+                        "calpha" (only the C_alpha atom of each residue).
+                        Default is "all".
+        @type model: C{str}
+        @keyword n_terminus: if C{True}, the first residue is constructed
+                             using the N-terminal variant, if C{False} the
+                             non-terminal version is used. Default is C{True}.
+        @type n_terminus: C{bool}
+        @keyword c_terminus: if C{True}, the last residue is constructed
+                             using the C-terminal variant, if C{False} the
+                             non-terminal version is used. Default is C{True}.
+        @type c_terminus: C{bool}
+        @keyword circular: if C{True}, a peptide bond is constructed
+                           between the first and the last residues.
+                           Default is C{False}.
+        @type circular: C{bool}
+        @keyword name: a name for the chain (a string)
+        @type name: C{str}
+        """
         if sequence is not None:
             model = 'all'
             if properties.has_key('model'):
-                model = string.lower(properties['model'])
+                model = properties['model'].lower()
             elif properties.has_key('hydrogens'):
                 model = properties['hydrogens']
                 if model == 1: model = 'all'
                 elif model == 0: model = 'none'
-                else: model = string.lower(model)
+                else: model = model.lower()
             if model == 'no_hydrogens':
                 model = 'none'
             elif model == 'polar_hydrogens':
                 model = 'polar'
-            n_term = self.binaryProperty(properties, 'n_terminus', 1)
-            c_term = self.binaryProperty(properties, 'c_terminus', 1)
-            circular = self.binaryProperty(properties, 'circular', 0)
+            n_term = self.binaryProperty(properties, 'n_terminus', True)
+            c_term = self.binaryProperty(properties, 'c_terminus', True)
+            circular = self.binaryProperty(properties, 'circular', False)
             self.version_spec = {'n_terminus': n_term,
                                  'c_terminus': c_term,
                                  'model': model,
@@ -300,18 +309,24 @@ class PeptideChain(Biopolymers.ResidueChain):
 
             self._setupChain(circular, properties, conf)
 
-    is_peptide_chain = 1
+    is_peptide_chain = True
 
     def __getslice__(self, first, last):
         return SubChain(self, self.groups[first:last])
 
     def sequence(self):
-        """Returns the primary sequence as a list of three-letter residue
-        codes."""
-        return map(lambda r: r.symbol, self.groups)
+        """
+        @returns: the primary sequence as a list of three-letter
+                  residue codes.
+        @rtype: C{list}
+        """
+        return [r.symbol for r in self.groups]
 
     def backbone(self):
-        "Returns a collection containing the peptide groups of all residues."
+        """
+        @returns: the peptide groups of all residues
+        @rtype: L{MMTK.Collections.Collection}
+        """
         backbone = Collections.Collection()
         for r in self.groups:
             try:
@@ -321,7 +336,10 @@ class PeptideChain(Biopolymers.ResidueChain):
         return backbone
     
     def sidechains(self):
-        "Returns a collection containing the sidechain groups of all residues."
+        """
+        @returns: the sidechain groups of all residues
+        @rtype: L{MMTK.Collections.Collection}
+        """
         sidechains = Collections.Collection()
         for r in self.groups:
             try:
@@ -331,8 +349,10 @@ class PeptideChain(Biopolymers.ResidueChain):
         return sidechains
 
     def phiPsi(self, conf = None):
-        """Returns a list of the (phi, psi) backbone angle pairs
-        for each residue."""
+        """
+        @returns: a list of the (phi, psi) backbone angles for each residue
+        @rtype: C{list} of C{tuple} of C{float}
+        """
         universe = self.universe()
         if universe is None:
             universe = Universe.InfiniteUniverse()
@@ -355,8 +375,12 @@ class PeptideChain(Biopolymers.ResidueChain):
         return angles
 
     def replaceResidue(self, r_old, r_new):
-        """Replaces residue |r_old|, which must be a residue object that
-        is part of the chain, by the residue object |r_new|."""
+        """
+        @param r_old: the residue to be replaced (must be part of the chain)
+        @type r_old: L{Residue}
+        @param r_new: the residue that replaces r_old
+        @type r_new: L{Residue}
+        """
         n = self.groups.index(r_old)
         for a in r_old.atoms:
             self.atoms.remove(a)
@@ -402,13 +426,13 @@ class PeptideChain(Biopolymers.ResidueChain):
     def _addSSBridges(self, bonds):
         for b in bonds:
             cys1 = b[0]
-            if string.lower(cys1.symbol) == 'cyx':
+            if cys1.symbol.lower() == 'cyx':
                 cys_ss1 = cys1
             else:
                 cys_ss1 = cys1._makeCystine()
                 self.replaceResidue(cys1, cys_ss1)
             cys2 = b[1]
-            if string.lower(cys2.symbol) == 'cyx':
+            if cys2.symbol.lower() == 'cyx':
                 cys_ss2 = cys2
             else:
                 cys_ss2 = cys2._makeCystine()
@@ -423,7 +447,7 @@ class PeptideChain(Biopolymers.ResidueChain):
         return "S", kwargs[:-1]
 
     def _typeName(self):
-        return reduce(operator.add, self.sequence())
+        return ''.join(self.sequence())
 
     def _graphics(self, conf, distance_fn, model, module, options):
         if model != 'backbone':
@@ -456,7 +480,8 @@ class PeptideChain(Biopolymers.ResidueChain):
 #
 class SubChain(PeptideChain):
 
-    """A contiguous part of a peptide chain
+    """
+    A contiguous part of a peptide chain
 
     SubChain objects are the result of slicing operations on
     PeptideChain objects. They cannot be created directly.
@@ -484,7 +509,7 @@ class SubChain(PeptideChain):
             self.configurations = {}
             self.part_of = chain
 
-    is_incomplete = 1
+    is_incomplete = True
 
     def __repr__(self):
         if self.name == '':
@@ -525,16 +550,18 @@ class SubChain(PeptideChain):
 #
 class ConnectedChains(PeptideChain):
 
-    # Peptide chains connected by sulfur bridges
-    #
-    # A group of peptide chains connected by sulfur bridges must be considered
-    # a single molecule due to the presence of chemical bonds. Such a molecule
-    # is represented by a ConnectedChains object. These objects are created
-    # automatically when a Protein object is assembled. They are normally
-    # not used directly by application programs. When a chain with sulfur
-    # bridges to other chains is extracted from a Protein object, the
-    # return value is a SubChain object that indirectly refers to a
-    # ConnectedChains object.
+    """
+    Peptide chains connected by disulfide bridges
+    
+    A group of peptide chains connected by disulfide bridges must be considered
+    a single molecule due to the presence of chemical bonds. Such a molecule
+    is represented by a ConnectedChains object. These objects are created
+    automatically when a Protein object is assembled. They are normally
+    not used directly by application programs. When a chain with disulfide
+    bridges to other chains is extracted from a Protein object, the
+    return value is a SubChain object that indirectly refers to a
+    ConnectedChains object.
+    """
 
     def __init__(self, chains=None):
         if chains is not None:
@@ -565,7 +592,7 @@ class ConnectedChains(PeptideChain):
             self.parent = None
             self.type = None
             self.configurations = {}
-    is_connected_chains = 1
+    is_connected_chains = True
 
     def _finalize(self):
         for i in range(len(self.chains)):
@@ -602,40 +629,11 @@ class ConnectedChains(PeptideChain):
 #
 class Protein(ChemicalObjects.Complex):
 
-    """Protein
+    """
+    Protein
 
-    A Glossary:Subclass of Class:MMTK.Complex.
-
-    A Protein object is a special kind of a Complex object which
-    is made up of peptide chains.
-
-    Constructor: Protein(|specification|, **|properties|)
-
-    Arguments:
-
-    |specification| -- one of:
-
-    - a list of peptide chain objects
-
-    - a string, which is interpreted as the name of a database definition
-      for a protein. If that definition does not exist, the string
-      is taken to be the name of a PDB file, from which all peptide chains
-      are constructed and assembled into a protein.
-
-    |properties| -- optional keyword properties:
-
-    - model: one of "all" (all-atom), "no_hydrogens" or "none" (no hydrogens),
-             "polar_hydrogens" or "polar" (united-atom with only polar
-             hydrogens), "polar_charmm" (like "polar", but defining
-             polar hydrogens like in the CHARMM force field),
-             "polar_opls" (like "polar", but defining
-             polar hydrogens like in the latest OPLS force field),
-             "calpha" (only the C_alpha atom of each residue). Default
-             is "all".
-
-    - position: the center-of-mass position of the protein (a vector)
-
-    - name: a name for the protein (a string)
+    A Protein object is a special kind of L{MMTK.ChemicalObjects.Complex}
+    object which is made up of peptide chains and possibly ligands.
 
     If the atoms in the peptide chains that make up a protein have
     defined positions, sulfur bridges within chains and between
@@ -643,14 +641,35 @@ class Protein(ChemicalObjects.Complex):
     based on a distance criterion between cystein sidechains.
 
 
-    Proteins act as sequences of chains. If 'p' is a Protein object, then
-
-    - 'len(p)' yields the number of chains
-
-    - 'p[i]' yields chain number 'i' (counting from zero)
+    Proteins act as sequences of chains. If C{p} is a Protein object, then
+     - C{len(p)} yields the number of chains
+     - C{p[i]} yields chain number {i}
     """
 
     def __init__(self, *items, **properties):
+        """
+        @param items: either a sequence of peptide chain objects, or
+                      a string, which is interpreted as the name of a
+                      database definition for a protein.
+                      If that definition does not exist, the string
+                      is taken to be the name of a PDB file, from which
+                      all peptide chains are constructed and
+                      assembled into a protein.
+        @keyword model: one of "all" (all-atom), "no_hydrogens" or "none"
+                        (no hydrogens),"polar_hydrogens" or "polar"
+                        (united-atom with only polar hydrogens),
+                        "polar_charmm" (like "polar", but defining
+                        polar hydrogens like in the CHARMM force field),
+                        "polar_opls" (like "polar", but defining
+                        polar hydrogens like in the latest OPLS force field),
+                        "calpha" (only the C_alpha atom of each residue).
+                        Default is "all".
+        @type model: C{str}
+        @keyword position: the center-of-mass position of the protein
+        @type position: C{Scientific.Geometry.Vector}
+        @keyword name: a name for the protein
+        @type name: C{str}
+        """
         if items == (None,):
             return
         self.name = ''
@@ -704,7 +723,7 @@ class Protein(ChemicalObjects.Complex):
                 m = m[0][0]
                 m._addSSBridges(bonds)
             else:
-                numbers = reduce(operator.add, map(lambda i: i._numbers, m[0]))
+                numbers = sum(i._numbers for i in m[0])
                 m = ConnectedChains(m[0])
                 m._numbers = numbers
                 m._addSSBridges(bonds)
@@ -744,12 +763,12 @@ class Protein(ChemicalObjects.Complex):
         undefined = 0
         for a in self.atoms:
             if a.position() is None:
-                undefined = undefined + 1
+                undefined += 1
         if undefined > 0 and undefined != len(self.atoms):
             Utility.warning('Some atoms in a protein ' +
                             'have undefined positions.')
 
-    is_protein = 1
+    is_protein = True
 
     def __len__(self):
         return len(self.chains)
@@ -769,8 +788,13 @@ class Protein(ChemicalObjects.Complex):
             return m[c]
 
     def residuesOfType(self, *types):
-        """Returns a collection that contains all residues whose type
-        (one- or three-letter code) is contained in |types|."""
+        """
+        @param types: a sequence of residue codes (one- or three-letter)
+        @type types: sequence of C{str}
+        @returns: all residues whose type (one- or three-letter code)
+                  is contained in types
+        @rtype: L{MMTK.Collections.Collection}
+        """
         rlist = Collections.Collection([])
         for m in self.molecules:
             if isPeptideChain(m):
@@ -778,8 +802,10 @@ class Protein(ChemicalObjects.Complex):
         return rlist
 
     def backbone(self):
-        """Returns a collection containing the peptide groups of all residues
-        in all chains."""
+        """
+        @returns: the peptide groups of all residues in all chains
+        @rtype: L{MMTK.Collections.Collection}
+        """
         rlist = Collections.Collection([])
         for m in self.molecules:
             if isPeptideChain(m):
@@ -787,8 +813,10 @@ class Protein(ChemicalObjects.Complex):
         return rlist
 
     def sidechains(self):
-        """Returns a collection containing the sidechain groups of all
-        residues in all chains."""
+        """
+        @returns: the sidechain groups of all residues in all chains
+        @rtype: L{MMTK.Collections.Collection}
+        """
         rlist = Collections.Collection([])
         for m in self.molecules:
             if isPeptideChain(m):
@@ -796,7 +824,10 @@ class Protein(ChemicalObjects.Complex):
         return rlist
 
     def residues(self):
-        "Returns a collection containing all residues in all chains."
+        """
+        @returns: all residues in all chains
+        @rtype: L{MMTK.Collections.Collection}
+        """
         rlist = Collections.Collection([])
         for m in self.molecules:
             if isPeptideChain(m):
@@ -804,12 +835,12 @@ class Protein(ChemicalObjects.Complex):
         return rlist
 
     def phiPsi(self, conf = None):
-        """Returns a list containing the phi/psi backbone dihedrals for
-        all chains."""
-        angles = []
-        for chain in self:
-            angles.append(chain.phiPsi(conf))
-        return angles
+        """
+        @returns: a list of the (phi, psi) backbone angles for all residue
+                  in all chains
+        @rtype: C{list} of C{list} of C{tuple} of C{float}
+        """
+        return [chain.phiPsi(conf) for chain in self]
 
     _ss_bond_max = 0.25*Units.nm
 
@@ -837,10 +868,8 @@ class Protein(ChemicalObjects.Complex):
         if not toplevel:
             raise ValueError
         return 'l(' + `self.__class__.__name__` + ',' + `self.name` + ',[' + \
-               reduce(operator.add,
-                      map(lambda o, t=tag, m=index_map:
-                                 o._description(t, m, 1)+',',
-                          self)) + '])'
+               ','.join(o._description(tag, index_map, True) for o in self) + \
+               + '])'
 
     def _graphics(self, conf, distance_fn, model, module, options):
         if model != 'backbone':
@@ -848,17 +877,25 @@ class Protein(ChemicalObjects.Complex):
                                                      model, module, options)
         objects = []
         for chain in self:
-            objects = objects + chain._graphics(conf, distance_fn,
-                                                model, module, options)
+            objects.extend(chain._graphics(conf, distance_fn,
+                                           model, module, options))
         return objects
 
 #
 # Type check functions
 #
 def isPeptideChain(x):
-    "Returns 1 f |x| is a peptide chain."
+    """
+    @param x: any object
+    @returns: C{True} if x is a peptide chain
+    @rtype: C{bool}
+    """
     return hasattr(x, 'is_peptide_chain')
 
 def isProtein(x):
-    "Returns 1 f |x| is a protein."
+    """
+    @param x: any object
+    @returns: C{True} if x is a protein
+    @rtype: C{bool}
+    """
     return hasattr(x, 'is_protein')
