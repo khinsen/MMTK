@@ -1,12 +1,17 @@
 # Manipulation of internal coordinates
 #
 # Written by Konrad Hinsen
-# last revision: 2006-11-27
+# last revision: 2009-1-21
 #
+
+"""
+Manipulation of molecular configurations in terms of internal coordinates
+"""
+
+__docformat__ = 'epytext'
 
 import MMTK
 from Scientific import N
-from copy import copy
 
 #
 # The abstract base class
@@ -44,23 +49,23 @@ class InternalCoordinate:
         try:
             self.bondTest()
             for fragment, start, excluded, error_check in [spec1, spec2]:
-                atoms = {start: 1}
+                atoms = set([start])
                 new_atoms = []
                 for a in start.bondedTo():
                     if a is not excluded and a is not start:
-                        atoms[a] = 1
+                        atoms.add(a)
                         new_atoms.append(a)
                 while new_atoms:
                     check = new_atoms
                     new_atoms = []
                     for a in check:
                         for na in a.bondedTo():
-                            if atoms.get(na, 0) == 0:
-                                atoms[na] = 1
+                            if na not in atoms:
+                                atoms.add(na)
                                 new_atoms.append(na)
-                if atoms.get(error_check, 0) == 1:
+                if error_check in atoms:
                     raise ValueError("cyclic bond structure")
-                for a in atoms.keys():
+                for a in atoms:
                     fragment.addObject(a)
         finally:
             self.molecule.clearBondAttributes()
@@ -70,16 +75,17 @@ class InternalCoordinate:
 #
 class BondLength(InternalCoordinate):
 
-    """Bond length
+    """
+    Bond length coordinate
 
-    A bond length object permits calculating and modifying the
+    A BondLength object permits calculating and modifying the
     length of a bond in a molecule, under the condition that
     the bond is not part of a circular bond structure (but it
     is not a problem to have a circular bond structure elsewhere
     in the molecule). Modifying the bond length moves the parts
     of the molecule on both sides of the bond along the bond direction
     in such a way that the center of mass of the molecule does not
-    move.
+    change.
 
     The initial construction of the BondLength object can be
     expensive (the bond structure of the molecule must be
@@ -87,28 +93,33 @@ class BondLength(InternalCoordinate):
     rather than recreate it frequently. Note that if you only
     want to calculate bond lengths (no modification), the
     method Universe.distance is simpler and faster.
-    
-    Constructor: BondLength(|atom1|, |atom2|)
-
-    Arguments:
-
-    |atom1|, |atom2| -- the atom objects that define the bond.
-                        Note that there must actually be a bond
-                        between those two atoms.
     """
 
     def __init__(self, atom1, atom2):
+        """
+        @param atom1: the first atom that defines the bond
+        @type atom1: L{MMTK.ChemicalObjects.Atom}
+        @param atom2: the second atom that defines the bond
+        @type atom2: L{MMTK.ChemicalObjects.Atom}
+        """
         InternalCoordinate.__init__(self, [atom1, atom2])
         self.findFragments((atom1, atom2, atom2), (atom2, atom1, atom1))
 
     def getValue(self, conf = None):
-        """Returns the length of the bond in the configuration |conf|,
-        which defaults to the current configuration.
+        """
+        @param conf: a configuration (defaults to the current configuration)
+        @type conf: L{MMTK.ParticleProperties.Configuration}
+        @returns: the length of the bond in the configuration conf
+        @rtype: C{float}
         """
         return self.universe.distance(self.atoms[0], self.atoms[1], conf)
 
     def setValue(self, value):
-        "Sets the length of the bond to |value|."
+        """
+        Sets the length of the bond
+        @param value: the desired length of the bond
+        @type value: C{float}
+        """
         v = self.universe.distanceVector(self.atoms[0], self.atoms[1])
         axis = v.normal()
         distance = value - v.length()
@@ -124,9 +135,10 @@ class BondLength(InternalCoordinate):
 #
 class BondAngle(InternalCoordinate):
 
-    """Bond angle
+    """
+    Bond angle
 
-    A bond angle object permits calculating and modifying the
+    A BondAngle object permits calculating and modifying the
     angle between two bonds in a molecule, under the condition that
     the bonds are not part of a circular bond structure (but it
     is not a problem to have a circular bond structure elsewhere
@@ -143,30 +155,36 @@ class BondAngle(InternalCoordinate):
     rather than recreate it frequently. Note that if you only
     want to calculate bond angles (no modification), the
     method Universe.angle is simpler and faster.
-    
-    Constructor: BondAngle(|atom1|, |atom2|, |atom3|)
-
-    Arguments:
-
-    |atom1|, |atom2|, |atom3| -- the atom objects that define the angle.
-                                 Note that there must actually be a bond
-                                 between |atom1| and |atom2| (the central
-                                 atom) and between |atom2| and |atom3|.
     """
 
     def __init__(self, atom1, atom2, atom3):
+        """
+        @param atom1: the first atom that defines the angle
+        @type atom1: L{MMTK.ChemicalObjects.Atom}
+        @param atom2: the second and central atom that defines the bond
+        @type atom2: L{MMTK.ChemicalObjects.Atom}
+        @param atom3: the third atom that defines the bond
+        @type atom3: L{MMTK.ChemicalObjects.Atom}
+        """
         InternalCoordinate.__init__(self, [atom1, atom2, atom3])
         self.findFragments((atom1, atom2, atom3), (atom3, atom2, atom1))
 
     def getValue(self, conf = None):
-        """Returns the size of the angle in the configuration |conf|,
-        which defaults to the current configuration.
+        """
+        @param conf: a configuration (defaults to the current configuration)
+        @type conf: L{MMTK.ParticleProperties.Configuration}
+        @returns: the size of the angle in the configuration conf
+        @rtype: C{float}
         """
         return self.universe.angle(self.atoms[0], self.atoms[1],
                                    self.atoms[2], conf)
 
     def setValue(self, value):
-        "Sets the angle to |value|."
+        """
+        Sets the size of the angle
+        @param value: the desired angle
+        @type value: C{float}
+        """
         from Scientific.Geometry.TensorModule import delta
         v1 = self.universe.distanceVector(self.atoms[1], self.atoms[0])
         v2 = self.universe.distanceVector(self.atoms[1], self.atoms[2])
@@ -197,9 +215,10 @@ class BondAngle(InternalCoordinate):
 #
 class DihedralAngle(InternalCoordinate):
 
-    """Dihedral angle
+    """
+    Dihedral angle
 
-    A dihedral angle object permits calculating and modifying the
+    A DihedralAngle object permits calculating and modifying the
     dihedral angle defined by three consecutive bonds in a molecule,
     under the condition that the central bond is not part of a
     circular bond structure (but it is not a problem to have a
@@ -214,31 +233,40 @@ class DihedralAngle(InternalCoordinate):
     rather than recreate it frequently. Note that if you only
     want to calculate bond angles (no modification), the
     method Universe.dihedral is simpler and faster.
-    
-    Constructor: DihedralAngle(|atom1|, |atom2|, |atom3|, |atom4|)
-
-    Arguments:
-
-    |atom1|, |atom2|, |atom3|, |atom4|
-            -- the atom objects that define the dihedral.
-               Note that there must actually be a bond
-               between |atom1| and |atom2|, between |atom2| and |atom3|
-               (the central bond), and between |atom3| and |atom4|.
     """
 
     def __init__(self, atom1, atom2, atom3, atom4):
+        """
+        @param atom1: the first atom that defines the dihedral
+        @type atom1: L{MMTK.ChemicalObjects.Atom}
+        @param atom2: the second atom that defines the dihedral,
+                      must be on the central bond
+        @type atom2: L{MMTK.ChemicalObjects.Atom}
+        @param atom3: the third atom that defines the dihedral,
+                      must be on the central bond
+        @type atom3: L{MMTK.ChemicalObjects.Atom}
+        @param atom4: the fourth atom that defines the dihedral
+        @type atom4: L{MMTK.ChemicalObjects.Atom}
+        """
         InternalCoordinate.__init__(self, [atom1, atom2, atom3, atom4])
         self.findFragments((atom2, atom3, atom3), (atom3, atom2, atom2))
 
     def getValue(self, conf = None):
-        """Returns the size of the angle in the configuration |conf|,
-        which defaults to the current configuration.
+        """
+        @param conf: a configuration (defaults to the current configuration)
+        @type conf: L{MMTK.ParticleProperties.Configuration}
+        @returns: the size of the dihedral angle in the configuration conf
+        @rtype: C{float}
         """
         return self.universe.dihedral(self.atoms[0], self.atoms[1],
                                       self.atoms[2], self.atoms[3], conf)
 
     def setValue(self, value):
-        "Sets the angle to |value|."
+        """
+        Sets the size of the dihedral
+        @param value: the desired dihedral angle
+        @type value: C{float}
+        """
         from Scientific.Geometry.TensorModule import delta
         angle  = self.universe.dihedral(self.atoms[0], self.atoms[1],
                                         self.atoms[2], self.atoms[3])
