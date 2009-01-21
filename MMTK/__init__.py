@@ -23,6 +23,7 @@ libraries:
 @undocumented: CrystalEnvironment
 @undocumented: surfm
 @undocumented: tess
+@undocumented: Skeleton
 @undocumented: Utility
 """
 

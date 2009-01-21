@@ -1,10 +1,8 @@
 # This module handles the skeleton descriptions stored in trajectory files.
 #
 # Written by Konrad Hinsen
-# last revision: 2008-11-7
+# last revision: 2009-1-21
 #
-
-_undocumented = 1
 
 import MMTK
 import MMTK.Environment
@@ -79,8 +77,7 @@ class S(Composite):
     def make(self, info, conf = None):
         import MMTK.Proteins
         n_residues = len(self.type)/3
-        residues = map(lambda i, s = self.type: s[3*i:3*i+3],
-                       range(n_residues))
+        residues = [self.type[3*i:3*i+3] for i in range(n_residues)]
         self.kwargs['name'] = self.name
         chain = apply(MMTK.Proteins.PeptideChain, (residues,), self.kwargs)
         for i in range(len(self.list)):
@@ -93,8 +90,7 @@ class N(Composite):
     def make(self, info, conf = None):
         import MMTK.NucleicAcids
         n_residues = len(self.type)/3
-        residues = map(lambda i, s = self.type: s[3*i:3*i+3].strip(),
-                       range(n_residues))
+        residues = [self.type[3*i:3*i+3].strip() for i in range(n_residues)]
         self.kwargs['name'] = self.name
         chain = apply(MMTK.NucleicAcids.NucleotideChain, (residues,),
                       self.kwargs)
