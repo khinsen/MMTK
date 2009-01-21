@@ -1,51 +1,69 @@
 # Define unit conversion factors and physical constants
 #
 # Written by Konrad Hinsen
-# last revision: 2007-9-11
+# last revision: 2009-1-21
 #
 
-"""This module defines constants and prefactors that convert between
-MMTK's internal unit system and other units. There are also some
-common physical constants.
+"""
+Units and physical constants
 
-SI Prefixes: ato, femto, pico, nano, micro, milli, centi, deci, deca,
-hecto, kilo, mega, giga, tera, peta
+This module defines constants and prefactors that convert from various
+units to MMTK's internal unit system. There are also some common
+physical constants.
 
-Length units: m, cm, mm, nm, pm, fm, Ang, Bohr
+MMTK's unit system is defined by:
+ - nm for length
+ - ps for time
+ - amu (g/mol) for mass
+ - the charge of a proton for charge
+ - rad for angles
 
-Angle units: rad, deg
+All formulas that do not contain electrical quantities (charge,
+electric/magnetic field, ...) have the same form in this unit system
+as in the SI system. The energy unit that results from the choices
+given above is kJ/mol.
 
-Volume units: l
+The constants defined in this module are:
 
-Time units: s, ns, ps, fs
+ * SI Prefixes: ato, femto, pico, nano, micro, milli, centi, deci,
+                deca, hecto, kilo, mega, giga, tera, peta
 
-Frequency units: Hz, invcm (wavenumbers)
+ * Length units: m, cm, mm, nm, pm, fm, Ang, Bohr
 
-Mass units: amu, g, kg
+ * Angle units: rad, deg
 
-Quantity-of-matter units: mol
+ * Volume units: l
 
-Energy units:
-J, kJ, cal, kcal, Hartree
+ * Time units: s, ns, ps, fs
 
-Temperature units:
-K
+ * Frequency units: Hz, invcm (wavenumbers)
 
-Pressure units:
-Pa, bar, atm
+ * Mass units: amu, g, kg
 
-Electrostatic units:
-C, A, V, D, eV, e
+ * Quantity-of-matter units: mol
 
+ * Energy units: J, kJ, cal (thermochemical), kcal, Hartree, Bohr
 
-Physical constants:
-c (speed of light),
-Nav (Avogadro number),
-h = (Planck constant),
-hbar = (Planck constant divided by 2*Pi),
-k_B = (Boltzmann constant),
-eps0 = (permittivity of vacuum),
-me = (electron mass)
+ * Temperature units: K
+
+ * Force units: N, dyn
+ 
+ * Pressure units: Pa, MPa, GPa, bar, kbar, atm
+
+ * Electrostatic units: C, A, V, D, eV, e
+
+ * Physical constants:
+   - c (speed of light)
+   - Nav (Avogadro number)
+   - h (Planck constant)
+   - hbar (Planck constant divided by 2*Pi)
+   - k_B (Boltzmann constant)
+   - eps0 (permittivity of vacuum)
+   - me (electron mass)
+
+ * Other:
+   - akma_time (the time unit in the DCD trajectory format)
+   - electrostatic_energy (the prefactor in Coulomb's law)
 """
 
 from Scientific import N as Numeric
