@@ -869,7 +869,7 @@ class Protein(ChemicalObjects.Complex):
             raise ValueError
         return 'l(' + `self.__class__.__name__` + ',' + `self.name` + ',[' + \
                ','.join(o._description(tag, index_map, True) for o in self) + \
-               + '])'
+               '])'
 
     def _graphics(self, conf, distance_fn, model, module, options):
         if model != 'backbone':
