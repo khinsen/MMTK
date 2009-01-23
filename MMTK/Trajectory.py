@@ -1,13 +1,20 @@
 # This module implements trajetories and trajectory generators.
 #
 # Written by Konrad Hinsen
-# last revision: 2008-10-27
+# last revision: 2009-1-23
 #
 
-import Collections, Units, Universe, Utility, ParticleProperties, Visualization
+"""
+Trajectory files and their contents
+"""
+
+__docformat__ = 'epytext'
+
+from MMTK import Collections, Units, Universe, Utility, \
+                 ParticleProperties, Visualization
 from Scientific.Geometry import Vector
-from Scientific import N as Numeric
-import copy, os, string, sys, types
+from Scientific import N
+import copy, os, sys
 
 # Report error if the netCDF module is not available.
 try:
@@ -19,69 +26,28 @@ except ImportError:
 #
 # Trajectory class
 #
-class Trajectory:
+class Trajectory(object):
 
-    """Trajectory file
-
-    Constructor: Trajectory(|object|, |filename|, |mode|="r",
-                            |comment|=None, |double_precision|=0, |cycle|=0,
-                            |block_size|=1)
-
-    Arguments:
-
-    |object| -- the object whose data is stored in the trajectory file.
-                This can be 'None' when opening a file for reading;
-                in that case, a universe object is constructed from the
-                description stored in the trajectory file. This universe
-                object can be accessed via the attribute 'universe'
-                of the trajectory object.
-
-    |filename| -- the name of the trajectory file
-
-    |mode| -- one of "r" (read-only), "w" (create new file for writing),
-              or "a" (append to existing file or create if the file does
-              not exist)
-
-    |comment| -- optional comment that is stored in the file; allowed only
-                 with mode="r"
-
-    |double_precision| -- if non-zero, data in the file is stored using
-                          double precision; default is single precision.
-                          Note that all I/O via trajectory objects is
-                          double precision; conversion from and to single
-                          precision file variables is handled automatically.
-
-    |cycle| -- if non-zero, a trajectory is created for a fixed number
-               of steps equal to the value of |cycle|, and these steps
-               are used cyclically. This is meant for restart trajectories.
-
-    |block_size| -- an optimization parameter that influences the file
-                    structure and the I/O performance for very large
-                    files. A block size of 1 is optimal for sequential
-                    access to configurations etc., whereas a block size
-                    equal to the number of steps is optimal for reading
-                    coordinates or scalar variables along the time axis.
-                    The default value is 1. Note that older MMTK releases
-                    always used a block size of 1 and cannot handle
-                    trajectories with different block sizes.
+    """
+    Trajectory file
 
     The data in a trajectory file can be accessed by step or by
-    variable. If 't' is a Trajectory object, then:
+    variable. If C{t} is a Trajectory object, then:
 
-    - 'len(t)' is the number of steps
+     - C{len(t)} is the number of steps
 
-    - 't[i]' is the data for step i, in the form of a dictionary that
-      maps variable names to data
+     - C{t[i]} is the data for step C{i}, in the form of a dictionary that
+       maps variable names to data
 
-    - 't[i:j]' and 't[i:j:n]' return a SubTrajectory object that refers
+     - C{t[i:j]} and C{t[i:j:n]} return a L{SubTrajectory} object that refers
        to a subset of the total number of steps (no data is copied)
 
-    - 't.variable' returns the value of the named variable at all
-      time steps. If the variable is a simple scalar, it is read
-      completely and returned as an array. If the variable contains
-      data for each atom, a TrajectoryVariable object is returned
-      from which data at specific steps can be obtained by further
-      indexing operations.
+     - C{t.variable} returns the value of the named variable at all
+       time steps. If the variable is a simple scalar, it is read
+       completely and returned as an array. If the variable contains
+       data for each atom, a L{TrajectoryVariable} object is returned
+       from which data at specific steps can be obtained by further
+       indexing operations.
 
     The routines that generate trajectories decide what variables
     are used and what they contain. The most frequently used variable
@@ -91,7 +57,47 @@ class Trajectory:
     """
 
     def __init__(self, object, filename, mode = 'r', comment = None,
-                 double_precision = 0, cycle = 0, block_size = 1):
+                 double_precision = False, cycle = 0, block_size = 1):
+        """
+        @param object: the object whose data is stored in the trajectory file.
+                       This can be 'None' when opening a file for reading;
+                       in that case, a universe object is constructed from the
+                       description stored in the trajectory file. This universe
+                       object can be accessed via the attribute 'universe'
+                       of the trajectory object.
+        @type object: L{MMTK.ChemicalObjects.ChemicalObject}
+        @param filename: the name of the trajectory file
+        @type filename: C{str}
+        @param mode: one of "r" (read-only), "w" (create new file for writing),
+                     or "a" (append to existing file or create if the file does
+                     not exist)
+        @type mode: C{str}
+        @param comment: optional comment that is stored in the file;
+                        allowed only with mode="r"
+        @type comment: C{str}
+        @param double_precision: if C{True}, data in the file is stored using
+                                 double precision; default is single precision.
+                                 Note that all I/O via trajectory objects is
+                                 double precision; conversion from and to
+                                 single precision file variables is handled
+                                 automatically.
+        @type double_precision: C{bool}
+        @param cycle: if non-zero, a trajectory is created for a fixed number
+                      of steps equal to the value of cycle, and these steps
+                      are used cyclically. This is meant for restart
+                      trajectories.
+        @type cycle: C{int}
+        @param block_size: an optimization parameter that influences the file
+                           structure and the I/O performance for very large
+                           files. A block size of 1 is optimal for sequential
+                           access to configurations etc., whereas a block size
+                           equal to the number of steps is optimal for reading
+                           coordinates or scalar variables along the time axis.
+                           The default value is 1. Note that older MMTK releases
+                           always used a block size of 1 and cannot handle
+                           trajectories with different block sizes.
+        @type block_size: C{int}
+        """
         filename = os.path.expanduser(filename)
         self.filename = filename
         if object is None and mode == 'r':
@@ -140,14 +146,14 @@ class Trajectory:
         else:
             if mode == 'r':
                 raise ValueError("can't read trajectory for a non-universe")
-            index_map = Numeric.array(map(lambda a:a.index, object.atomList()))
+            index_map = N.array([a.index for a in  object.atomList()])
             inverse_map = universe.numberOfPoints()*[None]
             for i in range(len(index_map)):
                 inverse_map[index_map[i]] = i
-            toplevel = {}
+            toplevel = set()
             for o in Collections.Collection(object):
-                toplevel[o.topLevelChemicalObject()] = 1
-            object = Collections.Collection(toplevel.keys())
+                toplevel.add(o.topLevelChemicalObject())
+            object = Collections.Collection(list(toplevel))
         if description is None:
             description = universe.description(object, inverse_map)
         import MMTK_trajectory
@@ -172,14 +178,18 @@ class Trajectory:
         self.particle_trajectory_reader = ParticleTrajectoryReader(self)
 
     def flush(self):
-        """Make sure that all data that has been written to the trajectory
-        is also written to the file."""
+        """
+        Make sure that all data that has been written to the trajectory
+        is also written to the file.
+        """
         self.trajectory.flush()
 
     def close(self):
-        """Close the trajectory file. Must be called after writing to
+        """
+        Close the trajectory file. Must be called after writing to
         ensure that all buffered data is written to the file. No data
-        access is possible after closing a file."""
+        access is possible after closing a file.
+        """
         self.trajectory.close()
 
     def __len__(self):
@@ -187,9 +197,9 @@ class Trajectory:
 
     def __getitem__(self, item):
         if not isinstance(item, int):
-            return SubTrajectory(self, Numeric.arange(len(self)))[item]
+            return SubTrajectory(self, N.arange(len(self)))[item]
         if item < 0:
-            item = item + len(self)
+            item += len(self)
         if item >= len(self):
             raise IndexError
         data = {}
@@ -216,7 +226,7 @@ class Trajectory:
         if data.has_key('configuration'):
             box = data.get('box_size', None)
             if box is not None:
-                box = box.astype(Numeric.Float)
+                box = box.astype(N.Float)
             conf = data['configuration']
             data['configuration'] = \
                ParticleProperties.Configuration(conf.universe, conf.array, box)
@@ -233,7 +243,7 @@ class Trajectory:
         if 'atom_number' in var.dimensions:
             return TrajectoryVariable(self.universe, self, name)
         else:
-            return Numeric.ravel(Numeric.array(var))[:len(self)]
+            return N.ravel(N.array(var))[:len(self)]
 
     def defaultStep(self):
         try:
@@ -244,29 +254,65 @@ class Trajectory:
 
     def readParticleTrajectory(self, atom, first=0, last=None, skip=1,
                                variable = "configuration"):
-        """Read the values of the specified |variable| for the specified
-        |atom| at all time steps from |first| to |last| with an
-        increment of |skip|. The result is a ParticleTrajectory object.
-        If the variable is "configuration", the resulting trajectory
-        is made continuous by eliminating all jumps caused by periodic
-        boundary conditions. The pseudo-variable "box_coordinates"
-        can be read to obtain the values of the variable "configuration"
-        scaled to box coordinates. For non-periodic universes there is
-        no difference between box coordinates and real coordinates."""
+        """
+        Read trajectory information for a single atom but for multiple
+        time steps.
+
+        @param atom: the atom whose trajectory is requested
+        @type atom: L{MMTK.ChemicalObjects.Atom}
+        @param first: the number of the first step to be read
+        @type first: C{int}
+        @param last: the number of the first step not to be read.
+                     A value of C{None} indicates that the
+                     whole trajectory should be read.
+        @type last: C{int}
+        @param skip: the number of steps to skip between two steps read
+        @type skip: C{int}
+        @param variable: the name of the trajectory variable to be read.
+                         If the variable is "configuration", the resulting
+                         trajectory is made continuous by eliminating all
+                         jumps caused by periodic boundary conditions.
+                         The pseudo-variable "box_coordinates" can be read
+                         to obtain the values of the variable "configuration"
+                         scaled to box coordinates. For non-periodic universes
+                         there is no difference between box coordinates
+                         and real coordinates.
+        @type variable: C{str}
+        @returns: the trajectory for a single atom
+        @rtype: L{ParticleTrajectory}
+        """
         return ParticleTrajectory(self, atom, first, last, skip, variable)
 
     def readRigidBodyTrajectory(self, object, first=0, last=None, skip=1,
                                 reference = None):
-        """Read the positions for the specified |object| at all time steps
-        from |first| to |last| with an increment of |skip| and extract
-        the rigid-body motion (center-of-mass position plus orientation as
-        a quaternion) by an optimal-transformation fit. The result is a
-        RigidBodyTrajectory object."""
+        """
+        Read the positions for an object at multiple time steps
+        and extract the rigid-body motion (center-of-mass position plus
+        orientation as a quaternion) by an optimal-transformation fit.
+
+        @param object: the object whose rigid-body trajectory is requested
+        @type object: L{MMTK.Collections.GroupOfAtoms}
+        @param first: the number of the first step to be read
+        @type first: C{int}
+        @param last: the number of the first step not to be read.
+                     A value of C{None} indicates that the
+                     whole trajectory should be read.
+        @type last: C{int}
+        @param skip: the number of steps to skip between two steps read
+        @type skip: C{int}
+        @param reference: the reference configuration for the fit
+        @type reference: L{MMTK.ParticleProperties.Configuration}
+        @returns: the trajectory for a single rigid body
+        @rtype: L{RigidBodyTrajectory}
+        """
         return RigidBodyTrajectory(self, object, first, last, skip, reference)
 
     def variables(self):
-        """Returns a list of the names of all variables that are stored
-        in the trajectory."""
+        """
+        @returns: a list of the names of all variables that are stored
+                  in the trajectory
+        @rtype: C{list} of C{str}
+        """
         vars = copy.copy(self.trajectory.file.variables.keys())
         vars.remove('step')
         try:
@@ -274,11 +320,25 @@ class Trajectory:
         except ValueError: pass
         return vars
 
-    def view(self, first=0, last=None, step=1, object = None):
-        """Show an animation of |object| using the positions in the
-        trajectory at all time steps from |first| to |last| with an
-        increment of |skip|. |object| defaults to the entire universe."""
-        Visualization.viewTrajectory(self, first, last, step, object)
+    def view(self, first=0, last=None, skip=1, object = None):
+        """
+        Show an animation of the trajectory using an external visualization
+        program.
+
+        @param first: the number of the first step in the animation
+        @type first: C{int}
+        @param last: the number of the first step not to include in the
+                     animation. A value of C{None} indicates that the
+                     whole trajectory should be used.
+        @type last: C{int}
+        @param skip: the number of steps to skip between two steps read
+        @type skip: C{int}
+        @param object: the object to be animated, which must be in the
+                       universe stored in the trajectory. C{None}
+                       stands for the whole universe.
+        @type object: L{MMTK.Collections.GroupOfAtoms}
+        """
+        Visualization.viewTrajectory(self, first, last, skip, object)
 
     def _boxTransformation(self, pt_in, pt_out, to_box=0):
         from MMTK_trajectory import boxTransformation
@@ -289,9 +349,11 @@ class Trajectory:
         boxTransformation(self.universe._spec,
                           pt_in, pt_out, box_size, to_box)
 
-class SubTrajectory:
 
-    """Reference to a subset of a trajectory
+class SubTrajectory(object):
+
+    """
+    Reference to a subset of a trajectory
 
     A SubTrajectory object is created by slicing a Trajectory object
     or another SubTrajectory object. It provides all the operations
@@ -361,9 +423,10 @@ class SubTrajectory:
 #
 # Trajectory variables
 #
-class TrajectoryVariable:
+class TrajectoryVariable(object):
 
-    """Variable in a trajectory
+    """
+    Variable in a trajectory
 
     A TrajectoryVariable object is created by extracting a variable from
     a Trajectory object if that variable contains data for each atom and
@@ -372,15 +435,15 @@ class TrajectoryVariable:
     takes place when the TrajectoryVariable is indexed with a specific
     step number.
 
-    If 't' is a TrajectoryVariable object, then:
+    If C{t} is a TrajectoryVariable object, then:
 
-    - 'len(t)' is the number of steps
+     - C{len(t)} is the number of steps
 
-    - 't[i]' is the data for step i, in the form of a ParticleScalar,
-      a ParticleVector, or a Configuration object, depending on the
-      variable
+     - C{t[i]} is the data for step C{i}, in the form of a ParticleScalar,
+       a ParticleVector, or a Configuration object, depending on the
+       variable
 
-    - 't[i:j]' and 't[i:j:n]' return a SubVariable object that refers
+     - C{t[i:j]} and C{t[i:j:n]} return a SubVariable object that refers
        to a subset of the total number of steps
     """
     
@@ -401,7 +464,7 @@ class TrajectoryVariable:
 
     def __getitem__(self, item):
         if not isinstance(item, int):
-            return SubVariable(self, Numeric.arange(len(self)))[item]
+            return SubVariable(self, N.arange(len(self)))[item]
         if item < 0:
             item = item + len(self.trajectory)
         if item >= len(self.trajectory):
@@ -411,9 +474,9 @@ class TrajectoryVariable:
                 box = None
             elif len(self.box_size.shape) == 3:
                 bs = self.trajectory.block_size
-                box = self.box_size[item/bs, :, item%bs].astype(Numeric.Float)
+                box = self.box_size[item/bs, :, item%bs].astype(N.Float)
             else:
-                box = self.box_size[item].astype(Numeric.Float)
+                box = self.box_size[item].astype(N.Float)
             array = ParticleProperties.Configuration(self.universe,
                 self.trajectory.trajectory.readParticleVector(self.name, item),
                 box)
@@ -436,9 +499,8 @@ class TrajectoryVariable:
 
 class SubVariable(TrajectoryVariable):
 
-    """Reference to a subset of a TrajectoryVariable
-
-    A Glossary:Subclass of Class:MMTK.Trajectory.TrajectoryVariable.
+    """
+    Reference to a subset of a L{TrajectoryVariable}
 
     A SubVariable object is created by slicing a TrajectoryVariable
     object or another SubVariable object. It provides all the operations
@@ -464,32 +526,17 @@ class SubVariable(TrajectoryVariable):
 #
 # Trajectory consisting of multiple files
 #
-class TrajectorySet:
+class TrajectorySet(object):
 
-    """Trajectory file set
+    """
+    Trajectory file set
 
-    A trajectory set permits to treat a sequence of trajectory files
-    like a single trajectory for reading data. It behaves like an
-    object of the class Class:MMTK.Trajectory.Trajectory. The
-    trajectory files must all contain data for the same system.
-    The variables stored in the individual files need not be the
-    same, but only variables common to all files can be accessed.
-
-    Constructor: TrajectorySet(|object|, |filename_list|)
-
-    Arguments:
-
-    |object| -- the object whose data is stored in the trajectory files.
-                This can be (and usually is) 'None';
-                in that case, a universe object is constructed from the
-                description stored in the first trajectory file. This universe
-                object can be accessed via the attribute 'universe'
-                of the trajectory set object.
-
-    |filename_list| -- a list of trajectory file names or
-                       (filename, first_step, last_step, increment)
-                       tuples.
-
+    A TrajectorySet permits to treat a sequence of trajectory files
+    like a single trajectory for reading data. It behaves exactly like a
+    L{Trajectory} object. The trajectory files must all contain data
+    for the same system. The variables stored in the individual files
+    need not be the same, but only variables common to all files
+    can be accessed.
 
     Note: depending on how the sequence of trajectories was constructed,
     the first configuration of each trajectory might be the same as the
@@ -499,15 +546,28 @@ class TrajectorySet:
     """
 
     def __init__(self, object, filenames):
-        first = Trajectory(object, filenames[0])
-        if type(first) == type(()):
-            first = first[0]
+        """
+        @param object: the object whose data is stored in the trajectory files.
+                       This can be (and usually is) C{None};
+                       in that case, a universe object is constructed from the
+                       description stored in the first trajectory file.
+                       This universe object can be accessed via the attribute
+                       C{universe} of the trajectory set object.
+        @param filenames: a list of trajectory file names or
+                          (filename, first_step, last_step, increment)
+                          tuples.
+        """
+        first = filenames[0]
+        if isinstance(first, tuple):
+            first = Trajectory(object, first[0])[first[1]:first[2]:first[3]]
+        else:
+            first = Trajectory(object, first)
         self.universe = first.universe
         self.trajectories = [first]
         self.nsteps = [0, len(first)]
         self.cell_parameters = []
         for file in filenames[1:]:
-            if type(file) == type(()):
+            if isinstance(file, tuple):
                 t = Trajectory(self.universe, file[0])[file[1]:file[2]:file[3]]
             else:
                 t = Trajectory(self.universe, file)
@@ -535,10 +595,10 @@ class TrajectorySet:
 
     def __getitem__(self, item):
         if not isinstance(item, int):
-            return SubTrajectory(self, Numeric.arange(len(self)))[item]
+            return SubTrajectory(self, N.arange(len(self)))[item]
         if item >= len(self):
             raise IndexError
-        tindex = Numeric.add.reduce(Numeric.greater_equal(item, self.nsteps))-1
+        tindex = N.add.reduce(N.greater_equal(item, self.nsteps))-1
         return self.trajectories[tindex][item-self.nsteps[tindex]]
 
     def __getslice__(self, first, last):
@@ -554,8 +614,8 @@ class TrajectorySet:
             data = []
             for t in self.trajectories:
                 var = t.trajectory.file.variables[name]
-                data.append(Numeric.ravel(Numeric.array(var))[:len(t)])
-            return Numeric.concatenate(data)
+                data.append(N.ravel(N.array(var))[:len(t)])
+            return N.concatenate(data)
 
     def readParticleTrajectory(self, atom, first=0, last=None, skip=1,
                                variable = "configuration"):
@@ -586,35 +646,35 @@ class TrajectorySet:
                        and self.cell_parameters[0] is not None:
                         jump = pt.array[0]-total.array[-1]
                         mult = -(jump/self.cell_parameters[i-1]).astype('i')
-                        if len(Numeric.nonzero(mult)) > 0:
+                        if len(N.nonzero(mult)) > 0:
                             t._boxTransformation(pt.array, pt.array, 1)
-                            Numeric.add(pt.array, mult[Numeric.NewAxis, : ],
+                            N.add(pt.array, mult[N.NewAxis, : ],
                                         pt.array)
                             t._boxTransformation(pt.array, pt.array, 0)
                             jump = pt.array[0] - total.array[-1]
-                        mask = Numeric.less(jump,
+                        mask = N.less(jump,
                                             -0.5*self.cell_parameters[i-1])- \
-                               Numeric.greater(jump,
+                               N.greater(jump,
                                                0.5*self.cell_parameters[i-1])
-                        if len(Numeric.nonzero(mask)) > 0:
+                        if len(N.nonzero(mask)) > 0:
                             t._boxTransformation(pt.array, pt.array, 1)
-                            Numeric.add(pt.array, mask[Numeric.NewAxis, :],
+                            N.add(pt.array, mask[N.NewAxis, :],
                                         pt.array)
                             t._boxTransformation(pt.array, pt.array, 0)
                     elif variable == "box_coordinates" \
                        and self.cell_parameters[0] is not None:
                         jump = pt.array[0]-total.array[-1]
                         mult = -jump.astype('i')
-                        if len(Numeric.nonzero(mult)) > 0:
-                            Numeric.add(pt.array, mult[Numeric.NewAxis, : ],
+                        if len(N.nonzero(mult)) > 0:
+                            N.add(pt.array, mult[N.NewAxis, : ],
                                         pt.array)
                             jump = pt.array[0] - total.array[-1]
-                        mask = Numeric.less(jump, -0.5)- \
-                               Numeric.greater(jump, 0.5)
-                        if len(Numeric.nonzero(mask)) > 0:
-                            Numeric.add(pt.array, mask[Numeric.NewAxis, :],
+                        mask = N.less(jump, -0.5)- \
+                               N.greater(jump, 0.5)
+                        if len(N.nonzero(mask)) > 0:
+                            N.add(pt.array, mask[N.NewAxis, :],
                                         pt.array)
-                    total.array = Numeric.concatenate((total.array, pt.array))
+                    total.array = N.concatenate((total.array, pt.array))
             else:
                 self.steps_read.append(0)
         return total
@@ -633,44 +693,6 @@ class TrajectorySet:
                                      to_box)
             n = n + steps
 
-##      def readRigidBodyTrajectory(self, object, first=0, last=None, skip=1,
-##                                  reference = None):
-##          total = None
-##          for i in range(len(self.trajectories)):
-##              if self.nsteps[i+1] <= first:
-##                  continue
-##              if last is not None and self.nsteps[i] >= last:
-##                  break
-##              n = max(0, (self.nsteps[i]-first+skip-1)/skip)
-##              start = first+skip*n-self.nsteps[i]
-##              n = (self.nsteps[i+1]-first+skip-1)/skip
-##              stop = first+skip*n
-##              if last is not None:
-##                  stop = min(stop, last)
-##              stop = stop-self.nsteps[i]
-##              if start >= 0 and start < self.nsteps[i+1]-self.nsteps[i]:
-##                  t = self.trajectories[i]
-##                  rbt = t.readRigidBodyTrajectory(object, start, stop, skip,
-##                                                  reference)
-##                  if total is None:
-##                      total = rbt
-##                  else:
-##                      if self.cell_parameters[0] is not None:
-##                          jump = rbt.cms[0]-total.cms[-1]
-##                          mask = Numeric.less(jump,
-##                                              -0.5*self.cell_parameters[i-1])- \
-##                                 Numeric.greater(jump,
-##                                                 0.5*self.cell_parameters[i-1])
-##                          t._boxTransformation(rbt.cms, rbt.cms, 1)
-##                          Numeric.add(rbt.cms, mask[Numeric.NewAxis, :],
-##                                      rbt.cms)
-##                          t._boxTransformation(rbt.cms, rbt.cms, 0)
-##                      total.cms = Numeric.concatenate((total.cms, rbt.cms))
-##                      total.quaternions = Numeric.concatenate((total.quaternions,
-##                                                               rbt.quaternions))
-##                      total.fit = Numeric.concatenate((total.fit, rbt.fit))
-##          return total
-
     def variables(self):
         return self.vars
 
@@ -680,7 +702,8 @@ class TrajectorySet:
 
 class TrajectorySetVariable(TrajectoryVariable):
 
-    """Variable in a trajectory set
+    """
+    Variable in a trajectory set
 
     A TrajectorySetVariable object is created by extracting a variable from
     a TrajectorySet object if that variable contains data for each atom and
@@ -698,11 +721,11 @@ class TrajectorySetVariable(TrajectoryVariable):
 
     def __getitem__(self, item):
         if not isinstance(item, int):
-            return SubVariable(self, Numeric.arange(len(self)))[item]
+            return SubVariable(self, N.arange(len(self)))[item]
         if item >= len(self.trajectory_set):
             raise IndexError
-        tindex = Numeric.add.reduce(Numeric.greater_equal(item,
-                                         self.trajectory_set.nsteps))-1
+        tindex = N.add.reduce(N.greater_equal(item,
+                                              self.trajectory_set.nsteps))-1
         step = item-self.trajectory_set.nsteps[tindex]
         t = self.trajectory_set.trajectories[tindex]
         return getattr(t, self.name)[step]
@@ -710,7 +733,7 @@ class TrajectorySetVariable(TrajectoryVariable):
 #
 # Cache for atom trajectories
 #
-class ParticleTrajectoryReader:
+class ParticleTrajectoryReader(object):
 
     def __init__(self, trajectory):
         self.trajectory = trajectory
@@ -720,10 +743,10 @@ class ParticleTrajectoryReader:
         self.cache_lifetime = 2
 
     def __call__(self, atom, variable, first, last, skip, correct, box):
-        if not isinstance(atom, int):
-            index = atom.index
-        else:
+        if isinstance(atom, int):
             index = atom
+        else:
+            index = atom.index
         key = (index, variable, first, last, skip, correct, box)
         data, count = self.cache.get(key, (None, 0))
         if data is not None:
@@ -732,7 +755,7 @@ class ParticleTrajectoryReader:
         delete = []
         for k, value in self.cache.items():
             data, count = value
-            count = count - 1
+            count -= 1
             if count == 0:
                 delete.append(k)
             else:
@@ -753,17 +776,19 @@ class ParticleTrajectoryReader:
 #
 # Single-atom trajectory
 #
-class ParticleTrajectory:
+class ParticleTrajectory(object):
 
-    """Trajectory data for a single particle
+    """
+    Trajectory data for a single particle
 
     A ParticleTrajectory object is created by calling the method
-    'readParticleTrajectory' on a Trajectory object.
-    If 'pt' is a ParticleTrajectory object, then
+    C{readParticleTrajectory} on a L{Trajectory} object.
 
-    - 'len(pt)' is the number of steps stored in it
+    If C{pt} is a ParticleTrajectory object, then
 
-    - 'pt[i]' is the value at step 'i' (a vector)
+     - C{len(pt)} is the number of steps stored in it
+
+     - C{pt[i]} is the value at step C{i} (a vector)
     """
     
     def __init__(self, trajectory, atom, first=0, last=None, skip=1,
@@ -779,7 +804,6 @@ class ParticleTrajectory:
         self.array = reader(atom, variable, first, last, skip,
                             variable == "configuration", box)
 
-
     def __len__(self):
         return self.array.shape[0]
 
@@ -787,25 +811,31 @@ class ParticleTrajectory:
         return Vector(self.array[index])
 
     def translateBy(self, vector):
-        """Adds |vector| to the values at all steps. This does *not*
-        change the data in the trajectory file."""
-        Numeric.add(self.array, vector.array[Numeric.NewAxis, :], self.array)
+        """
+        Adds a vector to the values at all steps. This does B{not}
+        change the data in the trajectory file.
+        @param vector: the vector to be added
+        @type vector: C{Scientific.Geometry.Vector}
+        """
+        N.add(self.array, vector.array[N.NewAxis, :], self.array)
 
 #
 # Rigid-body trajectory
 #
-class RigidBodyTrajectory:
+class RigidBodyTrajectory(object):
 
-    """Rigid-body trajectory data
+    """
+    Rigid-body trajectory data
 
     A RigidBodyTrajectory object is created by calling the method
-    'readRigidBodyTrajectory' on a Trajectory object.
-    If 'rbt' is a RigidBodyTrajectory object, then
+    C{readRigidBodyTrajectory} on a L{Trajectory} object.
 
-    - 'len(rbt)' is the number of steps stored in it
+    If C{rbt} is a RigidBodyTrajectory object, then
 
-    - 'rbt[i]' is the value at step 'i' (a vector for the center of mass
-               and a quaternion for the orientation)
+     - C{len(rbt)} is the number of steps stored in it
+
+     - C{rbt[i]} is the value at step C{i} (a vector for the center of mass
+       and a quaternion for the orientation)
     """
     
     def __init__(self, trajectory, object, first=0, last=None, skip=1,
@@ -814,31 +844,30 @@ class RigidBodyTrajectory:
         universe = trajectory.universe
         if last is None: last = len(trajectory)
         first_conf = trajectory.configuration[first]
-        offset = universe.contiguousObjectOffset([object], first_conf, 1)
+        offset = universe.contiguousObjectOffset([object], first_conf, True)
         if reference is None:
             reference = first_conf
-        reference = universe.contiguousObjectConfiguration([object],
-                                                           reference)
+        reference = universe.contiguousObjectConfiguration([object], reference)
         steps = (last-first+skip-1)/skip
         mass = object.mass()
         ref_cms = object.centerOfMass(reference)
         atoms = object.atomList()
 
-        possq = Numeric.zeros((steps,), Numeric.Float)
-        cross = Numeric.zeros((steps, 3, 3), Numeric.Float)
-        rcms = Numeric.zeros((steps, 3), Numeric.Float)
+        possq = N.zeros((steps,), N.Float)
+        cross = N.zeros((steps, 3, 3), N.Float)
+        rcms = N.zeros((steps, 3), N.Float)
 
         # cms of the CONTIGUOUS object made of CONTINUOUS atom trajectories 
         for a in atoms:
             r = trajectory.readParticleTrajectory(a, first, last, skip,
                                                   "box_coordinates").array
             w = a._mass/mass
-            Numeric.add(rcms, w*r, rcms)
+            N.add(rcms, w*r, rcms)
             if offset is not None:
-                Numeric.add(rcms, w*offset[a].array, rcms)
+                N.add(rcms, w*offset[a].array, rcms)
         
         # relative coords of the CONTIGUOUS reference
-        r_ref = Numeric.zeros((len(atoms), 3), Numeric.Float)
+        r_ref = N.zeros((len(atoms), 3), N.Float)
         for a in range(len(atoms)):
             r_ref[a] = atoms[a].position(reference).array - ref_cms.array
 
@@ -849,18 +878,18 @@ class RigidBodyTrajectory:
                                                   "box_coordinates").array
             r = r - rcms # (a-b)**2 != a**2 - b**2
             if offset is not None:
-                Numeric.add(r, offset[atoms[a]].array,r)
+                N.add(r, offset[atoms[a]].array,r)
             trajectory._boxTransformation(r, r)
             w = atoms[a]._mass/mass
-            Numeric.add(possq, w*Numeric.add.reduce(r*r, -1), possq)
-            Numeric.add(possq, w*Numeric.add.reduce(r_ref[a]*r_ref[a],-1),
+            N.add(possq, w*N.add.reduce(r*r, -1), possq)
+            N.add(possq, w*N.add.reduce(r_ref[a]*r_ref[a],-1),
                         possq)
-            Numeric.add(cross, w*r[:,:,Numeric.NewAxis]*r_ref[Numeric.NewAxis,
+            N.add(cross, w*r[:,:,N.NewAxis]*r_ref[N.NewAxis,
                                                               a,:],cross)
         self.trajectory._boxTransformation(rcms, rcms)
 
         # filling matrix M (formula no 40)
-        k = Numeric.zeros((steps, 4, 4), Numeric.Float)
+        k = N.zeros((steps, 4, 4), N.Float)
         k[:, 0, 0] = -cross[:, 0, 0]-cross[:, 1, 1]-cross[:, 2, 2]
         k[:, 0, 1] = cross[:, 1, 2]-cross[:, 2, 1]
         k[:, 0, 2] = cross[:, 2, 0]-cross[:, 0, 2]
@@ -875,21 +904,21 @@ class RigidBodyTrajectory:
         for i in range(1, 4):
             for j in range(i):
                 k[:, i, j] = k[:, j, i]
-        Numeric.multiply(k, 2., k)
+        N.multiply(k, 2., k)
         for i in range(4):
-            Numeric.add(k[:,i,i], possq, k[:,i,i])
+            N.add(k[:,i,i], possq, k[:,i,i])
         del possq
 
-        quaternions = Numeric.zeros((steps, 4), Numeric.Float)
-        fit = Numeric.zeros((steps,), Numeric.Float)
+        quaternions = N.zeros((steps, 4), N.Float)
+        fit = N.zeros((steps,), N.Float)
         from Scientific.LA import eigenvectors
         for i in range(steps):
             e, v = eigenvectors(k[i])
-            j = Numeric.argmin(e)
+            j = N.argmin(e)
             if e[j] < 0.:
                 fit[i] = 0.
             else:
-                fit[i] = Numeric.sqrt(e[j])
+                fit[i] = N.sqrt(e[j])
             if v[j,0] < 0.: quaternions[i] = -v[j] # eliminate jumps
             else: quaternions[i] = v[j]
         self.fit = fit
@@ -907,16 +936,24 @@ class RigidBodyTrajectory:
 # Type check for trajectory objects
 #
 def isTrajectory(object):
-    "Returns 1 if |object| is a trajectory."
+    """
+    @param object: any Python object
+    @returns C{True} if object is a trajectory
+    """
     import MMTK_trajectory
-    return type(object) == MMTK_trajectory.trajectory_type or \
-           (type(object) == types.InstanceType and
-            object.__class__ == Trajectory)
+    return isinstance(object, (Trajectory, MMTK_trajectory.trajectory_type))
 
 #
 # Base class for all objects that generate trajectories
 #
-class TrajectoryGenerator:
+class TrajectoryGenerator(object):
+
+    """
+    Trajectory generator base class
+
+    This base class implements the common aspects of everything that
+    generates trajectories: integrators, minimizers, etc.
+    """
 
     def __init__(self, universe, options):
         self.universe = universe
@@ -963,7 +1000,14 @@ class TrajectoryGenerator:
 #
 # Trajectory action base class
 #
-class TrajectoryAction:
+class TrajectoryAction(object):
+
+    """
+    Trajectory action base class
+
+    Subclasses of this base class implement the actions that can be
+    inserted into trajectory generation at regular intervals.
+    """
 
     def __init__(self, first, last, skip):
         self.first = first
@@ -993,46 +1037,41 @@ class TrajectoryAction:
 
 class TrajectoryOutput(TrajectoryAction):
 
-    """Trajectory output action
+    """
+    Trajectory output action
 
-    A TrajectoryOutput object is used in the action list of any
+    A TrajectoryOutput object can be used in the action list of any
     trajectory-generating operation. It writes any of the available
     data to a trajectory file. It is possible to use several
     TrajectoryOutput objects at the same time in order to produce
     multiple trajectories from a single run.
-
-    Constructor: TrajectoryOutput(|trajectory|, |data|=None,
-                                  |first|=0, |last|=None, |skip|=1)
-
-    Arguments:
-
-    |trajectory| -- a trajectory object or a string, which is interpreted
-                    as the name of a file that is opened as a trajectory
-                    in append mode
-
-    |data| -- a list of data categories. All variables provided by the
-              trajectory generator that fall in any of the listed categories
-              are written to the trajectory file. See the descriptions of
-              the trajectory generators for a list of variables and
-              categories. By default (|data| = 'None') the categories
-              "configuration", "energy", "thermodynamic", and "time"
-              are written.
-
-    |first| -- the number of the first step at which the action is executed
-
-    |last| -- the number of the last step at which the action is executed.
-              A value of 'None' indicates that the action should be
-              executed indefinitely.
-
-    |skip| -- the number of steps to skip between two applications of the
-              action
     """
 
-    def __init__(self, destination, categories = None,
+    def __init__(self, trajectory, data = None,
                  first=0, last=None, skip=1):
+        """
+        @param trajectory: a trajectory object or a string, which is
+                           interpreted as the name of a file that is opened
+                           as a trajectory in append mode
+        @param data: a list of data categories. All variables provided by the
+                     trajectory generator that fall in any of the listed
+                     categories are written to the trajectory file. See the
+                     descriptions of the trajectory generators for a list
+                     of variables and categories. By default (C{data = None})
+                     the categories "configuration", "energy",
+                     "thermodynamic", and "time" are written.
+        @param first: the number of the first step at which the action is run
+        @type first: C{int}
+        @param last: the number of the step at which the action is suspended.
+                     A value of C{None} indicates that the action should
+                     be applied indefinitely.
+        @type last: C{int}
+        @param skip: the number of steps to skip between two action runs
+        @type skip: C{int}
+        """
         TrajectoryAction.__init__(self, first, last, skip)
-        self.destination = destination
-        self.categories = categories
+        self.destination = trajectory
+        self.categories = data
         self.must_be_closed = None
 
     spec_type = 'trajectory'
@@ -1072,30 +1111,27 @@ class TrajectoryOutput(TrajectoryAction):
 
 class RestartTrajectoryOutput(TrajectoryOutput):
 
-    """Restart trajectory output action
+    """
+    Restart trajectory output action
 
     A RestartTrajectoryOutput object is used in the action list of any
     trajectory-generating operation. It writes those variables to a
     trajectory that the trajectory generator declares as necessary
     for restarting.
-
-    Constructor: RestartTrajectoryOutput(|trajectory|, |skip|=100, |length|=3)
-
-    Arguments:
-
-    |trajectory| -- a trajectory object or a string, which is interpreted
-                    as the name of a file that is opened as a trajectory
-                    in append mode with a cycle length of |length| and
-                    double-precision variables
-
-    |skip| -- the number of steps between two write operations to the
-              restart trajectory
-
-    |length| -- the number of steps stored in the restart trajectory;
-                used only if |trajectory| is a string
     """
 
     def __init__(self, trajectory, skip=100, length=3):
+        """
+        @param trajectory: a trajectory object or a string, which is interpreted
+                           as the name of a file that is opened as a trajectory
+                           in append mode with a cycle length of C{length} and
+                           double-precision variables
+        @param skip: the number of steps between two write operations to the
+                     restart trajectory
+        @type skip: C{int}
+        @param length: the number of steps stored in the restart trajectory;
+                       used only if C{trajectory} is a string
+        """
         TrajectoryAction.__init__(self, 0, None, skip)
         self.destination = trajectory
         self.categories = None
@@ -1113,35 +1149,35 @@ class RestartTrajectoryOutput(TrajectoryOutput):
 
 class LogOutput(TrajectoryOutput):
 
-    """Protocol file output action
+    """
+    Protocol file output action
 
-    A LogOutput object is used in the action list of any
+    A LogOutput object can be used in the action list of any
     trajectory-generating operation. It writes any of the available
     data to a text file.
-
-    Constructor: LogOutput(|file|, |data|, |first|=0, |last|=None, |skip|=1)
-
-    Arguments:
-
-    |file| -- a file object or a string, which is interpreted as the name
-              of a file that is opened in write mode
-
-    |data| -- a list of data categories. All variables provided by the
-              trajectory generator that fall in any of the listed categories
-              are written to the trajectory file. See the descriptions of
-              the trajectory generators for a list of variables and
-              categories. By default (|data| = 'None') the categories
-              "energy" and "time" are written.
-
-    |first| -- the number of the first step at which the action is executed
-
-    |last| -- the number of the last step at which the action is executed.
-              A value of 'None' indicates that the action should be
-              executed indefinitely.
-
-    |skip| -- the number of steps to skip between two applications of the
-              action
     """
+
+    def __init__(self, file, data = None, first=0, last=None, skip=1):
+        """
+        @param file: a file object or a string, which is interpreted as the
+                     name of a file that is opened in write mode
+        @param data: a list of data categories. All variables provided by the
+                     trajectory generator that fall in any of the listed
+                     categories are written to the trajectory file. See the
+                     descriptions of the trajectory generators for a list
+                     of variables and categories. By default (C{data = None})
+                     the categories "configuration", "energy",
+                     "thermodynamic", and "time" are written.
+        @param first: the number of the first step at which the action is run
+        @type first: C{int}
+        @param last: the number of the step at which the action is suspended.
+                     A value of C{None} indicates that the action should
+                     be applied indefinitely.
+        @type last: C{int}
+        @param skip: the number of steps to skip between two action runs
+        @type skip: C{int}
+        """
+        TrajectoryOutput.__init__(self, file, data, first, last, skip)
 
     def _setupDestination(self, destination, universe):
         self.must_be_closed = open(destination, 'w')
@@ -1153,22 +1189,20 @@ class LogOutput(TrajectoryOutput):
 
 class StandardLogOutput(LogOutput):
 
-    """Standard protocol output action
+    """
+    Standard protocol output action
 
-    A StandardLogOutput object is used in the action list of any
+    A StandardLogOutput object can be used in the action list of any
     trajectory-generating operation. It is a specialization of
     LogOutput to the most common case and writes data in the categories
     "time" and "energy" to the standard output stream.
-
-    Constructor: StandardLogOutput(|skip|=50)
-
-    Arguments:
-
-    |skip| -- the number of steps to skip between two applications of the
-              action
     """
 
     def __init__(self, skip=50):
+        """
+        @param skip: the number of steps to skip between two action runs
+        @type skip: C{int}
+        """
         LogOutput.__init__(self, sys.stdout, None, 0, None, skip)
 
 #
@@ -1176,32 +1210,28 @@ class StandardLogOutput(LogOutput):
 #
 class SnapshotGenerator(TrajectoryGenerator):
 
-    """Trajectory generator for single steps
+    """
+    Trajectory generator for single steps
 
     A SnapshotGenerator is used for manual assembly of trajectory
     files. At each call it writes one step to the trajectory,
     using the current state of the universe (configuration, velocities, etc.)
     and data provided explicitly with the call.
 
-    Constructor: SnapshotGenerator(|universe|, |**options|)
-
-    Arguments:
-
-    |universe| -- the universe on which the integrator acts
-
-    |options| -- keyword options:
-
-      * data: a dictionary that supplies values for variables
-              that are not part of the universe state (e.g. potential energy)
-      * actions: a list of actions to be executed periodically (default is
-                 none)
-
     Each call to the SnapshotGenerator object produces one step.
-    All the keyword options listed above can be specified either when
+    All the keyword options can be specified either when
     creating the generator or when calling it.
     """
 
     def __init__(self, universe, **options):
+        """
+        @param universe: the universe on which the generator acts
+        @keyword data: a dictionary that supplies values for variables
+                       that are not part of the universe state
+                       (e.g. potential energy)
+        @keyword actions: a list of actions to be executed periodically
+                          (default is none)
+        """
         TrajectoryGenerator.__init__(self, universe, options)
         self.available_data = []
         try:
@@ -1281,29 +1311,34 @@ class SnapshotGenerator(TrajectoryGenerator):
 #
 # Trajectory reader (not yet functional...)
 #
-class TrajectoryReader(TrajectoryGenerator):
+if False:
 
-    def __init__(self, trajectory, options):
-        TrajectoryGenerator.__init__(self, trajectory.universe, options)
-        self.input = trajectory
-        self.available_data = trajectory.variables()
+    class TrajectoryReader(TrajectoryGenerator):
 
-    default_options = {'trajectory': None, 'log': None, 'options': []}
+        def __init__(self, trajectory, options):
+            TrajectoryGenerator.__init__(self, trajectory.universe, options)
+            self.input = trajectory
+            self.available_data = trajectory.variables()
 
-    def __call__(self, **options):
-        self.setCallOptions(options)
-        from MMTK_trajectory import readTrajectory
-        readTrajectory(self.universe, self.input.trajectory,
-                       [self.getOption('trajectory'),
-                        self.getOption('log')] +
-                       self.getOption('options'))
+        default_options = {'trajectory': None, 'log': None, 'options': []}
+
+        def __call__(self, **options):
+            self.setCallOptions(options)
+            from MMTK_trajectory import readTrajectory
+            readTrajectory(self.universe, self.input.trajectory,
+                           [self.getOption('trajectory'),
+                            self.getOption('log')] +
+                           self.getOption('options'))
 
 #
 # Print information about trajectory file
 #
 def trajectoryInfo(filename):
-    """Return a string with summarial information about the trajectory
-    file identified by |filename|."""
+    """
+    @param filename: the name of a trajectory file
+    @type filename: C{str}
+    @returns: a string with summarial information about the trajectory
+    """
     from Scientific.IO import NetCDF
     file = NetCDF.NetCDFFile(filename, 'r')
     nsteps = file.variables['step'].shape[0]
@@ -1311,11 +1346,11 @@ def trajectoryInfo(filename):
         nsteps = nsteps*file.variables['step'].shape[1]
     s = 'Information about trajectory file ' + filename + ':\n'
     try:
-        s = s + file.comment + '\n'
+        s += file.comment + '\n'
     except AttributeError:
         pass
-    s = s + `file.dimensions['atom_number']` + ' atoms\n'
-    s = s +  `nsteps` + ' steps\n'
-    s = s +  file.history
+    s += `file.dimensions['atom_number']` + ' atoms\n'
+    s += `nsteps` + ' steps\n'
+    s += file.history
     file.close()
     return s
