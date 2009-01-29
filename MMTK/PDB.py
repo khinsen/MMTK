@@ -1,26 +1,32 @@
 # This module deals with input and output of configurations in PDB format.
 #
 # Written by Konrad Hinsen
-# last revision: 2009-1-8
+# last revision: 2009-1-29
 #
 
-"""This module provides classes that represent molecules in PDB file.
+"""
+PDB files
+
+This module provides classes that represent molecules in a PDB file.
 They permit various manipulations and the creation of MMTK objects.
 Note that the classes defined in this module are specializations
 of classed defined in Scientific.IO.PDB; the methods defined in
 that module are also available.
 """
 
-import ChemicalObjects, Collections, Database, Units, Universe, Utility
+__docformat__ = 'epytext'
+
+from MMTK import ChemicalObjects, Collections, Database, Units, \
+                 Universe, Utility
 from Scientific.Geometry import Vector
 import Scientific.IO.PDB
-import copy, os, string
+import copy, string
 
 #
 # The chain classes from Scientific.IO.PDB are extended by methods
 # that construct MMTK objects and set configurations.
 #
-class PDBChain:
+class PDBChain(object):
 
     def applyTo(self, chain, map = 'pdbmap', alt = 'pdb_alternative',
                 atom_map = None):
@@ -36,23 +42,26 @@ class PDBChain:
     
 class PDBPeptideChain(Scientific.IO.PDB.PeptideChain, PDBChain):
 
-    """Peptide chain in a PDB file
+    """
+    Peptide chain in a PDB file
 
-    A Glossary:Subclass of Scientific.IO.PDB.PeptideChain.
-    See the description of that class for the constructor and
-    additional methods. In MMTK, PDBPeptideChain objects
-    are usually obtained from a PDBConfiguration object
-    via its attribute peptide_chains (see the documentation
-    of Scientific.IO.PDB.Structure).
+    See the description of Scientific.IO.PDB.PeptideChain for the
+    constructor and additional methods. In MMTK, PDBPeptideChain
+    objects are usually obtained from a PDBConfiguration object via
+    its attribute peptide_chains (see the documentation of
+    Scientific.IO.PDB.Structure).
     """
 
     def createPeptideChain(self, model = 'all',
                            n_terminus=None, c_terminus=None):
-        """Returns a PeptideChain object corresponding to the
-        peptide chain in the PDB file. The parameter |model|
-        has the same meaning as for the PeptideChain constructor."""
+        """
+        @returns: a C{PeptideChain} object corresponding to the
+                  peptide chain in the PDB file. The parameter C{model}
+                  has the same meaning as for the PeptideChain constructor.
+        @rtype: L{MMTK.Proteins.PeptideChain}
+        """
         self.identifyProtonation()
-        import Proteins
+        from MMTK import Proteins
         properties = {'model': model}
         if self.segment_id != '':
             properties['name'] = self.segment_id
@@ -106,21 +115,24 @@ class PDBPeptideChain(Scientific.IO.PDB.PeptideChain, PDBChain):
 
 class PDBNucleotideChain(Scientific.IO.PDB.NucleotideChain, PDBChain):
 
-    """Nucleotide chain in a PDB file
+    """
+    Nucleotide chain in a PDB file
 
-    A Glossary:Subclass of Scientific.IO.PDB.NucleotideChain. See
-    the description of that class for the constructor and
-    additional methods. In MMTK, PDBNucleotideChain objects
-    are usually obtained from a PDBConfiguration object
-    via its attribute nucleotide_chains (see the documentation
-    of Scientific.IO.PDB.Structure).
+    See the description of Scientific.IO.PDB.NucleotideChain for the
+    constructor and additional methods. In MMTK, PDBNucleotideChain
+    objects are usually obtained from a PDBConfiguration object via
+    its attribute nucleotide_chains (see the documentation of
+    Scientific.IO.PDB.Structure).
     """
 
     def createNucleotideChain(self, model='all'):
-        """Returns a NucleotideChain object corresponding to the
-        nucleotide chain in the PDB file. The parameter |model|
-        has the same meaning as for the NucleotideChain constructor."""
-        import NucleicAcids
+        """
+        @returns: a C{NucleotideChain} object corresponding to the
+                  nucleotide chain in the PDB file. The parameter C{model}
+                  has the same meaning as for the NucleotideChain constructor.
+        @rtype: L{MMTK.NucleicAcids.NucleotideChain}
+        """
+        from MMTK import NucleicAcids
         properties = {'model': model}
         if self.segment_id != '':
             properties['name'] = self.segment_id
@@ -133,16 +145,16 @@ class PDBNucleotideChain(Scientific.IO.PDB.NucleotideChain, PDBChain):
 
 class PDBMolecule(Scientific.IO.PDB.Molecule):
 
-    """Molecule in a PDB file
+    """
+    Molecule in a PDB file
 
-    A Glossary:Subclass of Scientific.IO.PDB.Molecule. See
-    the description of that class for the constructor and
-    additional methods. In MMTK, PDBMolecule objects
-    are usually obtained from a PDBConfiguration object
-    via its attribute molecules (see the documentation
-    of Scientific.IO.PDB.Structure). A molecule is by definition
-    any residue in a PDB file that is not an amino acid or
-    nucleotide residue.
+    See the description of Scientific.IO.PDB.Molecule for the
+    constructor and additional methods. In MMTK, PDBMolecule objects
+    are usually obtained from a PDBConfiguration object via its
+    attribute molecules (see the documentation of
+    Scientific.IO.PDB.Structure). A molecule is by definition any
+    residue in a PDB file that is not an amino acid or nucleotide
+    residue.
     """
 
     def applyTo(self, molecule, map = 'pdbmap', alt = 'pdb_alternative',
@@ -153,10 +165,14 @@ class PDBMolecule(Scientific.IO.PDB.Molecule):
         setResidueConfiguration(molecule, self, pdbmap[0], altmap, atom_map)
 
     def createMolecule(self, name=None):
-        """Returns a Molecule object corresponding to the molecule
-        in the PDB file. The parameter |name| specifies the molecule
-        name as defined in the chemical database. It can be left out
-        for known molecules (currently only water)."""
+        """
+        @returns: a C{Molecule} object corresponding to the molecule
+                  in the PDB file. The parameter C{name} specifies the
+                  molecule name as defined in the chemical database.
+                  It can be left out for known molecules (currently
+                  only water).
+        @rtype: L{MMTK.ChemicalObjects.Molecule}
+        """
         if name is None:
             name = molecule_names[self.name]
         m = ChemicalObjects.Molecule(name)
@@ -169,27 +185,25 @@ class PDBMolecule(Scientific.IO.PDB.Molecule):
 #
 class PDBConfiguration(Scientific.IO.PDB.Structure):
 
-    """Everything in a PDB file
+    """
+    Everything in a PDB file
 
     A PDBConfiguration object represents the full contents of a PDB
     file. It can be used to create MMTK objects for all or part
     of the molecules, or to change the configuration of an existing
     system.
-
-    Constructor: PDBConfiguration(|file_or_filename|, |model|='0',
-                                  |alternate_code|='"A"')
-
-    Arguments:
-
-    |file_or_filename| -- the name of a PDB file, or a file object
-
-    |model| -- the number of the model to be used from a multiple model file
-
-    |alternate_code| -- the alternate code to be used for atoms that have
-                        alternate positions
     """
     
     def __init__(self, file_or_filename, model = 0, alternate_code = 'A'):
+        """
+        @param file_or_filename: the name of a PDB file, or a file object
+        @param model: the number of the model to be used from a
+                      multiple model file
+        @type model: C{int}
+        @param alternate_code: the alternate code to be used for atoms that
+                               have multiple positions
+        @type alternate_code: C{str}
+        """
         if isinstance(file_or_filename, str):
             file_or_filename = Database.PDBPath(file_or_filename)
         Scientific.IO.PDB.Structure.__init__(self, file_or_filename,
@@ -291,39 +305,43 @@ class PDBConfiguration(Scientific.IO.PDB.Structure):
         return Universe.ParallelepipedicPeriodicUniverse((e1, e2, e3))
 
     def createPeptideChains(self, model='all'):
-        """Returns a list of PeptideChain objects, one for each
-        peptide chain in the PDB file. The parameter |model|
-        has the same meaning as for the PeptideChain constructor."""
+        """
+        @returns: a list of C{PeptideChain} objects, one for each
+                  peptide chain in the PDB file. The parameter C{model}
+                  has the same meaning as for the PeptideChain constructor.
+        """
         return [chain.createPeptideChain(model)
                 for chain in self.peptide_chains]
 
     def createNucleotideChains(self, model='all'):
-        """Returns a list of NucleotideChain objects, one for each
-        nucleotide chain in the PDB file. The parameter |model|
-        has the same meaning as for the NucleotideChain constructor."""
+        """
+        @returns: a list of C{NucleotideChain} objects, one for each
+                  nucleotide chain in the PDB file. The parameter C{model}
+                  has the same meaning as for the NucleotideChain constructor.
+        """
         return [chain.createNucleotideChain(model)
                 for chain in self.nucleotide_chains]
 
-    def createMolecules(self, names = None, permit_undefined=1):
-        """Returns a collection of Molecule objects, one for each
-        molecule in the PDB file. Each PDB residue not describing
-        an amino acid or nucleotide residue is considered a molecule.
-
-        The parameter |names| allows the selective construction of
-        certain molecule types and the construction of unknown
-        molecules. If its value is a list of molecule names
-        (as defined in the chemical database) and/or PDB residue
-        names, only molecules mentioned in this list will be
-        constructed. If its value is a dictionary, it is used
-        to map PDB residue names to molecule names. By default only
-        water molecules are recognizes (under various common PDB residue
-        names); for all other molecules a molecule name must be provided
-        by the user.
-
-        The parameter |permit_undefined| determines how PDB residues
-        without a corresponding molecule name are handled. A value
-        of 0 causes an exception to be raised. A value of 1 causes
-        an AtomCluster object to be created for each unknown residue.
+    def createMolecules(self, names = None, permit_undefined=True):
+        """
+        @param names: If a list of molecule names (as defined in the
+                      chemical database) and/or PDB residue names,
+                      only molecules mentioned in this list will be
+                      constructed. If a dictionary, it is used to map
+                      PDB residue names to molecule names. With the
+                      default (C{None}), only water molecules are
+                      built.
+        @type names: C{list}
+        @param permit_undefined: If C{False}, an exception is raised
+                                 when a PDB residue is encountered for
+                                 which no molecule name is supplied
+                                 in C{names}. If C{True}, an AtomCluster
+                                 object is constructed for each unknown
+                                 molecule.
+        @returns: a collection of C{Molecule} objects, one for each
+                  molecule in the PDB file. Each PDB residue not describing
+                  an amino acid or nucleotide residue is considered a
+                  molecule.
         """
         collection = Collections.Collection()
         mol_dicts = [molecule_names]
@@ -362,7 +380,7 @@ class PDBConfiguration(Scientific.IO.PDB.Structure):
                             a.setPosition(atom.position)
                             atoms.append(a)
                             pdbdict[atom.name] = Database.AtomReference(i)
-                            i = i + 1
+                            i += 1
                         m = ChemicalObjects.AtomCluster(atoms, name = name)
                         if len(pdbdict) == len(molecule):
                             # pdbmap is correct only if the AtomCluster has
@@ -383,12 +401,15 @@ class PDBConfiguration(Scientific.IO.PDB.Structure):
                     groups.append(g)
         return groups
 
-    def createAll(self, molecule_names = None, permit_undefined=1):
-        """Returns a collection containing all objects contained in
-        the PDB file, i.e. the combination of the objects returned
-        by createPeptideChains(), createNucleotideChains(), and
-        createMolecules(). The parameters have the same meaning
-        as for createMolecules()."""
+    def createAll(self, molecule_names = None, permit_undefined=True):
+        """
+        @returns: a collection containing all objects contained in the
+                   PDB file, i.e. the combination of the objects
+                   returned by L{createPeptideChains},
+                   L{createNucleotideChains}, and L{createMolecules}.
+                   The parameters have the same meaning as for
+                   L{createMolecules}.
+        """
         collection = Collections.Collection()
         peptide_chains = self.createPeptideChains()
         if peptide_chains:
@@ -411,7 +432,7 @@ class PDBConfiguration(Scientific.IO.PDB.Structure):
                   obtained by copying and moving the molecules from the
                   asymmetric unit according to the crystallographic
                   symmetry operations.
-        @rtype: L{MMTK.Collection}
+        @rtype: L{MMTK.Collections.Collection}
         """
         unit_cell_contents = Collections.Collection()
         for symop in self.cs_transformations:
@@ -432,11 +453,14 @@ class PDBConfiguration(Scientific.IO.PDB.Structure):
         return unit_cell_contents
 
     def applyTo(self, object, atom_map=None):
-        """Sets the configuration of |object| from the coordinates in the
+        """
+        Sets the configuration of C{object} from the coordinates in the
         PDB file. The object must be compatible with the PDB file, i.e.
         contain the same subobjects and in the same order. This is usually
         only guaranteed if the object was created by the method
-        createAll() from a PDB file with the same layout."""
+        L{createAll} from a PDB file with the same layout.
+        @param object: a chemical object or collection of chemical objects
+        """
         setConfiguration(object, self.residues, atom_map=atom_map)
 
 #
@@ -470,25 +494,24 @@ def setResidueConfiguration(object, pdb_residue, pdbmap, altmap,
                 pass
             if atom_map is not None:
                 atom_map[object.getAtom(pdbname)] = atom
-            defined = defined + 1
+            defined += 1
     return defined
 
 def setConfiguration(object, pdb_residues,
                      map = 'pdbmap', alt = 'pdb_alternative',
-                     atom_map = None, toplevel = 1):
+                     atom_map = None, toplevel = True):
     defined = 0
     if hasattr(object, 'is_protein'):
         i = 0
         for chain in object:
             l = len(chain)
-            defined = defined + setConfiguration(chain, pdb_residues[i:i+l],
-                                                 map, alt, atom_map, 0)
+            defined += setConfiguration(chain, pdb_residues[i:i+l],
+                                        map, alt, atom_map, False)
             i = i + l
     elif hasattr(object, 'is_chain'):
         for i in range(len(object)):
-            defined = defined + setConfiguration(object[i],
-                                                 pdb_residues[i:i+1],
-                                                 map, alt, atom_map, 0)
+            defined += setConfiguration(object[i], pdb_residues[i:i+1],
+                                        map, alt, atom_map, False)
     elif hasattr(object, map):
         pdbmap = getattr(object, map)
         try: altmap = getattr(object, alt)
@@ -498,18 +521,16 @@ def setConfiguration(object, pdb_residues,
             raise IOError('PDB configuration does not match object ' +
                            object.fullName())
         for i in range(nres):
-            defined = defined + setResidueConfiguration(object,
-                                                        pdb_residues[i],
-                                                        pdbmap[i], altmap,
-                                                        atom_map)
+            defined += setResidueConfiguration(object, pdb_residues[i],
+                                               pdbmap[i], altmap, atom_map)
     elif Collections.isCollection(object):
         nres = len(pdb_residues)
         if len(object) != nres:
             raise IOError('PDB configuration does not match object ' +
                            object.fullName())
         for i in range(nres):
-            defined = defined + setConfiguration(object[i], [pdb_residues[i]],
-                                                 map, alt, atom_map, 0)
+            defined += setConfiguration(object[i], [pdb_residues[i]],
+                                        map, alt, atom_map, False)
     else:
         try:
             name = object.fullName()
@@ -545,29 +566,30 @@ def defineMolecule(code, name):
 #
 # This object represents a PDB file for output.
 #
-class PDBOutputFile:
+class PDBOutputFile(object):
 
-    """PDB file for output
-
-    Constructor: PDBOutputFile(|filename|, |subformat|='None')
-
-    Arguments:
-
-    |filename| -- the name of the PDB file that is created
-
-    |subformat| -- a variant of the PDB format; these subformats
-                   are defined in module Scientific.IO.PDB. The
-                   default is the standard PDB format.
+    """
+    PDB file for output
     """
 
     def __init__(self, filename, subformat= None):
+        """
+        @param filename: the name of the PDB file that is created
+        @type filename: C{str}
+        @param subformat: a variant of the PDB format; these subformats
+                          are defined in module Scientific.IO.PDB. The
+                          default is the standard PDB format.
+        @type subformat: C{str}
+        """
         self.file = Scientific.IO.PDB.PDBFile(filename, 'w', subformat)
-        self.warning = 0
+        self.warning = False
         self.atom_sequence = []
         self.model_number = None
 
     def nextModel(self):
-        "Start a new model"
+        """
+        Start a new model
+        """
         if self.model_number is None:
             self.model_number = 1
         else:
@@ -576,9 +598,13 @@ class PDBOutputFile:
         self.file.writeLine('MODEL', {'serial_number': self.model_number})
         
     def write(self, object, configuration = None, tag = None):
-        """Writes |object| to the file, using coordinates from
-        |configuration| (defaults to the current configuration).
-        The parameter |tag| is reserved for internal use."""
+        """Write  an object to the file
+        @param object: the object to be written
+        @type object: L{MMTK.Collections.GroupOfAtoms}
+        @param configuration: the configuration from which the coordinates 
+                              are taken (default: current configuration)
+        @type configuration: L{MMTK.ParticleProperties.Configuration}
+        """
         if not ChemicalObjects.isChemicalObject(object):
             for o in object:
                 self.write(o, configuration)
@@ -604,7 +630,7 @@ class PDBOutputFile:
                                                 occ, temp, atom.type.symbol)
                             self.atom_sequence.append(atom)
                         else:
-                            self.warning = 1
+                            self.warning = True
                         setattr(atom, tag, None)
             else:
                 if hasattr(object, 'is_protein'):
@@ -628,11 +654,13 @@ class PDBOutputFile:
                     delattr(a, tag)
 
     def close(self):
-        "Closes the file. Must be called in order to prevent data loss."
+        """
+        Closes the file. Must be called in order to prevent data loss.
+        """
         if self.model_number is not None:
             self.file.writeLine('ENDMDL', '')
         self.file.close()
         if self.warning:
             Utility.warning('Some atoms are missing in the output file ' + \
                             'because their positions are undefined.')
-            self.warning = 0
+            self.warning = False
