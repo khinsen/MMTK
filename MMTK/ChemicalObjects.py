@@ -11,7 +11,7 @@ Atoms, groups, molecules and similar objects
 
 __docformat__ = 'epytext'
 
-from MMTK import Bonds, Collections, ConfigIO, Database, \
+from MMTK import Bonds, Collections, Database, \
                  Units, Utility, Visualization
 from Scientific.Geometry import Vector
 from Scientific.Geometry import Objects3D

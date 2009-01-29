@@ -2,7 +2,7 @@
 # and a visualization base class
 #
 # Written by Konrad Hinsen
-# last revision: 2008-11-18
+# last revision: 2000-1-29
 #
 
 """This module provides visualization of chemical objects and animated
@@ -30,7 +30,7 @@ and must give "vmd" or "xmol" after stripping off an optional
 directory specification.
 """
 
-import ConfigIO, PDB, Universe, Units, Utility
+import Universe, Units, Utility
 from Scientific import N as Numeric
 import subprocess, sys, tempfile, os
 
@@ -514,6 +514,7 @@ def viewSequenceIMol(object, conf_list, periodic = 0, label=None):
     is 1, the configurations will be repeated periodically,
     provided that the external viewers supports this operation.
     """
+    from MMTK import PDB
     tempfile.tempdir = tempdir
     filename = tempfile.mktemp() + '.pdb'
     file = PDB.PDBOutputFile(filename)

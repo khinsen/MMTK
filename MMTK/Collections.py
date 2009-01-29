@@ -1,7 +1,7 @@
 # This module defines collections of chemical objects.
 #
 # Written by Konrad Hinsen
-# last revision: 2009-1-16
+# last revision: 2009-1-29
 #
 
 """
@@ -10,7 +10,7 @@ Collections of chemical objects
 
 __docformat__ = 'epytext'
 
-from MMTK import ConfigIO, Utility, Units, ParticleProperties, Visualization
+from MMTK import Utility, Units, ParticleProperties, Visualization
 from Scientific.Geometry import Vector, Tensor, Objects3D
 from Scientific.Geometry import Quaternion, Transformation
 from Scientific import N
@@ -467,6 +467,7 @@ class GroupOfAtoms(object):
                        charge on a red-to-green color scale)
         @type format: C{str}
         """
+        from MMTK import ConfigIO
         universe = self.universe()
         if universe is not None:
             configuration = universe.contiguousObjectConfiguration(
