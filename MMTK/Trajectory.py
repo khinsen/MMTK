@@ -1,7 +1,7 @@
 # This module implements trajetories and trajectory generators.
 #
 # Written by Konrad Hinsen
-# last revision: 2009-1-23
+# last revision: 2009-1-29
 #
 
 """
@@ -605,7 +605,7 @@ class TrajectorySet(object):
         return self[(slice(first, last),)]
 
     def __getattr__(self, name):
-        if name not in self.vars:
+        if name not in self.vars+['step']:
             raise AttributeError("no variable named " + name)
         var = self.trajectories[0].trajectory.file.variables[name]
         if 'atom_number' in var.dimensions:
