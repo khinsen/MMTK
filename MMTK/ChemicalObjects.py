@@ -2,7 +2,7 @@
 # complexes. They are made as copies from blueprints in the database.
 #
 # Written by Konrad Hinsen
-# last revision: 2008-1-16
+# last revision: 2008-1-29
 #
 
 """
@@ -869,7 +869,7 @@ class Molecule(CompositeChemicalObject, ChemicalObject):
                     raise ValueError("Can't handle this yet: " +
                                       a.symbol + ' with ' + `n` + ' bonds (' +
                                       a.fullName() + ').')
-                method(a, known, list)
+                method(self, a, known, list)
         finally:
             self.clearBondAttributes()
 
