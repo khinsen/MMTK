@@ -1,24 +1,28 @@
 # This module implements classes for nucleotide chains.
 #
 # Written by Konrad Hinsen
-# last revision: 2006-8-18
+# last revision: 2009-1-29
 #
 
-import Biopolymers, Bonds, ChemicalObjects, Collections, ConfigIO, Database
-import Universe, Utility
-from Scientific.Geometry import Vector
-import operator, string
+"""
+Nucleic acid chains
+"""
 
-from Biopolymers import defineNucleicAcidResidue
+__docformat__ = 'epytext'
+
+from MMTK import Biopolymers, Bonds, ChemicalObjects, Collections, \
+                 ConfigIO, Database, Universe, Utility
+from Scientific.Geometry import Vector
+
+from MMTK.Biopolymers import defineNucleicAcidResidue
 
 #
 # Nucleotides are special groups
 #
 class Nucleotide(Biopolymers.Residue):
 
-    """Nucleic acid residue
-
-    A subclass of Class:MMTK.ChemicalObjects.Group.
+    """
+    Nucleic acid residue
 
     Nucleotides are a special kind of group. Like any other
     group, they are defined in the chemical database. Each residue
@@ -27,23 +31,21 @@ class Nucleotide(Biopolymers.Residue):
     connected to other residues to form a nucleotide chain. The database
     contains three variants of each residue (5'-terminal, 3'-terminal,
     non-terminal).
-
-    Constructor: Nucleotide(|kind|, |model|="all")
-
-    Arguments:
-
-    |kind| -- the name of the nucleotide in the chemical database. This
-              is the full name of the residue plus the suffix
-              "_5ter" or "_3ter" for the terminal variants.
-
-    |model| -- one of "all" (all-atom), "none" (no hydrogens),
-               "polar" (united-atom with only polar hydrogens),
-               "polar_charmm" (like "polar", but defining
-               polar hydrogens like in the CHARMM force field).
-               Currently the database has definitions only for "all".
     """
 
     def __init__(self, name = None, model = 'all'):
+        """
+        @param name: the name of the nucleotide in the chemical database. This
+                     is the full name of the residue plus the suffix
+                     "_5ter" or "_3ter" for the terminal variants.
+        @type name: C{str}
+        @param model: one of "all" (all-atom), "none" (no hydrogens),
+                      "polar" (united-atom with only polar hydrogens),
+                      "polar_charmm" (like "polar", but defining
+                      polar hydrogens like in the CHARMM force field).
+                      Currently the database has definitions only for "all".
+        @type model: C{str}
+        """
 	if name is not None:
 	    blueprint = _residueBlueprint(name, model)
 	    ChemicalObjects.Group.__init__(self, blueprint)
@@ -51,14 +53,20 @@ class Nucleotide(Biopolymers.Residue):
 	    self._init()
 
     def backbone(self):
-        "Returns the sugar and phosphate groups."
+        """
+        @returns: the sugar and phosphate groups
+        @rtype: L{MMTK.ChemicalObjects.Group}
+        """
         bb = self.sugar
         if hasattr(self, 'phosphate'):
             bb = Collections.Collection([bb, self.phosphate])
         return bb
 
     def bases(self):
-        "Returns the base group."
+        """
+        @returns: the base group
+        @rtype: L{MMTK.ChemicalObjects.Group}
+        """
         return self.base
 
 
@@ -83,73 +91,71 @@ _residue_blueprints = {}
 #
 class NucleotideChain(Biopolymers.ResidueChain):
 
-    """Nucleotide chain
-
-    A Glossary:Subclass of Class:MMTK.Biopolymers.ResidueChain.
+    """
+    Nucleotide chain
 
     Nucleotide chains consist of nucleotides that are linked together.
     They are a special kind of molecule, i.e. all molecule operations
     are available.
 
-    Constructor: NucleotideChain(|sequence|, **|properties|)
-
-    Arguments:
-
-    |sequence| -- the nucleotide sequence. This can be a list
-                  of two-letter codes (a "d" or "r" for the type of
-                  sugar, and the one-letter base code), or a
-                  PDBNucleotideChain object.
-                  If a PDBNucleotideChain object is supplied, the atomic
-                  positions it contains are assigned to the atoms
-                  of the newly generated nucleotide chain, otherwise the
-                  positions of all atoms are undefined.
-
-    |properties| -- optional keyword properties:
-
-    - model: one of "all" (all-atom), "no_hydrogens" or "none" (no hydrogens),
-             "polar_hydrogens" or "polar" (united-atom with only polar
-             hydrogens), "polar_charmm" (like "polar", but defining
-             polar hydrogens like in the CHARMM force field). Default
-             is "all". Currently the database contains definitions only
-             for "all".
-
-    - terminus_5: 1 if the first nucleotide should be constructed using the
-                  5'-terminal variant, 0 if the non-terminal version should
-                  be used. Default is 1.
-
-    - terminus_3: 1 if the last residue should be constructed using the
-                  3'-terminal variant, 0 if the non-terminal version should
-                  be used. Default is 1.
-
-    - circular: 1 if a bond should be constructed between the first
-                and the last residue. Default is 0.
-
-    - name: a name for the chain (a string)
-
-
-    Nucleotide chains act as sequences of residues. If 'n' is a NucleotideChain
+    Nucleotide chains act as sequences of residues. If C{n} is a NucleotideChain
     object, then
 
-    - 'len(n)' yields the number of nucleotides
+     - C{len(n)} yields the number of nucleotides
 
-    - 'n[i]' yields nucleotide number 'i' (counting from zero)
+     - C{n[i]} yields nucleotide number C{i}
 
-    - 'n[i:j]' yields the subchain from nucleotide number 'i' up to but
-               excluding nucleotide number 'j'
+     - C{n[i:j]} yields the subchain from nucleotide number C{i} up to but
+                 excluding nucleotide number C{j}
     """
 
     def __init__(self, sequence, **properties):
+        """
+        @param sequence: the nucleotide sequence. This can be a string
+                         containing the one-letter codes, or a list
+                         of two-letter codes (a "d" or "r" for the type of
+                         sugar, and the one-letter base code), or a
+                         L{MMTK.PDB.PDBNucleotideChain} object.
+                         If a PDBNucleotideChain object is supplied, the
+                         atomic positions it contains are assigned to the
+                         atoms of the newly generated nucleotide chain,
+                         otherwise the positions of all atoms are undefined.
+        @keyword model: one of "all" (all-atom), "no_hydrogens" or "none"
+                        (no hydrogens), "polar_hydrogens" or "polar"
+                        (united-atom with only polar hydrogens),
+                        "polar_charmm" (like "polar", but defining
+                        polar hydrogens like in the CHARMM force field),
+                        "polar_opls" (like "polar", but defining
+                        polar hydrogens like in the latest OPLS force field).
+                        Default is "all". Currently the database contains
+                        definitions only for "all".
+        @type model: C{str}
+        @keyword terminus_5: if C{True}, the first residue is constructed
+                             using the 5'-terminal variant, if C{False} the
+                             non-terminal version is used. Default is C{True}.
+        @type terminus_5: C{bool}
+        @keyword terminus_3: if C{True}, the last residue is constructed
+                             using the 3'-terminal variant, if C{False} the
+                             non-terminal version is used. Default is C{True}.
+        @type terminus_3: C{bool}
+        @keyword circular: if C{True}, a bond is constructed
+                           between the first and the last residue.
+                           Default is C{False}.
+        @type circular: C{bool}
+        @keyword name: a name for the chain (a string)
+        @type name: C{str}
+        """
 	if sequence is not None:
 	    hydrogens = self.binaryProperty(properties, 'hydrogens', 'all')
 	    if hydrogens == 1:
 		hydrogens = 'all'
 	    elif hydrogens == 0:
 		hydrogens = 'none'
-	    term5 = self.binaryProperty(properties, 'terminus_5', 1)
-	    term3 = self.binaryProperty(properties, 'terminus_3', 1)
-	    circular = self.binaryProperty(properties, 'circular', 0)
+	    term5 = self.binaryProperty(properties, 'terminus_5', True)
+	    term3 = self.binaryProperty(properties, 'terminus_3', True)
+	    circular = self.binaryProperty(properties, 'circular', False)
 	    try:
-		model = string.lower(properties['model'])
+		model = properties['model'].lower()
 	    except KeyError:
 		model = hydrogens
 	    self.version_spec = {'hydrogens': hydrogens,
@@ -157,23 +163,23 @@ class NucleotideChain(Biopolymers.ResidueChain):
 				 'terminus_3': term3,
 				 'model': model,
                                  'circular': circular}
-	    if type(sequence[0]) == type(''):
+            if isinstance(sequence[0], str):
 		conf = None
 	    else:
 		conf = sequence
-		sequence = map(lambda r: r.name, sequence)
-	    sequence = map(Biopolymers._fullName, sequence)
+		sequence = [r.name for r in sequence]
+	    sequence = [Biopolymers._fullName(r) for r in sequence]
             if term5:
-                if string.find(sequence[0], '5ter') == -1:
-                    sequence[0] = sequence[0] + '_5ter'
+                if sequence[0].find('5ter') == -1:
+                    sequence[0] += '_5ter'
             if term3:
-                if string.find(sequence[-1], '3ter') == -1:
-                    sequence[-1] = sequence[-1] + '_3ter'
+                if sequence[-1].find('3ter') == -1:
+                    sequence[-1] += '_3ter'
 
             self.groups = []
             n = 0
             for residue in sequence:
-                n = n + 1
+                n += 1
                 r = Nucleotide(residue, model)
                 r.name = r.symbol + '_' + `n`
                 r.sequence_number = n
@@ -182,14 +188,16 @@ class NucleotideChain(Biopolymers.ResidueChain):
 
             self._setupChain(circular, properties, conf)
 
-    is_nucleotide_chain = 1
+    is_nucleotide_chain = True
 
     def __getslice__(self, first, last):
 	return NucleotideSubChain(self, self.groups[first:last])
 
     def backbone(self):
-        """Returns a collection containing the sugar and phosphate groups
-        of all nucleotides."""
+        """
+        @returns: the sugar and phosphate groups of all nucleotides
+        @rtype: L{MMTK.Collections.Collection}
+        """
         bb = Collections.Collection([])
         for residue in self.groups:
             try:
@@ -200,19 +208,19 @@ class NucleotideChain(Biopolymers.ResidueChain):
         return bb
 
     def bases(self):
-        "Returns a collection containing the base groups of all nucleotides."
-	return Collections.Collection(map(lambda r: r.base, self.groups))
+        """
+        @returns: the base groups of all nucleotides
+        @rtype: L{MMTK.Collections.Collection}
+        """
+	return Collections.Collection([r.base for r in self.groups])
 
     def _descriptionSpec(self):
-	kwargs = ''
-	for name, value in self.version_spec.items():
-	    kwargs = kwargs + name + '=' + `value` + ','
-	return "N", kwargs[:-1]
+        kwargs = ','.join([name + '=' + `value`
+                           for name, value in self.version_spec.items()])
+	return "N", kwargs
 
     def _typeName(self):
-        ljust3 = lambda s, n=3: string.ljust(s, n)
-        seq = map(ljust3, self.sequence())
-	return reduce(operator.add, seq)
+        return ''.join([s.ljust(3) for s in self.sequence()])
 
     def _graphics(self, conf, distance_fn, model, module, options):
 	if model != 'backbone':
@@ -245,7 +253,8 @@ class NucleotideChain(Biopolymers.ResidueChain):
 #
 class NucleotideSubChain(NucleotideChain):
 
-    """A contiguous part of a nucleotide chain
+    """
+    A contiguous part of a nucleotide chain
 
     NucleotideSubChain objects are the result of slicing operations on
     NucleotideChain objects. They cannot be created directly.
@@ -270,7 +279,7 @@ class NucleotideSubChain(NucleotideChain):
 	self.configurations = {}
 	self.part_of = chain
 
-    is_incomplete = 1
+    is_incomplete = True
 
     def __repr__(self):
 	if self.name == '':
@@ -284,5 +293,5 @@ class NucleotideSubChain(NucleotideChain):
 # Type check functions
 #
 def isNucleotideChain(x):
-    "Returns 1 if |x| is a NucleotideChain."
+    "Returns C{True} if x is a NucleotideChain."
     return hasattr(x, 'is_nucleotide_chain')
