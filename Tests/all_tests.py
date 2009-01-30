@@ -19,9 +19,9 @@ def suite():
     test_suite.addTests(universe_tests.suite())
     test_suite.addTests(pickle_tests.suite())
     test_suite.addTests(energy_tests.suite())
-    test_suite.addTests(trajectory_tests.suite())
     test_suite.addTests(normal_mode_tests.suite())
     test_suite.addTests(subspace_tests.suite())
+    test_suite.addTests(trajectory_tests.suite())
     return test_suite
 
 if __name__ == '__main__':
