@@ -4,7 +4,7 @@
 # (boundary conditions, external fields, etc.)
 #
 # Written by Konrad Hinsen
-# last revision: 2007-11-9
+# last revision: 2009-2-2
 #
 
 import Bonds, ChemicalObjects, Collections, Environment, \
@@ -1114,14 +1114,12 @@ class Periodic3DUniverse(Universe):
                 else:
                     raise ValueError(str(o) + " not a chemical object")
                 for bu in units:
+                    atoms = [a.index for a in bu.atomsWithDefinedPositions()]
                     mpairs = bu.traverseBondTree(lambda a: a.index)
+                    mpairs = [(a1, a2) for (a1, a2) in mpairs
+                              if a1 in atoms and a2 in atoms]
                     if len(mpairs) == 0:
-                        atoms = bu.atomList()
-                        first = atoms[0].index
-                        for a in atoms[1:]:
-                            mpairs.append((first, a.index))
-#                    if not new_object and len(pairs) > 0:
-#                        pairs.append((pairs[-1][1], mpairs[0][0]))
+                        mpairs = Utility.pairs(atoms)
                     new_object = False
                     pairs.extend(mpairs)
             pairs = N.array(pairs)
