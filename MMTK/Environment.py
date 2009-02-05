@@ -1,15 +1,25 @@
 # This module defines environment objects for universes.
 #
 # Written by Konrad Hinsen
-# last revision: 2006-11-27
+# last revision: 2009-2-5
 #
 
-from Scientific import N as Numeric
+"""
+Environment objects
+
+Environment objects are objects that define a simulation system without
+being composed of atoms. Examples are thermostats, barostats, external
+fields, etc.
+"""
+
+__docformat__ = 'epytext'
+
+from Scientific import N
 
 #
 # The environment object base class
 #
-class EnvironmentObject:
+class EnvironmentObject(object):
 
     is_environment_object = 1
 
@@ -30,25 +40,25 @@ def isEnvironmentObject(object):
 #
 class NoseThermostat(EnvironmentObject):
 
-    """Nose thermostat for Molecular Dynamics
+    """
+    Nose thermostat for Molecular Dynamics
 
     A thermostat object can be added to a universe and will then
     modify the integration algorithm to a simulation of an NVT
     ensemble.
-
-    Constructor:  NoseThermostat(|temperature|, |relaxation_time|=0.2)
-
-    Arguments:
-
-    |temperature| -- the temperature set by the thermostat
-
-    |relaxation_time| -- the relaxation time of the thermostat coordinate
     """
 
     def __init__(self, temperature, relaxation_time = 0.2):
+        """
+        @param temperature: the temperature set by the thermostat
+        @type temperature: C{float}
+        @param relaxation_time: the relaxation time of the
+                                thermostat coordinate
+        @type relaxation_time: C{float}
+        """
         self.arguments = (temperature, relaxation_time)
-        self.parameters = Numeric.array([temperature, relaxation_time])
-        self.coordinates = Numeric.array([0., 0.])
+        self.parameters = N.array([temperature, relaxation_time])
+        self.coordinates = N.array([0., 0.])
 
     def setTemperature(self, temperature):
         self.parameters[0] = temperature
@@ -65,25 +75,25 @@ class NoseThermostat(EnvironmentObject):
 #
 class AndersenBarostat(EnvironmentObject):
 
-    """Andersen barostat for Molecular Dynamics
+    """
+    Andersen barostat for Molecular Dynamics
 
     A barostat object can be added to a universe and will then
     together with a thermostat object modify the integration algorithm
     to a simulation of an NPT ensemble.
-
-    Constructor:  AndersenBarostat(|pressure|, |relaxation_time|=1.5)
-
-    Arguments:
-
-    |pressure| -- the pressure set by the barostat
-
-    |relaxation_time| -- the relaxation time of the barostat coordinate
     """
 
     def __init__(self, pressure, relaxation_time = 1.5):
+        """
+        @param pressure: the pressure set by the barostat
+        @type pressure: C{float}
+        @param relaxation_time: the relaxation time of the
+                                barostat coordinate
+        @type relaxation_time: C{float}
+        """
         self.arguments = (pressure, relaxation_time)
-        self.parameters = Numeric.array([pressure, relaxation_time])
-        self.coordinates = Numeric.array([0.])
+        self.parameters = N.array([pressure, relaxation_time])
+        self.coordinates = N.array([0.])
 
     def setPressure(self, pressure):
         self.parameters[0] = pressure
