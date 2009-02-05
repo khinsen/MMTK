@@ -1,14 +1,26 @@
 # Deformation energy module
 #
 # Written by Konrad Hinsen
-# last revision: 2006-11-27
+# last revision: 2009-2-5
 #
 
-"""This module implements deformational energies for use in the analysis
-of motions and conformational changes in macromolecules. A description
-of the techniques can be found in [Article:Hinsen1998] and
-[Article:Hinsen1999].
 """
+Deformation energies in proteins
+
+This module implements deformational energies for use in the analysis
+of motions and conformational changes in macromolecules. A description
+of the techniques can be found in the following articles:
+
+ 1. K. Hinsen
+    Analysis of domain motions by approximate normal mode calculations
+    Proteins 33 (1998): 417-429
+
+ 2. K. Hinsen, A. Thomas, M.J. Field
+    Analysis of domain motions in large proteins
+    Proteins 34 (1999): 369-382
+"""
+
+__docformat__ = 'epytext'
 
 try:
     from MMTK_forcefield import NonbondedList
@@ -16,22 +28,22 @@ try:
                                  reduceFiniteDeformation
 except ImportError:
     pass
-import ParticleProperties
-from Scientific import N as Numeric
+from MMTK import ParticleProperties
+from Scientific import N
 
 #
 # Deformation energy evaluations
 #
-class DeformationEvaluationFunction:
+class DeformationEvaluationFunction(object):
 
     def __init__(self, universe, fc_length = 0.7, cutoff = 1.2,
-                   factor = 46402., form = 'exponential'):
+                 factor = 46402., form = 'exponential'):
         self.universe = universe
         self.fc_length = fc_length
         self.cutoff = cutoff
         self.factor = factor
 
-        nothing = Numeric.zeros((0,2), Numeric.Int)
+        nothing = N.zeros((0,2), N.Int)
         self.pairs = NonbondedList(nothing, nothing, nothing,
                                    universe._spec, cutoff)
         self.pairs.update(universe.configuration().array)
@@ -49,24 +61,8 @@ class DeformationEvaluationFunction:
 
 class DeformationFunction(DeformationEvaluationFunction):
 
-    """Infinite-displacement deformation function
-
-    Constructor:  DeformationFunction(|universe|, |range|=0.7,
-                                      |cutoff|=1.2, |factor|=46402.,
-                                      |form| = 'exponential')
-
-    Arguments:
-
-    |universe| -- the universe for which the deformation function should be
-                  defined
-
-    |range| -- the range parameter r_0 in the pair interaction term
-
-    |cutoff| -- the cutoff used in the deformation calculation
-
-    |factor| -- a global scaling factor
-
-    |form| -- the functional form ('exponential' or 'calpha')
+    """
+    Infinite-displacement deformation function
 
     The default values are appropriate for a C_alpha model of a protein
     with the global scaling described in the reference cited above.
@@ -78,6 +74,24 @@ class DeformationFunction(DeformationEvaluationFunction):
     deformation value for each atom.
     """
 
+    def __init__(self, universe, fc_length = 0.7, cutoff = 1.2,
+                 factor = 46402., form = 'exponential'):
+        """
+        @param universe: the universe for which the deformation function
+                         is defined
+        @type universe: L{MMTK.Universe.Universe}
+        @param fc_length: the range parameter r_0 in the pair interaction term
+        @type fc_length: C{float}
+        @param cutoff: the cutoff used in the deformation calculation
+        @type cutoff: C{float}
+        @param factor: a global scaling factor
+        @type factor: C{float}
+        @param form: the functional form ('exponential' or 'calpha')
+        @type form: C{str}
+        """
+        DeformationEvaluationFunction.__init__(self, universe, fc_length,
+                                               cutoff, factor, form)
+
     def __call__(self, vector):
         conf = self.universe.configuration()
         r = ParticleProperties.ParticleScalar(self.universe)
@@ -86,30 +100,15 @@ class DeformationFunction(DeformationEvaluationFunction):
                         self.factor, self.normalize, 0, self.version)
         return r
 
+
 class NormalizedDeformationFunction(DeformationFunction):
 
-    """Normalized infinite-displacement deformation function
-
-    Constructor:  NormalizedDeformationFunction(|universe|, |range|=0.7,
-                                                |cutoff|=1.2, |factor|=46402.,
-                                                |form| = 'exponential')
-
-    Arguments:
-
-    |universe| -- the universe for which the deformation function should be
-                  defined
-
-    |range| -- the range parameter r_0 in the pair interaction term
-
-    |cutoff| -- the cutoff used in the deformation calculation
-
-    |factor| -- a global scaling factor
-
-    |form| -- the functional form ('exponential' or 'calpha')
+    """
+    Normalized infinite-displacement deformation function
 
     The default values are appropriate for a C_alpha model of a protein
     with the global scaling described in the reference cited above.
-    The normalization is defined by equation 10 of reference 1.
+    The normalization is defined by equation 10 of reference 1 (see above).
     
     A NormalizedDeformationFunction object must be called with a single
     parameter, which is a ParticleVector object containing the infinitesimal
@@ -118,6 +117,24 @@ class NormalizedDeformationFunction(DeformationFunction):
     deformation value for each atom.
     """
 
+    def __init__(self, universe, fc_length = 0.7, cutoff = 1.2,
+                 factor = 46402., form = 'exponential'):
+        """
+        @param universe: the universe for which the deformation function
+                         is defined
+        @type universe: L{MMTK.Universe.Universe}
+        @param fc_length: the range parameter r_0 in the pair interaction term
+        @type fc_length: C{float}
+        @param cutoff: the cutoff used in the deformation calculation
+        @type cutoff: C{float}
+        @param factor: a global scaling factor
+        @type factor: C{float}
+        @param form: the functional form ('exponential' or 'calpha')
+        @type form: C{str}
+        """
+        DeformationFunction.__init__(self, universe, fc_length,
+                                     cutoff, factor, form)
+
     def __init__(self, *args, **kwargs):
         apply(DeformationFunction.__init__, (self, ) + args, kwargs)
         self.normalize = 1
@@ -125,24 +142,8 @@ class NormalizedDeformationFunction(DeformationFunction):
 
 class FiniteDeformationFunction(DeformationEvaluationFunction):
 
-    """Finite-displacement deformation function
-
-    Constructor:  FiniteDeformationFunction(|universe|, |range|=0.7,
-                                            |cutoff|=1.2, |factor|=46402.,
-                                            |form| = 'exponential')
-
-    Arguments:
-
-    |universe| -- the universe for which the deformation function should be
-                  defined
-
-    |range| -- the range parameter r_0 in the pair interaction term
-
-    |cutoff| -- the cutoff used in the deformation calculation
-
-    |factor| -- a global scaling factor
-
-    |form| -- the functional form ('exponential' or 'calpha')
+    """
+    Finite-displacement deformation function
 
     The default values are appropriate for a C_alpha model of a protein
     with the global scaling described in the reference cited above.
@@ -150,10 +151,27 @@ class FiniteDeformationFunction(DeformationEvaluationFunction):
     A FiniteDeformationFunction object must be called with a single parameter,
     which is a Configuration or a ParticleVector object containing the
     alternate configuration of the universe for which the deformation is to be
-    evaluated.
-    The return value is a ParticleScalar object containing the
+    evaluated. The return value is a ParticleScalar object containing the
     deformation value for each atom.
     """
+
+    def __init__(self, universe, fc_length = 0.7, cutoff = 1.2,
+                 factor = 46402., form = 'exponential'):
+        """
+        @param universe: the universe for which the deformation function
+                         is defined
+        @type universe: L{MMTK.Universe.Universe}
+        @param fc_length: the range parameter r_0 in the pair interaction term
+        @type fc_length: C{float}
+        @param cutoff: the cutoff used in the deformation calculation
+        @type cutoff: C{float}
+        @param factor: a global scaling factor
+        @type factor: C{float}
+        @param form: the functional form ('exponential' or 'calpha')
+        @type form: C{str}
+        """
+        DeformationEvaluationFunction.__init__(self, universe, fc_length,
+                                               cutoff, factor, form)
 
     def __call__(self, vector):
         conf = self.universe.configuration()
@@ -164,29 +182,14 @@ class FiniteDeformationFunction(DeformationEvaluationFunction):
                         self.version)
         return r
 
+
 class DeformationEnergyFunction(DeformationEvaluationFunction):
 
-    """Infinite-displacement deformation energy function
+    """
+    Infinite-displacement deformation energy function
 
     The deformation energy is the sum of the deformation values over
     all atoms of a system.
-
-    Constructor:  DeformationEnergyFunction(|universe|, |range|=0.7,
-                                            |cutoff|=1.2, |factor|=46402.,
-                                            |form| = 'exponential')
-
-    Arguments:
-
-    |universe| -- the universe for which the deformation energy should be
-                  defined
-
-    |range| -- the range parameter r_0 in the pair interaction term
-
-    |cutoff| -- the cutoff used in the deformation energy calculation
-
-    |factor| -- a global scaling factor
-
-    |form| -- the functional form ('exponential' or 'calpha')
 
     The default values are appropriate for a C_alpha model of a protein
     with the global scaling described in the reference cited above.
@@ -201,13 +204,31 @@ class DeformationEnergyFunction(DeformationEvaluationFunction):
     object), otherwise only the energy is returned.
     """
 
+    def __init__(self, universe, fc_length = 0.7, cutoff = 1.2,
+                 factor = 46402., form = 'exponential'):
+        """
+        @param universe: the universe for which the deformation function
+                         is defined
+        @type universe: L{MMTK.Universe.Universe}
+        @param fc_length: the range parameter r_0 in the pair interaction term
+        @type fc_length: C{float}
+        @param cutoff: the cutoff used in the deformation calculation
+        @type cutoff: C{float}
+        @param factor: a global scaling factor
+        @type factor: C{float}
+        @param form: the functional form ('exponential' or 'calpha')
+        @type form: C{str}
+        """
+        DeformationEvaluationFunction.__init__(self, universe, fc_length,
+                                               cutoff, factor, form)
+
     def __call__(self, vector, gradients = None):
         conf = self.universe.configuration()
         g = None
         if gradients is not None:
             if ParticleProperties.isParticleProperty(gradients):
                 g = gradients
-            elif type(gradients) == Numeric.arraytype:
+            elif isinstance(gradients, N.array_type):
                 g = ParticleProperties.ParticleVector(self.universe, gradients)
             elif gradients:
                 g = ParticleProperties.ParticleVector(self.universe)
@@ -223,30 +244,14 @@ class DeformationEnergyFunction(DeformationEvaluationFunction):
         else:
             return l, g
 
+
 class NormalizedDeformationEnergyFunction(DeformationEnergyFunction):
 
-    """Normalized infinite-displacement deformation energy function
+    """
+    Normalized infinite-displacement deformation energy function
 
     The normalized deformation energy is the sum of the normalized
     deformation values over all atoms of a system.
-
-    Constructor: NormalizedDeformationEnergyFunction(|universe|, |range|=0.7,
-                                                     |cutoff|=1.2,
-                                                     |factor|=46402.,
-                                                     |form|='exponential')
-
-    Arguments:
-
-    |universe| -- the universe for which the deformation energy should be
-                  defined
-
-    |range| -- the range parameter r_0 in the pair interaction term
-
-    |cutoff| -- the cutoff used in the deformation energy calculation
-
-    |factor| -- a global scaling factor
-
-    |form| -- the functional form ('exponential' or 'calpha')
 
     The default values are appropriate for a C_alpha model of a protein
     with the global scaling described in the reference cited above.
@@ -262,34 +267,33 @@ class NormalizedDeformationEnergyFunction(DeformationEnergyFunction):
     object), otherwise only the energy is returned.
     """
 
-    def __init__(self, *args):
-        apply(DeformationEnergyFunction.__init__, (self,) + args)
+    def __init__(self, universe, fc_length = 0.7, cutoff = 1.2,
+                 factor = 46402., form = 'exponential'):
+        """
+        @param universe: the universe for which the deformation function
+                         is defined
+        @type universe: L{MMTK.Universe.Universe}
+        @param fc_length: the range parameter r_0 in the pair interaction term
+        @type fc_length: C{float}
+        @param cutoff: the cutoff used in the deformation calculation
+        @type cutoff: C{float}
+        @param factor: a global scaling factor
+        @type factor: C{float}
+        @param form: the functional form ('exponential' or 'calpha')
+        @type form: C{str}
+        """
+        DeformationEnergyFunction.__init__(self, universe, fc_length,
+                                           cutoff, factor, form)
         self.normalize = 1
 
 
 class FiniteDeformationEnergyFunction(DeformationEvaluationFunction):
 
-    """Finite-displacement deformation energy function
+    """
+    Finite-displacement deformation energy function
 
     The deformation energy is the sum of the
     deformation values over all atoms of a system.
-
-    Constructor: FiniteDeformationEnergyFunction(|universe|, |range|=0.7,
-                                                 |cutoff|=1.2, |factor|=46402.,
-                                                 |form|='exponential')
-
-    Arguments:
-
-    |universe| -- the universe for which the deformation energy should be
-                  defined
-
-    |range| -- the range parameter r_0 in the pair interaction term
-
-    |cutoff| -- the cutoff used in the deformation energy calculation
-
-    |factor| -- a global scaling factor
-
-    |form| -- the functional form ('exponential' or 'calpha')
 
     The default values are appropriate for a C_alpha model of a protein
     with the global scaling described in the reference cited above.
@@ -304,13 +308,31 @@ class FiniteDeformationEnergyFunction(DeformationEvaluationFunction):
     object), otherwise only the energy is returned.
     """
 
+    def __init__(self, universe, fc_length = 0.7, cutoff = 1.2,
+                 factor = 46402., form = 'exponential'):
+        """
+        @param universe: the universe for which the deformation function
+                         is defined
+        @type universe: L{MMTK.Universe.Universe}
+        @param fc_length: the range parameter r_0 in the pair interaction term
+        @type fc_length: C{float}
+        @param cutoff: the cutoff used in the deformation calculation
+        @type cutoff: C{float}
+        @param factor: a global scaling factor
+        @type factor: C{float}
+        @param form: the functional form ('exponential' or 'calpha')
+        @type form: C{str}
+        """
+        DeformationEvaluationFunction.__init__(self, universe, fc_length,
+                                               cutoff, factor, form)
+
     def __call__(self, vector, gradients = None):
         conf = self.universe.configuration()
         g = None
         if gradients is not None:
             if ParticleProperties.isParticleProperty(gradients):
                 g = gradients
-            elif type(gradients) == Numeric.arraytype:
+            elif isinstance(gradients, N.array_type):
                 g = ParticleProperties.ParticleVector(self.universe, gradients)
             elif gradients:
                 g = ParticleProperties.ParticleVector(self.universe)
@@ -331,24 +353,8 @@ class FiniteDeformationEnergyFunction(DeformationEvaluationFunction):
 #
 class DeformationReducer(DeformationEvaluationFunction):
 
-    """Iterative reduction of the deformation energy
-
-    Constructor:  DeformationReducer(|universe|, |range|=0.7,
-                                     |cutoff|=1.2, |factor|=46402.,
-                                     |form|='exponential')
-
-    Arguments:
-
-    |universe| -- the universe for which the deformation function should be
-                  defined
-
-    |range| -- the range parameter r_0 in the pair interaction term
-
-    |cutoff| -- the cutoff used in the deformation calculation
-
-    |factor| -- a global scaling factor
-
-    |form| -- the functional form ('exponential' or 'calpha')
+    """
+    Iterative reduction of the deformation energy
 
     The default values are appropriate for a C_alpha model of a protein
     with the global scaling described in the reference cited above.
@@ -360,32 +366,35 @@ class DeformationReducer(DeformationEvaluationFunction):
     by steepest-descent minimization of the deformation energy.
     """
 
+    def __init__(self, universe, fc_length = 0.7, cutoff = 1.2,
+                 factor = 46402., form = 'exponential'):
+        """
+        @param universe: the universe for which the deformation function
+                         is defined
+        @type universe: L{MMTK.Universe.Universe}
+        @param fc_length: the range parameter r_0 in the pair interaction term
+        @type fc_length: C{float}
+        @param cutoff: the cutoff used in the deformation calculation
+        @type cutoff: C{float}
+        @param factor: a global scaling factor
+        @type factor: C{float}
+        @param form: the functional form ('exponential' or 'calpha')
+        @type form: C{str}
+        """
+        DeformationEvaluationFunction.__init__(self, universe, fc_length,
+                                               cutoff, factor, form)
+
     def __call__(self, vector, niter):
         conf = self.universe.configuration()
         reduceDeformation(conf.array, vector.array, self.pairs,
                           self.cutoff, self.fc_length, self.factor, niter,
                           self.version)
 
+
 class FiniteDeformationReducer(DeformationEvaluationFunction):
 
-    """Iterative reduction of the finite-displacement deformation energy
-
-    Constructor:  FiniteDeformationReducer(|universe|, |range|=0.7,
-                                           |cutoff|=1.2, |factor|=46402.,
-                                           |form|='exponential')
-
-    Arguments:
-
-    |universe| -- the universe for which the deformation function should be
-                  defined
-
-    |range| -- the range parameter r_0 in the pair interaction term
-
-    |cutoff| -- the cutoff used in the deformation calculation
-
-    |factor| -- a global scaling factor
-
-    |form| -- the functional form ('exponential' or 'calpha')
+    """
+    Iterative reduction of the finite-displacement deformation energy
 
     The default values are appropriate for a C_alpha model of a protein
     with the global scaling described in the reference cited above.
@@ -399,6 +408,24 @@ class FiniteDeformationReducer(DeformationEvaluationFunction):
     and which is obtained by iterative steepest-descent minimization of
     the finite-displacement deformation energy.
     """
+
+    def __init__(self, universe, fc_length = 0.7, cutoff = 1.2,
+                 factor = 46402., form = 'exponential'):
+        """
+        @param universe: the universe for which the deformation function
+                         is defined
+        @type universe: L{MMTK.Universe.Universe}
+        @param fc_length: the range parameter r_0 in the pair interaction term
+        @type fc_length: C{float}
+        @param cutoff: the cutoff used in the deformation calculation
+        @type cutoff: C{float}
+        @param factor: a global scaling factor
+        @type factor: C{float}
+        @param form: the functional form ('exponential' or 'calpha')
+        @type form: C{str}
+        """
+        DeformationEvaluationFunction.__init__(self, universe, fc_length,
+                                               cutoff, factor, form)
 
     def __call__(self, vector, rms_reduction):
         conf = self.universe.configuration()
