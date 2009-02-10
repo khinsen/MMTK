@@ -2,25 +2,25 @@
 # in code, without a database definition.
 #
 # Written by Konrad Hinsen
-# last revision: 2007-6-1
+# last revision: 2009-2-10
 #
 
-"""See also the example in Example:Miscellaneous.
+"""
+Molecule factory for creating chemical objects
 """
 
 from MMTK import Bonds, ChemicalObjects
-import copy
 
 #
 # Molecule factories store AtomTemplate and GroupTemplate objects.
 #
 
-class AtomTemplate:
+class AtomTemplate(object):
     
     def __init__(self, element):
         self.element = element
 
-class GroupTemplate:
+class GroupTemplate(object):
     
     def __init__(self, name):
         self.name = name
@@ -32,8 +32,12 @@ class GroupTemplate:
         self.locked = False
 
     def addAtom(self, atom_name, element):
-        """Add an atom of |element| which is assigned the
-        name |atom_name|.
+        """
+        Add an atom.
+        @param atom_name: the name of the atom
+        @type atom_name: C{str}
+        @param element: the chemical element symbol
+        @type element: C{str}
         """
         if self.locked:
             raise ValueError("group is locked")
@@ -42,7 +46,12 @@ class GroupTemplate:
         self.children.append(atom)
 
     def addSubgroup(self, subgroup_name, subgroup):
-        """Add |subgroup| as a subgroup with name |subgroup_name|.
+        """
+        Add a subgroup.
+        @param subgroup_name: the name of the subgroup within this group
+        @type subgroup_name: C{str}
+        @param subgroup: the subgroup type
+        @type subgroup: C{str}
         """
         if self.locked:
             raise ValueError("group is locked")
@@ -50,7 +59,12 @@ class GroupTemplate:
         self.children.append(subgroup)
 
     def addBond(self, atom1, atom2):
-        """Add a bond between |atom1| and |atom2|.
+        """
+        Add a bond.
+        @param atom1: the name of the first atom
+        @type atom1: C{str}
+        @param atom2: the name of the second atom
+        @type atom2: C{str}
         """
         if self.locked:
             raise ValueError("group is locked")
@@ -145,23 +159,22 @@ class GroupTemplate:
 #
 # The MoleculeFactory class
 #
-class MoleculeFactory:
+class MoleculeFactory(object):
     
-    """MoleculeFactory
+    """
+    MoleculeFactory
 
     A MoleculeFactory serves to create molecules without reference to database
     definitions. Molecules and groups are defined in terms of atoms, groups, and
     bonds. Each MoleculeFactory constitutes an independent set of definitions.
     Definitions within a MoleculeFactory can refer to each other.
 
-    Each MoleculeFactory stores a set of Class:MMTK.ChemicalObjects.Group
+    Each MoleculeFactory stores a set of L{ChemicalObjects.Group}
     objects which are referred to by names. The typical operation sequence is to
     create a new group and then add atoms, bonds, and subgroups. It is also
     possible to define coordinates and arbitrary attributes (in particular for
     force fields). In the end, a finished object can be retrieved as a
-    Class:MMTK.ChemicalObjects.Molecule object.
-
-    Constructor: MoleculeFactory()
+    L{MMTK.ChemicalObjects.Molecule} object.
     """
 
     def __init__(self):
@@ -169,23 +182,47 @@ class MoleculeFactory:
         self.locked_groups = {}
 
     def createGroup(self, name):
-        "Creates a new (initially empty) group object."
+        """
+        Create a new (initially empty) group object.
+        """
         if self.groups.has_key(name):
             raise ValueError("redefinition of group " + name)
         self.groups[name] = GroupTemplate(name)
 
     def addSubgroup(self, group, subgroup_name, subgroup):
-        """Add |subgroup| as a subgroup to |group| with name |subgroup_name|.
+        """
+        Add a subgroup to a group
+        @param group: the name of the group
+        @type group: C{str}
+        @param subgroup_name: the name of the subgroup within the group
+        @type subgroup_name: C{str}
+        @param subgroup: the subgroup type
+        @type subgroup: C{str}
         """
         self.groups[group].addSubgroup(subgroup_name, self.groups[subgroup])
 
     def addAtom(self, group, atom_name, element):
-        """Add an atom of |element| to |group| which is assigned the
-        name |atom_name|."""
+        """
+        Add an atom to a group
+        @param group: the name of the group
+        @type group: C{str}
+        @param atom_name: the name of the atom
+        @type atom_name: C{str}
+        @param element: the chemical element symbol
+        @type element: C{str}
+        """
         self.groups[group].addAtom(atom_name, element)
 
     def addBond(self, group, atom1, atom2):
-        "Add a bond between |atom1| and |atom2| in |group|."
+        """
+        Add a bond to a group
+        @param group: the name of the group
+        @type group: C{str}
+        @param atom1: the name of the first atom
+        @type atom1: C{str}
+        @param atom2: the name of the second atom
+        @type atom2: C{str}
+        """
         self.groups[group].addBond(atom1, atom2)
 
     def setAttribute(self, group, name, value):
@@ -198,8 +235,11 @@ class MoleculeFactory:
         return self.groups[group].getAtomReference(atom)
 
     def retrieveMolecule(self, group):
-        """Returns a Molecule object containing the atoms and subgroups
-        of |group|.
+        """
+        @param group: the name of the group to be used as a template
+        @type group: C{str}
+        @returns: a molecule defined by the contents of the group
+        @rtype C{MMTK.ChemicalObjects.Molecule}
         """
         group = self.groups[group]
         return self.makeChemicalObjects(group, True)
