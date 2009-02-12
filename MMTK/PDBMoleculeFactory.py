@@ -16,6 +16,8 @@ systems generated in this way because the molecule factory does not know
 any force field parameters.
 """
 
+__docformat__ = 'epytext'
+
 import MMTK
 from MMTK.MoleculeFactory import MoleculeFactory
 from Scientific.Geometry import Vector, delta

@@ -9,6 +9,8 @@
 Molecule factory for creating chemical objects
 """
 
+__docformat__ = 'epytext'
+
 from MMTK import Bonds, ChemicalObjects
 
 #
