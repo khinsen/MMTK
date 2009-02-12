@@ -3,14 +3,17 @@
 # given in the file.
 #
 # Written by Konrad Hinsen
-# last revision: 2008-4-15
+# last revision: 2009-2-12
 #
 
 """
+Molecule factory defined by a PDB file
+
 This module permits the construction of molecular objects that correspond
 exactly to the contents of a PDB file. It is used for working with
 experimental data. Note that most force fields cannot be applied to the
-systems generated in this way.
+systems generated in this way because the molecule factory does not know
+any force field parameters.
 """
 
 import MMTK
@@ -50,22 +53,17 @@ class PDBMoleculeFactory(MoleculeFactory):
             self.pdb_conf = pdb_conf
         else:
             self.pdb_conf = copy.deepcopy(pdb_conf)
-            for residue in self.pdb_conf.residues:
-                delete = []
-                for atom in residue:
-                    if atom_filter is not None \
-                           and not atom_filter(residue, atom):
-                        delete.append(atom)
-                for atom in delete:
-                    residue.deleteAtom(atom)
-            delete = []
-            for residue in self.pdb_conf.residues:
-                if len(residue) == 0 or \
-                       (residue_filter is not None
-                        and not residue_filter(residue)):
-                    delete.append(residue)
-            for residue in delete:
-                self.pdb_conf.deleteResidue(residue)
+            if atom_filter is not None:
+                for residue in self.pdb_conf.residues:
+                    delete = [atom for atom in residue
+                              if not atom_filter(residue, atom)]
+                    for atom in delete:
+                        residue.deleteAtom(atom)
+            if residue_filter is not None:
+                delete = [residue for residue in self.pdb_conf.residues
+                          if len(residue) == 0 or not residue_filter(residue)]
+                for residue in delete:
+                    self.pdb_conf.deleteResidue(residue)
 
         self.peptide_chains = []
         self.nucleotide_chains = []
@@ -95,12 +93,12 @@ class PDBMoleculeFactory(MoleculeFactory):
         @returns: a list of Molecule objects
         @rtype: C{list}
         """
-        objects = []
-        for chain in self.peptide_chains + self.nucleotide_chains:
-            objects.append(self.retrieveMolecule(chain))
+        objects = [self.retrieveMolecule(o)
+                   for o in self.peptide_chains
+                            + self.nucleotide_chains]
         for mollist in self.molecules.values():
-            for residue in mollist:
-                objects.append(self.retrieveMolecule(residue))
+            objects.extend([self.retrieveMolecule(residue)
+                            for residue in mollist])
         return objects
 
     def retrieveUniverse(self):
