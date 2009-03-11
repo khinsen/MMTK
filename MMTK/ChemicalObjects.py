@@ -2,7 +2,7 @@
 # complexes. They are made as copies from blueprints in the database.
 #
 # Written by Konrad Hinsen
-# last revision: 2008-1-29
+# last revision: 2009-3-11
 #
 
 """
@@ -1218,6 +1218,7 @@ class AtomCluster(CompositeChemicalObject, ChemicalObject):
         """
         self.atoms = list(atoms)
         self.parent = None
+        self.name = ''
         self.type = None
         for a in self.atoms:
             if a.parent is not None:
