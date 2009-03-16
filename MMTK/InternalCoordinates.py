@@ -1,7 +1,7 @@
 # Manipulation of internal coordinates
 #
 # Written by Konrad Hinsen
-# last revision: 2009-1-21
+# last revision: 2009-3-16
 #
 
 """
@@ -185,7 +185,7 @@ class BondAngle(InternalCoordinate):
         @param value: the desired angle
         @type value: C{float}
         """
-        from Scientific.Geometry.TensorModule import delta
+        from Scientific.Geometry import delta
         v1 = self.universe.distanceVector(self.atoms[1], self.atoms[0])
         v2 = self.universe.distanceVector(self.atoms[1], self.atoms[2])
         angle = v1.angle(v2)
@@ -267,7 +267,7 @@ class DihedralAngle(InternalCoordinate):
         @param value: the desired dihedral angle
         @type value: C{float}
         """
-        from Scientific.Geometry.TensorModule import delta
+        from Scientific.Geometry import delta
         angle  = self.universe.dihedral(self.atoms[0], self.atoms[1],
                                         self.atoms[2], self.atoms[3])
         v = self.universe.distanceVector(self.atoms[1], self.atoms[2])
