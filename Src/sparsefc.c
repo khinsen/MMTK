@@ -1,7 +1,7 @@
 /* Sparse force-constant matrix objects.
  *
  * Written by Konrad Hinsen
- * last revision: 2006-5-30
+ * last revision: 2009-3-18
  */
 
 #define NO_IMPORT
@@ -249,13 +249,21 @@ PyObject *
 PySparseFC_AsArray(PySparseFCObject *fc, int from1, int to1, int from2, int to2)
 {
   PyArrayObject *array;
+#if defined(NUMPY)
+  npy_intp dims[4];
+#else
   int dims[4];
+#endif
   dims[0] = to1-from1;
   if (dims[0] < 0) dims[0] = 0;
   dims[2] = to2-from2;
   if (dims[2] < 0) dims[2] = 0;
   dims[1] = dims[3] = 3;
+#if defined(NUMPY)
+  array = (PyArrayObject *)PyArray_SimpleNew(4, dims, PyArray_DOUBLE);
+#else
   array = (PyArrayObject *)PyArray_FromDims(4, dims, PyArray_DOUBLE);
+#endif
   if (array == NULL)
     return NULL;
   PySparseFC_CopyToArray(fc, (double *)array->data, 3*dims[2],
@@ -451,7 +459,11 @@ multiplyVector(PyObject *self, PyObject *args)
   PyArrayObject *result_array;
   int from_i = 0, to_i = fc->natoms;
   int from_j = 0, to_j = fc->natoms;
+#if defined(NUMPY)
+  npy_intp dims[2];
+#else
   int dims[2];
+#endif
   if (!PyArg_ParseTuple(args, "O!|Oiiii", &PyArray_Type, &vector, &result,
 			&from_i, &to_i, &from_j, &to_j))
     return NULL;
@@ -482,7 +494,11 @@ multiplyVector(PyObject *self, PyObject *args)
   if (result == NULL) {
     dims[0] = to_i-from_i;
     dims[1] = 3;
+#if defined(NUMPY)
+    result = PyArray_SimpleNew(2, dims, PyArray_DOUBLE);
+#else
     result = PyArray_FromDims(2, dims, PyArray_DOUBLE);
+#endif
     if (result == NULL)
       return NULL;
   }
@@ -503,7 +519,11 @@ solveForVector(PyObject *self, PyObject *args)
   PyObject *result = NULL;
   PyArrayObject *result_array;
   double tolerance = 1.e-8;
+#if defined(NUMPY)
+  npy_intp dims[2];
+#else
   int dims[2];
+#endif
   int max_iter = 0;
   int ret;
   if (!PyArg_ParseTuple(args, "O!|Odi", &PyArray_Type, &vector, &result,
@@ -531,7 +551,11 @@ solveForVector(PyObject *self, PyObject *args)
   if (result == NULL) {
     dims[0] = fc->natoms;
     dims[1] = 3;
+#if defined(NUMPY)
+    result = PyArray_SimpleNew(2, dims, PyArray_DOUBLE);
+#else
     result = PyArray_FromDims(2, dims, PyArray_DOUBLE);
+#endif
     if (result == NULL)
       return NULL;
   }
@@ -618,9 +642,17 @@ sparsefc_item(PySparseFCObject *self, Py_ssize_t i)
   else {
     PyArrayObject *array;
     PyObject *ret;
+#if defined(NUMPY)
+    npy_intp dims[2];
+#else
     int dims[2];
+#endif
     dims[0] = 3; dims[1] = 3;
+#if defined(NUMPY)
+    array = (PyArrayObject *)PyArray_SimpleNew(2, dims, PyArray_DOUBLE);
+#else
     array = (PyArrayObject *)PyArray_FromDims(2, dims, PyArray_DOUBLE);
+#endif
     if (array == NULL)
       return NULL;
     memcpy(array->data, self->data[i].fc, 9*sizeof(double));

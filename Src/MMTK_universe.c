@@ -1,7 +1,7 @@
 /* Low-level functions for universes
  *
  * Written by Konrad Hinsen
- * last revision: 2007-5-30
+ * last revision: 2009-3-18
  */
 
 #define _UNIVERSE_MODULE
@@ -462,7 +462,11 @@ distance_vector_py(PyObject *self, PyObject *args)
   PyArrayObject *geometry_data = NULL;
 
   PyArrayObject *d;
+#if defined(NUMPY)
+  npy_intp three = 3;
+#else
   int three = 3;
+#endif
 
   if (!PyArg_ParseTuple(args, "O!O!|O!",
 			&PyArray_Type, &r1,
@@ -470,7 +474,11 @@ distance_vector_py(PyObject *self, PyObject *args)
 			&PyArray_Type, &geometry_data))
     return NULL;
 
+#if defined(NUMPY)
+  d = (PyArrayObject *)PyArray_SimpleNew(1, &three, PyArray_DOUBLE);
+#else
   d = (PyArrayObject *)PyArray_FromDims(1, &three, PyArray_DOUBLE);
+#endif
   if (d == NULL)
     return NULL;
   if (geometry_data != NULL)
@@ -754,7 +762,11 @@ InfiniteUniverseSpec(PyObject *dummy, PyObject *args)
   new = universe_new();
   if (new == NULL)
     return NULL;
+#if defined(NUMPY)
+  new->geometry = (PyArrayObject *)PyArray_SimpleNew(0, NULL, PyArray_DOUBLE);
+#else
   new->geometry = (PyArrayObject *)PyArray_FromDims(0, NULL, PyArray_DOUBLE);
+#endif
   new->geometry_data = NULL;
   new->geometry_data_length = 0;
   new->distance_function = distance_vector;

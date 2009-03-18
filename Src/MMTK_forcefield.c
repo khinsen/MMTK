@@ -1,7 +1,7 @@
 /* Low-level force field calculations
  *
  * Written by Konrad Hinsen
- * last revision: 2007-5-23
+ * last revision: 2009-3-18
  */
 
 #define _FORCEFIELD_MODULE
@@ -393,7 +393,7 @@ PyTypeObject PyFFEnergyTerm_Type = {
 
   /* delete references to contained objects */
   /* inquiry tp_clear */
-  (lenfunc)energyterm_clear,
+  (inquiry)energyterm_clear,
 
   /* Assigned meaning in release 2.1 */
 
@@ -734,9 +734,15 @@ evaluator(PyFFEvaluatorObject *self,
       tinfo->input.small_change = small_change;
       tinfo->with_gradients = (energy->gradients != NULL);
       if (tinfo->with_gradients && tinfo->energy.gradients == NULL) {
+#if defined(NUMPY)
+	npy_intp dims[2];
+	dims[0] = 3; dims[1] = natoms;
+	tinfo->energy.gradients = PyArray_SimpleNew(2, dims, PyArray_DOUBLE);
+#else
 	int dims[2];
 	dims[0] = 3; dims[1] = natoms;
 	tinfo->energy.gradients = PyArray_FromDims(2, dims, PyArray_DOUBLE);
+#endif
 	if (tinfo->energy.gradients == NULL) {
 	  energy->error = 1;
 	  return;
@@ -1173,11 +1179,20 @@ nblist_pair_distances(PyObject *self, PyObject *args)
   PyArrayObject *array;
   vector3 dv;
   double *d;
-  int i, n;
+  int i;
+#if defined(NUMPY)
+  npy_intp n;
+#else
+  int n;
+#endif
   if (!PyArg_ParseTuple(args, ""))
     return NULL;
   n = nblist_length(nblist);
+#if defined(NUMPY)
+  array = (PyArrayObject *)PyArray_SimpleNew(1, &n, PyArray_DOUBLE);
+#else
   array = (PyArrayObject *)PyArray_FromDims(1, &n, PyArray_DOUBLE);
+#endif
   if (array == NULL)
     return NULL;
   d = (double *)array->data;
@@ -1198,12 +1213,21 @@ nblist_pair_indices(PyObject *self, PyObject *args)
   struct nblist_iterator iterator;
   PyArrayObject *array;
   long *index;
-  int i, n[2];
+  int i;
+#if defined(NUMPY)
+  npy_intp n[2];
+#else
+  int n[2];
+#endif
   if (!PyArg_ParseTuple(args, ""))
     return NULL;
   n[0] = nblist_length(nblist);
   n[1] = 2;
+#if defined(NUMPY)
+  array = (PyArrayObject *)PyArray_SimpleNew(2, n, PyArray_LONG);
+#else
   array = (PyArrayObject *)PyArray_FromDims(2, n, PyArray_LONG);
+#endif
   if (array == NULL)
     return NULL;
   index = (long *)array->data;
@@ -1735,8 +1759,16 @@ Evaluator(PyObject *dummy, PyObject *args)
     term->virial_index = self->nterms;
   }
   self->nterms++;
+#if defined(NUMPY)
+  {
+    npy_intp dims = self->nterms;
+    self->energy_terms_array = (PyArrayObject *)
+               PyArray_SimpleNew(1, &dims, PyArray_DOUBLE);
+  }
+#else
   self->energy_terms_array = (PyArrayObject *)
              PyArray_FromDims(1, &self->nterms, PyArray_DOUBLE);
+#endif
   self->nterms--;
   if (self->energy_terms_array == NULL) {
     nthreads = 1;

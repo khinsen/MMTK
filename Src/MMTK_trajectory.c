@@ -154,7 +154,11 @@ PyTrajectory_ReadParticleVector(PyTrajectoryObject *trajectory,
   PyNetCDFVariableObject *v = (PyNetCDFVariableObject *)variable;
   PyNetCDFIndex *indices;
   PyArrayObject *data, *ret;
+#if defined(NUMPY)
+  npy_intp dim[2];
+#else
   int dim[2];
+#endif
   int i;
 
   indices = PyNetCDFVariable_Indices(v);
@@ -183,7 +187,12 @@ PyTrajectory_ReadParticleVector(PyTrajectoryObject *trajectory,
     return data;
   dim[0] = trajectory->natoms;
   dim[1] = 3;
+
+#if defined(NUMPY)
+  ret = (PyArrayObject *)PyArray_SimpleNew(2, dim, PyArray_DOUBLE);
+#else
   ret = (PyArrayObject *)PyArray_FromDims(2, dim, PyArray_DOUBLE);
+#endif
   if (ret == NULL) {
     Py_DECREF(data);
     return NULL;
@@ -273,18 +282,30 @@ PyTrajectory_ReadParticleTrajectories(PyTrajectoryObject *trajectory, int atom,
     PyArrayObject *read;
     double *data_data, *box_data;
     int bfirst, bsteps, rsteps, istep;
+#if defined(NUMPY)
+    npy_intp dim[3];
+#else
     int dim[3];
+#endif
     dim[0] = natoms;
     dim[1] = steps;
     dim[2] = 3;
+#if defined(NUMPY)
+    data = (PyArrayObject *)PyArray_SimpleNew(3, dim, PyArray_DOUBLE);
+#else
     data = (PyArrayObject *)PyArray_FromDims(3, dim, PyArray_DOUBLE);
+#endif
     if (data == NULL)
       return NULL;
     data_data = (double *)data->data;
     if (box_var != NULL && box == NULL) {
       dim[0] = steps;
       dim[1] = universe_spec->geometry_data_length;
+#if defined(NUMPY)
+      box = (PyArrayObject *)PyArray_SimpleNew(2, dim, PyArray_DOUBLE);
+#else
       box = (PyArrayObject *)PyArray_FromDims(2, dim, PyArray_DOUBLE);
+#endif
       if (box == NULL) {
 	Py_DECREF(data);
 	return NULL;
@@ -394,13 +415,21 @@ PyTrajectory_ReadParticleTrajectories(PyTrajectoryObject *trajectory, int atom,
       }
     }
     else {
+#if defined(NUMPY)
+      npy_intp dim[3];
+#else
       int dim[3];
+#endif
       double *d1;
       PyArrayObject *discard = data;
       dim[0] = natoms;
       dim[1] = steps;
       dim[2] = 3;
+#if defined(NUMPY)
+      data = (PyArrayObject *)PyArray_SimpleNew(3, dim, PyArray_DOUBLE);
+#else
       data = (PyArrayObject *)PyArray_FromDims(3, dim, PyArray_DOUBLE);
+#endif
       if (data == NULL) {
 	Py_DECREF(discard);
 	return NULL;
@@ -590,8 +619,16 @@ PyTrajectory_WriteFloats(PyTrajectoryObject *trajectory, PyObject *variable,
     a[type] = NULL;
   }
   if (a[type] == NULL) {
+#if defined(NUMPY)
+    {
+      npy_intp dim = n;
+      a[type] = (PyArrayObject *)PyArray_SimpleNew((n == 1) ? 0 : 1, &dim,
+						    trajectory->floattype);
+    }
+#else
     a[type] = (PyArrayObject *)PyArray_FromDims((n == 1) ? 0 : 1, &n,
 						trajectory->floattype);
+#endif
     if (a[type] == NULL)
       return -1;
     last_n[type] = n;
@@ -619,8 +656,13 @@ PyTrajectory_WriteInteger(PyTrajectoryObject *trajectory, PyObject *variable,
 {
   static PyArrayObject *a = NULL;
   if (a == NULL) {
+#if defined(NUMPY)
+    npy_intp n = 1;
+    a = (PyArrayObject *)PyArray_SimpleNew(0, &n, PyArray_LONG);
+#else
     int n = 1;
     a = (PyArrayObject *)PyArray_FromDims(0, &n, PyArray_LONG);
+#endif
     if (a == NULL)
       return -1;
   }
@@ -880,17 +922,30 @@ PyTrajectory_Open(PyObject *universe, PyObject *description,
 
   if ((self->index_map != NULL || floattype != PyArray_DOUBLE)
        && mode[0] != 'r') {
+#if defined(NUMPY)
+    npy_intp dim[2];
+#else
     int dim[2];
+#endif
     if (self->index_map != NULL)
       dim[0] = self->index_map->dimensions[0];
     else
       dim[0] = self->natoms;
     dim[1] = 3;
+#if defined(NUMPY)
+    self->vbuffer = (PyArrayObject *)PyArray_SimpleNew(2, dim, floattype);
+#else
     self->vbuffer = (PyArrayObject *)PyArray_FromDims(2, dim, floattype);
+#endif
     if (self->vbuffer == NULL)
       goto error;
+#if defined(NUMPY)
+    self->sbuffer = (PyArrayObject *)PyArray_SimpleNewFromData(1, dim,
+					 floattype, self->vbuffer->data);
+#else
     self->sbuffer = (PyArrayObject *)PyArray_FromDimsAndData(1, dim,
 					 floattype, self->vbuffer->data);
+#endif
     if (self->sbuffer == NULL)
       goto error;
   }
@@ -1741,12 +1796,21 @@ readTrajectory(PyObject *dummy, PyObject *args)
     char *n = PyString_AsString(name);
     if (var->unlimited && strcmp(n, "step") != 0) {
       if (var->nd == 3) { /* particle array */
+#if defined(NUMPY)
+	npy_intp shape[2];
+#else
 	int shape[2];
+#endif
 	vars[j].type = PyTrajectory_ParticleVector;
 	shape[0] = input->natoms;
 	shape[1] = 3;
+#if defined(NUMPY)
+	vars[j].value.array = (PyArrayObject *)
+	                        PyArray_SimpleNew(2, shape,input->floattype);
+#else
 	vars[j].value.array = (PyArrayObject *)
 	                           PyArray_FromDims(2, shape,input->floattype);
+#endif
 	if (vars[j].value.array == NULL) {
 	  PyErr_NoMemory();
 	  goto error;
