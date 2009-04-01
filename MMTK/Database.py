@@ -1,7 +1,7 @@
 # This module manages the chemical database.
 #
 # Written by Konrad Hinsen
-# last revision: 2008-10-29
+# last revision: 2009-4-1
 #
 
 """
@@ -79,7 +79,7 @@ class Database(object):
         name = name.lower()
         if not self.types.has_key(name):
             filename = databasePath(name, self.directory, 0)
-            self.types[name] = self.type_constructor(filename)
+            self.types[name] = self.type_constructor(filename, name)
         return self.types[name]
 
 #
@@ -88,8 +88,9 @@ class Database(object):
 #
 class ChemicalObjectType(object):
 
-    def __init__(self, filename, module, instancevars):
+    def __init__(self, filename, database_name, module, instancevars):
         self.filename = filename
+        self.database_name = database_name
         file_text = Utility.readURL(filename)
         newvars = {}
         exec file_text in vars(module), newvars
@@ -193,9 +194,10 @@ class AtomType(ChemicalObjectType):
 
     error = 'AtomTypeError'
 
-    def __init__(self, filename):
+    def __init__(self, filename, database_name):
         from MMTK import AtomEnvironment
-        ChemicalObjectType.__init__(self, filename, AtomEnvironment, ())
+        ChemicalObjectType.__init__(self, filename, database_name,
+                                    AtomEnvironment, ())
         if not isinstance(self.mass, list):
             self.mass = [(self.mass, 100.)]
         total_probability = sum([m[1] for m in self.mass])
@@ -209,7 +211,7 @@ class AtomType(ChemicalObjectType):
 
     def _restoreId(self):
         return 'Database.atom_types.findType("' + \
-               os.path.split(self.filename)[1] + '")'
+               self.database_name + '")'
 
     def writeXML(self, file, memo):
         file.write('<atom/>\n')
@@ -224,9 +226,10 @@ class GroupType(ChemicalObjectType):
 
     error = 'GroupTypeError'
 
-    def __init__(self, filename):
+    def __init__(self, filename, database_name):
         from MMTK import GroupEnvironment
-        ChemicalObjectType.__init__(self, filename, GroupEnvironment,
+        ChemicalObjectType.__init__(self, filename, database_name,
+                                    GroupEnvironment,
                                     ('atoms', 'groups', 'bonds',
                                      'chain_links'))
         for g in self.groups:
@@ -236,7 +239,7 @@ class GroupType(ChemicalObjectType):
 
     def _restoreId(self):
         return 'Database.group_types.findType("' + \
-               os.path.split(self.filename)[1] + '")'
+               self.database_name + '")'
 
 #
 # Molecule type class
@@ -245,9 +248,10 @@ class MoleculeType(ChemicalObjectType):
 
     error = 'MoleculeTypeError'
 
-    def __init__(self, filename):
+    def __init__(self, filename, database_name):
         from MMTK import MoleculeEnvironment
-        ChemicalObjectType.__init__(self, filename, MoleculeEnvironment,
+        ChemicalObjectType.__init__(self, filename, database_name,
+                                    MoleculeEnvironment,
                                     ('atoms', 'groups', 'bonds'))
         for g in self.groups:
             self.atoms = self.atoms + g.atoms
@@ -256,7 +260,7 @@ class MoleculeType(ChemicalObjectType):
 
     def _restoreId(self):
         return 'Database.molecule_types.findType("' + \
-               os.path.split(self.filename)[1] + '")'
+               self.database_name + '")'
 
 #
 # Crystal type class
@@ -265,9 +269,10 @@ class CrystalType(ChemicalObjectType):
 
     error = 'CrystalTypeError'
 
-    def __init__(self, filename):
+    def __init__(self, filename, database_name):
         from MMTK import CrystalEnvironment
-        ChemicalObjectType.__init__(self, filename, CrystalEnvironment,
+        ChemicalObjectType.__init__(self, filename, database_name,
+                                    CrystalEnvironment,
                                     ('atoms', 'groups', 'molecules', 'bonds'))
         for g in self.groups:
             self.atoms = self.atoms + g.atoms
@@ -279,7 +284,7 @@ class CrystalType(ChemicalObjectType):
 
     def _restoreId(self):
         return 'Database.crystal_types.findType("' + \
-               os.path.split(self.filename)[1] + '")'
+               self.database_name + '")'
 
 #
 # Complex type class
@@ -288,9 +293,10 @@ class ComplexType(ChemicalObjectType):
 
     error = 'ComplexTypeError'
 
-    def __init__(self, filename):
+    def __init__(self, filename, database_name):
         import ComplexEnvironment
-        ChemicalObjectType.__init__(self, filename, ComplexEnvironment,
+        ChemicalObjectType.__init__(self, filename, database_name,
+                                    ComplexEnvironment,
                                     ('atoms', 'molecules'))
         for m in self.molecules:
             self.atoms = self.atoms + m.atoms
@@ -298,7 +304,7 @@ class ComplexType(ChemicalObjectType):
 
     def _restoreId(self):
         return 'Database.complex_types.findType("' + \
-               os.path.split(self.filename)[1] + '")'
+               self.database_name + '")'
 
 #
 # An atom reference object is substituted for all references to
@@ -331,8 +337,9 @@ class AtomReference(object):
 #
 class ReferenceType(object):
 
-    def __init__(self, filename, environment):
+    def __init__(self, filename, database_name, environment):
         self.filename = filename
+        self.database_name = database_name
         self.environment = environment
 
     def createObject(self, newvars):
@@ -341,13 +348,14 @@ class ReferenceType(object):
 
 class ProteinType(ReferenceType):
 
-    def __init__(self, filename):
+    def __init__(self, filename, database_name):
         from MMTK import ProteinEnvironment
-        ReferenceType.__init__(self, filename, ProteinEnvironment)
+        ReferenceType.__init__(self, filename, database_name,
+                               ProteinEnvironment)
 
     def _restoreId(self):
         return 'Database.protein_types.findType("' + \
-               os.path.split(self.filename)[1] + '")'
+               self.database_name + '")'
 
 #
 # The five databases.
