@@ -16,6 +16,11 @@ most cases, a Pyrex or C implementation will be necessary, but a
 Python version can be very useful in designing, testing, and debugging
 an equivalent Pyrex or C implementation.
 
+NOTE: Force field terms implemented in Python cause a crash on various
+platforms with various Python versions. I didn't yet succeed in
+investigating the cause of these crashes. If Python force field terms
+crash on your system, please switch to Pyrex for the moment.
+
 Pyrex is a compiled version of Python that permits adding C type
 declarations for gaining speed. If all variables have C type
 declarations, then Pyrex code is as fast as hand-written C
