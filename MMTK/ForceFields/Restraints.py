@@ -1,7 +1,7 @@
 # Harmonic restraint terms that can be added to a force field.
 #
 # Written by Konrad Hinsen
-# last revision: 2008-1-10
+# last revision: 2009-4-15
 #
 
 """This module contains harmonic restraint terms that can be added
@@ -163,7 +163,7 @@ class HarmonicDihedralRestraint(ForceField):
         params = self.evaluatorParameters(universe, subset1, subset2,
                                           global_data)['cosine_dihedral_term']
         assert len(params) == 1
-        indices = Numeric.array([params[:4]])
-        parameters = Numeric.array([params[4:]])
+        indices = Numeric.array([params[0][:4]])
+        parameters = Numeric.array([params[0][4:]])
         return [CosineDihedralTerm(universe._spec, indices, parameters,
                                    self.name)]
