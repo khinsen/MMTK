@@ -1,7 +1,7 @@
 /* Low-level force field calculations: bonded interactions
  *
  * Written by Konrad Hinsen
- * last revision: 2008-1-28
+ * last revision: 2009-4-22
  */
 
 #define NO_IMPORT
@@ -425,6 +425,9 @@ cosine_dihedral_evaluator(PyFFEnergyTermObject *self,
     if (n == 0) {
       phi = acos(cos_phi)*sign_phi;
       dphi = phi-param[1];
+      dphi = fmod(dphi+2.*M_PI, 2.*M_PI);
+      if (dphi > M_PI)
+	dphi -= 2*M_PI;
       e += param[3]*sqr(dphi);
     }
     else {
