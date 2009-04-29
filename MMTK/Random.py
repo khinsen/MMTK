@@ -1,21 +1,19 @@
 # Functions for finding random points and orientations.
 #
 # Written by: Konrad Hinsen
-# Last revision: 2007-5-31
+# Last revision: 2009-4-29
 # 
 
-"""This module defines various random quantities that are useful in
-molecular simulations. For obtaining random numbers, it tries to use
-the RNG module, which is part of the LLNL package distribution, which
-also contains Numerical Python. If RNG is not available, it
-uses the random number generators in modules RandomArray (part of
-Numerical Python) and random (in the Python standard library).
 """
+Random quantities for use in molecular simulations
+"""
+
+__docformat__ = 'epytext'
 
 from Scientific.Geometry import Vector
 from Scientific.Geometry.Transformation import Rotation
 from Scientific import N
-import ParticleProperties, Units
+from MMTK import ParticleProperties, Units
 
 try:
     numeric = N.package
@@ -94,9 +92,17 @@ del numeric
 # Random point in a rectangular box centered around the origin
 #
 def randomPointInBox(a, b = None, c = None):
-    """Returns a vector drawn from a uniform distribution within a
-    rectangular box with edge lengths |a|, |b|, |c|. If |b| and/or |c|
-    are omitted, they are taken to be equal to |a|."""
+    """
+    @param a: the edge length of a box along the x axis
+    @type a: C{float}
+    @param b: the edge length of a box along the y axis (default: a)
+    @type b: C{float}
+    @param c: the edge length of a box along the z axis (default: a)
+    @type c: C{float}
+    @returns: a vector drawn from a uniform distribution within a
+              rectangular box with edge lengths a, b, c.
+    @rtype: C{Scientific.Geometry.Vector}
+    """
     if b is None: b = a
     if c is None: c = a
     x = uniform(-0.5*a, 0.5*a)
@@ -108,8 +114,13 @@ def randomPointInBox(a, b = None, c = None):
 # Random point in a sphere around the origin.
 #
 def randomPointInSphere(r):
-    """Returns a vector drawn from a uniform distribution within
-    a sphere of radius |r|."""
+    """
+    @param r: the radius of a sphere
+    @type r: C{float}
+    @returns: a vector drawn from a uniform distribution within
+              a sphere of radius r.
+    @rtype: C{Scientific.Geometry.Vector}
+    """
     rsq = r*r
     while 1:
         x = N.array([uniform(-r, r), uniform(-r, r), uniform(-r, r)])
@@ -120,43 +131,58 @@ def randomPointInSphere(r):
 # Random direction (unit vector).
 #
 def randomDirection():
-    """Returns a vector drawn from a uniform distribution on
-    the surface of a unit sphere."""
+    """
+    @returns: a vector drawn from a uniform distribution on the surface
+              of a unit sphere.
+    @rtype: C{Scientific.Geometry.Vector}
+    """
     r = randomPointInSphere(1.)
     return r.normal()
 
 def randomDirections(n):
-    """Returns a list of |n| vectors drawn from a uniform distribution on
-    the surface of a unit sphere. If |n| is negative, return a deterministic
-    list of not more than -|n| vectors of unit length (useful for
-    testing purposes)."""
+    """
+    @param n: the number of direction vectors
+    @returns: a list of n vectors drawn from a uniform distribution on
+              the surface of a unit sphere. If n is negative, returns
+              a deterministic list of not more than -n vectors of unit
+              length (useful for testing purposes).
+    @rtype: C{list}
+    """
     if n < 0:
-        list = [Vector(1., 0., 0.), Vector(0., -1., 0.), Vector(0., 0., 1.),
-                Vector(-1., 1., 0.).normal(), Vector(-1., 0., 1.).normal(),
-                Vector(0., 1., -1.).normal(), Vector(1., -1., 1.).normal()]
-        list = list[:-n]
+        vs = [Vector(1., 0., 0.), Vector(0., -1., 0.), Vector(0., 0., 1.),
+              Vector(-1., 1., 0.).normal(), Vector(-1., 0., 1.).normal(),
+              Vector(0., 1., -1.).normal(), Vector(1., -1., 1.).normal()]
+        return vs[:-n]
     else:
-        list = []
-        for i in range(n):
-            list.append(randomDirection())
-    return list
+        return [randomDirection() for i in range(n)]
 
 #
 # Random rotation.
 #
 def randomRotation(max_angle = N.pi):
-    """Returns a Rotation object describing a random rotation
-    with a uniform axis distribution and angles drawn from
-    a uniform distribution between -|max_angle| and |max_angle|."""
+    """
+    @param max_angle: the upper limit for the rotation angle
+    @type max_angle: C{float}
+    @returns: a random rotation with a uniform axis distribution
+              and angles drawn from a uniform distribution between
+              -max_angle and max_angle.
+    @rtype: C{Scientific.Geometry.Transformations.Rotation}
+    """
     return Rotation(randomDirection(), uniform(-max_angle, max_angle))
 
 #
 # Random velocity (gaussian)
 #
 def randomVelocity(temperature, mass):
-    """Returns a random velocity vector for a particle of a given
-    |mass|, drawn from a Boltzmann distribution for the given
-    |temperature|."""
+    """
+    @param temperature: the temperature defining a Maxwell distribution
+    @type temperature: C{float}
+    @param mass: the mass of a particle
+    @type mass: C{float}
+    @returns: a random velocity vector for a particle of a given mass
+              at a given temperature
+    @rtype: C{Scientific.Geometry.Vector}
+    """
     sigma = N.sqrt((temperature*Units.k_B)/(mass*Units.amu))
     return Vector(gaussian(0., sigma, (3,)))
 
@@ -164,23 +190,14 @@ def randomVelocity(temperature, mass):
 # Random ParticleVector (gaussian)
 #
 def randomParticleVector(universe, width):
-    """Returns a ParticleVector object in which each vector is
-    drawn from a Gaussian distribution with a given |width| centered
-    around zero."""
+    """
+    @param universe: a universe
+    @type universe: L{MMTK.Universe.Universe}
+    @param width: the width (standard deviation) of a Gaussian distribution
+    @type width: C{float}
+    @returns: a set of vectors drawn from a Gaussian distribution
+              with a given width centered  around zero.
+    @rtype: L{MMTK.ParticleProperties.ParticleVector}
+    """
     data = gaussian(0., 0.577350269189*width, (universe.numberOfPoints(), 3))
     return ParticleProperties.ParticleVector(universe, data)
-
-
-#
-# Test code
-#
-if __name__ == '__main__':
-
-    mean = 1.
-    std = 5.
-    n = 10000
-
-    values = gaussian(mean, std, (n,))
-    m = N.sum(values)/n
-    print mean, m
-    print std, N.sqrt(N.sum((values-m)**2)/n)
