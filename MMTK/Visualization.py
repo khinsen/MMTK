@@ -2,10 +2,13 @@
 # and a visualization base class
 #
 # Written by Konrad Hinsen
-# last revision: 2000-1-29
+# last revision: 2009-5-12
 #
 
-"""This module provides visualization of chemical objects and animated
+"""
+Visualization of chemical objects, including animation
+
+This module provides visualization of chemical objects and animated
 visualization of normal modes and sequences of configurations, including
 trajectories. Visualization depends on external visualization programs.
 On Unix systems, these programs are defined by environment variables.
@@ -30,8 +33,10 @@ and must give "vmd" or "xmol" after stripping off an optional
 directory specification.
 """
 
-import Universe, Units, Utility
-from Scientific import N as Numeric
+__docformat__ = 'epytext'
+
+from MMTK import Units, Utility
+from Scientific import N
 import subprocess, sys, tempfile, os
 
 #
@@ -83,68 +88,67 @@ def defineVRMLiewer(progname, exec_path):
 # Visualization base class. Defines methods for general visualization
 # tasks.
 #
-class Viewable:
+class Viewable(object):
 
-    """Any viewable chemical object
+    """
+    Any viewable chemical object
 
-    This class is a Glossary:MixInClass that defines a general
+    This is a mix-in class that defines a general
     visualization method for all viewable objects, i.e. chemical
     objects (atoms, molecules, etc.), collections, and universes.
     """
 
     def graphicsObjects(self, **options):
-        #PJC change: (added vdw and vdw_and_stick to documentation)
-        """Returns a list of graphics objects that represent
-        the object for which the method is called. All options
-        are specified as keyword arguments:
-
-        |configuration| -- the configuration in which the objects
-                           are drawn (default: the current configuration)
-
-        |model| -- a string specifying one of several graphical
-                   representations ("wireframe", "tube", "ball_and_stick",
-                   "vdw" and "vdw_and_stick").  The vdw models use balls
-                   with the radii taken from the atom objects.
-                   Default is "wireframe".
-
-        |ball_radius| -- the radius of the balls representing the atoms
-                         in a ball_and_stick model, default: 0.03
-                         This is also used in vdw and vdw_and_stick when
-                         an atom does not supply a radius.
-    
-        |stick_radius| -- the radius of the sticks representing the bonds
-                          in a ball_and_stick, vdw_and_stick or tube model.
-                          Default: 0.02 for the tube model, 0.01 for the
-                          ball_and_stick and vdw_and_stick models
-
-        |graphics_module| -- the module in which the elementary graphics
-                             objects are defined
-                             (default: Scientific.Visualization.VRML)
-
-        |color_values| -- a Class:MMTK.ParticleScalar object that defines
-                          a value for each atom which defines that
-                          atom's color via the color scale object specified
-                          by the option |color_scale|. If no value is
-                          given for |color_values|, the atoms' colors are
-                          taken from the attribute 'color' of each
-                          atom object (default values for each chemical
-                          element are provided in the chemical database).
-
-        |color_scale| -- an object that returns a color object (as defined
-                         in the module Scientific.Visualization.Color)
-                         when called with a number argument. Suitable
-                         objects are defined by
-                         Scientific.Visualization.Color.ColorScale and
-                         Scientific.Visualization.Color.SymmetricColorScale.
-                         The object is used only when the option
-                         |color_values| is specified as well. The default
-                         is a blue-to-red color scale that covers the
-                         range of the values given in |color_values|.
-                         
-        |color| -- a color name predefined in the module
-                   Scientific.Visualization.Color. The corresponding
-                   color is applied to all graphics objects that are
-                   returned.
+        """
+        @keyword configuration: the configuration in which the objects
+                                are drawn (default: the current configuration)
+        @type configuration: L{MMTK.ParticleProperties.Configuration}
+        @keyword model: the graphical representation to be used (one of
+                        "wireframe", "tube", "ball_and_stick", "vdw" and
+                        "vdw_and_stick").  The vdw models use balls
+                        with the radii taken from the atom objects.
+                        Default is "wireframe".
+        @type model: C{str}
+        @keyword ball_radius: the radius of the balls representing the atoms
+                              in a ball_and_stick model, default: 0.03
+                              This is also used in vdw and vdw_and_stick when
+                              an atom does not supply a radius.
+        @type ball_radius: C{float}
+        @keyword stick_radius: the radius of the sticks representing the bonds
+                               in a ball_and_stick, vdw_and_stick or tube model.
+                               Default: 0.02 for the tube model, 0.01 for the
+                               ball_and_stick and vdw_and_stick models
+        @type stick_radius: C{float}
+        @keyword graphics_module: the module in which the elementary graphics
+                                  objects are defined
+                                  (default: C{Scientific.Visualization.VRML})
+        @type graphics_module: C{module}
+        @keyword color_values:  a color value for each atom which defines
+                                the color via the color scale object specified
+                                by the option color_scale. If no value is
+                                given, the atoms' colors are taken from the
+                                attribute 'color' of each atom object (default
+                                values for each chemical element are provided
+                                in the chemical database).
+        @type  color_values: L{MMTK.ParticleProperties.ParticleScalar}
+        @keyword color_scale: an object that returns a color object (as defined
+                              in the module C{Scientific.Visualization.Color})
+                              when called with a number argument. Suitable
+                              objects are defined by
+                              Scientific.Visualization.Color.ColorScale and
+                              Scientific.Visualization.Color.SymmetricColorScale.
+                              The object is used only when the option
+                              color_values is specified as well. The default
+                              is a blue-to-red color scale that covers the
+                              range of the values given in color_values.
+        @type color_scale: callable
+        @keyword color: a color name predefined in the module
+                        Scientific.Visualization.Color. The corresponding
+                        color is applied to all graphics objects that are
+                        returned.
+        @returns: a list of graphics objects that represent
+                  the object for which the method is called.
+        @rtype: C{list}
         """
         conf = options.get('configuration', None)
         model = options.get('model', 'wireframe')
@@ -162,12 +166,13 @@ class Viewable:
         if color is None:
             color_values = options.get('color_values', None)
             if color_values is not None:
-                lower = Numeric.minimum.reduce(color_values.array)
-                upper = Numeric.maximum.reduce(color_values.array)
+                lower = N.minimum.reduce(color_values.array)
+                upper = N.maximum.reduce(color_values.array)
                 options['color_scale'] = module.ColorScale((lower, upper))
         try:
             distance_fn = self.universe().distanceVector
         except AttributeError:
+            from MMTK import Universe
             distance_fn = Universe.InfiniteUniverse().distanceVector
         return self._graphics(conf, distance_fn, model, module, options)
 
@@ -187,8 +192,8 @@ class Viewable:
 # View anything viewable.
 #
 def view(object, *parameters):
-    "Equivalent to |object|.view(parameters)."
-    apply(object.view, parameters)
+    "Equivalent to object.view(parameters)."
+    object.view(*parameters)
 
 #
 # Display an object or a collection of objects using an external
@@ -260,17 +265,19 @@ def viewConfiguration(*args, **kwargs):
 #
 # Normal mode and trajectory animation
 #
-def viewSequence(object, conf_list, periodic = 0, label = None):
-    """Launches an external viewer with animation capabilities
-    to display |object| in the configurations given in
-    |conf_list|, which can be any sequence of configurations,
-    including the variable "configuration" from a
-    Class:MMTK.Trajectory.Trajectory object. If |periodic|
-    is 1, the configurations will be repeated periodically,
-    provided that the external viewer supports this operation.
-    |label| is an optional text string that some interfaces
-    use to pass a description of the object to the visualization
-    system.
+def viewSequence(object, conf_list, periodic = False, label = None):
+    """
+    Launches an animation using an external viewer.
+
+    @param object: the object for which the animation is displayed.
+    @type object: L{MMTK.Collections.GroupOfAtoms}
+    @param conf_list: a sequence of configurations that define the animation
+    @type conf_list: sequence
+    @param periodic: if C{True}, turn animation into a loop
+    @param label: an optional text string that some interfaces
+                  use to pass a description of the object to the
+                  visualization system.
+    @type label: C{str}
     """
     pdbviewer, exec_path = viewer.get('pdb', (None, None))
     function = {'vmd': viewSequenceVMD,
@@ -283,21 +290,29 @@ def viewSequence(object, conf_list, periodic = 0, label = None):
         function(object, conf_list, periodic, label)
 
 
-def viewTrajectory(trajectory, first=0, last=None, step=1, subset = None,
+def viewTrajectory(trajectory, first=0, last=None, skip=1, subset = None,
                    label = None):
-    """Launches an external viewer with animation capabilities
-    to display the configurations from |first| to |last| in increments
-    of |step| in |trajectory|. The trajectory can be specified by
-    a Class:MMTK.Trajectory.Trajectory object or by a string which
-    is interpreted as the file name of a trajectory file. An optional
-    parameter |subset| can specify an object which is a subset of the
-    universe contained in the trajectory, in order to restrict
-    visualization to this subset. |label| is an optional text string
-    that some interfaces use to pass a description of the object to the
-    visualization system.
+    """
+    Launches an animation based on a trajectory using an external viewer.
+
+    @param trajectory: the trajectory
+    @type trajectory: L{MMTK.Trajectory.Trajectory}
+    @param first: the first trajectory step to be used
+    @type first: C{int}
+    @param last: the first trajectory step NOT to be used
+    @type last: C{int}
+    @param skip: the distance between two consecutive steps shown
+    @type skip: C{int}
+    @param subset: the subset of the universe that is shown
+                   (default: the whole universe)
+    @type subset: L{MMTK.Collections.GroupOfAtoms}
+    @param label: an optional text string that some interfaces
+                  use to pass a description of the object to the
+                  visualization system.
+    @type label: C{str}
     """
     if type(trajectory) == type(''):
-        from Trajectory import Trajectory
+        from MMTK.Trajectory import Trajectory
         trajectory = Trajectory(None, trajectory, 'r')
     if last is None:
         last = len(trajectory)
@@ -306,7 +321,7 @@ def viewTrajectory(trajectory, first=0, last=None, step=1, subset = None,
     universe = trajectory.universe
     if subset is None:
         subset = universe
-    viewSequence(subset, trajectory.configuration[first:last:step], label)
+    viewSequence(subset, trajectory.configuration[first:last:skip], label)
 
 def viewMode(mode, factor=1., subset=None, label=None):
     universe = mode.universe
@@ -353,9 +368,9 @@ def viewSequenceXMol(object, conf_list, periodic = 0, label = None):
 # View configuration
 #
 def isCalpha(object):
-    from Proteins import isProtein, isPeptideChain
-    from Universe import isUniverse
-    from Collections import isCollection
+    from MMTK.Proteins import isProtein, isPeptideChain
+    from MMTK.Universe import isUniverse
+    from MMTK.Collections import isCollection
     if isProtein(object):
        chain_list = list(object)
     elif isPeptideChain(object):
@@ -368,19 +383,20 @@ def isCalpha(object):
             elif isPeptideChain(element):
                 chain_list.append(element)
             else:
-                return 0
+                return False
     else:
-        return 0
+        return False
     for chain in chain_list:
         try:
             if chain.model != 'calpha':
-                return 0
+                return False
         except AttributeError:
-            return 0
-    return 1
+            return False
+    return True
 
 def viewConfigurationVMD(object, configuration = None, format = 'pdb',
                       label = None):
+    from MMTK import Universe
     format = format.lower()
     if format != 'pdb':
         return genericViewConfiguration(object, configuration, format)
@@ -431,7 +447,7 @@ def viewSequenceVMD(object, conf_list, periodic = 0, label=None):
     universe = object.universe()
     if np == universe.numberOfPoints() \
        and len(conf_list) > 2:
-        import DCD
+        from MMTK import DCD
         pdbfile = tempfile.mktemp()
         pdbfile_tcl = pdbfile.replace('\\', '\\\\')
         dcdfile = tempfile.mktemp()
@@ -506,14 +522,6 @@ def viewConfigurationIMol(object, configuration = None, format = 'pdb',
 # Animate sequence
 #
 def viewSequenceIMol(object, conf_list, periodic = 0, label=None):
-    """Launches an external viewer with animation capabilities
-    to display |object| in the configurations given in
-    |conf_list|, which can be any sequence of configurations,
-    including the variable "configuration" from a
-    Class:MMTK.Trajectory.Trajectory object. If |periodic|
-    is 1, the configurations will be repeated periodically,
-    provided that the external viewers supports this operation.
-    """
     from MMTK import PDB
     tempfile.tempdir = tempdir
     filename = tempfile.mktemp() + '.pdb'
@@ -529,7 +537,7 @@ def viewSequenceIMol(object, conf_list, periodic = 0, label=None):
 #
 # PyMOL support
 #
-import PyMOL
+from MMTK import PyMOL
 if PyMOL.in_pymol:
 
     _representation = None
