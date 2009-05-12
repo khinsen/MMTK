@@ -160,6 +160,29 @@ class NormalModes(object):
             self.sort_index = N.arange(0, last-first)
         self.nmodes = last-first
 
+    def fluctuations(self, first_mode=6):
+        """
+        @param first_mode: the first mode to be taken into account for
+                           the fluctuation calculation. The default value
+                           of 6 is right for molecules in vacuum.
+        @type first_mode: C{int}
+        @returns: the thermal fluctuations for each atom in the universe
+        @rtype: L{MMTK.ParticleProperties.ParticleScalar}
+        """
+        raise NotImplementedError
+
+    def anisotropicFluctuations(self, first_mode=6):
+        """
+        @param first_mode: the first mode to be taken into account for
+                           the fluctuation calculation. The default value
+                           of 6 is right for molecules in vacuum.
+        @type first_mode: C{int}
+        @returns: the anisotropic thermal fluctuations for each
+                  atom in the universe
+        @rtype: L{MMTK.ParticleProperties.ParticleTensor}
+        """
+        raise NotImplementedError
+
     def _forceConstantMatrix(self):
         if self.basis is not None:
             self._setupBasis()

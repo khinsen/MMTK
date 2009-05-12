@@ -1,11 +1,14 @@
 # Energetic normal mode calculations.
 #
 # Written by Konrad Hinsen
-# last revision: 2008-4-7
+# last revision: 2009-5-12
 #
 
-"""See also the Example:NormalModes example applications.
 """
+Energetic normal modes
+"""
+
+__docformat__ = 'epytext'
 
 from MMTK import Features, Units, ParticleProperties
 from MMTK.NormalModes import Core
@@ -16,18 +19,13 @@ from Scientific import N
 #
 class EnergeticMode(Core.Mode):
 
-    """Single energetic normal mode
+    """
+    Single energetic normal mode
 
-    A Glossary:Subclass of Class:MMTK.ParticleVector.
-
-    Mode objects are created by indexing a EnergeticNormalModes object.
+    Mode objects are created by indexing a L{EnergeticModes} object.
     They contain the atomic displacements corresponding to a
-    single mode.
-
-    Mode objects are specializations of Class:MMTK.ParticleVector
-    objects and support all their operations. In addition, the
-    frequency corresponding to the mode is stored in the attribute
-    "frequency".
+    single mode. In addition, the force constant corresponding to the mode
+    is stored in the attribute "force_constant".
     """
 
     def __init__(self, universe, n, force_constant, mode):
@@ -45,74 +43,69 @@ class EnergeticMode(Core.Mode):
 #
 class EnergeticModes(Core.NormalModes):
 
-    """Energetic normal modes
-
-    Constructor: EnergeticModes(|universe|, |temperature|=300,
-                                |subspace|=None, |delta|=None, |sparse|=None)
-
-    Arguments:
-
-    |universe| -- the system for which the normal modes are calculated;
-                  it must have a force field which provides the second
-                  derivatives of the potential energy
-
-    |temperature| -- the temperature for which the amplitudes of the
-                     atomic displacement vectors are calculated. A
-                     value of 'None' can be specified to have no scaling
-                     at all. In that case the norm of each normal mode
-                     vector is one.
-
-    |subspace| -- the basis for the subspace in which the normal modes
-                  are calculated (or, more precisely, a set of vectors
-                  spanning the subspace; it does not have to be
-                  orthogonal). This can either be a sequence of
-                  Class:MMTK.ParticleVector objects or a tuple of two
-                  such sequences. In the second case, the subspace is
-                  defined by the space spanned by the second set of
-                  vectors projected on the complement of the space
-                  spanned by the first set of vectors. The first set
-                  thus defines directions that are excluded from the
-                  subspace.
-                  The default value of None indicates a standard
-                  normal mode calculation in the 3N-dimensional
-                  configuration space.
-
-    |delta| -- the rms step length for numerical differentiation.
-               The default value of None indicates analytical differentiation.
-               Numerical differentiation is available only when a
-               subspace basis is used as well. Instead of calculating
-               the full force constant matrix and then multiplying
-               with the subspace basis, the subspace force constant
-               matrix is obtained by numerical differentiation of the
-               energy gradients along the basis vectors of the subspace.
-               If the basis is much smaller than the full configuration
-               space, this approach needs much less memory.
-
-    |sparse| -- a boolean flag that indicates if a sparse representation of
-                the force constant matrix is to be used. This is of
-                interest when there are no long-range interactions and
-                a subspace of smaller size then 3N is specified. In that
-                case, the calculation will use much less memory with a sparse
-                representation.
-
-    Energetic normal modes describe the principal axes of a harmonic
-    potential. They are obtained by diagonalizing the force constant
-    matrix without prior mass-weighting.
+    """
+    Energetic modes describe the principal axes of an harmonic approximation
+    to the potential energy surface of a system. They are obtained by
+    diagonalizing the force constant matrix without prior mass-weighting.
 
     In order to obtain physically reasonable normal modes, the configuration
     of the universe must correspond to a local minimum of the potential
     energy.
 
-    A EnergeticModes object behaves like a sequence of modes.
-    Individual modes (see class Class:MMTK.NormalModes.VibrationalMode)
+    Individual modes (see class L{EnergeticMode})
     can be extracted by indexing with an integer. Looping over the modes
     is possible as well.
     """
 
     features = []
 
-    def __init__(self, universe=None, temperature = 300,
+    def __init__(self, universe=None, temperature = 300*Units.K,
                  subspace = None, delta = None, sparse = False):
+        """
+        @param universe: the system for which the normal modes are calculated;
+                         it must have a force field which provides the second
+                         derivatives of the potential energy
+        @type universe: L{MMTK.Universe.Universe}
+        @param temperature: the temperature for which the amplitudes of the
+                            atomic displacement vectors are calculated. A
+                            value of C{None} can be specified to have no scaling
+                            at all. In that case the mass-weighted norm
+                            of each normal mode is one.
+        @type temperature: C{float}
+        @param subspace: the basis for the subspace in which the normal modes
+                         are calculated (or, more precisely, a set of vectors
+                         spanning the subspace; it does not have to be
+                         orthogonal). This can either be a sequence of
+                         L{MMTK.ParticleProperties.ParticleVector} objects
+                         or a tuple of two such sequences. In the second case,
+                         the subspace is defined by the space spanned by the
+                         second set of vectors projected on the complement of
+                         the space spanned by the first set of vectors.
+                         The first set thus defines directions that are
+                         excluded from the subspace.
+                         The default value of C{None} indicates a standard
+                         normal mode calculation in the 3N-dimensional
+                         configuration space.
+        @param delta: the rms step length for numerical differentiation.
+                      The default value of C{None} indicates analytical
+                      differentiation.
+                      Numerical differentiation is available only when a
+                      subspace basis is used as well. Instead of calculating
+                      the full force constant matrix and then multiplying
+                      with the subspace basis, the subspace force constant
+                      matrix is obtained by numerical differentiation of the
+                      energy gradients along the basis vectors of the subspace.
+                      If the basis is much smaller than the full configuration
+                      space, this approach needs much less memory.
+        @type delta: C{float}
+        @param sparse: a flag that indicates if a sparse representation of
+                       the force constant matrix is to be used. This is of
+                       interest when there are no long-range interactions and
+                       a subspace of smaller size then 3N is specified. In that
+                       case, the calculation will use much less memory with a
+                       sparse representation.
+        @type sparse: C{bool}
+        """
         if universe == None:
             return
         Features.checkFeatures(self, universe)
@@ -146,7 +139,12 @@ class EnergeticModes(Core.NormalModes):
                              amplitude*self.array[index])
 
     def rawMode(self, item):
-        "Return unscaled mode vector"
+        """
+        @param item: the index of a normal mode
+        @type item: C{int}
+        @returns: the unscaled mode vector
+        @rtype: L{EnergeticMode}
+        """
         index = self.sort_index[item]
         f = self.force_constants[index]
         return EnergeticMode(self.universe, item,
@@ -154,8 +152,6 @@ class EnergeticModes(Core.NormalModes):
                              self.array[index])
 
     def fluctuations(self, first_mode=6):
-        """Returns a Class:MMTK.ParticleScalar containing the thermal
-        fluctuations for each atom in the universe."""
         f = ParticleProperties.ParticleScalar(self.universe)
         for i in range(first_mode, self.nmodes):
             mode = self.rawMode(i)
@@ -165,8 +161,6 @@ class EnergeticModes(Core.NormalModes):
         return f
 
     def anisotropicFluctuations(self, first_mode=6):
-        """Returns a Class:MMTK.ParticleTensor containing the thermal
-        fluctuations for each atom in the universe."""
         f = ParticleProperties.ParticleTensor(self.universe)
         for i in range(first_mode, self.nmodes):
             mode = self.rawMode(i)
