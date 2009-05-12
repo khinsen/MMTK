@@ -1,10 +1,10 @@
 # Common aspects of normal mode calculations.
 #
 # Written by Konrad Hinsen
-# last revision: 2007-8-7
+# last revision: 2009-5-12
 #
 
-_undocumented = 1
+__docformat__ = 'epytext'
 
 from MMTK import Units, ParticleProperties, Visualization
 from Scientific import N
@@ -89,11 +89,16 @@ class Mode(ParticleProperties.ParticleVector):
         return m, k
 
     def view(self, factor=1., subset=None):
-        """Start an animation of the mode. The displacements can be
-        scaled by a |factor| to make them better visible, and
-        a |subset| of the total system can be specified as well.
-        This function requires an external viewer, see module
-        Module:MMTK.Visualization for details."""
+        """
+        Start an animation of the mode. See L{MMTK.Visualization} for
+        the configuration of external viewers.
+
+        @param factor: a scaling factor for the amplitude of the motion
+        @type factor: C{float}
+        @param subset: the subset of the universe to be shown
+                       (default: the whole universe)
+        @type subset: L{MMTK.Collections.GroupOfAtoms}
+        """
         Visualization.viewMode(self, factor, subset)
 
 #
@@ -101,7 +106,7 @@ class Mode(ParticleProperties.ParticleVector):
 # This is an abstract base class, the real classes are
 # EnergeticModes, VibrationalModes, and BrownianModes
 #
-class NormalModes:
+class NormalModes(object):
 
     def __init__(self, universe, basis, delta, sparse, arrays):
         self.universe = universe
@@ -130,10 +135,13 @@ class NormalModes:
         return [self[i] for i in range(first, last)]
 
     def reduceToRange(self, first, last):
-        """Discards all modes except for those whose numbers are between
-        |first| (inclusive) and |last| (exclusive). This is done to
-        reduce memory requirements, especially before saving the modes
-        to a file."""
+        """
+        Discards all modes outside a given range of mode numbers.
+        This is done to reduce memory requirements, especially before
+        saving the modesto a file.
+        @param first: the number of the first mode to be kept
+        @param last: the number of the last mode to be kept - 1
+        """
         junk1 = list(self.sort_index[:first])
         junk2 = list(self.sort_index[last:])
         junk1.sort()
@@ -260,7 +268,7 @@ class NormalModes:
         return ev
 
     def _setupBasis(self):
-        if type(self.basis) is type(()):
+        if isinstance(self.basis, tuple):
             excluded, basis = self.basis
         else:
             excluded = []

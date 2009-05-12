@@ -1,5 +1,13 @@
 # Normal modes package
 
+"""
+Normal modes
+
+@undocumented: Core
+"""
+
+__docformat__ = 'epytext'
+
 from MMTK.NormalModes.EnergeticModes import EnergeticModes
 from MMTK.NormalModes.VibrationalModes import VibrationalModes
 from MMTK.NormalModes.BrownianModes import BrownianModes
