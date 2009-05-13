@@ -1,15 +1,26 @@
 # Friction constants for protein C-alpha models
 #
 # Written by Konrad Hinsen
-# last revision: 2006-9-22
+# last revision: 2009-5-13
 #
+
+"""
+A friction constant model for C-alpha models of proteins
+"""
+
+__docformat__ = 'epytext'
 
 import MMTK.ParticleProperties
 from Scientific import N
 
 def calphaFrictionConstants(protein, set=2):
-    """Return a Class:MMTK.ParticleScalar object containing estimated
-    friction constants for the atoms in a c_alpha model |protein|."""
+    """
+    @param protein: a c_alpha model protein
+    @type protein: L{MMTK.Proteins.Protein}
+    @param set: the number of a friction constant set (1, 2, 3, or 4)
+    @return: the estimated friction constants for the atoms in the protein
+    @rtype: L{MMTK.ParticleProperties.ParticleScalar}
+    """
     radius = 1.5
     atoms = protein.atomCollection()
     f = MMTK.ParticleProperties.ParticleScalar(protein.universe())
