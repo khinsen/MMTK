@@ -2,7 +2,7 @@
 # nucleic acid chains.
 #
 # Written by Konrad Hinsen
-# last revision: 2008-11-27
+# last revision: 2009-5-13
 #
 
 """
@@ -202,7 +202,8 @@ _na_residue_names = {'da': 'd-adenosine',
                      }
 
 for code in _aa_residue_names:
-    Scientific.IO.PDB.defineAminoAcidResidue(code)
+    if len(code) == 3:
+        Scientific.IO.PDB.defineAminoAcidResidue(code)
 for code in _na_residue_names:
     Scientific.IO.PDB.defineNucleicAcidResidue(code)
 
