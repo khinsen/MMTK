@@ -11,29 +11,38 @@
 # "up" vector, and surface points for each atom.
 
 
-# Minor modifications by Konrad Hinsen <hinsen@cnrs-orleans.fr>:
+# Modifications by Konrad Hinsen <hinsen@cnrs-orleans.fr>:
 # - Replaced tabs by spaces
 # - Added/adapted docstrings to MMTK conventions
 # - Removed assignment of methods to class GroupOfAtoms
 # - Use vectors in the return value of surfacePointsAndGradients
 # - Replaced "math" module by "Numeric"
 # - Renamed module _surface to MMTK_surface
+# - Converted docstrings to epydoc
+# - Changed first argument name from self to object
 
-"""This module provides functions that calculate molecular surfaces
-and volumes.
+"""
+Molecular surfaces and volumes.
 """
 
+__docformat__ = 'epytext'
 
-import surfm
-from MMTK.Collections import GroupOfAtoms, Collection
+from MMTK import surfm
+from MMTK.Collections import Collection
 from MMTK import Vector
-from Scientific import N as Numeric
+from Scientific import N
 
-def surfaceAndVolume(self, probe_radius = 0.):
-    """Returns the molecular surface and volume of |object|,
-    defining the surface at a distance of |probe_radius| from
-    the van-der-Waals surfaces of the atoms."""
-    atoms = self.atomList()
+def surfaceAndVolume(object, probe_radius = 0.):
+    """
+    @param object: a chemical object
+    @type object: L{MMTK.Collections.GroupOfAtoms}
+    @param probe_radius: the distance from the vdW-radii of the atoms
+                         at which the surface is computed
+    @type probe_radius: C{float}
+    @returns: the molecular surface and volume of object
+    @rtype: C{tuple}
+    """
+    atoms = object.atomList()
     smap = surfm.surface_atoms(atoms, probe_radius, ret_fmt = 2)
     tot_a = 0
     tot_v = 0
@@ -43,12 +52,18 @@ def surfaceAndVolume(self, probe_radius = 0.):
         tot_v = tot_v + atom_data[1]
     return (tot_a, tot_v)
 
-#GroupOfAtoms.surfaceAndVolume = surfaceAndVolume
-
-def surfaceAtoms(self, probe_radius = 0.):
-    """Returns a dictionary that maps the surface atoms to their
-    exposed surface areas."""
-    atoms = self.atomList()
+def surfaceAtoms(object, probe_radius = 0.):
+    """
+    @param object: a chemical object
+    @type object: L{MMTK.Collections.GroupOfAtoms}
+    @param probe_radius: the distance from the vdW-radii of the atoms
+                         at which the surface is computed
+    @type probe_radius: C{float}
+    @returns: a dictionary that maps the surface atoms to their
+              exposed surface areas
+    @rtype: C{dict}
+    """
+    atoms = object.atomList()
     smap = surfm.surface_atoms(atoms, probe_radius, ret_fmt = 1)
     surface_atoms = {}
     for a in atoms:
@@ -58,14 +73,22 @@ def surfaceAtoms(self, probe_radius = 0.):
             surface_atoms[a] = area
     return surface_atoms
 
-#GroupOfAtoms.surfaceAtoms = surfaceAtoms
-
-def surfacePointsAndGradients(self, probe_radius = 0., point_density = 258):
-    """Returns a dictionary that maps the surface atoms to a tuple
-    containing three surface-related quantities: the exposed surface
-    are, a list of points in the exposed surface, and a gradient vector
-    pointing outward from the surface."""
-    atoms = self.atomList()
+def surfacePointsAndGradients(object, probe_radius = 0., point_density = 258):
+    """
+    @param object: a chemical object
+    @type object: L{MMTK.Collections.GroupOfAtoms}
+    @param probe_radius: the distance from the vdW-radii of the atoms
+                         at which the surface is computed
+    @type probe_radius: C{float}
+    @param point_density: the density of points that describe the surface
+    @type point_density: C{int}
+    @returns: a dictionary that maps the surface atoms to a tuple
+              containing three surface-related quantities: the exposed surface
+              area, a list of points in the exposed surface, and a gradient
+              vector pointing outward from the surface.
+    @rtype: C{dict}
+    """
+    atoms = object.atomList()
     smap = surfm.surface_atoms(atoms, probe_radius, ret_fmt = 4,
                                point_density = point_density)
     surface_data = {}
@@ -76,10 +99,8 @@ def surfacePointsAndGradients(self, probe_radius = 0., point_density = 258):
             surface_data[a] = (area, map(Vector, points1), Vector(grad))
     return surface_data
 
-#GroupOfAtoms.surfacePointsAndGradients = surfacePointsAndGradients
 
-
-class Contact:
+class Contact(object):
 
     def __init__(self, a1, a2, dist = None):
         self.a1 = a1
@@ -104,11 +125,22 @@ class Contact:
     __str__ = __repr__
 
 def findContacts(object1, object2, contact_factor = 1.0, cutoff = 0.0):
-    """Returns a list of MMTK.MolecularSurface.Contact objects
-    that describe atomic contacts between |object1| and |object2|.
-    A contact is defined as a pair of atoms whose distance is less than
-    |contact_factor|*(r1+r2+|cutoff|) where r1 and r2 are the atomic
-    van-der-Waals radii."""
+    """
+    Identifies contacts between two molecules. A contact is defined as a pair
+    of atoms whose distance is less than contact_factor*(r1+r2+cutoff),
+    where r1 and r2 are the atomic van-der-Waals radii.
+    @param object1: a chemical object
+    @type object1: L{MMTK.Collections.GroupOfAtoms}
+    @param object2: a chemical object
+    @type object2: L{MMTK.Collections.GroupOfAtoms}
+    @param contact_factor: a scale factor in the contact distance criterion
+    @type contact_factor: C{float}
+    @param cutoff: a constant in the contact distance criterion
+    @type cutoff: C{float}
+    @returns: a list of L{Contact} objects that describe atomic contacts
+              between object1 and object2. 
+    @rtype: C{list}
+    """
     max_object1 = len(object1.atomList())
     atoms = object1.atomList() + object2.atomList()
     tup = surfm.get_atom_data(atoms, 0.0)
@@ -127,7 +159,7 @@ def findContacts(object1, object2, contact_factor = 1.0, cutoff = 0.0):
                 else:
                     a1 = atoms[index2]
                     a2 = atoms[index1]
-                dist = Numeric.sqrt(dist2)
+                dist = N.sqrt(dist2)
                 if dist >= contact_factor*(a1.vdW_radius + a2.vdW_radius + cutoff):
                     continue
                 if not done.has_key((index1, index2)):
