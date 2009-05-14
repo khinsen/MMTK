@@ -2,14 +2,12 @@
 # and force field evaluators.
 #
 # Written by Konrad Hinsen
-# last revision: 2008-10-30
+# last revision: 2009-5-13
 #
 
-_undocumented = 1
-
 from MMTK import ParticleProperties, Universe, Utility
-from Scientific import N as Numeric
-import copy, itertools, operator, string
+from Scientific import N
+import copy, itertools, operator
 from MMTK_energy_term import PyEnergyTerm as EnergyTerm
 
 # Class definitions
@@ -17,25 +15,14 @@ from MMTK_energy_term import PyEnergyTerm as EnergyTerm
 #
 # The base class ForceField contains common operations for all force fields
 #
-class ForceField:
+class ForceField(object):
 
     def __init__(self, name):
         self.name = name
         self.type = None
 
-    is_force_field = 1
-
-    def __getstate__(self):
-        return None
-
-    def __setstate__(self, state):
-        if state is not None:
-            raise ValueError("Illegal state value")
-
-    def __getinitargs__(self):
-        return self.arguments
-
-    __safe_for_unpickling__ = 1
+    def __reduce__(self):
+        return type(self), self.arguments
 
     def evaluatorParameters(self, universe, subset1, subset2, global_data):
         # must be defined by derived classes
@@ -99,8 +86,6 @@ class CompoundForceField(ForceField):
         self.type = 'compound'
         self.arguments = args
 
-    is_compound_force_field = 1
-
     def evaluatorParameters(self, system, subset1, subset2, global_data):
         parameters = {}
         remaining = copy.copy(self.fflist)
@@ -137,7 +122,7 @@ class CompoundForceField(ForceField):
                 if ff.ready(global_data):
                     terms = ff.evaluatorTerms(system, subset1, subset2,
                                               global_data)
-                    if not isinstance(terms, type([])):
+                    if not isinstance(terms, list):
                         raise ValueError("evaluator term list not a list")
                     eval_objects.extend(terms)
                     done.append(ff)
@@ -149,17 +134,16 @@ class CompoundForceField(ForceField):
 
     def bondedForceFields(self):
         return reduce(operator.add,
-                      map(lambda f: f.bondedForceFields(), self.fflist))
+                      [f.bondedForceFields() for f in self.fflist])
 
     def description(self):
-        return reduce(lambda a, b: a+'+'+b,
-                      map(lambda f: f.description(), self.fflist))
+        return '+'.join([f.description() for f in self.fflist])
 
 #
 # This class serves to define data containers used in
 # force field initialization.
 #
-class ForceFieldData:
+class ForceFieldData(object):
 
     def __init__(self):
         self.dict = {}
@@ -183,10 +167,10 @@ class ForceFieldData:
 # Type check functions
 
 def isForceField(x):
-    return hasattr(x, 'is_force_field')
+    return isinstance(x, ForceField)
 
 def isCompoundForceField(x):
-    return hasattr(x, 'is_compound_force_field')
+    return isinstance(x, CompoundForceField)
 
 #
 # Force field evaluator support functions.
@@ -196,7 +180,7 @@ def isCompoundForceField(x):
 #
 def addToGradients(coordinates, indices, vectors):
     for index, vector in zip(indices, vectors):
-        coordinates[index] = coordinates[index] + vector.array
+        coordinates[index] += vector.array
 
 def addToForceConstants(total_fc, indices, small_fc):
     indices = zip(indices, range(len(indices)))
@@ -209,13 +193,12 @@ def addToForceConstants(total_fc, indices, small_fc):
             jj1, jj2 = jj2, jj1
         jj1 = 3*jj1
         jj2 = 3*jj2
-        total_fc[ii1,:,ii2,:] = total_fc[ii1,:,ii2,:] + \
-                                small_fc[jj1:jj1+3, jj2:jj2+3]
+        total_fc[ii1,:,ii2,:] += small_fc[jj1:jj1+3, jj2:jj2+3]
 
 #
 # High-level energy evaluator (i.e. the Python interface)
 #
-class EnergyEvaluator:
+class EnergyEvaluator(object):
 
     def __init__(self, universe, force_field, subset1=None, subset2=None,
                  threads=None, mpi_communicator=None):
@@ -231,13 +214,13 @@ class EnergyEvaluator:
         terms = self.ff.evaluatorTerms(self.universe,
                                        subset1, subset2,
                                        self.global_data)
-        if not isinstance(terms, type([])):
+        if not isinstance(terms, list):
             raise ValueError("evaluator term list not a list")
         from MMTK_forcefield import Evaluator
         if threads is None:
             import MMTK.ForceFields
             threads = MMTK.ForceFields.default_energy_threads;
-        self.evaluator = Evaluator(Numeric.array(terms), threads,
+        self.evaluator = Evaluator(N.array(terms), threads,
                                    mpi_communicator)
 
     def checkUniverseVersion(self):
@@ -248,13 +231,13 @@ class EnergyEvaluator:
         return self.evaluator
 
     def __call__(self, gradients = None, force_constants = None,
-                 small_change=0):
+                 small_change=False):
         self.checkUniverseVersion()
         args = [self.configuration.array]
 
         if ParticleProperties.isParticleProperty(gradients):
             args.append(gradients.array)
-        elif type(gradients) == Numeric.arraytype:
+        elif isinstance(gradients, N.array_type):
             gradients = \
                  ParticleProperties.ParticleVector(self.universe, gradients)
             args.append(gradients.array)
@@ -266,7 +249,7 @@ class EnergyEvaluator:
 
         if ParticleProperties.isParticleProperty(force_constants):
             args.append(force_constants.array)
-        elif type(force_constants) == Numeric.arraytype:
+        elif isinstance(force_constants, N.array_type):
             force_constants = \
                 ParticleProperties.SymmetricPairTensor(self.universe,
                                                        force_constants)
@@ -277,7 +260,7 @@ class EnergyEvaluator:
                 from MMTK_forcefield import SparseForceConstants
                 sparse_type = type(SparseForceConstants(2, 2))
             except ImportError: pass
-            if type(force_constants) == sparse_type:
+            if isinstance(force_constants, sparse_type):
                 args.append(force_constants)
             elif force_constants:
                 force_constants = \
@@ -308,7 +291,7 @@ class EnergyEvaluator:
                 dict[name] = dict.get(name, 0.) + values[i]
                 i = i + 1
         for name, value in dict.items():
-            index = string.find(name, '/')
+            index = name.find('/')
             if index >= 0:
                 category = name[:index]
                 dict[category] = dict.get(category, 0.) + value

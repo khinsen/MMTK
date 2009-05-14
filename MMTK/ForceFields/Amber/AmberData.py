@@ -1,16 +1,13 @@
 # This module handles input and application of Amber parameter files.
 #
 # Written by Konrad Hinsen
-# last revision: 2007-5-28
+# last revision: 2009-5-13
 #
-
-_undocumented = 1
 
 from MMTK import Units
 from Scientific.IO.FortranFormat import FortranFormat, FortranLine
 from Scientific.IO.TextFile import TextFile
 from Scientific.DictWithDefault import DictWithDefault
-import os, string
 
 amber_energy_unit = Units.kcal/Units.mol
 amber_length_unit = Units.Ang
@@ -20,7 +17,7 @@ amber_fc_angle_unit = Units.rad
 #
 # The force field parameter file
 #
-class AmberParameters:
+class AmberParameters(object):
 
     def __init__(self, file, modifications=[]):
         if isinstance(file, str):
@@ -31,16 +28,16 @@ class AmberParameters:
         self._readAtomTypes(file)
 
         format = FortranFormat('20(A2,2X)')
-        done = 0
+        done = False
         while not done:
             l = FortranLine(file.readline()[:-1], format)
             for entry in l:
                 name = _normalizeName(entry)
                 if len(name) == 0:
-                    done = 1
+                    done = True
                     break
                 try: # ignore errors for now
-                    self.atom_types[name].hydrophylic = 1
+                    self.atom_types[name].hydrophylic = True
                 except: pass
 
         self.bonds = {}
@@ -63,7 +60,7 @@ class AmberParameters:
 
         self.lj_equivalent = {}
         format = FortranFormat('20(A2,2X)')
-        while 1:
+        while True:
             l = FortranLine(file.readline()[:-1], format)
             if l.isBlank(): break
             name1 = _normalizeName(l[0])
@@ -72,7 +69,7 @@ class AmberParameters:
                 self.lj_equivalent[name2] = name1
 
         self.ljpar_sets = {}
-        while 1:
+        while True:
             l = FortranLine(file.readline()[:-1], 'A4,6X,A2')
             if l[0] == 'END ': break
             set_name = _normalizeName(l[0])
@@ -89,10 +86,10 @@ class AmberParameters:
                 file = mod
             title = file.readline()[:-1]
             blank = file.readline()[:-1]
-            while 1:
+            while True:
                 keyword = file.readline()
                 if not keyword: break
-                keyword = string.strip(keyword)[:4]
+                keyword = keyword.strip()[:4]
                 if keyword == 'MASS':
                     self._readAtomTypes(file)
                 elif keyword == 'BOND':
@@ -110,7 +107,7 @@ class AmberParameters:
 
     def _readAtomTypes(self, file):
         format = FortranFormat('A2,1X,F10.2')
-        while 1:
+        while True:
             l = FortranLine(file.readline()[:-1], format)
             if l.isBlank(): break
             name = _normalizeName(l[0])
@@ -118,7 +115,7 @@ class AmberParameters:
 
     def _readBondParameters(self, file):
         format = FortranFormat('A2,1X,A2,2F10.2')
-        while 1:
+        while True:
             l = FortranLine(file.readline()[:-1], format)
             if l.isBlank(): break
             name1 = _normalizeName(l[0])
@@ -131,7 +128,7 @@ class AmberParameters:
 
     def _readAngleParameters(self, file):
         format = FortranFormat('A2,1X,A2,1X,A2,2F10.2')
-        while 1:
+        while True:
             l = FortranLine(file.readline()[:-1], format)
             if l.isBlank(): break
             name1 = _normalizeName(l[0])
@@ -147,7 +144,7 @@ class AmberParameters:
     def _readDihedralParameters(self, file):
         format = FortranFormat('A2,1X,A2,1X,A2,1X,A2,I4,3F15.2')
         append = None
-        while 1:
+        while True:
             l = FortranLine(file.readline()[:-1], format)
             if l.isBlank(): break
             name1 = _normalizeName(l[0])
@@ -172,7 +169,7 @@ class AmberParameters:
 
     def _readImproperParameters(self, file):
         format = FortranFormat('A2,1X,A2,1X,A2,1X,A2,I4,3F15.2')
-        while 1:
+        while True:
             l = FortranLine(file.readline()[:-1], format)
             if l.isBlank(): break
             name1 = _normalizeName(l[0])
@@ -207,7 +204,7 @@ class AmberParameters:
 
     def _readHbondParameters(self, file):
         format = FortranFormat('2X,A2,2X,A2,2X,2F10.2')
-        while 1:
+        while True:
             l = FortranLine(file.readline()[:-1], format)
             if l.isBlank(): break
             name1 = _normalizeName(l[0])
@@ -220,7 +217,7 @@ class AmberParameters:
 
     def _readLJParameters(self, file, ljpar_set):
         format = FortranFormat('2X,A2,6X,3F10.6')
-        while 1:
+        while True:
             l = FortranLine(file.readline()[:-1], format)
             if l.isBlank(): break
             name = _normalizeName(l[0])
@@ -319,17 +316,17 @@ class AmberParameters:
 #
 # Atom type class
 #
-class AmberAtomType:
+class AmberAtomType(object):
 
     def __init__(self, name, mass):
         self.name = name
         self.mass = mass
-        self.hydrophylic = 0
+        self.hydrophylic = False
 
 #
 # Bond parameter class
 #
-class AmberBondParameters:
+class AmberBondParameters(object):
 
     def __init__(self, a1, a2, k, l):
         self.a1 = a1
@@ -340,7 +337,7 @@ class AmberBondParameters:
 #
 # Bond angle parameter class
 #
-class AmberBondAngleParameters:
+class AmberBondAngleParameters(object):
 
     def __init__(self, a1, a2, a3, k, angle):
         self.a1 = a1
@@ -352,7 +349,7 @@ class AmberBondAngleParameters:
 #
 # Dihedral angle parameter class
 #
-class AmberDihedralParameters:
+class AmberDihedralParameters(object):
 
     def __init__(self, a1, a2, a3, a4, divf, k, delta, n):
         self.a1 = a1
@@ -375,7 +372,7 @@ class AmberDihedralParameters:
 #
 # Improper dihedral angle parameter class
 #
-class AmberImproperParameters:
+class AmberImproperParameters(object):
 
     def __init__(self, a1, a2, a3, a4, divf, k, delta, n):
         self.a1 = a1
@@ -402,7 +399,7 @@ class AmberImproperParameters:
 #
 # H-bond parameter class
 #
-class AmberHbondParameters:
+class AmberHbondParameters(object):
 
     def __init__(self, a1, a2, a, b):
         self.a1 = a1
@@ -413,7 +410,7 @@ class AmberHbondParameters:
 #
 # Lennard-Jones parameter sets
 #
-class AmberLJParameterSet:
+class AmberLJParameterSet(object):
 
     def __init__(self, name, type):
         self.name = name

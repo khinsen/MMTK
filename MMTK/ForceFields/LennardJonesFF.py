@@ -1,12 +1,16 @@
 # A Lennard-Jones force fields for simple liquids
 #
 # Written by Konrad Hinsen
-# last revision: 2007-12-4
+# last revision: 2009-5-13
 #
 
-_undocumented = 1
+"""
+Lennard-Jones force field for simple liquids
+"""
 
-from NonBondedInteractions import LJForceField
+__docformat__ = 'epytext'
+
+from MMTK.ForceFields.NonBondedInteractions import LJForceField
 from Scientific.Geometry import Vector
 import copy
 
@@ -15,18 +19,8 @@ import copy
 #
 class LennardJonesForceField(LJForceField):
 
-    """Lennard-Jones force field for noble gases
-
-    Constructor: LennardJonesForceField(|cutoff|)
-
-    Arguments:
-
-    |cutoff| -- a cutoff value or 'None', meaning no cutoff
-
-    Pair interactions in periodic systems are calculated using the
-    minimum-image convention; the cutoff should therefore never be
-    larger than half the smallest edge length of the elementary
-    cell.
+    """
+    Lennard-Jones force field
 
     The Lennard-Jones parameters are taken from the atom attributes
     LJ_radius and LJ_energy. The pair interaction energy has the form
@@ -34,12 +28,20 @@ class LennardJonesForceField(LJForceField):
     """
 
     def __init__(self, cutoff = None):
+        """
+        @param cutoff: a cutoff value or C{None}, meaning no cutoff.
+                       Pair interactions in periodic systems are calculated
+                       using the minimum-image convention; the cutoff should
+                       therefore never be larger than half the smallest edge
+                       length of the elementary cell.
+        @type cutoff: C{float}
+        """
         self.arguments = (cutoff, )
         LJForceField.__init__(self, 'LJ', cutoff)
         self.lj_14_factor = 1.
 
     def ready(self, global_data):
-        return 1
+        return True
 
     def collectParameters(self, universe, global_data):
         if not hasattr(global_data, 'lj_parameters'):

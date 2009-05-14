@@ -1,20 +1,26 @@
 # Detailed harmonic force field for proteins
 #
 # Written by Konrad Hinsen
-# last revision: 2007-2-14
+# last revision: 2009-5-13
 #
 
-from NonBondedInteractions import NonBondedForceField
-from Amber.AmberForceField import AmberBondedForceField
-from MMForceField import MMAtomParameters
-from ForceField import ForceField, CompoundForceField
+"""
+Simplified harmonic force field for normal mode calculations
+"""
+
+__docformat__ = 'epytext'
+
+from MMTK.ForceFields.NonBondedInteractions import NonBondedForceField
+from MMTK.ForceFields.Amber.AmberForceField import AmberBondedForceField
+from MMTK.ForceFields.MMForceField import MMAtomParameters
+from MMTK.ForceFields.ForceField import ForceField, CompoundForceField
 from MMTK_deformation import DeformationTerm
 from Scientific.Geometry import Transformation
-from Scientific import N as Numeric
+from Scientific import N
 
 class BondForceField(AmberBondedForceField):
 
-    def __init__(self, bonds=1, angles=1, dihedrals=1):
+    def __init__(self, bonds=True, angles=True, dihedrals=True):
         AmberBondedForceField.__init__(self)
         self.arguments = (bonds, angles, dihedrals)
         self.bonded = self
@@ -87,15 +93,14 @@ class BondForceField(AmberBondedForceField):
             cos = a*b
             sin = b.cross(a)*v2/v2.length()
             dihedral = Transformation.angleFromSineAndCosine(sin, cos)
-            if dihedral > Numeric.pi:
-                dihedral = dihedral - 2.*Numeric.pi
+            if dihedral > N.pi:
+                dihedral -= 2.*N.pi
             for p in terms:
                 if p[2] != 0.:
                     mult = p[0]
-                    phase = Numeric.fmod(Numeric.pi-mult*dihedral,
-                                         2.*Numeric.pi)
+                    phase = N.fmod(N.pi-mult*dihedral, 2.*N.pi)
                     if phase < 0.:
-                        phase = phase + 2.*Numeric.pi
+                        phase += 2.*N.pi
                     data.add('dihedrals', (i1, i2, i3, i4,
                                            p[0], phase) + p[2:])
 
@@ -128,15 +133,14 @@ class BondForceField(AmberBondedForceField):
             cos = a*b
             sin = b.cross(a)*v2/v2.length()
             dihedral = Transformation.angleFromSineAndCosine(sin, cos)
-            if dihedral > Numeric.pi:
-                dihedral = dihedral - 2.*Numeric.pi
+            if dihedral > N.pi:
+                dihedral -= 2.*N.pi
             for p in terms:
                 if p[2] != 0.:
                     mult = p[0]
-                    phase = Numeric.fmod(Numeric.pi-mult*dihedral,
-                                         2.*Numeric.pi)
+                    phase = N.fmod(N.pi-mult*dihedral, 2.*N.pi)
                     if phase < 0.:
-                        phase = phase + 2.*Numeric.pi
+                        phase += 2.*N.pi
                     data.add('dihedrals', (i2, i3, i1, i4,
                                            p[0], phase) + p[2:])
 
@@ -188,9 +192,8 @@ class MidrangeForceField(NonBondedForceField):
 
 class HarmonicForceField(MMAtomParameters, CompoundForceField):
 
-    """Simplified harmonic force field for normal mode calculations
-
-    Constructor: HarmonicForceField()
+    """
+    Simplified harmonic force field for normal mode calculations
 
     This force field is made up of the bonded terms from the Amber 94
     force field with the equilibrium positions of all terms changed
@@ -199,8 +202,10 @@ class HarmonicForceField(MMAtomParameters, CompoundForceField):
     The nonbonded terms are replaced by a generic short-ranged
     deformation term.
 
-    See [Article:Hinsen1999b] for a description of this force field,
-    and [Article:Viduna2000] for an application to DNA.
+    For a description of this force field, see:
+     - Hinsen & Kneller, J. Chem. Phys. 24, 10766 (1999)
+    For an application to DNA, see:
+     - Viduna, Hinsen & Kneller, Phys. Rev. E 3, 3986 (2000)
     """
 
     def __init__(self, fc_length = 0.45, cutoff = 0.6, factor = 400.):

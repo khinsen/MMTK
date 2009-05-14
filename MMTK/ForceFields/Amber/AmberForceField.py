@@ -1,13 +1,64 @@
 # This file provides the Amber force field, using Amber parameter files.
 #
 # Written by Konrad Hinsen
-# last revision: 2007-6-10
+# last revision: 2009-5-13
 #
 
-_undocumented = 1
+"""
+Amber force field implementation
+
+General comments about parameters for Lennard-Jones and electrostatic
+interactions:
+
+Pair interactions in periodic systems are calculated using the
+minimum-image convention; the cutoff should therefore never be
+larger than half the smallest edge length of the elementary
+cell.
+
+For Lennard-Jones interactions, all terms for pairs whose distance
+exceeds the cutoff are set to zero, without any form of correction.
+For electrostatic interactions, a charge-neutralizing surface charge
+density is added around the cutoff sphere in order to reduce
+cutoff effects (see Wolf et al., J. Chem. Phys. 17, 8254 (1999)).
+
+For Ewald summation, there are some additional parameters that can
+be specified by dictionary entries:
+ - "beta" specifies the Ewald screening parameter
+ - "real_cutoff" specifies the cutoff for the real-space sum.
+   It should be significantly larger than 1/beta to ensure that
+   the neglected terms are small.
+ - "reciprocal_cutoff" specifies the cutoff for the reciprocal-space sum.
+   Note that, like the real-space cutoff, this is a distance; it describes
+   the smallest wavelength of plane waves to take into account.
+   Consequently, a smaller value means a more precise (and more expensive)
+   calculation.
+
+MMTK provides default values for these parameter which are calculated
+as a function of the system size. However, these parameters are
+exaggerated in most cases of practical interest and can lead to excessive
+calculation times for large systems. It is preferable to determine
+suitable values empirically for the specific system to be simulated.
+
+The method "screened" uses the real-space part of the Ewald sum
+with a charge-neutralizing surface charge density around the
+cutoff sphere, and no reciprocal sum (see article cited above).
+It requires the specification of the dictionary entries "cutoff"
+and "beta".
+
+The fast-multipole method uses the DPMTA library. Note that this
+method provides only energy and forces, but no second-derivative
+matrix. There are several optional dictionary entries for this method,
+all of which are set to reasonable default values. The entries are
+"spatial_decomposition_levels", "multipole_expansion_terms", "use_fft",
+"fft_blocking_factor", "macroscopic_expansion_terms", and
+"multipole_acceptance". For an explanation of these options, refer
+to the DPMTA manual.
+"""
+
+__docformat__ = 'epytext'
 
 from MMTK.ForceFields import MMForceField
-import AmberData
+from MMTK.ForceFields.Amber import AmberData
 import os
 
 #
@@ -117,94 +168,50 @@ def readOPLS(main_file = None, mod_files = None):
 #
 class Amber94ForceField(MMForceField.MMForceField):
 
-    """Amber 94 force field
-
-    Constructor: Amber94ForceField(|lennard_jones_options|,
-                                   |electrostatic_options|,
-                                   |mod_files| = [])
-
-    Arguments:
-
-    |lennard_jones_options| -- parameters for Lennard-Jones interactions;
-                               one of:
-
-      * a number, specifying the cutoff
-      * 'None', meaning the default method (no cutoff; inclusion of all
-        pairs, using the minimum-image conventions for periodic universes)
-      * a dictionary with an entry "method" which specifies the
-        calculation method as either "direct" (all pair terms)
-        or "cutoff", with the cutoff specified by the dictionary
-        entry "cutoff".
-
-    |electrostatic_options| -- parameters for electrostatic interactions;
-                               one of:
-
-      * a number, specifying the cutoff
-      * 'None', meaning the default method (all pairs without cutoff for
-        non-periodic system, Ewald summation for periodic systems)
-      * a dictionary with an entry "method" which specifies the
-        calculation method as either "direct" (all pair terms),
-        "cutoff" (with the cutoff specified by the dictionary
-        entry "cutoff"), "ewald" (Ewald summation, only for periodic
-        universes), "screened" (see below),
-        or "multipole" (fast-multipole method).
-
-    |mod_files| -- a list of parameter modification files. The file
-                   format is the one defined by AMBER. Each item
-                   in the list can be either a file object
-                   or a filename, filenames are looked up
-                   first relative to the current directory and then
-                   relative to the directory containing MMTK's
-                   AMBER parameter files.
-
-    Pair interactions in periodic systems are calculated using the
-    minimum-image convention; the cutoff should therefore never be
-    larger than half the smallest edge length of the elementary
-    cell.
-
-    For Lennard-Jones interactions, all terms for pairs whose distance
-    exceeds the cutoff are set to zero, without any form of correction.
-    For electrostatic interactions, a charge-neutralizing surface charge
-    density is added around the cutoff sphere in order to reduce
-    cutoff effects [Article:Wolf1999].
-
-    For Ewald summation, there are some additional parameters that can
-    be specified by dictionary entries:
-
-    - "beta" specifies the Ewald screening parameter
-    - "real_cutoff" specifies the cutoff for the real-space sum.
-      It should be significantly larger than 1/beta to ensure that
-      the neglected terms are small.
-    - "reciprocal_cutoff" specifies the cutoff for the reciprocal-space sum.
-      Note that, like the real-space cutoff, this is a distance; it describes
-      the smallest wavelength of plane waves to take into account.
-      Consequently, a smaller value means a more precise (and more expensive)
-      calculation.
-
-    MMTK provides default values for these parameter which are calculated
-    as a function of the system size. However, these parameters are
-    exaggerated in most cases of practical interest and can lead to excessive
-    calculation times for large systems. It is preferable to determine
-    suitable values empirically for the specific system to be simulated.
-
-    The method "screened" uses the real-space part of the Ewald sum
-    with a charge-neutralizing surface charge density around the
-    cutoff sphere, and no reciprocal sum [Article:Wolf1999]. It requires
-    the specification of the dictionary entries "cutoff" and "beta".
-
-    The fast-multipole method uses the DPMTA library [Article:DPMTA].
-    Note that this method provides only energy and forces, but no
-    second-derivative matrix. There are several optional dictionary
-    entries for this method, all of which are set to reasonable default
-    values. The entries are "spatial_decomposition_levels",
-    "multipole_expansion_terms", "use_fft", "fft_blocking_factor",
-    "macroscopic_expansion_terms", and "multipole_acceptance".
-    For an explanation of these options, refer to the
-    DPMTA manual [Article:DPMTA].
+    """
+    Amber 94 force field
     """
 
     def __init__(self, lj_options = None, es_options = None,
                  bonded_scale_factor = 1., **kwargs):
+        """
+        @param lj_options: parameters for Lennard-Jones
+                           interactions; one of:
+                            - a number, specifying the cutoff
+                            - C{None}, meaning the default method
+                              (no cutoff; inclusion of all
+                              pairs, using the minimum-image
+                              conventions for periodic universes)
+                            - a dictionary with an entry "method"
+                              which specifies the calculation
+                              method as either "direct" (all pair
+                              terms) or "cutoff", with the cutoff
+                              specified by the dictionary
+                              entry "cutoff".
+        @param es_options: parameters for electrostatic
+                           interactions; one of:
+                            - a number, specifying the cutoff
+                            - C{None}, meaning the default method
+                              (all pairs without cutoff for
+                              non-periodic system, Ewald summation
+                              for periodic systems)
+                            - a dictionary with an entry "method"
+                              which specifies the calculation
+                              method as either "direct" (all pair
+                              terms), "cutoff" (with the cutoff
+                              specified by the dictionary
+                              entry "cutoff"), "ewald" (Ewald
+                              summation, only for periodic
+                              universes), "screened" or
+                              "multipole" (fast-multipole method).
+        @keyword mod_files: a list of parameter modification files. The file
+                            format is the one defined by AMBER. Each item
+                            in the list can be either a file object
+                            or a filename, filenames are looked up
+                            first relative to the current directory and then
+                            relative to the directory containing MMTK's
+                            AMBER parameter files.
+        """
         main_file = kwargs.get('parameter_file', None)
         mod_files = kwargs.get('mod_files', None)
         parameters = readAmber94(main_file, mod_files)
@@ -218,94 +225,50 @@ AmberForceField = Amber94ForceField
 
 class Amber99ForceField(MMForceField.MMForceField):
 
-    """Amber 99 force field
-
-    Constructor: Amber99ForceField(|lennard_jones_options|,
-                                   |electrostatic_options|,
-                                   |mod_files| = [])
-
-    Arguments:
-
-    |lennard_jones_options| -- parameters for Lennard-Jones interactions;
-                               one of:
-
-      * a number, specifying the cutoff
-      * 'None', meaning the default method (no cutoff; inclusion of all
-        pairs, using the minimum-image conventions for periodic universes)
-      * a dictionary with an entry "method" which specifies the
-        calculation method as either "direct" (all pair terms)
-        or "cutoff", with the cutoff specified by the dictionary
-        entry "cutoff".
-
-    |electrostatic_options| -- parameters for electrostatic interactions;
-                               one of:
-
-      * a number, specifying the cutoff
-      * 'None', meaning the default method (all pairs without cutoff for
-        non-periodic system, Ewald summation for periodic systems)
-      * a dictionary with an entry "method" which specifies the
-        calculation method as either "direct" (all pair terms),
-        "cutoff" (with the cutoff specified by the dictionary
-        entry "cutoff"), "ewald" (Ewald summation, only for periodic
-        universes), "screened" (see below),
-        or "multipole" (fast-multipole method).
-
-    |mod_files| -- a list of parameter modification files. The file
-                   format is the one defined by AMBER. Each item
-                   in the list can be either a file object
-                   or a filename, filenames are looked up
-                   first relative to the current directory and then
-                   relative to the directory containing MMTK's
-                   AMBER parameter files.
-
-    Pair interactions in periodic systems are calculated using the
-    minimum-image convention; the cutoff should therefore never be
-    larger than half the smallest edge length of the elementary
-    cell.
-
-    For Lennard-Jones interactions, all terms for pairs whose distance
-    exceeds the cutoff are set to zero, without any form of correction.
-    For electrostatic interactions, a charge-neutralizing surface charge
-    density is added around the cutoff sphere in order to reduce
-    cutoff effects [Article:Wolf1999].
-
-    For Ewald summation, there are some additional parameters that can
-    be specified by dictionary entries:
-
-    - "beta" specifies the Ewald screening parameter
-    - "real_cutoff" specifies the cutoff for the real-space sum.
-      It should be significantly larger than 1/beta to ensure that
-      the neglected terms are small.
-    - "reciprocal_cutoff" specifies the cutoff for the reciprocal-space sum.
-      Note that, like the real-space cutoff, this is a distance; it describes
-      the smallest wavelength of plane waves to take into account.
-      Consequently, a smaller value means a more precise (and more expensive)
-      calculation.
-
-    MMTK provides default values for these parameter which are calculated
-    as a function of the system size. However, these parameters are
-    exaggerated in most cases of practical interest and can lead to excessive
-    calculation times for large systems. It is preferable to determine
-    suitable values empirically for the specific system to be simulated.
-
-    The method "screened" uses the real-space part of the Ewald sum
-    with a charge-neutralizing surface charge density around the
-    cutoff sphere, and no reciprocal sum [Article:Wolf1999]. It requires
-    the specification of the dictionary entries "cutoff" and "beta".
-
-    The fast-multipole method uses the DPMTA library [Article:DPMTA].
-    Note that this method provides only energy and forces, but no
-    second-derivative matrix. There are several optional dictionary
-    entries for this method, all of which are set to reasonable default
-    values. The entries are "spatial_decomposition_levels",
-    "multipole_expansion_terms", "use_fft", "fft_blocking_factor",
-    "macroscopic_expansion_terms", and "multipole_acceptance".
-    For an explanation of these options, refer to the
-    DPMTA manual [Article:DPMTA].
+    """
+    Amber 99 force field
     """
 
     def __init__(self, lj_options = None, es_options = None,
                  bonded_scale_factor = 1., **kwargs):
+        """
+        @param lj_options: parameters for Lennard-Jones
+                           interactions; one of:
+                            - a number, specifying the cutoff
+                            - C{None}, meaning the default method
+                              (no cutoff; inclusion of all
+                              pairs, using the minimum-image
+                              conventions for periodic universes)
+                            - a dictionary with an entry "method"
+                              which specifies the calculation
+                              method as either "direct" (all pair
+                              terms) or "cutoff", with the cutoff
+                              specified by the dictionary
+                              entry "cutoff".
+        @param es_options: parameters for electrostatic
+                           interactions; one of:
+                            - a number, specifying the cutoff
+                            - C{None}, meaning the default method
+                              (all pairs without cutoff for
+                              non-periodic system, Ewald summation
+                              for periodic systems)
+                            - a dictionary with an entry "method"
+                              which specifies the calculation
+                              method as either "direct" (all pair
+                              terms), "cutoff" (with the cutoff
+                              specified by the dictionary
+                              entry "cutoff"), "ewald" (Ewald
+                              summation, only for periodic
+                              universes), "screened" or
+                              "multipole" (fast-multipole method).
+        @keyword mod_files: a list of parameter modification files. The file
+                            format is the one defined by AMBER. Each item
+                            in the list can be either a file object
+                            or a filename, filenames are looked up
+                            first relative to the current directory and then
+                            relative to the directory containing MMTK's
+                            AMBER parameter files.
+        """
         main_file = kwargs.get('parameter_file', None)
         mod_files = kwargs.get('mod_files', None)
         parameters = readAmber99(main_file, mod_files)

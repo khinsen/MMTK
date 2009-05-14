@@ -21,16 +21,15 @@
 # modifications to this module.
 #
 # Written by Konrad Hinsen
-# last revision: 2008-1-15
+# last revision: 2009-5-13
 #
 
-_undocumented = 1
-
-from BondedInteractions import BondedForceField
-from NonBondedInteractions import NonBondedForceField, LJForceField, \
-                                  ElectrostaticForceField, \
-                                  ESMPForceField, ESEwaldForceField
-from ForceField import ForceField, CompoundForceField, ForceFieldData
+from MMTK.ForceFields.BondedInteractions import BondedForceField
+from MMTK.ForceFields.NonBondedInteractions import \
+     NonBondedForceField, LJForceField, ElectrostaticForceField, \
+     ESMPForceField, ESEwaldForceField
+from MMTK.ForceFields.ForceField import ForceField, CompoundForceField, \
+                                        ForceFieldData
 from MMTK import ParticleProperties
 from Scientific.Geometry import Vector
 import copy
@@ -38,7 +37,7 @@ import copy
 #
 # Mix-in class that ensures availability of atom parameters.
 #
-class MMAtomParameters:
+class MMAtomParameters(object):
 
     def collectAtomTypesAndIndices(self, universe, global_data):
         if not hasattr(global_data, 'atom_type'):
@@ -355,8 +354,6 @@ class MMForceField(MMAtomParameters, CompoundForceField):
         self.nonbonded = MMNonbondedForceField(name, parameters,
                                                lj_options, es_options)
         apply(CompoundForceField.__init__, (self, self.bonded, self.nonbonded))
-
-    is_compound_force_field = 0
 
     def evaluatorParameters(self, universe, subset1, subset2, global_data):
         self.collectAtomTypesAndIndices(universe, global_data)

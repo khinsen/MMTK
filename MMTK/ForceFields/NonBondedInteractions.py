@@ -2,13 +2,11 @@
 # for non-bonded interactions
 #
 # Written by Konrad Hinsen
-# last revision: 2008-10-30
+# last revision: 2009-5-13
 #
 
-_undocumented = 1
-
 from MMTK import Units, Utility
-from ForceField import ForceField
+from MMTK.ForceFields.ForceField import ForceField
 from Scientific.Geometry import Vector
 from Scientific import N
 
@@ -88,7 +86,7 @@ class NonBondedForceField(ForceField):
             nbl = NonbondedList(excluded_pairs, one_four_pairs, atom_subset,
                                 universe._spec, self.cutoff)
             update = NonbondedListTerm(nbl)
-            update.info = 0
+            update.info = False
             global_data.set('nonbondedlist', (nbl, update, self.cutoff))
             global_data.add('initialized', 'nonbondedlist')
         else:
@@ -174,7 +172,7 @@ class LJForceField(NonBondedForceField):
         if update.info:
             return [ev]
         else:
-            update.info = 1
+            update.info = True
             return [update, ev]
 
     # the following methods must be overridden by derived classes
@@ -192,10 +190,9 @@ def _normalizePair(pair):
 
 def _cmpPair(p1, p2):
     cmp0 = cmp(p1[0], p2[0])
-    if not cmp0:
-        return cmp(p1[1], p2[1])
-    else:
+    if cmp0:
         return cmp0
+    return cmp(p1[1], p2[1])
 
 def _makeUnique(pair_list):
     i = 0
@@ -266,7 +263,7 @@ class ElectrostaticForceField(NonBondedForceField):
         if update.info:
             return [ev]
         else:
-            update.info = 1
+            update.info = True
             return [update, ev]
 
     # the following method must be overridden by derived classes
@@ -366,7 +363,7 @@ class ESEwaldForceField(NonBondedForceField):
         if update.info:
             return [ev]
         else:
-            update.info = 1
+            update.info = True
             return [update, ev]
 
     # the following methods must be overridden by derived classes

@@ -2,15 +2,13 @@
 # for bonded interactions.
 #
 # Written by Konrad Hinsen
-# last revision: 2007-7-4
+# last revision: 2009-5-13
 #
 
-_undocumented = 1
-
-from ForceField import ForceField, ForceFieldData
+from MMTK.ForceFields.ForceField import ForceField, ForceFieldData
 from MMTK import Utility
 from Scientific.Geometry import Vector
-from Scientific import N as Numeric
+from Scientific import N
 
 #
 # The base class BondedForceField provides the common
@@ -37,8 +35,8 @@ class BondedForceField(ForceField):
         for o in universe:
             for bu in o.bondedUnits():
                 if not hasattr(bu, 'bonds'): continue
-                options = {'bonds': 1, 'bond_angles': 1,
-                           'dihedrals': 1, 'impropers': 1}
+                options = {'bonds': True, 'bond_angles': True,
+                           'dihedrals': True, 'impropers': True}
                 self.getOptions(bu, options)
                 if options['bonds']:
                     if subset1 is None:
@@ -98,22 +96,22 @@ class BondedForceField(ForceField):
         eval_list = []
         bonds = param['harmonic_distance_term']
         if bonds:
-            indices = Numeric.array(map(lambda b: b[:2], bonds))
-            parameters = Numeric.array(map(lambda b: b[2:], bonds))
+            indices = N.array(map(lambda b: b[:2], bonds))
+            parameters = N.array(map(lambda b: b[2:], bonds))
             eval_list.append(HarmonicDistanceTerm(universe._spec,
                                                   indices, parameters))
         angles = param['harmonic_angle_term']
         if angles:
-            indices = Numeric.array(map(lambda a: a[:3], angles))
-            parameters = Numeric.array(map(lambda a: a[3:], angles))
+            indices = N.array(map(lambda a: a[:3], angles))
+            parameters = N.array(map(lambda a: a[3:], angles))
             eval_list.append(HarmonicAngleTerm(universe._spec,
                                                indices, parameters))
         dihedrals = param['cosine_dihedral_term']
         if dihedrals:
             def _dihedral_parameters(p):
-                return [p[4], Numeric.cos(p[5]), Numeric.sin(p[5]), p[6]]
-            indices = Numeric.array(map(lambda d: d[:4], dihedrals))
-            parameters = Numeric.array(map(_dihedral_parameters, dihedrals))
+                return [p[4], N.cos(p[5]), N.sin(p[5]), p[6]]
+            indices = N.array(map(lambda d: d[:4], dihedrals))
+            parameters = N.array(map(_dihedral_parameters, dihedrals))
             eval_list.append(CosineDihedralTerm(universe._spec,
                                                 indices, parameters))
         return eval_list
@@ -143,16 +141,16 @@ class BondedForceField(ForceField):
 
 # Check if an energy term matches the specified atom subset
 def _checkSubset(atoms, label1, label2):
-    s1 = 0
-    s2 = 0
+    s1 = False
+    s2 = False
     for a in atoms:
-        flag = 0
+        flag = False
         if hasattr(a, label1):
-            s1 = 1
-            flag = 1
+            s1 = True
+            flag = True
         if hasattr(a, label2):
-            s2 = 1
-            flag = 1
+            s2 = True
+            flag = True
         if not flag:
-            return 0
+            return False
     return s1 and s2

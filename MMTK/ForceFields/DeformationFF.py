@@ -1,53 +1,51 @@
 # Deformation force field
 #
 # Written by Konrad Hinsen
-# last revision: 2007-7-4
+# last revision: 2009-5-13
 #
 
-_undocumented = 1
+"""
+Deformation force field (elastic network model)
+For proteins, CalphaForceField is usually a better choice.
+"""
 
-from ForceField import ForceField, ForceFieldData
-try:
-    from MMTK_forcefield import NonbondedList, NonbondedListTerm
-    from MMTK_deformation import DeformationTerm
-except ImportError:
-    pass
-from Scientific import N as Numeric
+__docformat__ = 'epytext'
+
+from MMTK.ForceFields.ForceField import ForceField, ForceFieldData
+from MMTK_forcefield import NonbondedList, NonbondedListTerm
+from MMTK_deformation import DeformationTerm
+from Scientific import N
 
 #
 # The deformation force field class
 #
 class DeformationForceField(ForceField):
 
-    """Deformation force field for protein normal mode calculations
-
-    Constructor: DeformationForceField(|range|=0.7, |cutoff|=1.2,
-                                       |factor|=46402.)
-
-    Arguments:
-
-    |range| -- the range parameter
-
-    |cutoff| -- the cutoff for pair interactions, should be significantly
-                larger than |range|.
-
-    |factor| -- a global scaling factor.
-
-    Pair interactions in periodic systems are calculated using the
-    minimum-image convention; the cutoff should therefore never be
-    larger than half the smallest edge length of the elementary
-    cell.
+    """
+    Deformation force field for protein normal mode calculations
 
     The pair interaction force constant has the form
-    k(r)=|factor|*exp(-(r**2-0.01)/|range|**2). The default value
+    k(r)=factor*exp(-(r**2-0.01)/range**2). The default value
     for |range| is appropriate for a C-alpha model of a protein.
-    The offset of 0.01 is a convenience for defining |factor|;
-    with this definition, |factor| is the force constant for a
+    The offset of 0.01 is a convenience for defining factor;
+    with this definition, factor is the force constant for a
     distance of 0.1nm.
-    See [Article:Hinsen1998] for details.
     """
 
     def __init__(self, fc_length = 0.7, cutoff = 1.2, factor = 46402.):
+        """
+        @param fc_length: a range parameter
+        @type fc_length: C{float}
+        @param cutoff: the cutoff for pair interactions, should be
+                       at least 2.5 nm. Pair interactions in periodic
+                       systems are calculated using the minimum-image
+                       convention; the cutoff should therefore never be
+                       larger than half the smallest edge length of the
+                       elementary cell.
+        @type cutoff: C{float}
+        @param factor: a global scaling factor
+        @type factor: C{float}
+        """
         self.arguments = (fc_length, cutoff, factor)
         ForceField.__init__(self, 'deformation')
         self.arguments = (fc_length, cutoff, factor)
@@ -56,7 +54,7 @@ class DeformationForceField(ForceField):
         self.factor = factor
 
     def ready(self, global_data):
-        return 1
+        return True
 
     def evaluatorTerms(self, universe, subset1, subset2, global_data):
         if subset1 is not None:
@@ -75,10 +73,10 @@ class DeformationForceField(ForceField):
                 set[a.index] = None
             atom_subset = set.keys()
             atom_subset.sort()
-            atom_subset = Numeric.array(atom_subset)
+            atom_subset = N.array(atom_subset)
         else:
-            atom_subset = Numeric.array([], Numeric.Int)
-        nothing = Numeric.zeros((0,2), Numeric.Int)
+            atom_subset = N.array([], N.Int)
+        nothing = N.zeros((0,2), N.Int)
         nbl = NonbondedList(nothing, nothing, atom_subset, universe._spec,
                             self.cutoff)
         update = NonbondedListTerm(nbl)

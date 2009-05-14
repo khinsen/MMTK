@@ -1,10 +1,16 @@
 # Amber forcefield initialization
 #
 # Written by Konrad Hinsen
-# last revision: 2004-1-7
+# last revision: 2009-5-13
 #
 
-_undocumented = 1
+"""
+Amber force fields
+
+@undocumented: AmberData
+"""
+
+__docformat__ = 'epytext'
 
 from AmberForceField import Amber99ForceField, Amber94ForceField, \
                              Amber91ForceField, OPLSForceField
