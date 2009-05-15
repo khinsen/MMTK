@@ -1,18 +1,28 @@
 # XML I/O
 #
 # Written by Konrad Hinsen
-# last revision: 2006-11-27
+# last revision: 2009-5-15
 #
+
+"""
+XML format for describing molecular systems
+
+Note: this format is not used by any other program at the moment. It should
+be considered experimental and subject to change.
+"""
+
+__docformat__ = 'epytext'
 
 import MMTK
 from MMTK.MoleculeFactory import MoleculeFactory
-from cElementTree import iterparse
+from xml.etree.ElementTree import iterparse
 from Scientific import N
 
 
 class XMLMoleculeFactory(MoleculeFactory):
 
-    """XML molecule factory.
+    """
+    XML molecule factory
     
     An XML molecule factory reads an XML specification of a molecular
     system and builds the molecule objects and universe described
@@ -27,6 +37,9 @@ class XMLMoleculeFactory(MoleculeFactory):
     """
 
     def __init__(self, file):
+        """
+        @param file: the name of an XML file, or a file object
+        """
         MoleculeFactory.__init__(self)
         for event, element in iterparse(file):
             tag = element.tag
