@@ -7,6 +7,7 @@ build
 dist
 Test
 epydoc
+Doc/Reference
 MANIFEST
 HG_CHANGESET_ID
 config/erfc_test

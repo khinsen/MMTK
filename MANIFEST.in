@@ -26,6 +26,7 @@ include Doc/CHANGELOG
 include Doc/XML/mmtk-user.xml
 include Doc/PDF/*.pdf
 include Doc/HTML/*.html
+include Doc/Reference/*.html
 include Doc/XMLConversion/*
 recursive-include Examples *.py
 recursive-include Examples *.c
