@@ -21,9 +21,11 @@ libraries:
 @undocumented: ProteinEnvironment
 @undocumented: ComplexEnvironment
 @undocumented: CrystalEnvironment
+@undocumented: Features
 @undocumented: surfm
 @undocumented: tess
 @undocumented: Skeleton
+@undocumented: ThreadManager
 @undocumented: Utility
 """
 

@@ -1,3 +1,47 @@
+2.5.24 --> 2.5.25
+=================
+
+Improvements:
+
+- General code revision
+
+- Conversion of docstrings to epytext
+
+- NumPy 1.2 compatibility fixes
+
+- AtomCluster objects have a default name (the empty string)
+
+- PDBMoleculeFactory guarantees that ADP tensors are exactly symmetric
+
+- New method Trajectory.flush()
+
+
+Bug fixes:
+
+- Dihedral restraints lead to a segmentation fault.
+
+- Dihedral restraints for angles close to pi/-pi caused instabilities.
+
+- Multiple assignments to the same attribute of a universe lead to
+  all the objects being added to the universe, with the last assignment
+  defininge the value of the attribute. For consistency with assignment
+  semantics, an assignment now removes the previous value of the attribute
+  from the universe.
+
+- Under certain conditions, nucleic acid chains in PDB files were
+  wrongly identified as peptide chains.
+
+- Wrong import in MMTK.InternalCoordinates
+
+- Visualization of periodic universes with undefined atom positions
+  didn't work.
+
+- Creation of AtomCluster objects from PDB files was sometimes 
+  incomplete (mission positions)
+
+- Opening a trajectory with undefined atom positions lead to a crash.
+
+
 2.5.23 --> 2.5.24
 =================
 
