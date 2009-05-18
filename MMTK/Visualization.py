@@ -2,7 +2,7 @@
 # and a visualization base class
 #
 # Written by Konrad Hinsen
-# last revision: 2009-5-12
+# last revision: 2009-5-15
 #
 
 """
@@ -532,41 +532,3 @@ def viewSequenceIMol(object, conf_list, periodic = 0, label=None):
     file.close()
     tempfile.tempdir = None
     os.system('open -a %s %s ' % (prog, filename))
-
-
-#
-# PyMOL support
-#
-from MMTK import PyMOL
-if PyMOL.in_pymol:
-
-    _representation = None
-
-    def viewConfiguration(object, configuration = None, format = 'pdb',
-                          label = None):
-        global _representation
-        if label is None:
-            label = "MMTK Object"
-        if _representation is not None:
-            _representation.remove()
-        _representation = PyMOL.Representation(object, label, configuration)
-        _representation.show()
-        
-    def viewSequence(object, conf_list, periodic = 0, label = None):
-        global _representation
-        if label is None:
-            label = "MMTK Object"
-        if _representation is not None:
-            _representation.remove()
-        _representation = PyMOL.Representation(object, label,
-                                               conf_list[0])
-        _representation.movie(conf_list)
-
-    genericViewMode = viewMode
-    
-    def viewMode(mode, factor=1., subset=None, label=None):
-        from pymol import cmd
-        cmd.set("movie_delay","200",log=1)
-        genericViewMode(mode, factor, subset, label)
-
-
