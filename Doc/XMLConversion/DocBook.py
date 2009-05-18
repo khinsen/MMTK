@@ -6,15 +6,14 @@
 # some utility methods for such handlers that locate particular
 # subelements and extract data from it.
 
-import xml.dom.core
-from xml.unicode import iso8859, wstring
+from xml.dom.minidom import Node
 import copy
 
 class DOMWalker:
 
     def doNode(self, node):
         type = node.nodeType
-        if type == xml.dom.core.ELEMENT:
+        if type == Node.ELEMENT_NODE:
             name = node.nodeName
 
             handler = None
@@ -44,11 +43,14 @@ class DOMWalker:
                     pass
                 if handler is not None:
                     handler(node)
-        elif type == xml.dom.core.TEXT:
+        elif type == Node.TEXT_NODE:
             self.doText(node)
-        elif type == xml.dom.core.COMMENT:
+        elif type == Node.COMMENT_NODE:
             self.doComment(node)
-        elif type == xml.dom.core.DOCUMENT:
+        elif type == Node.DOCUMENT_NODE:
+            for child in node.childNodes:
+                self.doNode(child)
+        elif type == Node.DOCUMENT_TYPE_NODE:
             for child in node.childNodes:
                 self.doNode(child)
         else:
@@ -57,7 +59,7 @@ class DOMWalker:
     def findChildElements(self, node, element_name):
         elements = []
         for child in node.childNodes:
-            if child.nodeType == xml.dom.core.ELEMENT and \
+            if child.nodeType == Node.ELEMENT_NODE and \
                child.nodeName == element_name:
                 elements.append(child)
         return elements
@@ -65,7 +67,7 @@ class DOMWalker:
     def findTextNodes(self, node):
         nodes = []
         for child in node.childNodes:
-            if child.nodeType == xml.dom.core.TEXT:
+            if child.nodeType == Node.TEXT_NODE:
                 nodes.append(child)
         return nodes
 
@@ -74,7 +76,7 @@ class DOMWalker:
         while element_name:
             found = 0
             for child in node.childNodes:
-                if child.nodeType == xml.dom.core.ELEMENT and \
+                if child.nodeType == Node.ELEMENT_NODE and \
                    child.nodeName == element_name[0]:
                     found = 1
                     break
@@ -86,7 +88,7 @@ class DOMWalker:
         text = ''
         for node in text_nodes:
             text = text + node.nodeValue
-        return wstring.from_utf8(text).encode('L1', wstring.SKIP_INVALID)
+        return text.encode('L1', 'ignore')
 
     def doElement(self, node):
         pass
@@ -237,8 +239,7 @@ class DocBookLatexWriter(DocBookWriter):
         return text
 
     def doText(self, node):
-        text = node.nodeValue
-        text = wstring.from_utf8(text).encode('L1', wstring.SKIP_INVALID)
+        text = node.nodeValue.encode('L1', 'ignore')
         newline_at_end = text[-1] == '\n'
         text = string.split(text, '\n')
         text = filter(lambda s: s, text)
@@ -257,10 +258,11 @@ class DocBookLatexWriter(DocBookWriter):
             raise ValueError, "section nesting exceeds LaTeX capabilities"
 
     def doOtherNode(self, node):
-        type = xml.dom.core.NODE_CLASS[node.nodeType].__name__
-        if type != 'ProcessingInstruction':
-            sys.stderr.write("--> Unknown node %s (type %s)\n"
-                             % (node.nodeName, type))
+        raise ValueError("Unknown node type %s" % str(node))
+        #type = xml.dom.core.NODE_CLASS[node.nodeType].__name__
+        #if type != 'ProcessingInstruction':
+        #    sys.stderr.write("--> Unknown node %s (type %s)\n"
+        #                     % (node.nodeName, type))
 
     def doElement(self, node):
         sys.stderr.write("--> Unknown element %s\n" % node.nodeName)
@@ -322,7 +324,13 @@ class DocBookLatexWriter(DocBookWriter):
         if title is None:
             title = self.findChildElements(node, 'title')[0]
             title = self.collectText(title)
-        self.file.write("\\chapter{%s}\n\n" % title)
+        id = node.getAttribute('id')
+        if id:
+            self.file.write("\\chapter{%s}\n" % title)
+            self.file.write("\\hypertarget{%s}{}\n" % id)
+            self.file.write('\\label{%s}\n\n' % id)
+        else:
+            self.file.write("\\chapter{%s}\n\n" % title)
         self.chapter_empty = 1
         for child in node.childNodes:
             self.doNode(child)
@@ -363,15 +371,11 @@ class DocBookLatexWriter(DocBookWriter):
         else:
             self.file.write("*{%s}\n" % title)
         self.file.write("\n")
-        if title[:3] == 'Mod':
-            self.file.write("\\addcontentsline{toc}{%s}{%s}\n\n"
-                            % (self.sectionCommand()[1:], title))
-        else:
-            if self.section_level < 3:
-                self.file.write("\\pdfbookmark[%d]{%s}{x%d}\n\n"
-                                % ((self.section_level+1),
-                                   title, self.labelnum))
-                self.labelnum = self.labelnum + 1
+        if self.section_level < 3:
+            self.file.write("\\pdfbookmark[%d]{%s}{x%d}\n\n"
+                            % ((self.section_level+1),
+                               title, self.labelnum))
+            self.labelnum = self.labelnum + 1
         self.section_level = self.section_level + 1
         for child in node.childNodes:
             self.doNode(child)
@@ -675,9 +679,6 @@ class HTMLFiles(DOMWalker):
 
     def do_sect(self, node):
         title = self.getTextOfElement(node, 'title')
-        if title[:6] == 'Module':
-            self.files.push(self.newFileName())
-            node.setAttribute('filename', self.files.top())
         self.doElement(node)
 
     do_preface = do_sect
@@ -721,7 +722,7 @@ class DocBookHTMLWriter(DocBookWriter):
         text = string.join(text, '\n')
         if initial_newline: text = '\n' + text
         if terminal_newline: text = text + '\n'        
-        text = wstring.from_utf8(text).encode('L1', wstring.SKIP_INVALID)
+        text = text.encode('L1', 'ignore')
         self.file.write(text)
 
     def doOtherNode(self, node):
@@ -813,7 +814,7 @@ class DocBookHTMLWriter(DocBookWriter):
             local = []
             for i in range(len(children)):
                 child = children[i]
-                if child.nodeType == xml.dom.core.ELEMENT:
+                if child.nodeType == Node.ELEMENT_NODE:
                     if child.nodeName[:4] == 'sect':
                         text = self.collectText(child)
                         if text[:9] == 'Functions':

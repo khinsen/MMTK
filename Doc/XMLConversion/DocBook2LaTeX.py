@@ -1,11 +1,8 @@
-from esis_builder import EsisBuilder
+from xml.dom.minidom import parse
 from DocBook import DocBookLatexWriter
-import sys
 
-esis = EsisBuilder()
-esis.feed(open('mmtk-user.esis').read())
-document = esis.document
-
+document = parse(file('../XML/mmtk-user.xml'))
 out = open('mmtk-user.tex', 'w')
 DocBookLatexWriter(document, out)
 out.close()
+

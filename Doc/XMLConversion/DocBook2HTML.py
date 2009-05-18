@@ -1,9 +1,5 @@
-from esis_builder import EsisBuilder
+from xml.dom.minidom import parse
 from DocBook import DocBookHTMLWriter
-import os, sys
 
-esis = EsisBuilder()
-esis.feed(open('mmtk-user.esis').read())
-document = esis.document
-
+document = parse(file('../XML/mmtk-user.xml'))
 DocBookHTMLWriter(document, 'MMTK', 'html')
