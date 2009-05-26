@@ -6,10 +6,9 @@ syntax: glob
 build
 dist
 Test
-epydoc
-Doc/Reference
-Doc/HTML
-Doc/PDF
+Doc/module_reference
+Doc/users_guide
+Doc/users_guide.pdf
 MANIFEST
 HG_CHANGESET_ID
 config/erfc_test

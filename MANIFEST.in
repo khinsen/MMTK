@@ -23,11 +23,12 @@ recursive-include Include *.h
 include Tests/*.py
 include config/*.c
 include Doc/CHANGELOG
-include Doc/XML/mmtk-user.xml
-include Doc/PDF/*.pdf
-include Doc/HTML/*.html
-include Doc/Reference/*.html
-include Doc/XMLConversion/*
+include Doc/users_guide.pdf
+include Doc/users_guide/*.html
+include Doc/module_reference/*.html
+include Doc/source/users_guide_docbook_xml/mmtk-user.xml
+include Doc/source/XMLConversion/*
+include Doc/source/epydoc.conf
 recursive-include Examples *.py
 recursive-include Examples *.c
 recursive-include Examples *.pyx
