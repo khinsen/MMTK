@@ -1,7 +1,7 @@
 # This module implements classes for peptide chains and proteins.
 #
 # Written by Konrad Hinsen
-# last revision: 2009-1-21
+# last revision: 2009-5-19
 #
 
 """
@@ -723,7 +723,7 @@ class Protein(ChemicalObjects.Complex):
                 m = m[0][0]
                 m._addSSBridges(bonds)
             else:
-                numbers = sum(i._numbers for i in m[0])
+                numbers = sum((i._numbers for i in m[0]), [])
                 m = ConnectedChains(m[0])
                 m._numbers = numbers
                 m._addSSBridges(bonds)
