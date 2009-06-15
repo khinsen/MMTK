@@ -4,7 +4,9 @@ O_2 = Atom('O')
 
 bonds = [Bond(O_1, P), Bond(O_2, P), ]
 
-pdbmap = [('NAP', {"O2P": O_2, "P": P, "O1P": O_1, })]
+pdbmap = [('NAP', {"OP2": O_2, "P": P, "OP1": O_1, })]
+
+pdb_alternative = {'O1P': 'OP1', 'O2P': 'OP2'}
 
 amber_atom_type = {O_2: 'O2', P: 'P', O_1: 'O2', }
 
