@@ -1,7 +1,7 @@
 /* Low-level minimization
  *
  * Written by Konrad Hinsen
- * last revision: 2007-6-13
+ * last revision: 2009-7-10
  */
 
 #include "MMTK/universe.h"
@@ -97,7 +97,6 @@ get_data_descriptors(PyArrayObject *configuration, PyArrayObject *gradients,
 static PyObject *
 steepestDescent(PyObject *dummy, PyObject *args)
 {
-  PyThreadState *this_thread;
   PyObject *universe;
   PyUniverseSpecObject *universe_spec;
   PyArrayObject *configuration;
@@ -177,7 +176,9 @@ steepestDescent(PyObject *dummy, PyObject *args)
 
   /* Get write access for the minimization, switching to
      read access only during energy evaluation */
-  this_thread = PyEval_SaveThread();
+#ifdef WITH_THREAD
+  evaluator->tstate_save = PyEval_SaveThread();
+#endif
   PyUniverseSpec_StateLock(universe_spec, -1);
 
   /* Minimization main loop */
@@ -191,7 +192,9 @@ steepestDescent(PyObject *dummy, PyObject *args)
     (*evaluator->eval_func)(evaluator, &p_energy, configuration, i > 0);
     PyUniverseSpec_StateLock(universe_spec, 2);
     if (p_energy.error) {
-      PyEval_RestoreThread(this_thread);
+#ifdef WITH_THREAD
+      PyEval_RestoreThread(evaluator->tstate_save);
+#endif
       goto error;
     }
     PyUniverseSpec_StateLock(universe_spec, -1);
@@ -216,9 +219,12 @@ steepestDescent(PyObject *dummy, PyObject *args)
     }
     if (norm < gradient_convergence)
       break;
-    if (PyTrajectory_Output(output, i, data_descriptors, &this_thread) == -1) {
+    if (PyTrajectory_Output(output, i, data_descriptors,
+			    &evaluator->tstate_save) == -1) {
       PyUniverseSpec_StateLock(universe_spec, -2);
-      PyEval_RestoreThread(this_thread);
+#ifdef WITH_THREAD
+      PyEval_RestoreThread(evaluator->tstate_save);
+#endif
       goto error;
     }
     factor = step_size/norm;
@@ -236,15 +242,20 @@ steepestDescent(PyObject *dummy, PyObject *args)
   norm = min_norm;
   copy_vectors(min_configuration, x, atoms);
   copy_vectors(min_gradients, f, atoms);
-  if (PyTrajectory_Output(output, i, data_descriptors, &this_thread) == -1) {
+  if (PyTrajectory_Output(output, i, data_descriptors,
+			  &evaluator->tstate_save) == -1) {
     PyUniverseSpec_StateLock(universe_spec, -2);
-    PyEval_RestoreThread(this_thread);
+#ifdef WITH_THREAD
+    PyEval_RestoreThread(evaluator->tstate_save);
+#endif
     goto error;
   }
 
   /* Clean up and return None */
   PyUniverseSpec_StateLock(universe_spec, -2);
-  PyEval_RestoreThread(this_thread);
+#ifdef WITH_THREAD
+  PyEval_RestoreThread(evaluator->tstate_save);
+#endif
   PyTrajectory_OutputFinish(output, i, 0, 1, data_descriptors);
   free(min_configuration);
   free(min_gradients);
@@ -270,7 +281,6 @@ error2:
 static PyObject *
 conjugateGradient(PyObject *dummy, PyObject *args)
 {
-  PyThreadState *this_thread;
   PyObject *universe;
   PyUniverseSpecObject *universe_spec;
   PyArrayObject *configuration;
@@ -366,7 +376,9 @@ conjugateGradient(PyObject *dummy, PyObject *args)
     goto error2;
 
   /* Minimization main loop */
-  this_thread = PyEval_SaveThread();
+#ifdef WITH_THREAD
+  evaluator->tstate_save = PyEval_SaveThread();
+#endif
   reset_count = 0;
   p_energy.gradients = (PyObject *)gradients1;
   p_energy.gradient_fn = NULL;
@@ -376,7 +388,9 @@ conjugateGradient(PyObject *dummy, PyObject *args)
   (*evaluator->eval_func)(evaluator, &p_energy, configuration, 0);
   PyUniverseSpec_StateLock(universe_spec, 2);
   if (p_energy.error) {
-    PyEval_RestoreThread(this_thread);
+#ifdef WITH_THREAD
+    PyEval_RestoreThread(evaluator->tstate_save);
+#endif
     goto error;
   }
 
@@ -396,9 +410,12 @@ conjugateGradient(PyObject *dummy, PyObject *args)
       break;
     if (norm > 50.*gradient_convergence)
       reset_count++;
-    if (PyTrajectory_Output(output, i, data_descriptors, &this_thread) == -1) {
+    if (PyTrajectory_Output(output, i, data_descriptors,
+			    &evaluator->tstate_save) == -1) {
       PyUniverseSpec_StateLock(universe_spec, -2);
-      PyEval_RestoreThread(this_thread);
+#ifdef WITH_THREAD
+      PyEval_RestoreThread(evaluator->tstate_save);
+#endif
       goto error;
     }
     if (i == 0)
@@ -443,7 +460,7 @@ conjugateGradient(PyObject *dummy, PyObject *args)
       (*evaluator->eval_func)(evaluator, &p_energy, configuration, 0); \
       PyUniverseSpec_StateLock(universe_spec, 2); \
       if (p_energy.error) { \
-        PyEval_RestoreThread(this_thread); \
+	PyEval_RestoreThread(evaluator->tstate_save); \
         goto error; \
       } \
       PyUniverseSpec_StateLock(universe_spec, -1); \
@@ -503,12 +520,15 @@ conjugateGradient(PyObject *dummy, PyObject *args)
   }
 
   /* Final output */
-  if (PyTrajectory_Output(output, i, data_descriptors, &this_thread) == -1)
+  if (PyTrajectory_Output(output, i, data_descriptors,
+			  &evaluator->tstate_save) == -1)
       goto error;
 
   /* Clean up and return None */
   PyUniverseSpec_StateLock(universe_spec, -2);
-  PyEval_RestoreThread(this_thread);
+#ifdef WITH_THREAD
+  PyEval_RestoreThread(evaluator->tstate_save);
+#endif
   PyTrajectory_OutputFinish(output, i, 0, 1, data_descriptors);
   Py_DECREF(gradients1);
   Py_DECREF(gradients2);
