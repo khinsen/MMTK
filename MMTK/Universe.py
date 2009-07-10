@@ -4,7 +4,7 @@
 # (boundary conditions, external fields, etc.)
 #
 # Written by Konrad Hinsen
-# last revision: 2009-4-15
+# last revision: 2009-7-10
 #
 
 """
@@ -421,8 +421,6 @@ class Universe(Collections.GroupOfAtoms, Visualization.Viewable):
             for a, i in zip(redef, free_indices):
                 a.index = i
             # At this point a.index runs from 0 to np-1 in the universe.
-            # We should now call a.setArray, but for efficiency
-            # resons a simplified version of that code is inlined here.
             for a in self.atomList():
                 if a.array is None:
                     try:
@@ -541,14 +539,6 @@ class Universe(Collections.GroupOfAtoms, Visualization.Viewable):
             except AttributeError: pass
         return ParticleProperties.ParticleScalar(self, array)
     getAtomBooleanArray = getParticleBoolean
-
-    def renumberAtoms(self, indices):
-        conf = self.configuration()
-        for a in self.atomList():
-            a.index = indices[a.index]
-        indices = N.argsort(indices)
-        conf.array[:] = N.take(conf.array, indices)
-        self._changed(True)
 
     def masses(self):
         """
