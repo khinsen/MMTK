@@ -14,6 +14,7 @@ setup (name = "MMTK-LangevinDynamics",
        url = "http://dirac.cnrs-orleans.fr/MMTK/",
        license = "LGPL",
 
+       py_modules = ['LangevinDynamics'],
        ext_modules = [Extension('MMTK_langevin',
                                 ['./MMTK_langevin.c', 'ranf.c', 'pmath_rng.c'],
                                 include_dirs=['./']),
