@@ -1,7 +1,7 @@
 /* Low-level dynamics integrators
  *
  * Written by Konrad Hinsen
- * last revision: 2007-6-13
+ * last revision: 2009-7-8
  */
 
 #include "MMTK/universe.h"
@@ -391,7 +391,6 @@ mult_by_h_plus_one(vector3 *in, vector3 *out, int natoms, double *mass,
 static PyObject *
 integrateVV(PyObject *dummy, PyObject *args)
 {
-  PyThreadState *this_thread;
   PyObject *universe;
   PyUniverseSpecObject *universe_spec;
   PyArrayObject *configuration;
@@ -620,11 +619,15 @@ integrateVV(PyObject *dummy, PyObject *args)
   p_energy.gradient_fn = NULL;
   p_energy.force_constants = NULL;
   p_energy.fc_fn = NULL;
-  Py_BEGIN_ALLOW_THREADS;
+#ifdef WITH_THREAD
+  evaluator->tstate_save = PyEval_SaveThread();
+#endif
   PyUniverseSpec_StateLock(universe_spec, 1);
   (*evaluator->eval_func)(evaluator, &p_energy, configuration, 0);
   PyUniverseSpec_StateLock(universe_spec, 2);
-  Py_END_ALLOW_THREADS;
+#ifdef WITH_THREAD
+  PyEval_RestoreThread(evaluator->tstate_save);
+#endif
   if (p_energy.error)
     goto error2;
 
@@ -665,7 +668,7 @@ integrateVV(PyObject *dummy, PyObject *args)
   if (output == NULL)
     goto error2;
 
-  this_thread = PyEval_SaveThread();
+  evaluator->tstate_save = PyEval_SaveThread();
   
   /* Get write access for the integration, switching to
      read access only during energy evaluation */
@@ -691,9 +694,10 @@ integrateVV(PyObject *dummy, PyObject *args)
     if (barostat && !thermostat)
       b_mass = 0.5*k_energy*b_tau*b_tau/(volume*volume);
     /* Trajectory and log output */
-    if (PyTrajectory_Output(output, i, data_descriptors, &this_thread) == -1) {
+    if (PyTrajectory_Output(output, i, data_descriptors,
+			    &evaluator->tstate_save) == -1) {
       PyUniverseSpec_StateLock(universe_spec, -2);
-      PyEval_RestoreThread(this_thread);
+      PyEval_RestoreThread(evaluator->tstate_save);
       goto error;
     }
 
@@ -812,7 +816,7 @@ integrateVV(PyObject *dummy, PyObject *args)
     (*evaluator->eval_func)(evaluator, &p_energy, configuration, 1);
     PyUniverseSpec_StateLock(universe_spec, 2);
     if (p_energy.error) {
-      PyEval_RestoreThread(this_thread);
+      PyEval_RestoreThread(evaluator->tstate_save);
       goto error;
     }
     PyUniverseSpec_StateLock(universe_spec, -1);
@@ -960,15 +964,16 @@ integrateVV(PyObject *dummy, PyObject *args)
 	      + (*b_alpha)*const_virial2)/(3.*volume);
 
   /* Final trajectory and log output */
-  if (PyTrajectory_Output(output, i, data_descriptors, &this_thread) == -1) {
+  if (PyTrajectory_Output(output, i, data_descriptors,
+			  &evaluator->tstate_save) == -1) {
     PyUniverseSpec_StateLock(universe_spec, -2);
-    PyEval_RestoreThread(this_thread);
+    PyEval_RestoreThread(evaluator->tstate_save);
     goto error;
   }
 
   /* Cleanup */
   PyUniverseSpec_StateLock(universe_spec, -2);
-  PyEval_RestoreThread(this_thread);
+  PyEval_RestoreThread(evaluator->tstate_save);
   PyTrajectory_OutputFinish(output, i, 0, 1, data_descriptors);
   free(scratch);
   free(pdata);
