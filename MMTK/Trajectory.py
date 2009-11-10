@@ -1,7 +1,7 @@
 # This module implements trajetories and trajectory generators.
 #
 # Written by Konrad Hinsen
-# last revision: 2009-1-29
+# last revision: 2009-11-9
 #
 
 """
@@ -747,6 +747,8 @@ class ParticleTrajectoryReader(object):
             index = atom
         else:
             index = atom.index
+            if atom.universe() is not self.trajectory.universe:
+                raise ValueError("objects not in the same universe")
         key = (index, variable, first, last, skip, correct, box)
         data, count = self.cache.get(key, (None, 0))
         if data is not None:
