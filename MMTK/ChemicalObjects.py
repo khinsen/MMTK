@@ -2,7 +2,7 @@
 # complexes. They are made as copies from blueprints in the database.
 #
 # Written by Konrad Hinsen
-# last revision: 2009-3-11
+# last revision: 2009-7-10
 #
 
 """
@@ -615,31 +615,9 @@ class Atom(ChemicalObject):
             raise ValueError('Wrong atom index')
         self.index = index
 
-    def setArray(self, array, indices):
-        if len(indices) == 1:
-            index = indices[0]
-        else:
-            if self.index is None or self.index not in indices:
-                return False
-            index = self.index
-            indices.remove(index)
-        if array is None:
-            self.index = index
-            self.array = None
-            return True
-        if self.array is None:
-            try:
-                array[index, :] = self.pos.array
-            except AttributeError:
-                array[index, :] = Utility.undefined
-        else:
-            array[index, :] = self.array[self.index, :] 
-        self.array = array
+    def setArray(self, index):
         self.index = index
-        try:
-            del self.pos
-        except AttributeError: pass
-        return True
+        self.array = None
 
     def getArray(self):
         return self.array
