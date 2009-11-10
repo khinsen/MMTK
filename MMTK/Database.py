@@ -1,7 +1,7 @@
 # This module manages the chemical database.
 #
 # Written by Konrad Hinsen
-# last revision: 2009-4-1
+# last revision: 2009-10-20
 #
 
 """
@@ -324,8 +324,17 @@ class AtomReference(object):
         return '<Atom number ' + `self.number` + '>'
     __str__ = __repr__
 
-    def __cmp__(self, other):
-        return cmp(self.number, other.number)
+    def __eq__(self, other):
+        if isinstance(other, AtomReference):
+            return self.number == other.number
+        else:
+            return NotImplemented
+
+    def __ne__(self, other):
+        if isinstance(other, AtomReference):
+            return self.number != other.number
+        else:
+            return NotImplemented
 
     def __hash__(self):
         return hash(self.number)
