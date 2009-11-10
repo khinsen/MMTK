@@ -4,7 +4,7 @@
 # (boundary conditions, external fields, etc.)
 #
 # Written by Konrad Hinsen
-# last revision: 2009-7-10
+# last revision: 2009-10-20
 #
 
 """
@@ -110,7 +110,7 @@ class Universe(Collections.GroupOfAtoms, Visualization.Viewable):
         return self._objects[item]
 
     def __setattr__(self, attr, value):
-        if self.__dict__.has_key(attr):
+        if attr[0] != '_' and self.__dict__.has_key(attr):
             try:
                 self.removeObject(self.__dict__[attr])
             except ValueError:
