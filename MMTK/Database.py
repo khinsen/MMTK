@@ -1,7 +1,7 @@
 # This module manages the chemical database.
 #
 # Written by Konrad Hinsen
-# last revision: 2009-10-20
+# last revision: 2009-11-10
 #
 
 """
@@ -112,7 +112,7 @@ class ChemicalObjectType(object):
             if hasattr(object, 'object_list'):
                 getattr(self, object.object_list).append(object)
 
-    is_chemical_object_type = 1
+    is_chemical_object_type = True
 
     def setReferences(self):
         atom_refs = []
@@ -124,9 +124,32 @@ class ChemicalObjectType(object):
                         Utility.substitute(getattr(self, attr[0]),
                                            self.atoms, atom_refs))
 
+    # Type objects are singletons, they are never copied
     def __copy__(self, memo = None):
         return self
     __deepcopy__ = __copy__
+
+    # Pickle support. When pickled/unpickled through
+    # MMTK.Utility.save and MMTK.Utility.load, type objects
+    # are treated as external persistent objects. This is handled
+    # by a specialized Pickler and Unpickler (see MMTK.Utility)
+    # and the _restoreId() methods in the subclasses of
+    # ChemicalObjectType. This mechanism maintains the singleton
+    # nature of type objects.
+    # When pickling using the unmodified pickle/cPickle routines,
+    # there is no way to prevent type objects from being duplicated
+    # at unpickle time. The best we can do is to make the newly created
+    # type object a clone of the singleton object. This is handled
+    # by the __setstate__ and __getstate__ methods that follow
+
+    def __getstate__(self):
+        return self._restoreId()
+
+    def __setstate__(self, state):
+        import sys
+        singleton_type = eval("MMTK."+state, sys.modules)
+        self.__dict__.update(singleton_type.__dict__)
+
 
     def writeXML(self, file, memo):
         if memo.get(id(self), None) is not None:
@@ -401,8 +424,8 @@ class BlueprintObject(object):
         for attr in self.type.instance:
             setattr(self, attr, _blueprintCopy(getattr(original, attr), memo))
 
-    is_instance_var = 1
-    is_blueprint = 1
+    is_instance_var = True
+    is_blueprint = True
 
     def __getattr__(self, attr):
         return getattr(self.type, attr)
@@ -450,7 +473,7 @@ class ReferenceBlueprint(object):
             self.type = type
         self.type.createObject(self.__dict__)
 
-    is_blueprint = 1
+    is_blueprint = True
 
 class BlueprintProtein(ReferenceBlueprint):
 
@@ -487,7 +510,7 @@ class BlueprintBond(object):
         self.a1 = a1
         self.a2 = a2
 
-    is_instance_var = 1
+    is_instance_var = True
 
     def _blueprintCopy(self, memo):
         return BlueprintBond(_blueprintCopy(self.a1, memo),
