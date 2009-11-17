@@ -1,3 +1,32 @@
+2.5.25 --> 2.7.0
+================
+
+Improvements:
+
+- Better support of pickle and cPickle. Until now, MMTK's specialized pickler
+  had to be used to pickle MMTK's chemical objects. From this version, the
+  standard pickler and unpickler can be used as well, although MMTK's
+  pickler is more efficient in terms of pickle size and memory use of
+  unpickled objects.
+
+- AtomReference objects implement the rich comparison protocol.
+
+Bug fixes:
+
+- The use of force field terms implemented in Python with an integrator
+  or minimizer crashed Python on some platforms.
+
+- Modifying a universe after initializing its velocities could lead
+  to an infinite recursion.
+
+- Reading a ParticleTrajectory for atoms outside of the trajectory's
+  universe now raises an exception.
+
+- Fixed PDB names of oxygens in phosphate groups of DNA
+
+- Added missing database file MMTK/Database/Groups/lysine_neutral_noh
+
+
 2.5.24 --> 2.5.25
 =================
 
