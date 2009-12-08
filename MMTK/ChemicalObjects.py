@@ -2,7 +2,7 @@
 # complexes. They are made as copies from blueprints in the database.
 #
 # Written by Konrad Hinsen
-# last revision: 2009-7-10
+# last revision: 2009-12-7
 #
 
 """
@@ -621,6 +621,10 @@ class Atom(ChemicalObject):
 
     def getArray(self):
         return self.array
+
+    def unsetArray(self):
+        self.pos = self.position()
+        self.array = None
 
     def setBondAttribute(self, atom):
         try:

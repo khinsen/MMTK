@@ -4,7 +4,7 @@
 # (boundary conditions, external fields, etc.)
 #
 # Written by Konrad Hinsen
-# last revision: 2009-10-20
+# last revision: 2009-12-7
 #
 
 """
@@ -264,6 +264,8 @@ class Universe(Collections.GroupOfAtoms, Visualization.Viewable):
         self._bond_database = None
         self._version += 1
         if system_size_changed:
+            for a in self.atomList():
+                a.unsetArray()
             self._configuration = None
             self._masses = None
             self._atom_properties = {}
