@@ -1,7 +1,7 @@
 /* Low-level functions for universes
  *
  * Written by Konrad Hinsen
- * last revision: 2009-3-18
+ * last revision: 2009-12-9
  */
 
 #define _UNIVERSE_MODULE
@@ -208,21 +208,21 @@ parallelepipedic_volume(double scale_factor, double *data)
  * Box coordinate transformation functions
  */
 static void
-no_box(vector3 *x, vector3 *b, int n, double *data, int to_box)
+no_box(vector3 *x, vector3 *b, int n, double *data, int mode)
 {
 }
 
 static void
-orthorhombic_box(vector3 *x, vector3 *b, int n, double *data, int to_box)
+orthorhombic_box(vector3 *x, vector3 *b, int n, double *data, int mode)
 {
   int i;
-  if (to_box)
+  if (mode == 1 || mode == 3) /* real-to-box  or reciprocal box-to-real */
     for (i = 0; i < n; i++) {
       b[i][0] = x[i][0]/data[0];
       b[i][1] = x[i][1]/data[1];
       b[i][2] = x[i][2]/data[2];
     }
-  else
+  else if (mode == 0 || mode == 2) /* box-to-real or reciprocal real-to-box */
     for (i = 0; i < n; i++) {
       x[i][0] = b[i][0]*data[0];
       x[i][1] = b[i][1]*data[1];
@@ -231,20 +231,37 @@ orthorhombic_box(vector3 *x, vector3 *b, int n, double *data, int to_box)
 }
 
 static void
-parallelepipedic_box(vector3 *x, vector3 *b, int n, double *data, int to_box)
+parallelepipedic_box(vector3 *x, vector3 *b, int n, double *data, int mode)
 {
   int i;
-  if (to_box)
+  vector3 r;
+  if (mode == 1)  /* real-to-box  */
     for (i = 0; i < n; i++) {
-      b[i][0] = data[0+9]*x[i][0] + data[1+9]*x[i][1] + data[2+9]*x[i][2];
-      b[i][1] = data[3+9]*x[i][0] + data[4+9]*x[i][1] + data[5+9]*x[i][2];
-      b[i][2] = data[6+9]*x[i][0] + data[7+9]*x[i][1] + data[8+9]*x[i][2];
+      r[0] = data[0+9]*x[i][0] + data[1+9]*x[i][1] + data[2+9]*x[i][2];
+      r[1] = data[3+9]*x[i][0] + data[4+9]*x[i][1] + data[5+9]*x[i][2];
+      r[2] = data[6+9]*x[i][0] + data[7+9]*x[i][1] + data[8+9]*x[i][2];
+      vector_copy(b[i], r);
     }
-  else
+  else if (mode == 3)  /* reciprocal box-to-real */
     for (i = 0; i < n; i++) {
-      x[i][0] = data[0]*b[i][0] + data[1]*b[i][1] + data[2]*b[i][2];
-      x[i][1] = data[3]*b[i][0] + data[4]*b[i][1] + data[5]*b[i][2];
-      x[i][2] = data[6]*b[i][0] + data[7]*b[i][1] + data[8]*b[i][2];
+      r[0] = data[0+9]*b[i][0] + data[3+9]*b[i][1] + data[6+9]*b[i][2];
+      r[1] = data[1+9]*b[i][0] + data[4+9]*b[i][1] + data[7+9]*b[i][2];
+      r[2] = data[2+9]*b[i][0] + data[5+9]*b[i][1] + data[8+9]*b[i][2];
+      vector_copy(x[i], r);
+    }
+  else if (mode == 0)  /* box-to-real */
+    for (i = 0; i < n; i++) {
+      r[0] = data[0]*b[i][0] + data[1]*b[i][1] + data[2]*b[i][2];
+      r[1] = data[3]*b[i][0] + data[4]*b[i][1] + data[5]*b[i][2];
+      r[2] = data[6]*b[i][0] + data[7]*b[i][1] + data[8]*b[i][2];
+      vector_copy(x[i], r);
+    }
+  else if (mode == 2)  /* reciprocal real-to-box */
+    for (i = 0; i < n; i++) {
+      r[0] = data[0]*x[i][0] + data[3]*x[i][1] + data[6]*x[i][2];
+      r[1] = data[1]*x[i][0] + data[4]*x[i][1] + data[7]*x[i][2];
+      r[2] = data[2]*x[i][0] + data[5]*x[i][1] + data[8]*x[i][2];
+      vector_copy(b[i], r);
     }
 }
 

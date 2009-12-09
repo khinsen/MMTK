@@ -1,7 +1,7 @@
 /* Ewald method for electrostatic interactions
  *
  * Written by Konrad Hinsen
- * last revision: 2002-12-10
+ * last revision: 2009-12-9
  */
 
 
@@ -102,9 +102,9 @@ reciprocal_sum(energy_spec *input, energy_data *energy,
   r1[0] = 2.*M_PI;  r1[1] = r1[2] = 0.;
   r2[1] = 2.*M_PI;  r2[2] = r2[0] = 0.;
   r3[2] = 2.*M_PI;  r3[0] = r3[1] = 0.;
-  (*box_transformation_fn)(&r1, &r1, 1, universe_data, 1);
-  (*box_transformation_fn)(&r2, &r2, 1, universe_data, 1);
-  (*box_transformation_fn)(&r3, &r3, 1, universe_data, 1);
+  (*box_transformation_fn)(&r1, &r1, 1, universe_data, 3);
+  (*box_transformation_fn)(&r2, &r2, 1, universe_data, 3);
+  (*box_transformation_fn)(&r3, &r3, 1, universe_data, 3);
 
   nx = kmax[0]+1;
   ny = 2*kmax[1]+1;
@@ -259,9 +259,9 @@ init_kvectors(box_fn *box_transformation_fn, double *universe_data, int natoms,
   r1[0] = 2.*M_PI;  r1[1] = r1[2] = 0.;
   r2[1] = 2.*M_PI;  r2[2] = r2[0] = 0.;
   r3[2] = 2.*M_PI;  r3[0] = r3[1] = 0.;
-  (*box_transformation_fn)(&r1, &r1, 1, universe_data, 1);
-  (*box_transformation_fn)(&r2, &r2, 1, universe_data, 1);
-  (*box_transformation_fn)(&r3, &r3, 1, universe_data, 1);
+  (*box_transformation_fn)(&r1, &r1, 1, universe_data, 3);
+  (*box_transformation_fn)(&r2, &r2, 1, universe_data, 3);
+  (*box_transformation_fn)(&r3, &r3, 1, universe_data, 3);
 
   if (scratch != NULL)
     *nkvect = nvect;

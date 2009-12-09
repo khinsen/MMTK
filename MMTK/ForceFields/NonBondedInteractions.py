@@ -2,7 +2,7 @@
 # for non-bonded interactions
 #
 # Written by Konrad Hinsen
-# last revision: 2009-12-7
+# last revision: 2009-12-9
 #
 
 from MMTK import Units, Utility
@@ -289,7 +289,7 @@ class ESEwaldForceField(NonBondedForceField):
                      'scale_factor']
 
     def evaluatorParameters(self, universe, subset1, subset2, global_data):
-        rsum = not self.options.get('no_reciprocal_sum', 0)
+        rsum = not self.options.get('no_reciprocal_sum', False)
         if not universe.is_periodic and rsum:
             raise ValueError("Ewald method accepts only periodic universes")
         n = universe.numberOfPoints()
@@ -311,26 +311,24 @@ class ESEwaldForceField(NonBondedForceField):
         options['beta'] = beta_opt
         options['real_cutoff'] = p/beta_opt
         options['reciprocal_cutoff'] = N.pi/(beta_opt*p)
-        options['no_reciprocal_sum'] = 0
+        options['no_reciprocal_sum'] = False
         for key, value in self.options.items():
             options[key] = value
-        lx = universe.boxToRealCoordinates(Vector(1., 0., 0.)).length()
-        ly = universe.boxToRealCoordinates(Vector(0., 1., 0.)).length()
-        lz = universe.boxToRealCoordinates(Vector(0., 0., 1.)).length()
-        kmax = N.array([lx,ly,lz])/options['reciprocal_cutoff']
-        kmax = N.ceil(kmax).astype(N.Int)
+        kx, ky, kz = [1./(rbv.length()*options['reciprocal_cutoff'])
+                      for rbv in universe.reciprocalBasisVectors()]
+        kmax = N.ceil([kx, ky, kz]).astype(N.Int)
         excluded_pairs, one_four_pairs, atom_subset = \
                              self.excludedPairs(subset1, subset2, global_data)
         if atom_subset is not None:
             raise ValueError("Ewald summation not available for subsets")
         if options['no_reciprocal_sum']:
-            kcutoff = 0.
+            kcutoff_sq = 0.
         else:
-            kcutoff = (2.*N.pi/options['reciprocal_cutoff'])**2
+            kcutoff_sq = (2.*N.pi/options['reciprocal_cutoff'])**2
         return {'electrostatic': {'algorithm': 'ewald',
                                   'charge': charge,
                                   'real_cutoff': options['real_cutoff'],
-                                  'reciprocal_cutoff': kcutoff,
+                                  'k_cutoff_sq': kcutoff_sq,
                                   'beta': options['beta'],
                                   'k_max': kmax,
                                   'one_four_factor': self.es_14_factor},
@@ -340,14 +338,12 @@ class ESEwaldForceField(NonBondedForceField):
                }
 
     def evaluatorTerms(self, universe, subset1, subset2, global_data):
-        if not universe.is_orthogonal and rsum:
-            raise ValueError("Ewald method implemented only for orthogonal universes")
         params = self.evaluatorParameters(universe, subset1, subset2,
                                           global_data)['electrostatic']
         assert params['algorithm'] == 'ewald'
         nblist, update = \
                 self.nonbondedList(universe, subset1, subset2, global_data)
-        if params['reciprocal_cutoff'] == 0.:
+        if params['k_cutoff_sq'] == 0.:
             shape = N.zeros((3, 3), N.Float)
         else:
             shape = universe.basisVectors()
@@ -356,7 +352,7 @@ class ESEwaldForceField(NonBondedForceField):
             shape = N.array(shape, N.Float)
         from MMTK_forcefield import EsEwaldTerm
         ev = EsEwaldTerm(universe._spec, shape, nblist, params['charge'],
-                         params['real_cutoff'], params['reciprocal_cutoff'],
+                         params['real_cutoff'], params['k_cutoff_sq'],
                          params['k_max'], params['one_four_factor'],
                          params['beta'])
         update.addTerm(ev, 2)
