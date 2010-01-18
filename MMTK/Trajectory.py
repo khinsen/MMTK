@@ -465,6 +465,7 @@ class TrajectoryVariable(object):
     def __getitem__(self, item):
         if not isinstance(item, int):
             return SubVariable(self, N.arange(len(self)))[item]
+        item = int(item) # gets rid of numpy.intXX objects
         if item < 0:
             item = item + len(self.trajectory)
         if item >= len(self.trajectory):
