@@ -1,7 +1,7 @@
 # This module deals with input and output of configurations in PDB format.
 #
 # Written by Konrad Hinsen
-# last revision: 2009-1-29
+# last revision: 2010-2-11
 #
 
 """
@@ -110,7 +110,9 @@ class PDBPeptideChain(Scientific.IO.PDB.PeptideChain, PDBChain):
                 for atom in residue:
                     if 'HZ' in atom.name:
                         count_hz += 1
-                if count_hz < 3:
+                if count_hz > 0 and count_hz < 3:
+                    # for count_hz == 0 (most probably a crystallographic
+                    # structure), keep LYS which is the most frequent one.
                     residue.name = 'LYP'
 
 class PDBNucleotideChain(Scientific.IO.PDB.NucleotideChain, PDBChain):
