@@ -1,7 +1,7 @@
 /* Low-level functions for universes
  *
  * Written by Konrad Hinsen
- * last revision: 2009-12-9
+ * last revision: 2010-2-2
  */
 
 #define _UNIVERSE_MODULE
@@ -876,6 +876,19 @@ contiguous_object_offset(PyObject *dummy, PyObject *args)
 			&box_coor_flag,
 			&PyArray_Type, &geometry))
     return NULL;
+
+  if (!PyArray_ISCONTIGUOUS(conf)) {
+    PyErr_SetString(PyExc_ValueError, "configuration array not contiguous");
+    return NULL;
+  }
+  if (!PyArray_ISCONTIGUOUS(pairs)) {
+    PyErr_SetString(PyExc_ValueError, "pair array not contiguous");
+    return NULL;
+  }
+  if (!PyArray_ISCONTIGUOUS(pairs)) {
+    PyErr_SetString(PyExc_ValueError, "offset array not contiguous");
+    return NULL;
+  }
 
   if (geometry == NULL)
     geometry_data = spec->geometry_data;
