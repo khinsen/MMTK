@@ -4,7 +4,7 @@
 # (boundary conditions, external fields, etc.)
 #
 # Written by Konrad Hinsen
-# last revision: 2009-12-7
+# last revision: 2010-2-11
 #
 
 """
@@ -940,6 +940,9 @@ class Universe(Collections.GroupOfAtoms, Visualization.Viewable):
         if parameters is not None:
             raise ValueError('incompatible cell parameters')
 
+    def _fixCellParameters(self, cell_parameters):
+        return cell_parameters
+
     def cellVolume(self):
         """
         @returns: the volume of the elementary cell of a periodic
@@ -1356,9 +1359,6 @@ class Periodic3DUniverse(Universe):
             contiguous_object_offset(self._spec, pairs, conf.array,
                                      offset.array, box_coordinates, cell)
         return offset
-
-    def _fixCellParameters(self, cell_parameters):
-        return cell_parameters
 
     def _graphics(self, conf, distance_fn, model, module, options):
         objects = self._objects._graphics(conf, distance_fn, model,
