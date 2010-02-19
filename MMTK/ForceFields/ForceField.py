@@ -2,7 +2,7 @@
 # and force field evaluators.
 #
 # Written by Konrad Hinsen
-# last revision: 2009-5-13
+# last revision: 2010-1-22
 #
 
 from MMTK import ParticleProperties, Universe, Utility
@@ -98,14 +98,8 @@ class CompoundForceField(ForceField):
                     if not isinstance(params, dict):
                         raise ValueError("evaluator parameters are not a dict")
                     for key, value in params.items():
-                        try:
-                            if parameters[key] != value:
-                                raise ValueError("A term with the same name " +
-                                                  "but a different value " +
-                                                  "already exists")
-                        except KeyError:
-                            pass
-                        parameters[key] = value
+                        parameters[key] = _combine(value,
+                                                   parameters.get(key, None))
                     done.append(ff)
             if not done:
                 raise TypeError("Cyclic force field dependence")
@@ -138,6 +132,17 @@ class CompoundForceField(ForceField):
 
     def description(self):
         return '+'.join([f.description() for f in self.fflist])
+
+def _combine(params1, params2):
+    if params1 is None:
+        return params2
+    if params2 is None:
+        return params1
+    if isinstance(params1, list) and isinstance(params2, list):
+        return params1 + params2
+    if params1 == params2:
+        return params1
+    raise TypeError, "_combine not implemented yet"
 
 #
 # This class serves to define data containers used in
