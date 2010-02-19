@@ -1,7 +1,7 @@
 # This module deals with input and output of configurations in PDB format.
 #
 # Written by Konrad Hinsen
-# last revision: 2010-2-11
+# last revision: 2010-2-16
 #
 
 """
@@ -88,7 +88,10 @@ class PDBPeptideChain(Scientific.IO.PDB.PeptideChain, PDBChain):
                         count_hd += 1
                     if 'HE' in atom.name:
                         count_he += 1
-                if count_he == 2:
+                if count_hd + count_he == 0:
+                    # default for crystallographic structures without hydrogens
+                    residue.name = 'HIE'
+                elif count_he == 2:
                     if count_hd == 2:
                         residue.name = 'HIP'
                     else:
