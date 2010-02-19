@@ -1,3 +1,34 @@
+2.7.0 --> 2.7.1
+===============
+
+Improvements:
+
+- The identification of protonation states when creating molecules from a
+  PDB file now takes into account the common situation of crystallographic
+  PDB files that contain no hydrogens at all. In that case, the most frequent
+  protonation is used for each individual residue.
+
+- Ewald summation works for non-orthogonal universes.
+
+Bug fixes:
+
+- Universe.distanceVector raised an exception when called with the optional
+  configuration argument and for an InfiniteUniverse.
+
+- MMTK.Universe.contiguousObjectOffset could crash when input arrays
+  do not use contiguous storage (very unlikely in normal MMTK usage)
+
+- NumPy compatibility problem: indexing trajectory variables did not
+  work with indices coming from a NumPy array.
+
+- Removal of objects from a universe (e.g. by calling replaceResidue()
+  on a biopolymer chain) could cause incorrect atom indices in the
+  universe.
+
+- A force field containing more than one restraint term did not permit
+  the retrieval of the evaluator parameters.
+
+
 2.5.25 --> 2.7.0
 ================
 
