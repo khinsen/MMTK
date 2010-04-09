@@ -1,7 +1,7 @@
 # Friction constants for protein C-alpha models
 #
 # Written by Konrad Hinsen
-# last revision: 2009-5-13
+# last revision: 2010-3-24
 #
 
 """
@@ -30,12 +30,12 @@ def calphaFrictionConstants(protein, set=2):
             m = atoms.selectShell(a.position(), radius).mass()
             d = 3.*m/(4.*N.pi*radius**3)
             if set == 1:  # linear fit to initial slope
-                f[a] = 121.2*d-8600
+                f[a] = max(1000., 121.2*d-8600)
             elif set == 2:  # exponential fit 400 steps
-                f[a] = 68.2*d-5160
+                f[a] = max(1000., 68.2*d-5160)
             elif set == 3:  # exponential fit 200 steps
-                f[a] = 38.2*d-2160
+                f[a] = max(1000., 38.2*d-2160)
             elif set == 4:  # expansion fit 50 steps
-                f[a] = 20.4*d-500.
+                f[a] = max(1000., 20.4*d-500.)
                 
     return f
