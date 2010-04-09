@@ -2,7 +2,7 @@
 # simulation, i.e. configurations, force vectors, etc.
 #
 # Written by Konrad Hinsen
-# last revision: 2009-2-23
+# last revision: 2010-2-26
 #
 
 """
@@ -143,6 +143,17 @@ class ParticleProperty(object):
         @type factor: C{float}
         """
         self.array[:] = self.array[:]*factor
+
+    def selectAtoms(self, condition):
+        """
+        Return a collection containing all atoms a for which 
+        condition(property[a]) is True.
+        @param condition: a test function
+        @type condition: callable
+        """
+        from MMTK.Collections import Collection
+        return Collection([a for a in self.universe.atomList()
+                           if condition(self[a])])
 
 ParticleProperty.return_class = ParticleProperty
 
