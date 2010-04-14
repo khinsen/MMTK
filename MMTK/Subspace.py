@@ -1,7 +1,7 @@
 # This module implements subspaces for motion analysis etc.
 #
 # Written by Konrad Hinsen
-# last revision: 2009-2-12
+# last revision: 2010-4-14
 #
 
 """
@@ -19,7 +19,7 @@ calculations or for analyzing complex motions. For an explanation, see:
 __docformat__ = 'epytext'
 
 from MMTK import Utility, ParticleProperties
-from Scientific.Geometry import Vector
+from Scientific.Geometry import Vector, ex, ey, ez
 from Scientific import N
 
 #
@@ -186,6 +186,19 @@ class Subspace(object):
                   of the subspace.
         """
         return vector - self.projectionOf(vector)
+
+    def complement(self):
+        """
+        @returns: the orthogonal complement subspace
+        @rtype: L{MMTK.Subspace.Subspace}
+        """
+        basis = []
+        for i in range(self.universe.numberOfAtoms()):
+            for e in [ex, ey, ez]:
+                p = ParticleProperties.ParticleVector(self.universe)
+                p[i] = e
+                basis.append(self.projectionComplementOf(p))
+        return Subspace(self.universe, basis)
 
 
 class RigidMotionSubspace(Subspace):
