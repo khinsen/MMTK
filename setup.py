@@ -225,7 +225,7 @@ standard and non-standard problems in molecular simulations.
        author = "Konrad Hinsen",
        author_email = "hinsen@cnrs-orleans.fr",
        url = "http://dirac.cnrs-orleans.fr/MMTK/",
-       license = "LGPL",
+       license = "CeCILL-C",
 
        packages = ['MMTK', 'MMTK.ForceFields', 'MMTK.ForceFields.Amber',
                    'MMTK.NormalModes', 'MMTK.Tk', 'MMTK.Tools',
