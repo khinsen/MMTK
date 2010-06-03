@@ -1,7 +1,7 @@
 /* Low-level Langevin dynamics integrators
  *
  * Written by Konrad Hinsen
- * last revision: 2000-11-9
+ * last revision: 2010-6-3
  */
 
 #include "MMTK/universe.h"
@@ -226,23 +226,35 @@ integrateLD(PyObject *dummy, PyObject *args)
     return NULL;
 
   /* Create the array for energy gradients */
+#if defined(NUMPY)
+  gradients = (PyArrayObject *)PyArray_Copy(configuration);
+#else
   gradients = (PyArrayObject *)PyArray_FromDims(configuration->nd,
 						configuration->dimensions,
 						PyArray_DOUBLE);
+#endif
   if (gradients == NULL)
     return NULL;
 
   /* Create the arrays for random forces */
+#if defined(NUMPY)
+  random1 = (PyArrayObject *)PyArray_Copy(configuration);
+#else
   random1 = (PyArrayObject *)PyArray_FromDims(configuration->nd,
 					      configuration->dimensions,
 					      PyArray_DOUBLE);
+#endif
   if (random1 == NULL) {
     Py_DECREF(gradients);
     return NULL;
   }
+#if defined(NUMPY)
+  random2 = (PyArrayObject *)PyArray_Copy(configuration);
+#else
   random2 = (PyArrayObject *)PyArray_FromDims(configuration->nd,
 					      configuration->dimensions,
 					      PyArray_DOUBLE);
+#endif
   if (random2 == NULL) {
     Py_DECREF(gradients);
     Py_DECREF(random1);
