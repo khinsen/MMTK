@@ -3,5 +3,5 @@
 
 int main(int argc, char **argv)
 {
-  printf("%d\n", sizeof(long));
+  printf("%d\n", (int)sizeof(long));
 }
