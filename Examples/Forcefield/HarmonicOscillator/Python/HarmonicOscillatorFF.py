@@ -49,24 +49,20 @@ class HarmonicOscillatorTerm(EnergyTerm):
 
 class HarmonicOscillatorForceField(ForceField):
 
-    """Harmonic potential with respect to a fixed point in space
-
-    Constructor: HarmonicOscillatorForceField(|atom|, |center|,
-                                              |force_constant|)
-
-    Arguments:
-
-    |atom| -- an atom object, specifying the
-              atom on which the force field acts
-
-    |center| -- a vector defining the point to which the atom is
-                attached by the harmonic potential
-
-    |force_constant| -- the force constant of the harmonic potential
-                        (a real number)
+    """
+    Harmonic potential with respect to a fixed point in space
     """
 
     def __init__(self, atom, center, force_constant):
+        """
+        @param atom: the atom on which the force field acts
+        @type atom: L{MMTK.ChemicalObjects.Atom}
+        @param center: the point to which the atom is attached by
+                       the harmonic potential
+        @type center: L{Scientific.Geometry.Vector}
+        @param force_constant: the force constant of the harmonic potential
+        @type force_constant: C{float}
+        """
         # Get the internal index of the atom if the argument is an
         # atom object. It is the index that is stored internally,
         # and when the force field is recreated from a specification
@@ -88,7 +84,7 @@ class HarmonicOscillatorForceField(ForceField):
     # requires. This is necessary for interdependent force field
     # terms. In our case, we just say "yes" immediately.
     def ready(self, global_data):
-        return 1
+        return True
 
     # The following method is called by the energy evaluation engine
     # to obtain a list of the low-level evaluator objects (the C routines)

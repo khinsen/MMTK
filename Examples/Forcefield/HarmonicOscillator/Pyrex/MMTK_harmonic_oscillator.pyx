@@ -64,16 +64,13 @@ cdef class HarmonicOscillatorTerm(EnergyTerm):
         energy.virial_available = 0 # we don't do virials here
         if energy.gradients != NULL:
             gradients = <vector3 *>(<PyArrayObject *> energy.gradients).data
-            gradients[self.atom_index][0] = \
-                         gradients[self.atom_index][0] + self.k*dx
-            gradients[self.atom_index][1] = \
-                         gradients[self.atom_index][1] + self.k*dy
-            gradients[self.atom_index][2] = \
-                         gradients[self.atom_index][2] + self.k*dz
+            gradients[self.atom_index][0] += self.k*dx
+            gradients[self.atom_index][1] += self.k*dy
+            gradients[self.atom_index][2] += self.k*dz
         if energy.force_constants != NULL:
             fc = <double *>(<PyArrayObject *> energy.force_constants).data
             n = (<PyArrayObject *> energy.force_constants).dimensions[0]
             offset = (9*n+3)*self.atom_index
-            fc[offset + 3*n*0 + 0] = fc[offset + 3*n*0 + 0] + self.k
-            fc[offset + 3*n*1 + 1] = fc[offset + 3*n*1 + 1] + self.k
-            fc[offset + 3*n*2 + 2] = fc[offset + 3*n*2 + 2] + self.k
+            fc[offset + 3*n*0 + 0] += self.k
+            fc[offset + 3*n*1 + 1] += self.k
+            fc[offset + 3*n*2 + 2] += self.k
