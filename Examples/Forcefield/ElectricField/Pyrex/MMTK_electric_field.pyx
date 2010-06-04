@@ -52,6 +52,7 @@ cdef class ElectricFieldTerm(EnergyTerm):
         cdef double *q
         cdef double e
         cdef int natoms, i
+
         coordinates = <vector3 *>input.coordinates.data
         natoms = input.coordinates.dimensions[0]
         q = <double *>self.charges.data
@@ -69,6 +70,6 @@ cdef class ElectricFieldTerm(EnergyTerm):
             energy.energy_terms[self.virial_index] = \
                                 energy.energy_terms[self.virial_index] - e
             if energy.gradients != NULL:
-                gradients[i][0] = gradients[i][0] + q[i]*self.strength[0]
-                gradients[i][1] = gradients[i][1] + q[i]*self.strength[1]
-                gradients[i][2] = gradients[i][2] + q[i]*self.strength[2]
+                gradients[i][0] += q[i]*self.strength[0]
+                gradients[i][1] += q[i]*self.strength[1]
+                gradients[i][2] += q[i]*self.strength[2]

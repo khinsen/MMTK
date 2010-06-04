@@ -6,20 +6,20 @@
 
 from distutils.core import setup, Extension
 from Pyrex.Distutils import build_ext
+import os, sys
 
-# Patch for Pyrex.Distutils to use include paths
-# This should become unnecessary in some future Pyrex release.
-def pyrex_compile(self, source):
-    import Pyrex.Compiler.Main
-    import copy
-    options = copy.deepcopy(Pyrex.Compiler.Main.default_options)
-    if self.include_dirs:
-        options.include_path.extend(self.include_dirs)
-    result = Pyrex.Compiler.Main.compile(source, options)
-    if result.num_errors <> 0:
-        sys.exit(1)
-build_ext.pyrex_compile = pyrex_compile
-# End of Pyrex.Distutils patch
+compile_args = []
+include_dirs = ['../../../../Include']
+
+from Scientific import N
+try:
+    num_package = N.package
+except AttributeError:
+    num_package = "Numeric"
+if num_package == "NumPy":
+    compile_args.append("-DNUMPY=1")
+    import numpy.distutils.misc_util
+    include_dirs.extend(numpy.distutils.misc_util.get_numpy_include_dirs())
 
 setup (name = "ElectricField",
        version = "1.0",
@@ -27,6 +27,8 @@ setup (name = "ElectricField",
 
        py_modules = ['ElectricField'],
        ext_modules = [Extension('MMTK_electric_field',
-                                ['MMTK_electric_field.pyx'])],
+                                ['MMTK_electric_field.pyx'],
+                                extra_compile_args = compile_args,
+                                include_dirs=include_dirs)],
        cmdclass = {'build_ext': build_ext}
        )

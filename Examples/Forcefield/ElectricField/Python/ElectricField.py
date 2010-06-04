@@ -53,21 +53,20 @@ class ElectricFieldTerm(EnergyTerm):
 
 class ElectricField(ForceField):
 
-    """Uniform electric field
-
-    Constructor: ElectricField(|strength|, |charge_property|='amber_charge')
-
-    Arguments:
-
-    |strength| -- a vector object representing the electric field vector
-
-    |charge_property| -- a string indicating the name of the atomic
-                         property in the database that is used to retrieve
-                         the atomic charges. The default is 'amber_charge',
-                         the charge property for the Amber94 force field.
+    """
+    Uniform electric field
     """
 
     def __init__(self, strength, charge_property='amber_charge'):
+        """
+        @param strength: the electric field vector
+        @type strength: L{Scientific.Geometry.Vector}
+        @charge_property: the name of the atomic property in the database
+                          that is used to retrieve the atomic charges.
+                          The default is 'amber_charge', the charge property
+                          for Amber94 and Amber99.
+        @type charge_property: C{str}
+        """
         # Store arguments that recreate the force field from a pickled
         # universe or from a trajectory.
         self.arguments = (strength, charge_property)
@@ -82,7 +81,7 @@ class ElectricField(ForceField):
     # requires. This is necessary for interdependent force field
     # terms. In our case, we just say "yes" immediately.
     def ready(self, global_data):
-        return 1
+        return True
 
     # The following method is called by the energy evaluation engine
     # to obtain a list of the evaluator objects
