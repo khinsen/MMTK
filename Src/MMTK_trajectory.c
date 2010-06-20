@@ -2,7 +2,7 @@
  * Trajectory objects using netCDF files.
  *
  * Written by Konrad Hinsen
- * last revision: 2008-10-27
+ * last revision: 2010-6-20
  */
 
 #define _TRAJECTORY_MODULE
@@ -1568,8 +1568,12 @@ PyTrajectory_Output(PyTrajectoryOutputSpec *spec, int step,
 	}
       }
       if (spec->type == PySpec_Function) {
+	if (thread != NULL)
+	  PyEval_RestoreThread(*thread);
 	if (!spec->function(data, spec->parameters, step, &spec->scratch))
-	  return -1;
+	  interrupt = -1;
+	if (thread != NULL)
+	  *thread = PyEval_SaveThread();
       }
     }
     spec++;
