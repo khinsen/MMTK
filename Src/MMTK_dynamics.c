@@ -1,7 +1,7 @@
 /* Low-level dynamics integrators
  *
  * Written by Konrad Hinsen
- * last revision: 2009-7-8
+ * last revision: 2010-6-22
  */
 
 #include "MMTK/universe.h"
@@ -854,7 +854,7 @@ integrateVV(PyObject *dummy, PyObject *args)
       double ke1, ke2, ke3;
 
       ke1 = ke2 = ke3 = 0.;
-      if (n_const > 0)
+      if (barostat && n_const > 0)
 	for (j = 0; j < atoms; j++) {
 	  vector3 va, vb;
 	  va[0] = v[j][0]-v1[j][0];
@@ -935,9 +935,11 @@ integrateVV(PyObject *dummy, PyObject *args)
 	  v[j][0] -= v1[j][0];
 	  v[j][1] -= v1[j][1];
 	  v[j][2] -= v1[j][2];
-	  vh[j][0] -= v2[j][0];
-	  vh[j][1] -= v2[j][1];
-	  vh[j][2] -= v2[j][2];
+	  if (barostat) {
+	    vh[j][0] -= v2[j][0];
+	    vh[j][1] -= v2[j][1];
+	    vh[j][2] -= v2[j][2];
+	  }
 	}
 	v[j][0] = (1.-dth*(*t_xi))*v[j][0] - dth*(*b_alpha)*vh[j][0];
 	v[j][1] = (1.-dth*(*t_xi))*v[j][1] - dth*(*b_alpha)*vh[j][1];
