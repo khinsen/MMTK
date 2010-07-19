@@ -1,3 +1,45 @@
+2.7.1 --> 2.7.2
+===============
+
+Improvements:
+
+- ParticleProperty objects (including ParticleScalar, ParticleVector,
+  and Configuration objects) have a new method selectAtoms. Its argument
+  is a function that is called with the property of one particle and returns
+  a boolean deciding whether or not that particle is part of the selection.
+
+- CalphaForceField has a new option (version=2) for the pair force constants.
+  For reasonable input structures, it is equivalent to the default, version=1.
+  It adds a threshold for small nearest-neighbour C-alpha distances: for 
+  distances less than 0.37 nm, the force constant does not decrease below
+  its value at 0.37 nm. This ensures that the Hessian remains positive
+  semi-definite for proteins with unrealistically short C-alpha distances.
+
+- MMTK.Subspae.Subspace has a new method complement() which returns the
+  orthogonal complement.
+
+- Two new example scripts:
+  -  Miscellaneous/bad_contacts.py
+  -  Miscellaneous/two_models.py
+
+- Protein friction constants for Brownian Dynamics (module MMTK.ProteinFriction)
+  are calculated with a threshold that assures a minimal value of
+  1000/ps. Without this threshold, friction constants could become negative
+  for solvent-exposed loops.
+
+Bug fixes:
+
+- The VelocityVerletIntegrator could crash, or produce NaN results,
+  for systems with distance constraints and a thermostat but no barostat.
+
+- All examples now work with recent releases of NumPy.
+
+- Installation could break on systems whose C compiler's sizeof returns
+  another type than "int".
+
+- Trajectory actions of type "function" could crash integrators.
+
+
 2.7.0 --> 2.7.1
 ===============
 
