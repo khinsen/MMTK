@@ -1,7 +1,7 @@
 /* Deformation energy calculation.
  *
  * Written by Konrad Hinsen
- * last revision: 2007-4-26
+ * last revision: 2009-12-4
  */
 
 #include "MMTK/universe.h"
@@ -571,6 +571,17 @@ calpha_evaluator(PyFFEnergyTermObject *self,
           /* derived from Amber94 force constant matrix */
           if (r_sq < 0.16) {
             double r = sqrt(r_sq);
+            deriv2 = (860000.*r-239000.)*self->param[1];
+          }
+          else {
+            deriv2 = 128.*self->param[1]/(r_sq*r_sq*r_sq);
+          }
+          break;
+        case 2:
+          /* same as 1 but with a fix for very short neighbour distances */
+          if (r_sq < 0.16) {
+            double r = sqrt(r_sq);
+	    if (r < 0.37) r = 0.37;
             deriv2 = (860000.*r-239000.)*self->param[1];
           }
           else {
