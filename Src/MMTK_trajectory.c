@@ -2,7 +2,7 @@
  * Trajectory objects using netCDF files.
  *
  * Written by Konrad Hinsen
- * last revision: 2010-7-20
+ * last revision: 2010-7-21
  */
 
 #define _TRAJECTORY_MODULE
@@ -1157,6 +1157,8 @@ get_spec(PyObject *universe, PyObject *spec,
   output->frequency = PyInt_AsLong(PyTuple_GetItem(spec, (Py_ssize_t)3));
   output->close = 0;
   output->type = type;
+  output->universe = universe;
+  Py_INCREF(universe);
   output->destination = NULL;
   output->parameters = NULL;
   output->scratch = NULL;
@@ -1263,7 +1265,8 @@ get_spec(PyObject *universe, PyObject *spec,
 							   (Py_ssize_t)4));
     output->parameters = PyTuple_GetItem(spec, (Py_ssize_t)5);
     Py_INCREF(output->parameters);
-    if (!output->function(data, output->parameters, -1, &output->scratch))
+    if (!output->function(data, output->parameters, -1,
+			  &output->scratch, output->universe))
       return -1;
 
   }
@@ -1353,7 +1356,8 @@ PyTrajectory_OutputFinish(PyTrajectoryOutputSpec *spec, int step,
       free(spec->variables);
     }
     if (spec->type == PySpec_Function) {
-      spec->function(data, spec->parameters, -2, &spec->scratch);
+      spec->function(data, spec->parameters, -2,
+		     &spec->scratch, spec->universe);
     }
     if (spec->close) {
       if (spec->type == PySpec_Trajectory)
@@ -1363,6 +1367,7 @@ PyTrajectory_OutputFinish(PyTrajectoryOutputSpec *spec, int step,
     }
     Py_XDECREF(spec->destination);
     Py_XDECREF(spec->parameters);
+    Py_XDECREF(spec->universe);
     spec++;
   }
   free(s);
@@ -1570,7 +1575,8 @@ PyTrajectory_Output(PyTrajectoryOutputSpec *spec, int step,
       if (spec->type == PySpec_Function && step >= 0) {
 	if (thread != NULL)
 	  PyEval_RestoreThread(*thread);
-	if (!spec->function(data, spec->parameters, step, &spec->scratch))
+	if (!spec->function(data, spec->parameters, step,
+			    &spec->scratch, spec->universe))
 	  interrupt = -1;
 	if (thread != NULL)
 	  *thread = PyEval_SaveThread();

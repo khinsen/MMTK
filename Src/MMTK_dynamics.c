@@ -1,7 +1,7 @@
 /* Low-level dynamics integrators
  *
  * Written by Konrad Hinsen
- * last revision: 2010-6-22
+ * last revision: 2010-7-21
  */
 
 #include "MMTK/universe.h"
@@ -1072,7 +1072,7 @@ getConfiguration(PyTrajectoryVariable *dynamic_data)
 
 static int
 scaleVelocities(PyTrajectoryVariable *dynamic_data, PyObject *parameters,
-		int step, void **scratch)
+		int step, void **scratch, PyObject *universe)
 {
   PyArrayObject *p_array = (PyArrayObject *)parameters;
   double temperature = ((double *)p_array->data)[0];
@@ -1132,7 +1132,7 @@ scaleVelocities(PyTrajectoryVariable *dynamic_data, PyObject *parameters,
 
 static int
 heat(PyTrajectoryVariable *dynamic_data, PyObject *parameters,
-     int step, void **scratch)
+     int step, void **scratch, PyObject *universe)
 {
   PyArrayObject *p_array = (PyArrayObject *)parameters;
   double temp1 = ((double *)p_array->data)[0];
@@ -1196,7 +1196,7 @@ heat(PyTrajectoryVariable *dynamic_data, PyObject *parameters,
 
 static int
 resetBarostat(PyTrajectoryVariable *dynamic_data, PyObject *parameters,
-	      int step, void **scratch)
+	      int step, void **scratch, PyObject *universe)
 {
   typedef struct {double *barostat;} workspace;
   workspace *ws = (workspace *)*scratch;
@@ -1230,7 +1230,7 @@ resetBarostat(PyTrajectoryVariable *dynamic_data, PyObject *parameters,
 
 static int
 removeTranslation(PyTrajectoryVariable *dynamic_data, PyObject *parameters,
-		  int step, void **scratch)
+		  int step, void **scratch, PyObject *universe)
 {
   typedef struct {PyArrayObject *masses;
                   PyArrayObject *velocities;} workspace;
@@ -1301,7 +1301,7 @@ solve_3x3(tensor3 A, vector3 B, vector3 X)
 
 static int
 removeRotation(PyTrajectoryVariable *dynamic_data, PyObject *parameters,
-	       int step, void **scratch)
+	       int step, void **scratch, PyObject *universe)
 {
   typedef struct {PyArrayObject *configuration;
                   PyArrayObject *masses;

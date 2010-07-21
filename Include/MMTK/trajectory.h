@@ -2,7 +2,7 @@
  * Include file for trajectory objects
  *
  * Written by Konrad Hinsen
- * last revision: 2007-11-27
+ * last revision: 2010-7-21
  */
 
 #ifndef MMTK_TRAJECTORY_H
@@ -87,7 +87,7 @@ typedef struct {
 /* Trajectory function declaration */
 
 typedef int trajectory_fn(PyTrajectoryVariable *, PyObject *,
-			  int step, void **scratch);
+			  int step, void **scratch, PyObject *universe);
 
 /* Output specification structure */
 
@@ -96,6 +96,7 @@ typedef struct {
   PyObject **variables;
   trajectory_fn *function;
   PyObject *parameters;
+  PyObject *universe;
   void *scratch;
   int first;
   int last;
