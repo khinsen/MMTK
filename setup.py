@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
 package_name = "MMTK"
-#package_name = "python-mmtk"
 
 from distutils.core import setup, Extension
 from distutils.command.sdist import sdist
@@ -18,6 +17,19 @@ class Dummy:
     pass
 pkginfo = Dummy()
 execfile('MMTK/__pkginfo__.py', pkginfo.__dict__)
+
+# Check for Cython and use it if the environment variable
+# MMTK_USE_CYTHON is set to a non-zero value.
+use_cython = int(os.environ.get('MMTK_USE_CYTHON', '0')) != 0
+if use_cython:
+    try:
+        from Cython.Distutils import build_ext
+        use_cython = True
+    except ImportError:
+        pass
+if not use_cython:
+    from distutils.command.build_ext import build_ext
+src_ext = 'pyx' if use_cython else 'c'
 
 # Check that we have Scientific 2.6 or higher
 try:
@@ -52,13 +64,8 @@ except AttributeError:
     num_package = "Numeric"
 if num_package == "NumPy":
     compile_args.append("-DNUMPY=1")
-    if sys.platform == 'win32':
-        include_dirs.append(os.path.join(sys.prefix,
-                            "Lib/site-packages/numpy/core/include"))
-    else:
-        include_dirs.append(os.path.join(sys.prefix,
-                            "lib/python%s.%s/site-packages/numpy/core/include"
-                             % sys.version_info [:2]))
+    import numpy.distutils.misc_util
+    include_dirs.extend(numpy.distutils.misc_util.get_numpy_include_dirs())
 
 headers = glob(os.path.join ("Include", "MMTK", "*.h"))
 
@@ -307,7 +314,7 @@ standard and non-standard problems in molecular simulations.
                                                 + macros,
                                 libraries=libraries),
                       Extension('MMTK_energy_term',
-                                ['Src/MMTK_energy_term.c'],
+                                ['Src/MMTK_energy_term.%s' % src_ext],
                                 extra_compile_args = compile_args,
                                 include_dirs=include_dirs,
                                 libraries=libraries,
@@ -318,5 +325,6 @@ standard and non-standard problems in molecular simulations.
        scripts = ['tviewer'],
 
        cmdclass = {'sdist': modified_sdist,
-                   'install_data': modified_install_data},
+                   'install_data': modified_install_data,
+                   'build_ext': build_ext},
        )
