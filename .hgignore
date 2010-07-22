@@ -15,4 +15,5 @@ config/intlen
 config/libm_test
 config/*.o
 Src/MMTK_energy_term.c
+Src/MMTK_trajectory_action.c
 1
