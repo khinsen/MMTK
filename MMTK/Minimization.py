@@ -1,7 +1,7 @@
 # This module implements energy minimizers.
 #
 # Written by Konrad Hinsen
-# last revision: 2009-1-16
+# last revision: 2010-7-22
 #
 
 """
@@ -10,37 +10,8 @@ Energy minimizers
 
 __docformat__ = 'epytext'
 
-from MMTK import Features, ThreadManager, Trajectory, Units
+from MMTK import Features, Trajectory, Units
 from MMTK_minimization import conjugateGradient, steepestDescent
-
-try:
-    import threading
-    if not hasattr(threading, 'Thread'):
-	threading = None
-except ImportError:
-    threading = None
-
-#
-# Thread subclass
-#
-if threading:
-
-    class MinimizerThread(threading.Thread):
-
-        def __init__(self, universe, target, args):
-            threading.Thread.__init__(self, group = None,
-                                      name = 'Energy minimization',
-                                      target = target,
-                                      args = args)
-            self.universe = universe
-            self.function = (target, args)
-            self.start()
-            ThreadManager.registerThread(self)
-
-        def run(self):
-            self.universe.acquireConfigurationChangeLock()
-            apply(apply, self.function)
-            self.universe.releaseConfigurationChangeLock()
 
 #
 # Minimizer base class
@@ -52,7 +23,7 @@ class Minimizer(Trajectory.TrajectoryGenerator):
 
     default_options = {'steps': 100, 'step_size': 0.02*Units.Ang,
 		       'convergence': 0.01*Units.kJ/(Units.mol*Units.nm),
-                       'background': 0, 'threads': None,
+                       'background': False, 'threads': None,
                        'mpi_communicator': None, 'actions': []}
 
     available_data = ['energy', 'configuration', 'gradients']
@@ -139,12 +110,7 @@ class SteepestDescentMinimizer(Minimizer):
                 self.getOption('convergence'), self.getActions(),
                 'Steepest descent minimization with ' +
                 self.optionString(['convergence', 'step_size', 'steps']))
-        if self.getOption('background'):
-            if not threading:
-                raise OSError("background processing not available")
-            return MinimizerThread(self.universe, steepestDescent, args)
-        else:
-            apply(steepestDescent, args)
+        return self.run(steepestDescent, args)
 
 #
 # Conjugate gradient minimizer
@@ -216,9 +182,4 @@ class ConjugateGradientMinimizer(Minimizer):
                self.getOption('convergence'), self.getActions(),
                'Conjugate gradient minimization with ' +
                self.optionString(['convergence', 'step_size', 'steps']))
-        if self.getOption('background'):
-            if not threading:
-                raise OSError("background processing not available")
-            return MinimizerThread(self.universe, conjugateGradient, args)
-        else:
-            apply(conjugateGradient, args)
+        return self.run(conjugateGradient, args)

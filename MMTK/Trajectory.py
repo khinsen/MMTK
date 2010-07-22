@@ -971,6 +971,13 @@ class TrajectoryGenerator(object):
         except ValueError:
             self.actions = []
         try:
+            if self.getOption('background'):
+                import MMTK_state_accessor
+                self.state_accessor = MMTK_state_accessor.StateAccessor()
+                self.actions.append(self.state_accessor)
+        except ValueError:
+            pass
+        try:
             steps = self.getOption('steps')
         except ValueError:
             steps = None
@@ -1000,6 +1007,14 @@ class TrajectoryGenerator(object):
             s = s + o + '=' + `self.getOption(o)` + ', '
         return s[:-2]
 
+    def run(self, function, args):
+        if self.getOption('background'):
+            import ThreadManager
+            return ThreadManager.TrajectoryGeneratorThread(self.universe,
+                                      function, args, self.state_accessor)
+        else:
+            apply(function, args)
+        
 #
 # Trajectory action base class
 #

@@ -1,7 +1,7 @@
 # This module implements MD integrators
 #
 # Written by Konrad Hinsen
-# last revision: 2009-1-16
+# last revision: 2010-7-22
 #
 
 """
@@ -10,39 +10,10 @@ Molecular Dynamics integrators
 
 __docformat__ = 'epytext'
 
-from MMTK import Environment, Features, ThreadManager, Trajectory, Units
+from MMTK import Environment, Features, Trajectory, Units
 import MMTK_dynamics
 from Scientific import N
 
-try:
-    import threading
-    if not hasattr(threading, 'Thread'):
-        threading = None
-except ImportError:
-    threading = None
-
-#
-# Thread subclass
-#
-if threading:
-
-    class MDThread(threading.Thread):
-
-        def __init__(self, universe, target, args):
-            threading.Thread.__init__(self, group = None,
-                                      name = 'Molecular Dynamics integration',
-                                      target = target,
-                                      args = args)
-            self.universe = universe
-            self.function = (target, args)
-            self.start()
-            ThreadManager.registerThread(self)
-
-        def run(self):
-            self.universe.acquireConfigurationChangeLock()
-            apply(apply, self.function)
-            self.universe.releaseConfigurationChangeLock()
-            
 #
 # Integrator base class
 #
@@ -52,7 +23,7 @@ class Integrator(Trajectory.TrajectoryGenerator):
         Trajectory.TrajectoryGenerator.__init__(self, universe, options)
 
     default_options = {'first_step': 0, 'steps': 100, 'delta_t': 1.*Units.fs,
-                       'background': 0, 'threads': None,
+                       'background': False, 'threads': None,
                        'mpi_communicator': None, 'actions': []}
 
     available_data = ['configuration', 'velocities', 'gradients',
@@ -190,12 +161,7 @@ class VelocityVerletIntegrator(Integrator):
                 self.getOption('steps'), self.getActions(),
                 type + ' dynamics trajectory with ' +
                 self.optionString(['delta_t', 'steps']))
-        if self.getOption('background'):
-            if not threading:
-                raise OSError("background processing not available")
-            return MDThread(self.universe, MMTK_dynamics.integrateVV, args)
-        else:
-            apply(MMTK_dynamics.integrateVV, args)
+        return self.run(MMTK_dynamics.integrateVV, args)
 
 #
 # Velocity scaling, removal of global translation/rotation
