@@ -1,7 +1,7 @@
 # This module implements classes for peptide chains and proteins.
 #
 # Written by Konrad Hinsen
-# last revision: 2009-5-19
+# last revision: 2010-7-23
 #
 
 """
@@ -441,10 +441,9 @@ class PeptideChain(Biopolymers.ResidueChain):
                                           cys_ss2.sidechain.S_gamma)))
 
     def _descriptionSpec(self):
-        kwargs = ''
-        for name, value in self.version_spec.items():
-            kwargs = kwargs + name + '=' + `value` + ','
-        return "S", kwargs[:-1]
+        kwargs = ','.join([name + '=' + `self.version_spec[name]`
+                           for name in sorted(self.version_spec.keys())])
+	return "S", kwargs
 
     def _typeName(self):
         return ''.join(self.sequence())

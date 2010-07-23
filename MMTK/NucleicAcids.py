@@ -1,7 +1,7 @@
 # This module implements classes for nucleotide chains.
 #
 # Written by Konrad Hinsen
-# last revision: 2009-1-29
+# last revision: 2010-7-23
 #
 
 """
@@ -215,8 +215,8 @@ class NucleotideChain(Biopolymers.ResidueChain):
 	return Collections.Collection([r.base for r in self.groups])
 
     def _descriptionSpec(self):
-        kwargs = ','.join([name + '=' + `value`
-                           for name, value in self.version_spec.items()])
+        kwargs = ','.join([name + '=' + `self.version_spec[name]`
+                           for name in sorted(self.version_spec.keys())])
 	return "N", kwargs
 
     def _typeName(self):
