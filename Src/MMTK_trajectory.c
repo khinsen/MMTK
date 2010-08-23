@@ -2,7 +2,7 @@
  * Trajectory objects using netCDF files.
  *
  * Written by Konrad Hinsen
- * last revision: 2010-7-21
+ * last revision: 2010-8-23
  */
 
 #define _TRAJECTORY_MODULE
@@ -1198,17 +1198,21 @@ get_spec(PyObject *universe, PyObject *spec,
     output->variables = (PyObject **)malloc(nvar*sizeof(PyObject *));
     if (output->variables == NULL)
       return -1;
-    trajectory = (PyTrajectoryObject *)output->destination;
-    while (!PyTrajectory_Check(output->destination)) {
-      output->destination = PyObject_GetAttrString(output->destination,
-						   "trajectory");
+    if (PyTrajectory_Check(output->destination)) {
       trajectory = (PyTrajectoryObject *)output->destination;
-      if (output->destination == NULL) {
-	PyErr_SetString(PyExc_TypeError, "not a trajectory");
-	return -1;
+      Py_INCREF(output->destination);
+    }
+    else {
+      while (!PyTrajectory_Check(output->destination)) {
+	output->destination = PyObject_GetAttrString(output->destination,
+						     "trajectory");
+	trajectory = (PyTrajectoryObject *)output->destination;
+	if (output->destination == NULL) {
+	  PyErr_SetString(PyExc_TypeError, "not a trajectory");
+	  return -1;
+	}
       }
     }
-    Py_INCREF(output->destination);
     if (!PyTrajectory_Check(output->destination)) {
       PyErr_SetString(PyExc_TypeError, "not a trajectory");
       Py_DECREF(output->destination);
