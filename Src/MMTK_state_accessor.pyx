@@ -2,7 +2,7 @@
 # any trajectory generator
 #
 # Written by Konrad Hinsen
-# last revision: 2010-1-22
+# last revision: 2010-8-24
 #
 
 include 'MMTK/trajectory.pxi'
@@ -59,9 +59,7 @@ cdef class StateAccessor(MMTK_trajectory_action.TrajectoryAction):
             dtype = dynamic_data.type
             if name == 'configuration':
                 state[name] = MMTK.copy(self.universe.configuration())
-            elif name == 'box_size':
-                continue
-            else:
+            elif name != 'box_size':
                 if dtype == PyTrajectory_Scalar:
                     state[name] = dynamic_data.value.dp[0]
                 elif dtype == PyTrajectory_IntScalar:
@@ -80,9 +78,9 @@ cdef class StateAccessor(MMTK_trajectory_action.TrajectoryAction):
     
     cdef int initialize(self, object universe, long generator_id,
                         PyTrajectoryVariable *dynamic_data):
-        self.generator_id = generator_id
         self.universe = universe
         self.dynamic_data = dynamic_data
+        self.generator_id = generator_id
         return 1
 
     cdef int finalize(self, object universe, long generator_id,
