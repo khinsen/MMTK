@@ -1,7 +1,7 @@
 /* Low-level force field calculations: bonded interactions
  *
  * Written by Konrad Hinsen
- * last revision: 2009-4-22
+ * last revision: 2010-9-2
  */
 
 #define NO_IMPORT
@@ -55,7 +55,7 @@ harmonic_bond_evaluator(PyFFEnergyTermObject *self,
     e += param[1]*sqr(dr);
     v += -2.*param[1]*dr*lrij;
     if (energy->gradients != NULL) {
-      double deriv = 2.*param[1]*dr/lrij;
+      double deriv = (lrij == 0.) ? 0. : 2.*param[1]*dr/lrij;
       vector3 grad;
       grad[0] = deriv*rij[0];
       grad[1] = deriv*rij[1];
