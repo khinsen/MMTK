@@ -57,6 +57,21 @@ class DistanceConstraintsFeatureClass(Feature):
 DistanceConstraintsFeature = DistanceConstraintsFeatureClass()
 
 #
+# Path Integrals feature
+#
+class PathIntegralsFeatureClass(Feature):
+
+    def isInUniverse(self, universe):
+        for o in universe._environment:
+            if o.__class__ is Environment.PathIntegrals:
+                return True
+        return False
+
+    description = 'Path Integrals'
+
+PathIntegralsFeature = PathIntegralsFeatureClass()
+
+#
 # Nose thermostat feature
 #
 class NoseThermostatFeatureClass(Feature):
