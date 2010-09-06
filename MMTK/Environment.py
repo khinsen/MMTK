@@ -1,7 +1,7 @@
 # This module defines environment objects for universes.
 #
 # Written by Konrad Hinsen
-# last revision: 2009-2-5
+# last revision: 2010-9-6
 #
 
 """
@@ -14,6 +14,7 @@ fields, etc.
 
 __docformat__ = 'epytext'
 
+import MMTK.Units
 from Scientific import N
 
 #
@@ -104,4 +105,35 @@ class AndersenBarostat(EnvironmentObject):
     def checkCompatibilityWith(self, other):
         if other.__class__ is AndersenBarostat:
             raise ValueError("the universe already has a barostat")
+
+#
+# Path Integrals class
+#
+class PathIntegrals(EnvironmentObject):
+
+    """
+    Path Integral Molecular Dynamics Constants
+
+    This object stores the reciprocal temperature, beta,
+    as well as the number of beads in the system
+    """
+
+    def __init__(self, temperature):
+        """
+        @param temperature: the temperature used for path integral interactions
+        @type temperature: C{float}
+        """
+        self.arguments = (temperature,)
+        self.parameters = N.array([temperature])
+        self.coordinates = N.array([0.,0.])
+        self.beta = 1./(MMTK.Units.k_B*temperature)
+
+    def setTemperature(self, temperature):
+        self.parameters[0] = temperature
+        self.beta = 1./(MMTK.Units.k_B*temperature)
+
+    def checkCompatibilityWith(self, other):
+        if other.__class__ is PathIntegrals:
+            raise ValueError("the universe already has a "
+                             "path integral environment")
 
