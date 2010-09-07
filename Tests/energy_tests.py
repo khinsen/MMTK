@@ -1,15 +1,17 @@
 # Energy tests
 #
 # Written by Konrad Hinsen
-# last revision: 2008-10-30
+# last revision: 2010-9-7
 #
 
 import unittest
+from subsets import SubsetTest
 from MMTK import *
 from MMTK.MoleculeFactory import MoleculeFactory
-from MMTK.ForceFields import Amber99ForceField
+from MMTK.ForceFields import Amber99ForceField, LennardJonesForceField
 from MMTK_forcefield import NonbondedList
 from MMTK.Random import randomPointInBox
+from MMTK.Geometry import SCLattice
 from MMTK.Utility import pairs
 from Scientific.Geometry import ex, ey, ez
 from Scientific import N
@@ -211,7 +213,18 @@ class ParallelepipedicUniverseNonbondedListTest(unittest.TestCase,
             p = self.universe.boxToRealCoordinates(randomPointInBox(1.))
             self.universe.addObject(Atom('C', position = p))
 
+class LennardJonesSubsetTest(unittest.TestCase,
+                             SubsetTest):
 
+    def setUp(self):
+        self.universe = OrthorhombicPeriodicUniverse((2., 2., 2.),
+                                                     LennardJonesForceField())
+        for point in SCLattice(0.5, 4):
+            self.universe.addObject(Atom('Ar', position=point))
+        self.subset1 = Collection(self.universe.atomList()[:10])
+        self.subset2 = Collection(self.universe.atomList()[20:30])
+
+            
 def suite():
     loader = unittest.TestLoader()
     s = unittest.TestSuite()
@@ -219,6 +232,7 @@ def suite():
     s.addTest(loader.loadTestsFromTestCase(InfiniteUniverseNonbondedListTest))
     s.addTest(loader.loadTestsFromTestCase(OrthorhombicUniverseNonbondedListTest))
     s.addTest(loader.loadTestsFromTestCase(ParallelepipedicUniverseNonbondedListTest))
+    s.addTest(loader.loadTestsFromTestCase(LennardJonesSubsetTest))
     return s
 
 
