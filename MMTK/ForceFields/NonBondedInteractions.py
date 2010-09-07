@@ -2,7 +2,7 @@
 # for non-bonded interactions
 #
 # Written by Konrad Hinsen
-# last revision: 2009-12-9
+# last revision: 2010-9-7
 #
 
 from MMTK import Units, Utility
@@ -29,37 +29,21 @@ class NonBondedForceField(ForceField):
 
     def excludedPairs(self, subset1, subset2, global_data):
         if 'excluded_pairs' not in global_data.get('initialized'):
-            excluded_pairs = global_data.get('excluded_pairs')
+            excluded_pairs = set(global_data.get('excluded_pairs'))
             if subset1 is not None:
-                for s1, s2 in [(subset1, subset2), (subset2, subset1)]:
-                    set = {}
-                    for a in s1.atomList():
-                        set[a.index] = None
-                    for a in s2.atomList():
-                        try:
-                            del set[a.index]
-                        except KeyError: pass
-                    excluded_pairs.extend(Utility.pairs(set.keys()))
-                set = {}
-                for a in subset1.atomList():
-                    set[a.index] = None
-                for a in subset2.atomList():
-                    set[a.index] = None
-                atom_subset = set.keys()
+                set1 = set(a.index for a in subset1.atomList())
+                set2 = set(a.index for a in subset2.atomList())
+                excluded_pairs |= Utility.orderedPairs(list(set1-set2))
+                excluded_pairs |= Utility.orderedPairs(list(set2-set1))
+                atom_subset = list(set1 | set2)
                 atom_subset.sort()
             else:
                 atom_subset = None
             global_data.set('atom_subset', atom_subset)
-            excluded_pairs = map(_normalizePair, excluded_pairs)
-            excluded_pairs.sort(_cmpPair)
-            _makeUnique(excluded_pairs)
-            global_data.set('excluded_pairs', excluded_pairs)
-            one_four_pairs = map(_normalizePair,
-                                 global_data.get('1_4_pairs'))
-            one_four_pairs.sort(_cmpPair)
-            _makeUnique(one_four_pairs)
-            _eliminateExcluded(one_four_pairs, excluded_pairs)
-            global_data.set('1_4_pairs', one_four_pairs)
+            global_data.set('excluded_pairs', list(excluded_pairs))
+            one_four_pairs = set(global_data.get('1_4_pairs')) \
+                               - excluded_pairs
+            global_data.set('1_4_pairs', list(one_four_pairs))
             global_data.add('initialized', 'excluded_pairs')
         return global_data.get('excluded_pairs'), \
                global_data.get('1_4_pairs'), \
@@ -180,43 +164,6 @@ class LJForceField(NonBondedForceField):
         raise AttributeError
     def _ljParameters(self, t, global_data):
         raise AttributeError
-
-def _normalizePair(pair):
-    i, j = pair
-    if i > j:
-        return j, i
-    else:
-        return i, j
-
-def _cmpPair(p1, p2):
-    cmp0 = cmp(p1[0], p2[0])
-    if cmp0:
-        return cmp0
-    return cmp(p1[1], p2[1])
-
-def _makeUnique(pair_list):
-    i = 0
-    while i < len(pair_list):
-        item = pair_list[i]
-        j = i + 1
-        while j < len(pair_list) and pair_list[j] == item:
-            del pair_list[j]
-        i = i + 1
-
-def _eliminateExcluded(one_four_list, excluded_list):
-    i = 0
-    j = 0
-    n = len(excluded_list)
-    while i < len(one_four_list):
-        item = one_four_list[i]
-        while j < n and item > excluded_list[j]:
-            j = j + 1
-        if j == n:
-            break
-        if item == excluded_list[j]:
-            del one_four_list[i]
-        else:
-            i = i + 1
 
 #
 # Electrostatic force field

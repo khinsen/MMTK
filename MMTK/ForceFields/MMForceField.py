@@ -21,7 +21,7 @@
 # modifications to this module.
 #
 # Written by Konrad Hinsen
-# last revision: 2009-5-13
+# last revision: 2010-9-7
 #
 
 from MMTK.ForceFields.BondedInteractions import BondedForceField
@@ -30,7 +30,7 @@ from MMTK.ForceFields.NonBondedInteractions import \
      ESMPForceField, ESEwaldForceField
 from MMTK.ForceFields.ForceField import ForceField, CompoundForceField, \
                                         ForceFieldData
-from MMTK import ParticleProperties
+from MMTK import ParticleProperties, Utility
 from Scientific.Geometry import Vector
 import copy
 
@@ -129,7 +129,7 @@ class MMBondedForceField(MMAtomParameters, BondedForceField):
         i2 = a2.index
         i3 = a3.index
         i4 = a4.index
-        global_data.add('1_4_pairs', (i1, i4))
+        global_data.add('1_4_pairs', Utility.normalizePair((i1, i4)))
         t1 = global_data.atom_type[a1]
         t2 = global_data.atom_type[a2]
         t3 = global_data.atom_type[a3]
