@@ -105,13 +105,39 @@ def uniqueAttribute():
     return '_' + `_unique_attributes` + '__'
 
 #
-# Return an iterator over all pairs of objects in a given list
+# Ensure that items in a pair are ordered
 #
-def pairs(list):
-    n = len(list)
+def normalizePair(pair):
+    i, j = pair
+    if i > j:
+        return j, i
+    else:
+        return i, j
+
+#
+# Return an iterator over all pairs of objects in a given sequence
+#
+def pairs(seq):
+    n = len(seq)
     for i in range(n):
+        a = seq[i]
         for j in range(i+1, n):
-            yield (list[i], list[j])
+            b = seq[j]
+            yield (a, b)
+
+#
+# Return an iterator over all ordered pairs of objects in a given sequence
+#
+def orderedPairs(seq):
+    n = len(seq)
+    for i in range(n):
+        a = seq[i]
+        for j in range(i+1, n):
+            b = seq[j]
+            if a > b:
+                yield (b, a)
+            else:
+                yield (a, b)
 
 #
 # Type check for sequence objects
