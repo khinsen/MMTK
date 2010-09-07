@@ -1,7 +1,7 @@
 # Deformation force field
 #
 # Written by Konrad Hinsen
-# last revision: 2009-5-13
+# last revision: 2010-9-7
 #
 
 """
@@ -12,6 +12,7 @@ For proteins, CalphaForceField is usually a better choice.
 __docformat__ = 'epytext'
 
 from MMTK.ForceFields.ForceField import ForceField, ForceFieldData
+from MMTK import Utility
 from MMTK_forcefield import NonbondedList, NonbondedListTerm
 from MMTK_deformation import DeformationTerm
 from Scientific import N
@@ -57,29 +58,25 @@ class DeformationForceField(ForceField):
         return True
 
     def evaluatorTerms(self, universe, subset1, subset2, global_data):
+        nothing = N.zeros((0, 2), N.Int)
         if subset1 is not None:
-            for s1, s2 in [(subset1, subset2), (subset2, subset1)]:
-                set = {}
-                for a in s1.atomList():
-                    set[a.index] = None
-                for a in s2.atomList():
-                    try:
-                        del set[a.index]
-                    except KeyError: pass
-            set = {}
-            for a in subset1.atomList():
-                set[a.index] = None
-            for a in subset2.atomList():
-                set[a.index] = None
-            atom_subset = set.keys()
+            set1 = set(a.index for a in subset1.atomList())
+            set2 = set(a.index for a in subset2.atomList())
+            excluded_pairs = set(Utility.orderedPairs(list(set1-set2))) \
+                             | set(Utility.orderedPairs(list(set2-set1)))
+            excluded_pairs = N.array(list(excluded_pairs))
+            atom_subset = list(set1 | set2)
             atom_subset.sort()
             atom_subset = N.array(atom_subset)
         else:
             atom_subset = N.array([], N.Int)
-        nothing = N.zeros((0,2), N.Int)
-        nbl = NonbondedList(nothing, nothing, atom_subset, universe._spec,
+            excluded_pairs = nothing
+        nbl = NonbondedList(excluded_pairs, nothing, atom_subset, universe._spec,
                             self.cutoff)
         update = NonbondedListTerm(nbl)
+        cutoff = self.cutoff
+        if cutoff is None:
+            cutoff = 0.
         ev = DeformationTerm(universe._spec, nbl, self.fc_length,
                              self.cutoff, self.factor, 1.)
         return [update, ev]
