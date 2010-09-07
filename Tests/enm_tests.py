@@ -47,9 +47,9 @@ class ANMFFSubsetTest(unittest.TestCase,
 def suite():
     loader = unittest.TestLoader()
     s = unittest.TestSuite()
-    s.addTest(loader.loadTestsFromTestCase(CalphaSubsetTest))
-    s.addTest(loader.loadTestsFromTestCase(DeformationSubsetTest))
-    s.addTest(loader.loadTestsFromTestCase(ANMSubsetTest))
+    s.addTest(loader.loadTestsFromTestCase(CalphaFFSubsetTest))
+    s.addTest(loader.loadTestsFromTestCase(DeformationFFSubsetTest))
+    s.addTest(loader.loadTestsFromTestCase(ANMFFSubsetTest))
     return s
 
 
