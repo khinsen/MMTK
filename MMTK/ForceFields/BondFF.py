@@ -1,7 +1,7 @@
 # Detailed harmonic force field for proteins
 #
 # Written by Konrad Hinsen
-# last revision: 2009-5-13
+# last revision: 2010-9-7
 #
 
 """
@@ -14,6 +14,7 @@ from MMTK.ForceFields.NonBondedInteractions import NonBondedForceField
 from MMTK.ForceFields.Amber.AmberForceField import AmberBondedForceField
 from MMTK.ForceFields.MMForceField import MMAtomParameters
 from MMTK.ForceFields.ForceField import ForceField, CompoundForceField
+from MMTK import Utility
 from MMTK_deformation import DeformationTerm
 from Scientific.Geometry import Transformation
 from Scientific import N
@@ -78,7 +79,7 @@ class BondForceField(AmberBondedForceField):
         i2 = a2.index
         i3 = a3.index
         i4 = a4.index
-        global_data.add('1_4_pairs', (i1, i4))
+        global_data.add('1_4_pairs', Utility.normalizePair((i1, i4)))
         t1 = global_data.atom_type[a1]
         t2 = global_data.atom_type[a2]
         t3 = global_data.atom_type[a3]
