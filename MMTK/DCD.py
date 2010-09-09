@@ -2,7 +2,7 @@
 #
 # Written by Lutz Ehrlich
 # Adapted to MMTK conventions by Konrad Hinsen
-# last revision: 2009-1-16
+# last revision: 2010-9-9
 
 
 """
@@ -73,9 +73,9 @@ class DCDReader(Trajectory.TrajectoryGenerator):
 def writeDCD(vector_list, dcd_file_name, factor, atom_order=None,
              delta_t=0.1, conf_flag=1):
     universe = vector_list[0].universe
-    natoms = universe.numberOfPoints()
+    npoints = universe.numberOfPoints()
     if atom_order is None:
-        atom_order = N.arrayrange(natoms)
+        atom_order = N.arrayrange(npoints)
     else:
         atom_order = N.array(atom_order)
 
@@ -120,7 +120,11 @@ def writeDCDPDB(conf_list, dcd_file_name, pdb_file_name, delta_t=0.1):
     """
     universe = conf_list[0].universe
     sequence = writePDB(universe, conf_list[0], pdb_file_name)
-    indices = map(lambda a: a.index, sequence)
+    # For now, write the first bead of each atom:
+    indices = [a.index for a in sequence]
+    # For writing all beads, this should be:
+    # indices = sum((range(a.index, a.index+a.nbeads) for a in sequence), [])
+    # but this requires a change in PDB output.
     writeDCD(conf_list, dcd_file_name, 1./Units.Ang, indices, delta_t, 1)
 
 
@@ -140,6 +144,10 @@ def writeVelocityDCDPDB(vel_list, dcd_file_name, pdb_file_name, delta_t=0.1):
     """
     universe = vel_list[0].universe
     sequence = writePDB(universe, universe.configuration(), pdb_file_name)
-    indices = map(lambda a: a.index, sequence)
+    # For now, write the first bead of each atom:
+    indices = [a.index for a in sequence]
+    # For writing all beads, this should be:
+    # indices = sum((range(a.index, a.index+a.nbeads) for a in sequence), [])
+    # but this requires a change in PDB output.
     writeDCD(vel_list, dcd_file_name, 1./(Units.Ang/Units.akma_time),
              indices, delta_t, 0)

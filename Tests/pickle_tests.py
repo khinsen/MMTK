@@ -1,7 +1,7 @@
 # Pickle tests
 #
 # Written by Konrad Hinsen
-# last revision: 2008-10-29
+# last revision: 2010-9-9
 #
 
 import unittest
@@ -84,12 +84,33 @@ class WaterTest(unittest.TestCase):
         restored_molecule = MMTK.load('test.pickle')
         self.assertEqual(restored_molecule.type, self.universe.water1.type)
 
+class PathIntegralTest(unittest.TestCase):
 
+    """
+    Test pickling a water molecule with path integrals
+    """
+
+    def setUp(self):
+        self.universe = MMTK.InfiniteUniverse(Amber99ForceField())
+        self.universe.water = MMTK.Molecule('water',
+                                            position=MMTK.Vector(0.,0.,0.))
+        self.universe.water.H1.setNBeads(8)
+        self.universe.water.H2.setNBeads(8)
+
+    def test_pickle(self):
+        MMTK.save(self.universe, 'test.pickle')
+        restored_universe = MMTK.load('test.pickle')
+        self.assertEqual(restored_universe.numberOfPoints(), 17)
+        self.assertEqual(restored_universe.water.H1.nBeads(), 8)
+        self.assertEqual(restored_universe.water.H2.nBeads(), 8)
+        self.assertEqual(restored_universe.water.O.nBeads(), 1)
+        
 def suite():
     loader = unittest.TestLoader()
     s = unittest.TestSuite()
     s.addTest(loader.loadTestsFromTestCase(PeptideTest))
     s.addTest(loader.loadTestsFromTestCase(WaterTest))
+    s.addTest(loader.loadTestsFromTestCase(PathIntegralTest))
     return s
 
 

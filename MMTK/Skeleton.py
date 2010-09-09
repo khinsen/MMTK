@@ -1,7 +1,7 @@
 # This module handles the skeleton descriptions stored in trajectory files.
 #
 # Written by Konrad Hinsen
-# last revision: 2009-7-10
+# last revision: 2010-9-9
 #
 
 import MMTK
@@ -18,17 +18,21 @@ class A:
         self.name = name
         self.index = index
         self.type = type
+        if isinstance(self.index, tuple):
+            self.index, self.nbeads = self.index
+        else:
+            self.nbeads = 1
 
     def make(self, info, conf = None):
-        atom =  MMTK.Atom(self.type, name = self.name)
+        atom = MMTK.Atom(self.type, name = self.name, nbeads = self.nbeads)
         self.assignIndex(atom, info, conf)
         return atom
 
     def assignIndex(self, atom, info, conf):
-        atom.setIndex(self.index)
         info[self.index] = atom
         if conf is not None and self.index is not None:
-            atom.setPosition(MMTK.Vector(conf[self.index]))
+            atom.setBeadPositions([MMTK.Vector(conf[i])
+                                   for i in range(self.index, self.index+self.nbeads)])
 
 #
 # Composite chemical objects

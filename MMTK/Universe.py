@@ -4,7 +4,7 @@
 # (boundary conditions, external fields, etc.)
 #
 # Written by Konrad Hinsen
-# last revision: 2010-2-11
+# last revision: 2010-9-9
 #
 
 """
@@ -18,7 +18,7 @@ from MMTK import Bonds, ChemicalObjects, Collections, Environment, \
 from Scientific.Geometry import Transformation
 from Scientific.Geometry import Vector, isVector
 from Scientific import N
-import copy
+import copy, operator
 
 try:
     import threading
@@ -405,33 +405,42 @@ class Universe(Collections.GroupOfAtoms, Visualization.Viewable):
         @rtype: L{MMTK.ParticleProperties.Configuration}
         """
         if self._configuration is None:
-            np = self.numberOfAtoms()
+            np = self.numberOfPoints()
+            na = self.numberOfAtoms()
             coordinates = N.zeros((np, 3), N.Float)
-            index_map = {}
-            redef = []
-            for a in self.atomList():
-                if a.index is None or a.index >= np:
-                    redef.append(a)
-                else:
-                    if index_map.get(a.index, None) is None:
-                        index_map[a.index] = a
-                    else:
+            if na == np:
+                index_map = {}
+                redef = []
+                for a in self.atomList():
+                    if a.index is None or a.index >= np:
                         redef.append(a)
-            free_indices = [i for i in xrange(np)
-                            if index_map.get(i, None) is None]
-            assert len(free_indices) == len(redef)
-            for a, i in zip(redef, free_indices):
-                a.index = i
+                    else:
+                        if index_map.get(a.index, None) is None:
+                            index_map[a.index] = a
+                        else:
+                            redef.append(a)
+                free_indices = [i for i in xrange(np)
+                                if index_map.get(i, None) is None]
+                assert len(free_indices) == len(redef)
+                for a, i in zip(redef, free_indices):
+                    a.index = i
+            else:
+                i = 0
+                for a in self.atomList():
+                    a.index = i
+                    i += a.nbeads
+                assert i == np
             # At this point a.index runs from 0 to np-1 in the universe.
             for a in self.atomList():
                 if a.array is None:
                     try:
-                        coordinates[a.index, :] = a.pos.array
+                        for i in range(a.nbeads):
+                            coordinates[a.index+i, :] = a.pos[i].array
                         del a.pos
                     except AttributeError:
-                        coordinates[a.index, :] = Utility.undefined
+                        coordinates[a.index:a.index+a.nbeads, :] = Utility.undefined
                 else:
-                    coordinates[a.index, :] = a.array[a.index, :]
+                    coordinates[a.index:a.index+a.nbeads, :] = a.array[a.index:a.index+a.nbeads, :]
                 a.array = coordinates
             # Define configuration object.
             self._configuration = 1 # a hack to prevent endless recursion
@@ -520,7 +529,7 @@ class Universe(Collections.GroupOfAtoms, Visualization.Viewable):
         conf = self.configuration()
         array = N.zeros((len(conf),), datatype)
         for a in self.atomList():
-            array[a.index] = getattr(a, name)
+            array[a.index:a.index+a.nbeads] = getattr(a, name)
         return ParticleProperties.ParticleScalar(self, array)
     getAtomScalarArray = getParticleScalar
 
@@ -537,8 +546,10 @@ class Universe(Collections.GroupOfAtoms, Visualization.Viewable):
         array = N.zeros((len(conf),), N.Int)
         for a in self.atomList():
             try:
-                array[a.index] = getattr(a, name)
-            except AttributeError: pass
+                v = getattr(a, name)
+            except AttributeError:
+                v = 0
+            array[a.index:a.index+a.nbeads] = v
         return ParticleProperties.ParticleScalar(self, array)
     getAtomBooleanArray = getParticleBoolean
 
@@ -1341,11 +1352,18 @@ class Periodic3DUniverse(Universe):
                 else:
                     raise ValueError(str(o) + " not a chemical object")
                 for bu in units:
-                    atoms = [a.index for a in bu.atomsWithDefinedPositions()]
-                    mpairs = bu.traverseBondTree(lambda a: a.index)
-                    mpairs = [(a1, a2) for (a1, a2) in mpairs
-                              if a1 in atoms and a2 in atoms]
-                    if len(mpairs) == 0:
+                    atoms = bu.atomsWithDefinedPositions()
+                    mpairs = []
+                    for (a1, a2) in bu.traverseBondTree():
+                        if a1 in atoms and a2 in atoms:
+                            i1 = range(a1.index, a1.index+a1.nbeads)
+                            i2 = range(a2.index, a2.index+a2.nbeads)
+                            mpairs.append((i1[0], i2[0]))
+                            for i in range(1, len(i1)):
+                                mpairs.append((i1[i-1], i1[i]))
+                            for i in range(1, len(i2)):
+                                mpairs.append((i2[i-1], i2[i]))
+                    if len(mpairs) == 0: # AtomCluster
                         mpairs = Utility.pairs(atoms)
                     new_object = False
                     pairs.extend(mpairs)

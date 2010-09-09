@@ -2,7 +2,7 @@
 # complexes. They are made as copies from blueprints in the database.
 #
 # Written by Konrad Hinsen
-# last revision: 2009-12-7
+# last revision: 2010-9-9
 #
 
 """
@@ -521,6 +521,9 @@ class Atom(ChemicalObject):
         self._mass = self.type.average_mass
         self.array = None
         self.index = None
+        if properties.has_key('nbeads'):
+            self.setNBeads(properties['nbeads'])
+            del properties['nbeads']
         if properties.has_key('position'):
             self.setPosition(properties['position'])
             del properties['position']
@@ -528,11 +531,14 @@ class Atom(ChemicalObject):
 
     blueprintclass = Database.BlueprintAtom
 
+    nbeads = 1
+
     def __getstate__(self):
         state = copy.copy(self.__dict__)
         if self.array is not None:
             state['array'] = None
-            state['pos'] = Vector(self.array[self.index,:])
+            state['index'] = None
+            state['pos'] = self.beadPositions()
         return state
 
     def atomList(self):
@@ -549,16 +555,12 @@ class Atom(ChemicalObject):
                 try: del self.pos
                 except AttributeError: pass
             else:
-                self.array[self.index,0] = Utility.undefined
-                self.array[self.index,1] = Utility.undefined
-                self.array[self.index,2] = Utility.undefined
+                self.array[self.index:self.index+self.nbeads, :] = Utility.undefined
         else:
             if self.array is None:
-                self.pos = position
+                self.pos = self.nbeads*[position]
             else:
-                self.array[self.index,0] = position[0]
-                self.array[self.index,1] = position[1]
-                self.array[self.index,2] = position[2]
+                self.array[self.index:self.index+self.nbeads, :] = position.array
 
     translateTo = setPosition
 
@@ -568,23 +570,55 @@ class Atom(ChemicalObject):
                   'None', use the current configuration. If the atom has
                   not been assigned a position, the return value is C{None}.
         """
-        if conf is None:
-            if self.array is None:
-                try:
-                    return self.pos
-                except AttributeError:
-                    return None
-            else:
-                if N.logical_or.reduce(
-                    N.greater(self.array[self.index, :],
-                              Utility.undefined_limit)):
-                    return None
+        if self.array is None:
+            assert conf is None
+            try:
+                if self.nbeads == 1:
+                    return self.pos[0]
                 else:
-                    return Vector(self.array[self.index,:])
+                    return sum(self.pos, Vector(0., 0., 0.))/self.nbeads
+            except AttributeError:
+                return None
+
+        if conf is None:
+            array = self.array
         else:
-            return conf[self]
+            array = conf.array
+        if (array[self.index:self.index+self.nbeads, :] > Utility.undefined_limit).any():
+            return None
+        if self.nbeads == 1:
+            return Vector(array[self.index, :])
+        else:
+            return sum((Vector(array[self.index+i,:]) for i in range(self.nbeads)),
+                       Vector(0., 0., 0.))/self.nbeads
 
     centerOfMass = position
+
+    def beadPositions(self):
+        """
+        @returns: the positions of all beads of this atom
+        @rtype: C{list}
+        """
+        if self.array is None:
+            try:
+                return self.pos
+            except AttributeError:
+                return self.nbeads*[None]
+        else:
+            return [Vector(self.array[self.index+i,:]) for i in range(self.nbeads)]
+
+    def setBeadPositions(self, bead_positions):
+        """
+        @param bead_positions: positions for all beads of the atom
+        @type bead_positions: C{list}
+        """
+        assert len(bead_positions) == self.nbeads
+        if self.array is None:
+            self.pos = bead_positions
+        else:
+            assert len(bead_positions) == self.nbeads
+            for i, p in enumerate(bead_positions):
+                self.array[self.index+i,:] = p.array
 
     def setMass(self, mass):
         """
@@ -594,21 +628,35 @@ class Atom(ChemicalObject):
         """
         self._mass = mass
 
+    def nBeads(self):
+        """
+        @returns: the number of beads
+        @rtype: C{int}
+        """
+        return self.nbeads
+
+    def setNBeads(self, nbeads):
+        """
+        @param nbeads: the number of beads
+        @type nbeads: C{int}
+        """
+        if nbeads != self.nbeads:
+            self.unsetArray()
+            p = self.position()
+            self.nbeads = nbeads
+            self.setPosition(p)
+
     def getAtom(self, atom):
         return self
 
     def translateBy(self, vector):
         if self.array is None:
-            self.pos = self.pos + vector
+            self.pos = [p + vector for p in self.pos]
         else:
-            self.array[self.index,0] = self.array[self.index,0] + vector[0]
-            self.array[self.index,1] = self.array[self.index,1] + vector[1]
-            self.array[self.index,2] = self.array[self.index,2] + vector[2]
+            self.array[self.index:self.index+self.nbeads, :] += vector.array[N.NewAxis, :]
 
-    def numberOfPoints(self):
-        return 1
-
-    numberOfCartesianCoordinates = numberOfPoints
+    numberOfPoints = nBeads
+    numberOfCartesianCoordinates = nBeads
 
     def setIndex(self, index):
         if self.index is not None and self.index != index:
@@ -623,7 +671,7 @@ class Atom(ChemicalObject):
         return self.array
 
     def unsetArray(self):
-        self.pos = self.position()
+        self.pos = self.beadPositions()
         self.array = None
 
     def setBondAttribute(self, atom):
@@ -666,19 +714,26 @@ class Atom(ChemicalObject):
             index = self.index
         else:
             index = index_map[self.index]
-        if toplevel:
-            return 'A(' + `self.name` + ',' + `index` + ',' + \
-                   `self.symbol` + ')'
+        if self.nbeads == 1:
+            if toplevel:
+                return 'A(' + `self.name` + ',' + `index` + ',' + \
+                       `self.symbol` + ')'
+            else:
+                return 'A(' + `self.name` + ',' + `index` + ')'
         else:
-            return 'A(' + `self.name` + ',' + `index` + ')'
+            if toplevel:
+                return 'A(' + `self.name` + ',' + `(index, self.nbeads)` + ',' + \
+                       `self.symbol` + ')'
+            else:
+                return 'A(' + `self.name` + ',' + `(index, self.nbeads)` + ')'
 
     def _graphics(self, conf, distance_fn, model, module, options):
-        #PJC change:
         if model == 'ball_and_stick':
             color = self._atomColor(self, options)
             material = module.DiffuseMaterial(color)
             radius = options.get('ball_radius', 0.03)
-            return [module.Sphere(self.position(), radius, material=material)]
+            return [module.Sphere(p, radius, material=material)
+                    for p in self.beadPositions()]
         elif model == 'vdw' or model == 'vdw_and_stick':
             color = self._atomColor(self, options)
             material = module.DiffuseMaterial(color)
@@ -686,16 +741,10 @@ class Atom(ChemicalObject):
                 radius = self.vdW_radius
             except:
                 radius = options.get('ball_radius', 0.03)
-            return [module.Sphere(self.position(), radius, material=material)]
+            return [module.Sphere(p, radius, material=material)
+                    for p in self.beadPositions()]
         else:
             return []
-
-        if model != 'ball_and_stick':
-            return []
-        color = self._atomColor(self, options)
-        material = module.DiffuseMaterial(color)
-        radius = options.get('ball_radius', 0.03)
-        return [module.Sphere(self.position(), radius, material=material)]
 
     def writeXML(self, file, memo, toplevel=1):
         return ['<atom title="%s" elementType="%s"/>'

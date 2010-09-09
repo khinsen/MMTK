@@ -2,7 +2,7 @@
 # and a visualization base class
 #
 # Written by Konrad Hinsen
-# last revision: 2009-5-12
+# last revision: 2010-9-9
 #
 
 """
@@ -454,7 +454,11 @@ def viewSequenceVMD(object, conf_list, periodic = 0, label=None):
         dcdfile_tcl = dcdfile.replace('\\', '\\\\')
         tempfile.tempdir = None
         sequence = DCD.writePDB(universe, conf_list[0], pdbfile)
-        indices = map(lambda a: a.index, sequence)
+        # For now, write the first bead of each atom:
+        indices = [a.index for a in sequence]
+        # For writing all beads, this should be:
+        # indices = sum((range(a.index, a.index+a.nbeads) for a in sequence), [])
+        # but this requires a change in PDB output.
         DCD.writeDCD(conf_list[1:], dcdfile, 1./Units.Ang, indices)
         file = open(script, 'w')
         file.write('mol load pdb ' + pdbfile_tcl + '\n')
