@@ -5,10 +5,11 @@
 # last revision: 2010-9-9
 #
 
-from MMTK import ParticleProperties, Universe, Utility
+from MMTK import Environment, ParticleProperties, Units, Universe, Utility
 from Scientific import N
 import copy, itertools, operator
 from MMTK_energy_term import PyEnergyTerm as EnergyTerm
+from MMTK_forcefield import HarmonicDistanceTerm
 
 # Class definitions
 
@@ -216,16 +217,64 @@ class EnergyEvaluator(object):
         self.global_data = ForceFieldData()
         if subset1 is not None and subset2 is None:
             subset2 = subset1
-        terms = self.ff.evaluatorTerms(self.universe,
-                                       subset1, subset2,
-                                       self.global_data)
+
+        pi_atoms = [a for a in self.universe.atomList() if a.nBeads() > 1]
+        if pi_atoms:
+
+            nbead_values = set(a.nBeads() for a in self.universe.atomList())
+            if len(nbead_values) > 1:
+                raise ValueError("number of beads not consistent for all atoms")
+            nbeads = nbead_values.pop()
+
+            terms = []
+            # Ugly hack: modifying a.index is not thread-safe!
+            for a in pi_atoms:
+                a.__index = a.index
+            try:
+                for i in range(nbeads):
+                    terms.extend(self.ff.evaluatorTerms(self.universe,
+                                                        subset1, subset2,
+                                                        self.global_data))
+                    for a in pi_atoms:
+                        a.index += 1
+            finally:
+                for a in pi_atoms:
+                    a.index = a.__index
+                    del a.__index
+
+            pi_environments = self.universe.environmentObjectList(
+                                                Environment.PathIntegrals)
+            if len(pi_environments) == 1:
+                beta = pi_environments[0].beta
+            else:
+                raise ValueError('exactly one path integral environment required')
+            indices = []
+            parameters = []
+            for a in pi_atoms:
+                nb = a.nBeads()
+                k = float(nb*nb*nb)*a.mass() / (beta*beta*Units.hbar*Units.hbar*2.)
+                for b in range(nb):
+                    indices.append([a.index+b, (a.index+b+1) % nb])
+                    parameters.append([0., k])
+                terms.append(HarmonicDistanceTerm(universe._spec,
+                                                  N.array(indices),
+                                                  N.array(parameters),
+                                                  "path_integral_spring"))
+
+        else:
+
+            nbeads = 1
+            terms = self.ff.evaluatorTerms(self.universe,
+                                           subset1, subset2,
+                                           self.global_data)
+
         if not isinstance(terms, list):
             raise ValueError("evaluator term list not a list")
         from MMTK_forcefield import Evaluator
         if threads is None:
             import MMTK.ForceFields
             threads = MMTK.ForceFields.default_energy_threads;
-        self.evaluator = Evaluator(N.array(terms), 1.,
+        self.evaluator = Evaluator(N.array(terms), 1./nbeads,
                                    threads, mpi_communicator)
 
     def checkUniverseVersion(self):
