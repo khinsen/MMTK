@@ -2,7 +2,7 @@
  * Trajectory objects using netCDF files.
  *
  * Written by Konrad Hinsen
- * last revision: 2010-8-23
+ * last revision: 2010-9-9
  */
 
 #define _TRAJECTORY_MODULE
@@ -890,7 +890,7 @@ PyTrajectory_Open(PyObject *universe, PyObject *description,
     PyErr_SetString(PyExc_TypeError, "system description not a string");
     return NULL;
   }
-  n_ob = PyObject_CallMethod((PyObject *)universe, "numberOfAtoms", NULL);
+  n_ob = PyObject_CallMethod((PyObject *)universe, "numberOfPoints", NULL);
   if (n_ob == NULL)
     return NULL;
 

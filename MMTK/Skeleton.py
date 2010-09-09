@@ -22,14 +22,15 @@ class A:
             self.index, self.nbeads = self.index
         else:
             self.nbeads = 1
-
+    
     def make(self, info, conf = None):
-        atom = MMTK.Atom(self.type, name = self.name, nbeads = self.nbeads)
+        atom = MMTK.Atom(self.type, name = self.name)
         self.assignIndex(atom, info, conf)
         return atom
 
     def assignIndex(self, atom, info, conf):
         info[self.index] = atom
+        atom.setNBeads(self.nbeads)
         if conf is not None and self.index is not None:
             atom.setBeadPositions([MMTK.Vector(conf[i])
                                    for i in range(self.index, self.index+self.nbeads)])

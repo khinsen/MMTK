@@ -1,7 +1,7 @@
 # Trajectory tests
 #
 # Written by Konrad Hinsen
-# last revision: 2008-10-29
+# last revision: 2010-9-9
 #
 
 
@@ -41,6 +41,14 @@ class ParallelepipedicUniverseTest:
         self.universe.addObject(Molecule('water',
                                          position = Vector(0.2, 0., 0.)))
 
+class InfiniteUniverseWithPITest:
+
+    def setUp(self):
+        self.universe = InfiniteUniverse()
+        self.universe.addObject(Molecule('water',
+                                         position = Vector(-0.2, 0., 0.)))
+        for a in self.universe.atomList():
+            a.setNBeads(4)
 
 class SinglePrecisionTest:
 
@@ -57,6 +65,7 @@ class DoublePrecisionTest:
 class TrajectoryTest:
 
     def tearDown(self):
+        return
         try:
             os.remove('test.nc')
         except OSError:
@@ -105,47 +114,53 @@ class TrajectoryTest:
         trajectory.close()
 
 
-class InfiniteUniverseTestSP(unittest.TestCase,
-                             InfiniteUniverseTest,
-                             TrajectoryTest,
-                             SinglePrecisionTest):
-    setUp = InfiniteUniverseTest.setUp
+## class InfiniteUniverseTestSP(unittest.TestCase,
+##                              InfiniteUniverseTest,
+##                              TrajectoryTest,
+##                              SinglePrecisionTest):
+##     setUp = InfiniteUniverseTest.setUp
 
-class InfiniteUniverseTestDP(unittest.TestCase,
-                             InfiniteUniverseTest,
-                             TrajectoryTest,
-                             DoublePrecisionTest):
-    setUp = InfiniteUniverseTest.setUp
+## class InfiniteUniverseTestDP(unittest.TestCase,
+##                              InfiniteUniverseTest,
+##                              TrajectoryTest,
+##                              DoublePrecisionTest):
+##     setUp = InfiniteUniverseTest.setUp
+##     tearDown = TrajectoryTest.tearDown
+
+## class OrthorhombicUniverseTestSP(unittest.TestCase,
+##                                  OrthorhombicUniverseTest,
+##                                  TrajectoryTest,
+##                                  SinglePrecisionTest):
+##     setUp = OrthorhombicUniverseTest.setUp
+##     tearDown = TrajectoryTest.tearDown
+
+## class OrthorhombicUniverseTestDP(unittest.TestCase,
+##                                  OrthorhombicUniverseTest,
+##                                  TrajectoryTest,
+##                                  DoublePrecisionTest):
+##     setUp = OrthorhombicUniverseTest.setUp
+##     tearDown = TrajectoryTest.tearDown
+
+## class ParallelepipedicUniverseTestSP(unittest.TestCase,
+##                                      ParallelepipedicUniverseTest,
+##                                      TrajectoryTest,
+##                                      SinglePrecisionTest):
+##     setUp = ParallelepipedicUniverseTest.setUp
+##     tearDown = TrajectoryTest.tearDown
+
+## class ParallelepipedicUniverseTestDP(unittest.TestCase,
+##                                      ParallelepipedicUniverseTest,
+##                                      TrajectoryTest,
+##                                      DoublePrecisionTest):
+##     setUp = ParallelepipedicUniverseTest.setUp
+##     tearDown = TrajectoryTest.tearDown
+
+class InfiniteUniverseWithPITestDP(unittest.TestCase,
+                                   InfiniteUniverseWithPITest,
+                                   TrajectoryTest,
+                                   DoublePrecisionTest):
+    setUp = InfiniteUniverseWithPITest.setUp
     tearDown = TrajectoryTest.tearDown
-
-class OrthorhombicUniverseTestSP(unittest.TestCase,
-                                 OrthorhombicUniverseTest,
-                                 TrajectoryTest,
-                                 SinglePrecisionTest):
-    setUp = OrthorhombicUniverseTest.setUp
-    tearDown = TrajectoryTest.tearDown
-
-class OrthorhombicUniverseTestDP(unittest.TestCase,
-                                 OrthorhombicUniverseTest,
-                                 TrajectoryTest,
-                                 DoublePrecisionTest):
-    setUp = OrthorhombicUniverseTest.setUp
-    tearDown = TrajectoryTest.tearDown
-
-class ParallelepipedicUniverseTestSP(unittest.TestCase,
-                                     ParallelepipedicUniverseTest,
-                                     TrajectoryTest,
-                                     SinglePrecisionTest):
-    setUp = ParallelepipedicUniverseTest.setUp
-    tearDown = TrajectoryTest.tearDown
-
-class ParallelepipedicUniverseTestDP(unittest.TestCase,
-                                     ParallelepipedicUniverseTest,
-                                     TrajectoryTest,
-                                     DoublePrecisionTest):
-    setUp = ParallelepipedicUniverseTest.setUp
-    tearDown = TrajectoryTest.tearDown
-
 
 def suite():
     loader = unittest.TestLoader()
@@ -156,6 +171,7 @@ def suite():
     s.addTest(loader.loadTestsFromTestCase(OrthorhombicUniverseTestDP))
     s.addTest(loader.loadTestsFromTestCase(ParallelepipedicUniverseTestSP))
     s.addTest(loader.loadTestsFromTestCase(ParallelepipedicUniverseTestDP))
+    s.addTest(loader.loadTestsFromTestCase(InfiniteUniverseWithPITestDP))
     return s
 
 
