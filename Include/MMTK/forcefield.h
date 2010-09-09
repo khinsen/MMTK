@@ -1,7 +1,7 @@
 /* Include file for C force field calculations.
  *
  * Written by Konrad Hinsen
- * last revision: 2006-5-10
+ * last revision: 2009-7-7
  */
 
 #ifndef MMTK_FORCEFIELD_H
@@ -140,6 +140,7 @@ typedef struct ffeval {
   double *energy_parts;
   double *gradient_parts;
 #endif
+  double scale_factor;
   int nterms, ntermobjects;
   int nthreads, nprocs, nslices, proc_id;
 } PyFFEvaluatorObject;

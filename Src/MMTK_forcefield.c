@@ -1,7 +1,7 @@
 /* Low-level force field calculations
  *
  * Written by Konrad Hinsen
- * last revision: 2009-3-18
+ * last revision: 2009-7-7
  */
 
 #define _FORCEFIELD_MODULE
@@ -486,6 +486,7 @@ PyFFEvaluator_New(void)
   self->nterms =  self->ntermobjects = 0;
   self->scratch = NULL;
   self->nthreads = 0;
+  self->scale_factor = 1.;
 #ifdef WITH_THREAD
   self->global_lock = NULL;
   self->binfo = NULL;
@@ -875,6 +876,37 @@ evaluator(PyFFEvaluatorObject *self,
     fflush(stdout);
   }
 #endif
+  if (self->scale_factor != 1.) {
+    for (i = 0; i < self->nterms+1; i++)
+      energy->energy_terms[i] *= self->scale_factor;
+    if (energy->gradients != NULL) {
+      if (energy->gradient_fn != NULL) {
+	PyErr_SetString(PyExc_NotImplementedError,
+			"gradient function with scale factor");
+	energy->error = 1;
+      }
+      else { 
+	double *data = (double *)((PyArrayObject *)energy->gradients)->data;
+	for (i = 0; i < 3*natoms; i++)
+	  data[i] *= self->scale_factor;
+      }
+    }
+    if (energy->force_constants != NULL) {
+      if (energy->fc_fn != NULL) {
+	PyErr_SetString(PyExc_NotImplementedError,
+			"force constant function with scale factor");
+	energy->error = 1;
+      }
+      else { 
+	double *data = 
+               (double *)((PyArrayObject *)energy->force_constants)->data;
+	long nelements = 9L*(long)natoms*(long)natoms;
+	long j;
+	for (j = 0; j < nelements; j++)
+	  data[j] *= self->scale_factor;
+      }
+    }
+  }
   energy->energy = 0.;
   for (i = 0; i < self->nterms; i++)
     energy->energy += energy->energy_terms[i];
@@ -1715,8 +1747,9 @@ Evaluator(PyObject *dummy, PyObject *args)
   int i;
   if (self == NULL)
     return NULL;
-  if (!PyArg_ParseTuple(args, "O!|iO",
+  if (!PyArg_ParseTuple(args, "O!|diO",
 			&PyArray_Type, &self->terms,
+			&self->scale_factor,
 			&nthreads, &communicator))
     return NULL;
   Py_INCREF(self->terms);

@@ -2,7 +2,7 @@
 # and force field evaluators.
 #
 # Written by Konrad Hinsen
-# last revision: 2010-1-22
+# last revision: 2010-9-9
 #
 
 from MMTK import ParticleProperties, Universe, Utility
@@ -225,8 +225,8 @@ class EnergyEvaluator(object):
         if threads is None:
             import MMTK.ForceFields
             threads = MMTK.ForceFields.default_energy_threads;
-        self.evaluator = Evaluator(N.array(terms), threads,
-                                   mpi_communicator)
+        self.evaluator = Evaluator(N.array(terms), 1.,
+                                   threads, mpi_communicator)
 
     def checkUniverseVersion(self):
         if self.universe_version != self.universe._version:
