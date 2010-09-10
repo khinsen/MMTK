@@ -21,7 +21,7 @@
 # modifications to this module.
 #
 # Written by Konrad Hinsen
-# last revision: 2010-9-7
+# last revision: 2010-9-10
 #
 
 from MMTK.ForceFields.BondedInteractions import BondedForceField
@@ -88,7 +88,7 @@ class MMBondedForceField(MMAtomParameters, BondedForceField):
         a2 = bond.a2
         i1 = a1.index
         i2 = a2.index
-        global_data.add('excluded_pairs', (i1, i2))
+        global_data.add('excluded_pairs', Utility.normalizePair((i1, i2)))
         t1 = global_data.atom_type[a1]
         t2 = global_data.atom_type[a2]
         try:
@@ -107,7 +107,7 @@ class MMBondedForceField(MMAtomParameters, BondedForceField):
         i1 = a1.index
         i2 = a2.index
         ic = ca.index
-        global_data.add('excluded_pairs', (i1, i2))
+        global_data.add('excluded_pairs', Utility.normalizePair((i1, i2)))
         t1 = global_data.atom_type[a1]
         t2 = global_data.atom_type[a2]
         tc = global_data.atom_type[ca]
