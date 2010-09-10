@@ -2,7 +2,7 @@
 # any trajectory generator
 #
 # Written by Konrad Hinsen
-# last revision: 2010-8-24
+# last revision: 2010-9-10
 #
 
 include 'MMTK/trajectory.pxi'
@@ -40,6 +40,9 @@ cdef class StateAccessor(MMTK_trajectory_action.TrajectoryAction):
         @rtype:  C{dict}
         """
         cdef PyTrajectoryVariable *dynamic_data = self.dynamic_data
+        # Make sure the trajectory generator has already started.
+        if self.generator_id == 0:
+            return None
         self.universe.acquireReadStateLock()
         state = {}
         # Timing can be tricky. The trajectory generator runs in another
@@ -57,9 +60,9 @@ cdef class StateAccessor(MMTK_trajectory_action.TrajectoryAction):
         while dynamic_data.name != NULL:
             name = dynamic_data.name
             dtype = dynamic_data.type
-            if name == 'configuration':
+            if name == b'configuration':
                 state[name] = MMTK.copy(self.universe.configuration())
-            elif name != 'box_size':
+            elif name != b'box_size':
                 if dtype == PyTrajectory_Scalar:
                     state[name] = dynamic_data.value.dp[0]
                 elif dtype == PyTrajectory_IntScalar:
