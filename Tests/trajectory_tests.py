@@ -114,46 +114,46 @@ class TrajectoryTest:
         trajectory.close()
 
 
-## class InfiniteUniverseTestSP(unittest.TestCase,
-##                              InfiniteUniverseTest,
-##                              TrajectoryTest,
-##                              SinglePrecisionTest):
-##     setUp = InfiniteUniverseTest.setUp
+class InfiniteUniverseTestSP(unittest.TestCase,
+                             InfiniteUniverseTest,
+                             TrajectoryTest,
+                             SinglePrecisionTest):
+    setUp = InfiniteUniverseTest.setUp
 
-## class InfiniteUniverseTestDP(unittest.TestCase,
-##                              InfiniteUniverseTest,
-##                              TrajectoryTest,
-##                              DoublePrecisionTest):
-##     setUp = InfiniteUniverseTest.setUp
-##     tearDown = TrajectoryTest.tearDown
+class InfiniteUniverseTestDP(unittest.TestCase,
+                             InfiniteUniverseTest,
+                             TrajectoryTest,
+                             DoublePrecisionTest):
+    setUp = InfiniteUniverseTest.setUp
+    tearDown = TrajectoryTest.tearDown
 
-## class OrthorhombicUniverseTestSP(unittest.TestCase,
-##                                  OrthorhombicUniverseTest,
-##                                  TrajectoryTest,
-##                                  SinglePrecisionTest):
-##     setUp = OrthorhombicUniverseTest.setUp
-##     tearDown = TrajectoryTest.tearDown
+class OrthorhombicUniverseTestSP(unittest.TestCase,
+                                 OrthorhombicUniverseTest,
+                                 TrajectoryTest,
+                                 SinglePrecisionTest):
+    setUp = OrthorhombicUniverseTest.setUp
+    tearDown = TrajectoryTest.tearDown
 
-## class OrthorhombicUniverseTestDP(unittest.TestCase,
-##                                  OrthorhombicUniverseTest,
-##                                  TrajectoryTest,
-##                                  DoublePrecisionTest):
-##     setUp = OrthorhombicUniverseTest.setUp
-##     tearDown = TrajectoryTest.tearDown
+class OrthorhombicUniverseTestDP(unittest.TestCase,
+                                 OrthorhombicUniverseTest,
+                                 TrajectoryTest,
+                                 DoublePrecisionTest):
+    setUp = OrthorhombicUniverseTest.setUp
+    tearDown = TrajectoryTest.tearDown
 
-## class ParallelepipedicUniverseTestSP(unittest.TestCase,
-##                                      ParallelepipedicUniverseTest,
-##                                      TrajectoryTest,
-##                                      SinglePrecisionTest):
-##     setUp = ParallelepipedicUniverseTest.setUp
-##     tearDown = TrajectoryTest.tearDown
+class ParallelepipedicUniverseTestSP(unittest.TestCase,
+                                     ParallelepipedicUniverseTest,
+                                     TrajectoryTest,
+                                     SinglePrecisionTest):
+    setUp = ParallelepipedicUniverseTest.setUp
+    tearDown = TrajectoryTest.tearDown
 
-## class ParallelepipedicUniverseTestDP(unittest.TestCase,
-##                                      ParallelepipedicUniverseTest,
-##                                      TrajectoryTest,
-##                                      DoublePrecisionTest):
-##     setUp = ParallelepipedicUniverseTest.setUp
-##     tearDown = TrajectoryTest.tearDown
+class ParallelepipedicUniverseTestDP(unittest.TestCase,
+                                     ParallelepipedicUniverseTest,
+                                     TrajectoryTest,
+                                     DoublePrecisionTest):
+    setUp = ParallelepipedicUniverseTest.setUp
+    tearDown = TrajectoryTest.tearDown
 
 class InfiniteUniverseWithPITestDP(unittest.TestCase,
                                    InfiniteUniverseWithPITest,
