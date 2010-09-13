@@ -659,6 +659,9 @@ class Atom(ChemicalObject):
             self.nbeads = nbeads
             self.setPosition(p)
 
+    def beads(self):
+        return [Bead(self, i) for i in range(self.nbeads)]
+
     def getAtom(self, atom):
         return self
 
@@ -765,6 +768,42 @@ class Atom(ChemicalObject):
 
     def getXMLAtomOrder(self):
         return [self]
+
+class Bead(object):
+
+    def __init__(self, atom, bead_number):
+        self.atom = atom
+        self.bead_number = bead_number
+        if atom.index is None:
+            self.index = None
+        else:
+            self.index = atom.index + bead_number
+        self._mass = atom._mass/atom.nbeads
+
+    def position(self, conf = None):
+        if self.atom.array is None:
+            assert conf is None
+            return self.pos[self.bead_number]
+        if conf is None:
+            array = self.atom.array
+        else:
+            array = conf.array
+        if (array[self.index, :] > Utility.undefined_limit).any():
+            return None
+        return Vector(array[self.index, :])
+
+    def setPosition(self, position):
+        assert position is not None
+        if self.atom.array is None:
+            self.pos[self.bead_number] = position
+        else:
+            self.array[self.index, :] = position.array
+
+    def translateBy(self, vector):
+        if self.atom.array is None:
+            self.atom.pos[self.bead_number] += vector
+        else:
+            self.array[self.index, :] += vector.array
 
 class Group(CompositeChemicalObject, ChemicalObject):
 
