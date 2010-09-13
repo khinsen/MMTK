@@ -562,7 +562,7 @@ class Universe(Collections.GroupOfAtoms, Visualization.Viewable):
         @rtype: L{MMTK.ParticleProperties.ParticleScalar}
         """
         if self._masses is None:
-            self._masses = self.getParticleScalar('_mass')
+            self._masses = self.getParticleScalar('_mass')/self.getParticleScalar('nbeads')
         return self._masses
 
     def charges(self):
@@ -846,6 +846,27 @@ class Universe(Collections.GroupOfAtoms, Visualization.Viewable):
         eval = self.energyEvaluator(subset1, subset2)
         eval(0, 0, small_change)
         return eval.lastEnergyTerms()
+
+    def pathIntegralEnergies(self, subset1 = None, subset2 = None, small_change=False):
+        """
+        @param subset1: a subset of a universe, or C{None}
+        @type subset1: L{MMTK.ChemicalObjects.ChemicalObject}
+        @param subset2: a subset of a universe, or C{None}
+        @type subset2: L{MMTK.ChemicalObjects.ChemicalObject}
+        @param small_change: if C{True}, algorithms optimized for small
+                             configurational changes relative to the last
+                             evaluation may be used.
+        @type small_change: C{bool}
+        @returns: the potential energy, the kinetic energy, and the path integral
+                  potential energy, such that the total energy is the ensemble average
+                  of potential energy + kinetic energy - path integral energy. If no
+                  velocities are available, the kinetic energy is C{None}.
+        @rtype: (C{float}, C{float}, C{float})
+        """
+        eval = self.energyEvaluator(subset1, subset2)
+        total_potential_energy = eval(0, 0, small_change)
+        pi_energy =  eval.lastEnergyTerms().get("path integral spring", 0.)
+        return total_potential_energy-pi_energy, self.kineticEnergy(), pi_energy
 
     def configurationDifference(self, conf1, conf2):
         """
@@ -1181,6 +1202,8 @@ class Universe(Collections.GroupOfAtoms, Visualization.Viewable):
     def kineticEnergy(self, velocities = None):
         if velocities is None:
             velocities = self.velocities()
+            if velocities is None:
+                return None
         return 0.5*velocities.massWeightedDotProduct(velocities)
 
     def momentum(self, velocities = None):

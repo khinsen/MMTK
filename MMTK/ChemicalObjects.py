@@ -658,6 +658,9 @@ class Atom(ChemicalObject):
             p = self.position()
             self.nbeads = nbeads
             self.setPosition(p)
+            universe = self.universe()
+            if universe is not None:
+                universe._changed(True)
 
     def beads(self):
         return [Bead(self, i) for i in range(self.nbeads)]

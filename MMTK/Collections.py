@@ -505,11 +505,13 @@ class GroupOfAtoms(object):
         @param velocities: a set of velocities for all atoms, or
                            C{None} for the current velocities
         @type velocities: L{MMTK.ParticleVector}
-        @returns: the kinetic energy
+        @returns: the kinetic energy, or C{None} if no velocities have been defined
         @rtype: C{float}
         """
         if velocities is None:
             velocities = self.atomList()[0].universe().velocities()
+            if velocities is None:
+                return None
         energy = 0.
         for b in self.beadIterator():
             v = velocities[b]
