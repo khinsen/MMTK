@@ -1,7 +1,7 @@
 # Trajectory tests
 #
 # Written by Konrad Hinsen
-# last revision: 2010-9-9
+# last revision: 2010-9-13
 #
 
 
@@ -48,7 +48,7 @@ class InfiniteUniverseWithPITest:
         self.universe.addObject(Molecule('water',
                                          position = Vector(-0.2, 0., 0.)))
         for a in self.universe.atomList():
-            a.setNBeads(4)
+            a.setNumberOfBeads(4)
 
 class SinglePrecisionTest:
 

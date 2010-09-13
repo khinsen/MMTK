@@ -1,7 +1,7 @@
 # This module handles the skeleton descriptions stored in trajectory files.
 #
 # Written by Konrad Hinsen
-# last revision: 2010-9-9
+# last revision: 2010-9-13
 #
 
 import MMTK
@@ -30,7 +30,7 @@ class A:
 
     def assignIndex(self, atom, info, conf):
         info[self.index] = atom
-        atom.setNBeads(self.nbeads)
+        atom.setNumberOfBeads(self.nbeads)
         if conf is not None and self.index is not None:
             atom.setBeadPositions([MMTK.Vector(conf[i])
                                    for i in range(self.index, self.index+self.nbeads)])

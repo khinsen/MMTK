@@ -2,7 +2,7 @@
 # and force field evaluators.
 #
 # Written by Konrad Hinsen
-# last revision: 2010-9-9
+# last revision: 2010-9-13
 #
 
 from MMTK import Environment, ParticleProperties, Units, Universe, Utility
@@ -218,10 +218,10 @@ class EnergyEvaluator(object):
         if subset1 is not None and subset2 is None:
             subset2 = subset1
 
-        pi_atoms = [a for a in self.universe.atomList() if a.nBeads() > 1]
+        pi_atoms = [a for a in self.universe.atomList() if a.numberOfBeads() > 1]
         if pi_atoms:
 
-            nbead_values = set(a.nBeads() for a in self.universe.atomList())
+            nbead_values = set(a.numberOfBeads() for a in self.universe.atomList())
             if len(nbead_values) > 1:
                 raise ValueError("number of beads not consistent for all atoms")
             nbeads = nbead_values.pop()
@@ -251,7 +251,7 @@ class EnergyEvaluator(object):
             indices = []
             parameters = []
             for a in pi_atoms:
-                nb = a.nBeads()
+                nb = a.numberOfBeads()
                 k = float(nb*nb*nb)*a.mass() / (beta*beta*Units.hbar*Units.hbar*2.)
                 for b in range(nb):
                     indices.append([a.index+b, (a.index+b+1) % nb])

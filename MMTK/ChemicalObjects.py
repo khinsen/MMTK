@@ -532,7 +532,7 @@ class Atom(ChemicalObject):
         self.array = None
         self.index = None
         if properties.has_key('nbeads'):
-            self.setNBeads(properties['nbeads'])
+            self.setNumberOfBeads(properties['nbeads'])
             del properties['nbeads']
         if properties.has_key('position'):
             self.setPosition(properties['position'])
@@ -641,14 +641,14 @@ class Atom(ChemicalObject):
         """
         self._mass = mass
 
-    def nBeads(self):
+    def numberOfBeads(self):
         """
         @returns: the number of beads
         @rtype: C{int}
         """
         return self.nbeads
 
-    def setNBeads(self, nbeads):
+    def setNumberOfBeads(self, nbeads):
         """
         @param nbeads: the number of beads
         @type nbeads: C{int}
@@ -671,8 +671,8 @@ class Atom(ChemicalObject):
         else:
             self.array[self.index:self.index+self.nbeads, :] += vector.array[N.NewAxis, :]
 
-    numberOfPoints = nBeads
-    numberOfCartesianCoordinates = nBeads
+    numberOfPoints = numberOfBeads
+    numberOfCartesianCoordinates = numberOfBeads
 
     def setIndex(self, index):
         if self.index is not None and self.index != index:
