@@ -254,12 +254,12 @@ class EnergyEvaluator(object):
                 nb = a.numberOfBeads()
                 k = float(nb*nb*nb)*a.mass() / (beta*beta*Units.hbar*Units.hbar*2.)
                 for b in range(nb):
-                    indices.append([a.index+b, (a.index+b+1) % nb])
+                    indices.append([a.index+b, a.index+(b+1)%nb])
                     parameters.append([0., k])
-                terms.append(HarmonicDistanceTerm(universe._spec,
-                                                  N.array(indices),
-                                                  N.array(parameters),
-                                                  "path_integral_spring"))
+            terms.append(HarmonicDistanceTerm(universe._spec,
+                                              N.array(indices),
+                                              N.array(parameters),
+                                              "path integral spring"))
 
         else:
 
