@@ -1,7 +1,7 @@
 # This module defines collections of chemical objects.
 #
 # Written by Konrad Hinsen
-# last revision: 2009-1-29
+# last revision: 2010-9-13
 #
 
 """
@@ -14,7 +14,7 @@ from MMTK import Utility, Units, ParticleProperties, Visualization
 from Scientific.Geometry import Vector, Tensor, Objects3D
 from Scientific.Geometry import Quaternion, Transformation
 from Scientific import N
-import copy
+import copy, itertools
 
 #
 # This class defines groups of atoms. It is used as a base class
@@ -48,7 +48,7 @@ class GroupOfAtoms(object):
                   each atom is described by a wave function or a path integral.
         @rtype: C{int}
         """
-        return sum([a.numberOfPoints() for a in self.atomList()])
+        return sum([a.numberOfPoints() for a in self.atomIterator()])
 
     numberOfCartesianCoordinates = numberOfPoints
 
@@ -58,7 +58,7 @@ class GroupOfAtoms(object):
         @rtype: C{int}
         """
         n = 0
-        for a in self.atomList():
+        for a in self.atomIterator():
             try:
                 if a.fixed: n = n + 1
             except AttributeError: pass
@@ -85,7 +85,7 @@ class GroupOfAtoms(object):
         @returns: a collection of all atoms that have a position in the
                   given configuration
         """
-        return Collection([a for a in self.atomList()
+        return Collection([a for a in self.atomIterator()
                            if Utility.isDefinedPosition(a.position(conf))])
 
     def mass(self):
@@ -93,7 +93,7 @@ class GroupOfAtoms(object):
         @returns: the total mass
         @rtype: C{float}
         """
-        return sum(a._mass for a in self.atomList())
+        return sum(a._mass for a in self.atomIterator())
 
     def centerOfMass(self, conf = None):
         """
@@ -110,11 +110,11 @@ class GroupOfAtoms(object):
         m = 0.
         mr = Vector(0.,0.,0.)
         if offset is None:
-            for a in self.atomList():
+            for a in self.atomIterator():
                 m += a._mass
                 mr += a._mass * a.position(conf)
         else:
-            for a in self.atomList():
+            for a in self.atomIterator():
                 m += a._mass
                 mr += a._mass * (a.position(conf)+offset[a])
         return mr/m
@@ -137,7 +137,7 @@ class GroupOfAtoms(object):
         m = 0.
         mr = Vector(0.,0.,0.)
         t = Tensor(3*[3*[0.]])
-        for a in self.atomList():
+        for a in self.atomIterator():
             ma = a._mass
             if offset is None:
                 r = a.position(conf)
@@ -173,7 +173,7 @@ class GroupOfAtoms(object):
                   bounding box with edges parallel to the coordinate axes.
         @rtype: C{tuple} of two C{Scientific.Geometry.Vector}
         """
-        atoms = self.atomList()
+        atoms = self.atomIterator()
         min = atoms[0].position(conf).array
         max = min
         for a in atoms[1:]:
@@ -192,7 +192,7 @@ class GroupOfAtoms(object):
                   bounding sphere.
         @rtype: Scientific.Geometry.Objects3D.Sphere
         """
-        atoms = self.atomList()
+        atoms = self.atomIterator()
         center = sum((a.position(conf) for a in atoms),
                      Vector(0., 0., 0.)) / len(atoms)
         r = 0.
@@ -215,7 +215,7 @@ class GroupOfAtoms(object):
         universe = conf1.universe
         m = 0.
         rms = 0.
-        for a in self.atomList():
+        for a in self.atomIterator():
             ma = a._mass
             dr = universe.distanceVector(a.position(conf1), a.position(conf2))
             m += ma
@@ -239,7 +239,7 @@ class GroupOfAtoms(object):
         pos = N.zeros((3,), N.Float)
         possq = 0.
         cross = N.zeros((3, 3), N.Float)
-        for a in self.atomList():
+        for a in self.atomIterator():
             r = a.position(conf).array
             r_ref = a.position(ref).array-ref_cms
             w = weights[a]
@@ -304,7 +304,7 @@ class GroupOfAtoms(object):
         @param vector: the displacement vector
         @type vector: C{Scientific.Geometry.Vector}
         """
-        for a in self.atomList():
+        for a in self.atomIterator():
             a.translateBy(vector)
 
     def translateTo(self, position):
@@ -385,7 +385,7 @@ class GroupOfAtoms(object):
         @param t: the transformation to be applied
         @type t: C{Scientific.Geometry.Transformation}
         """
-        for a in self.atomList():
+        for a in self.atomIterator():
             a.setPosition(t(a.position()))
 
     def displacementUnderTransformation(self, t):
@@ -397,7 +397,7 @@ class GroupOfAtoms(object):
         @rtype: L{MMTK.ParticleVector}
         """
         d = ParticleProperties.ParticleVector(self.universe())
-        for a in self.atomList():
+        for a in self.atomIterator():
             r = a.position()
             d[a] = t(r)-r
         return d
@@ -505,7 +505,7 @@ class GroupOfAtoms(object):
         if velocities is None:
             velocities = self.atomList()[0].universe().velocities()
         energy = 0.
-        for a in self.atomList():
+        for a in self.atomIterator():
             v = velocities[a]
             energy = energy + a._mass*(v*v)
         return 0.5*energy
@@ -531,7 +531,7 @@ class GroupOfAtoms(object):
         """
         if velocities is None:
             velocities = self.atomList()[0].universe().velocities()
-        return sum((a._mass*velocities[a] for a in self.atomList()),
+        return sum((a._mass*velocities[a] for a in self.atomIterator()),
                    Vector(0., 0., 0.))
 
     def angularMomentum(self, velocities = None, conf = None):
@@ -549,7 +549,7 @@ class GroupOfAtoms(object):
             velocities = self.atomList()[0].universe().velocities()
         cm = self.centerOfMass(conf)
         return sum((a._mass*a.position(conf).cross(velocities[a])
-                    for a in self.atomList()),
+                    for a in self.atomIterator()),
                    Vector(0., 0., 0.))
 
     def angularVelocity(self, velocities = None, conf = None):
@@ -567,7 +567,7 @@ class GroupOfAtoms(object):
             velocities = self.atomList()[0].universe().velocities()
         cm, inertia = self.centerAndMomentOfInertia(conf)
         l = sum((a._mass*a.position(conf).cross(velocities[a])
-                 for a in self.atomList()),
+                 for a in self.atomIterator()),
                 Vector(0., 0., 0.))
         return inertia.inverse()*l
         
@@ -616,7 +616,7 @@ class GroupOfAtoms(object):
             raise ValueError("object not in a universe")
         array = N.zeros((universe.numberOfAtoms(),), N.Int)
         mask = ParticleProperties.ParticleScalar(universe, array)
-        for a in self.atomList():
+        for a in self.atomIterator():
             mask[a] = 1
         return mask
 
@@ -720,7 +720,7 @@ class Collection(GroupOfAtoms, Visualization.Viewable):
         universe = self.universe()
         in_shell = []
         for o in self.objects:
-            for a in o.atomList():
+            for a in o.atomIterator():
                 r =  universe.distance(a.position(), point)
                 if r >= r1 and r <= r2:
                     in_shell.append(o)
@@ -775,6 +775,9 @@ class Collection(GroupOfAtoms, Visualization.Viewable):
             atoms.extend(o.atomList())
         return atoms
 
+    def atomIterator(self):
+        return itertools.chain(*(o.atomIterator() for o in self.objects))
+    
     def numberOfAtoms(self):
         """
         @returns: the total number of atoms in the objects of the collection
@@ -1088,9 +1091,9 @@ class PartitionedAtomCollection(PartitionedCollection):
         apply(PartitionedCollection.__init__, args)
 
     def addChemicalObject(self, object):
-        for atom in object.atomList():
+        for atom in object.atomIterator():
             PartitionedCollection.addChemicalObject(self, atom)
 
     def removeChemicalObject(self, object):
-        for atom in object.atomList():
+        for atom in object.atomIterator():
             PartitionedCollection.removeChemicalObject(self, atom)
