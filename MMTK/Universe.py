@@ -4,7 +4,7 @@
 # (boundary conditions, external fields, etc.)
 #
 # Written by Konrad Hinsen
-# last revision: 2010-2-11
+# last revision: 2010-9-13
 #
 
 """
@@ -169,6 +169,9 @@ class Universe(Collections.GroupOfAtoms, Visualization.Viewable):
         if self._atoms is None:
             self._atoms = self._objects.atomList()
         return self._atoms
+
+    def atomIterator(self):
+        return self._objects.atomIterator()
 
     def bondedUnits(self):
         return self._objects.bondedUnits()

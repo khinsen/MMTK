@@ -2,7 +2,7 @@
 # complexes. They are made as copies from blueprints in the database.
 #
 # Written by Konrad Hinsen
-# last revision: 2009-12-7
+# last revision: 2010-9-13
 #
 
 """
@@ -109,6 +109,13 @@ class ChemicalObject(Collections.GroupOfAtoms, Visualization.Viewable):
         """
         @returns: a list containing all atoms in the object
         @rtype: C{list}
+        """
+        pass
+
+    def atomIterator(self):
+        """
+        @returns: an iterator over all atoms in the object
+        @rtype: C{iterator}
         """
         pass
 
@@ -339,6 +346,9 @@ class CompositeChemicalObject(object):
     def atomList(self):
         return self.atoms
 
+    def atomIterator(self):
+        return iter(self.atoms)
+
     def setPosition(self, atom, position):
         if atom.__class__ is Database.AtomReference:
             atom = self.atoms[atom.number]
@@ -537,6 +547,9 @@ class Atom(ChemicalObject):
 
     def atomList(self):
         return [self]
+
+    def atomIterator(self):
+        yield self
 
     def setPosition(self, position):
         """
