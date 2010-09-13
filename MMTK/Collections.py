@@ -52,6 +52,11 @@ class GroupOfAtoms(object):
 
     numberOfCartesianCoordinates = numberOfPoints
 
+    def beadIterator(self):
+        for a in self.atomIterator():
+            for b in a.beads():
+                yield b
+
     def numberOfFixedAtoms(self):
         """
         @returns: the number of atoms that are fixed, i.e. that cannot move
@@ -173,13 +178,14 @@ class GroupOfAtoms(object):
                   bounding box with edges parallel to the coordinate axes.
         @rtype: C{tuple} of two C{Scientific.Geometry.Vector}
         """
-        atoms = self.atomIterator()
-        min = atoms[0].position(conf).array
+        atoms = self.atomList()
+        min = atoms[0].beads()[0].position(conf).array
         max = min
-        for a in atoms[1:]:
-            r = a.position(conf).array
-            min = N.minimum(min, r)
-            max = N.maximum(max, r)
+        for a in atoms:
+            for b in a.beads():
+                r = b.position(conf).array
+                min = N.minimum(min, r)
+                max = N.maximum(max, r)
         return Vector(min), Vector(max)
 
     def boundingSphere(self, conf = None):
@@ -192,12 +198,12 @@ class GroupOfAtoms(object):
                   bounding sphere.
         @rtype: Scientific.Geometry.Objects3D.Sphere
         """
-        atoms = self.atomIterator()
+        atoms = self.atomList()
         center = sum((a.position(conf) for a in atoms),
                      Vector(0., 0., 0.)) / len(atoms)
         r = 0.
-        for a in atoms:
-            r = max(r, (a.position(conf)-center).length())
+        for p in self.beadIterator():
+            r = max(r, (p.position(conf)-center).length())
         return Objects3D.Sphere(center, r)
 
     def rmsDifference(self, conf1, conf2 = None):
@@ -304,8 +310,8 @@ class GroupOfAtoms(object):
         @param vector: the displacement vector
         @type vector: C{Scientific.Geometry.Vector}
         """
-        for a in self.atomIterator():
-            a.translateBy(vector)
+        for b in self.beadIterator():
+            b.translateBy(vector)
 
     def translateTo(self, position):
         """
@@ -385,8 +391,8 @@ class GroupOfAtoms(object):
         @param t: the transformation to be applied
         @type t: C{Scientific.Geometry.Transformation}
         """
-        for a in self.atomIterator():
-            a.setPosition(t(a.position()))
+        for b in self.beadIterator():
+            b.setPosition(t(b.position()))
 
     def displacementUnderTransformation(self, t):
         """
@@ -397,9 +403,9 @@ class GroupOfAtoms(object):
         @rtype: L{MMTK.ParticleVector}
         """
         d = ParticleProperties.ParticleVector(self.universe())
-        for a in self.atomIterator():
-            r = a.position()
-            d[a] = t(r)-r
+        for b in self.beadIterator():
+            r = b.position()
+            d[b] = t(r)-r
         return d
 
     def rotateAroundCenter(self, axis_direction, angle):
@@ -505,9 +511,9 @@ class GroupOfAtoms(object):
         if velocities is None:
             velocities = self.atomList()[0].universe().velocities()
         energy = 0.
-        for a in self.atomIterator():
-            v = velocities[a]
-            energy = energy + a._mass*(v*v)
+        for b in self.beadIterator():
+            v = velocities[b]
+            energy += energy + b._mass*(v*v)
         return 0.5*energy
 
     def temperature(self, velocities = None):
@@ -531,7 +537,7 @@ class GroupOfAtoms(object):
         """
         if velocities is None:
             velocities = self.atomList()[0].universe().velocities()
-        return sum((a._mass*velocities[a] for a in self.atomIterator()),
+        return sum((b._mass*velocities[b] for b in self.beadIterator()),
                    Vector(0., 0., 0.))
 
     def angularMomentum(self, velocities = None, conf = None):
@@ -548,8 +554,8 @@ class GroupOfAtoms(object):
         if velocities is None:
             velocities = self.atomList()[0].universe().velocities()
         cm = self.centerOfMass(conf)
-        return sum((a._mass*a.position(conf).cross(velocities[a])
-                    for a in self.atomIterator()),
+        return sum((b._mass*b.position(conf).cross(velocities[b])
+                    for b in self.beadIterator()),
                    Vector(0., 0., 0.))
 
     def angularVelocity(self, velocities = None, conf = None):
@@ -566,8 +572,8 @@ class GroupOfAtoms(object):
         if velocities is None:
             velocities = self.atomList()[0].universe().velocities()
         cm, inertia = self.centerAndMomentOfInertia(conf)
-        l = sum((a._mass*a.position(conf).cross(velocities[a])
-                 for a in self.atomIterator()),
+        l = sum((b._mass*b.position(conf).cross(velocities[b])
+                 for b in self.beadIterator()),
                 Vector(0., 0., 0.))
         return inertia.inverse()*l
         
