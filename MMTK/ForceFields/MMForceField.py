@@ -21,7 +21,7 @@
 # modifications to this module.
 #
 # Written by Konrad Hinsen
-# last revision: 2010-9-10
+# last revision: 2010-9-15
 #
 
 from MMTK.ForceFields.BondedInteractions import BondedForceField
@@ -77,6 +77,9 @@ class MMBondedForceField(MMAtomParameters, BondedForceField):
         self.scale_factor = scale_factor
         BondedForceField.__init__(self, name)
 
+    def supportsPathIntegrals(self):
+        return True
+
     def evaluatorParameters(self, universe, subset1, subset2, global_data):
         self.collectAtomTypesAndIndices(universe, global_data)
         return BondedForceField.evaluatorParameters(self, universe,
@@ -88,7 +91,9 @@ class MMBondedForceField(MMAtomParameters, BondedForceField):
         a2 = bond.a2
         i1 = a1.index
         i2 = a2.index
-        global_data.add('excluded_pairs', Utility.normalizePair((i1, i2)))
+        f, offsets = self.beadOffsetsAndFactor([i1, i2], global_data)
+        for o1, o2 in offsets:
+            global_data.add('excluded_pairs', Utility.normalizePair((i1+o1, i2+o2)))
         t1 = global_data.atom_type[a1]
         t2 = global_data.atom_type[a2]
         try:
@@ -98,7 +103,8 @@ class MMBondedForceField(MMAtomParameters, BondedForceField):
                             ' - %s (atom type %s)') % (str(a1), t1,
                                                        str(a2), t2))
         if p is not None and p[1] != 0.:
-            data.add('bonds', (i1, i2, p[0], p[1]*self.scale_factor))
+            for o1, o2 in offsets:
+                data.add('bonds', (i1+o1, i2+o2, p[0], p[1]*f*self.scale_factor))
 
     def addBondAngleTerm(self, data, angle, object, global_data):
         a1 = angle.a1
@@ -107,7 +113,9 @@ class MMBondedForceField(MMAtomParameters, BondedForceField):
         i1 = a1.index
         i2 = a2.index
         ic = ca.index
-        global_data.add('excluded_pairs', Utility.normalizePair((i1, i2)))
+        f, offsets = self.beadOffsetsAndFactor([i1, i2, ic], global_data)
+        for o1, o2, oc in offsets:
+            global_data.add('excluded_pairs', Utility.normalizePair((i1+o1, i2+o2)))
         t1 = global_data.atom_type[a1]
         t2 = global_data.atom_type[a2]
         tc = global_data.atom_type[ca]
@@ -118,7 +126,8 @@ class MMBondedForceField(MMAtomParameters, BondedForceField):
                             ' - %s (atom type %s) - %s (atom type %s)')
                            % (str(a1), t1, str(ca), tc, str(a2), t2))
         if p is not None and p[1] != 0.:
-            data.add('angles', (i1, ic, i2, p[0], p[1]*self.scale_factor))
+            for o1, o2, oc in offsets:
+                data.add('angles', (i1+o1, ic+oc, i2+o2, p[0], p[1]*f*self.scale_factor))
 
     def addDihedralTerm(self, data, dihedral, object, global_data):
         a1 = dihedral.a1
@@ -129,7 +138,9 @@ class MMBondedForceField(MMAtomParameters, BondedForceField):
         i2 = a2.index
         i3 = a3.index
         i4 = a4.index
-        global_data.add('1_4_pairs', Utility.normalizePair((i1, i4)))
+        f, offsets = self.beadOffsetsAndFactor([i1, i2, i3, i4], global_data)
+        for o1, o2, o3, o4 in offsets:
+            global_data.add('1_4_pairs', Utility.normalizePair((i1+o1, i4+o4)))
         t1 = global_data.atom_type[a1]
         t2 = global_data.atom_type[a2]
         t3 = global_data.atom_type[a3]
@@ -138,8 +149,9 @@ class MMBondedForceField(MMAtomParameters, BondedForceField):
         if terms is not None:
             for p in terms:
                 if p[2] != 0.:
-                    data.add('dihedrals', (i1, i2, i3, i4,
-                                           p[0], p[1], p[2]*self.scale_factor))
+                    for o1, o2, o3, o4 in offsets:
+                        data.add('dihedrals', (i1+o1, i2+o2, i3+o3, i4+o4,
+                                               p[0], p[1], p[2]*f*self.scale_factor))
 
     def addImproperTerm(self, data, improper, object, global_data):
         a1 = improper.a1
@@ -150,19 +162,22 @@ class MMBondedForceField(MMAtomParameters, BondedForceField):
         i2 = a2.index
         i3 = a3.index
         i4 = a4.index
+        f, offsets = self.beadOffsetsAndFactor([i1, i2, i3, i4], global_data)
         t1 = global_data.atom_type[a1]
         t2 = global_data.atom_type[a2]
         t3 = global_data.atom_type[a3]
         t4 = global_data.atom_type[a4]
         terms = self.dataset.improperParameters(t1, t2, t3, t4)
         if terms is not None:
-            atoms = [(t2,i2), (t3,i3), (t4,i4)]
-            atoms.sort(_order)
-            i2, i3, i4 = tuple(map(lambda t: t[1], atoms))
-            for p in terms:
-                if p[2] != 0.:
-                    data.add('dihedrals', (i1, i2, i3, i4,
-                                           p[0], p[1], p[2]*self.scale_factor))
+            for o1, o2, o3, o4 in offsets:
+                atoms = [(t2,i2,o2), (t3,i3,o3), (t4,i4,o4)]
+                atoms.sort(_order)
+                i2, i3, i4 = [a[1] for a in atoms]
+                o2, o3, o4 = [a[2] for a in atoms]
+                for p in terms:
+                    if p[2] != 0.:
+                        data.add('dihedrals', (i1+o1, i2+o2, i3+o3, i4+o4,
+                                               p[0], p[1], p[2]*f*self.scale_factor))
 
     def bondLengthDatabase(self, universe):
         return MMBondLengthDatabase(self, universe, self.dataset)

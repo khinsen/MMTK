@@ -769,9 +769,8 @@ class Universe(Collections.GroupOfAtoms, Visualization.Viewable):
     def energyEvaluatorParameters(self, subset1 = None, subset2 = None):
         self.configuration()
         from MMTK.ForceFields import ForceField
-        ffdata = ForceField.ForceFieldData()
-        return self._forcefield.evaluatorParameters(self, subset1, subset2,
-                                                    ffdata)
+        return ForceField.EnergyEvaluatorParameters(self, self._forcefield,
+                                                    subset1, subset2).params
 
     def energyEvaluator(self, subset1 = None, subset2 = None,
                         threads=None, mpi_communicator=None):

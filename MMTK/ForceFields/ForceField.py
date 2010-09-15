@@ -2,7 +2,7 @@
 # and force field evaluators.
 #
 # Written by Konrad Hinsen
-# last revision: 2010-9-13
+# last revision: 2010-9-15
 #
 
 from MMTK import Environment, ParticleProperties, Units, Universe, Utility
@@ -76,6 +76,23 @@ class ForceField(object):
                 indices.append(a.index)
         return tuple(indices)
 
+    def supportsPathIntegrals(self):
+        return False
+
+    def beadOffsetsAndFactor(self, atom_indices, global_data):
+        nbeads = global_data.get('nbeads')
+        nbead_array = global_data.get('nbead_array')
+        if nbead_array == []:
+            universe = global_data.get('universe')
+            nbead_array = N.zeros((universe.numberOfPoints(),), N.Int)
+            for a in universe.atomIterator():
+                nbead_array[a.index] = a.numberOfBeads()
+            global_data.set('nbead_array', nbead_array)
+        nb = [nbead_array[i] for i in atom_indices]
+        assert all(nbeads % n == 0 for n in nb)
+        f = nbeads / max(nb)
+        return f, N.transpose([N.repeat(N.arange(n), nbeads/n/f) for n in nb])
+
 #
 # A CompoundForceField represents the sum of its component force fields
 #
@@ -134,6 +151,12 @@ class CompoundForceField(ForceField):
     def description(self):
         return '+'.join([f.description() for f in self.fflist])
 
+    def supportsPathIntegrals(self):
+        for ff in self.fflist:
+            if not ff.supportsPathIntegrals():
+                return False
+        return True
+
 def _combine(params1, params2):
     if params1 is None:
         return params2
@@ -161,10 +184,7 @@ class ForceFieldData(object):
             self.dict[tag] = [value]
 
     def get(self, tag):
-        try:
-            return self.dict[tag]
-        except KeyError:
-            return []
+        return self.dict.get(tag, [])
 
     def set(self, tag, value):
         self.dict[tag] = value
@@ -204,6 +224,57 @@ def addToForceConstants(total_fc, indices, small_fc):
 #
 # High-level energy evaluator (i.e. the Python interface)
 #
+class EnergyEvaluatorParameters(object):
+
+    def __init__(self, universe, force_field, subset1=None, subset2=None):
+        if not Universe.isUniverse(universe):
+            raise TypeError("energy evaluator defined only for universes")
+        self.universe = universe
+        self.universe_version = self.universe._version
+        self.ff = force_field
+        self.configuration = self.universe.configuration()
+        self.global_data = ForceFieldData()
+        self.global_data.set('universe', universe)
+        if subset1 is not None and subset2 is None:
+            subset2 = subset1
+
+        spring_parameters = []
+
+        pi_atoms = [a for a in self.universe.atomList() if a.numberOfBeads() > 1]
+        if pi_atoms:
+
+            if not self.ff.supportsPathIntegrals():
+                raise ValueError("Some force field term doesn't handle path integrals")
+            nbead_values = set(a.numberOfBeads() for a in self.universe.atomList())
+            if len(nbead_values) > 1:
+                raise ValueError("number of beads not consistent for all atoms")
+            nbeads = nbead_values.pop()
+            self.global_data.set('nbeads', nbeads)
+
+            pi_environments = self.universe.environmentObjectList(
+                                                Environment.PathIntegrals)
+            if len(pi_environments) == 1:
+                beta = pi_environments[0].beta
+            else:
+                raise ValueError('exactly one path integral environment required')
+            for a in pi_atoms:
+                nb = a.numberOfBeads()
+                k = float(nb*nb*nb)*a.mass() / (beta*beta*Units.hbar*Units.hbar*2.)
+                for b in range(nb):
+                    spring_parameters.append((a.index+b, a.index+(b+1)%nb, 0., k))
+
+        else:
+
+            nbeads = 1
+            self.global_data.set('nbeads', nbeads)
+            
+        self.params = self.ff.evaluatorParameters(self.universe,
+                                                  subset1, subset2,
+                                                  self.global_data)
+        key = 'harmonic_distance_term'
+        self.params[key] = _combine(spring_parameters, self.params.get(key, None))
+
+
 class EnergyEvaluator(object):
 
     def __init__(self, universe, force_field, subset1=None, subset2=None,
@@ -215,32 +286,22 @@ class EnergyEvaluator(object):
         self.ff = force_field
         self.configuration = self.universe.configuration()
         self.global_data = ForceFieldData()
+        self.global_data.set('universe', universe)
         if subset1 is not None and subset2 is None:
             subset2 = subset1
+
+        terms = []
 
         pi_atoms = [a for a in self.universe.atomList() if a.numberOfBeads() > 1]
         if pi_atoms:
 
+            if not self.ff.supportsPathIntegrals():
+                raise ValueError("Some force field term doesn't handle path integrals")
             nbead_values = set(a.numberOfBeads() for a in self.universe.atomList())
             if len(nbead_values) > 1:
                 raise ValueError("number of beads not consistent for all atoms")
             nbeads = nbead_values.pop()
-
-            terms = []
-            # Ugly hack: modifying a.index is not thread-safe!
-            for a in pi_atoms:
-                a.__index = a.index
-            try:
-                for i in range(nbeads):
-                    terms.extend(self.ff.evaluatorTerms(self.universe,
-                                                        subset1, subset2,
-                                                        self.global_data))
-                    for a in pi_atoms:
-                        a.index += 1
-            finally:
-                for a in pi_atoms:
-                    a.index = a.__index
-                    del a.__index
+            self.global_data.set('nbeads', nbeads)
 
             pi_environments = self.universe.environmentObjectList(
                                                 Environment.PathIntegrals)
@@ -264,12 +325,12 @@ class EnergyEvaluator(object):
         else:
 
             nbeads = 1
-            terms = self.ff.evaluatorTerms(self.universe,
-                                           subset1, subset2,
-                                           self.global_data)
+            self.global_data.set('nbeads', nbeads)
 
-        if not isinstance(terms, list):
-            raise ValueError("evaluator term list not a list")
+        terms.extend(self.ff.evaluatorTerms(self.universe,
+                                            subset1, subset2,
+                                            self.global_data))
+
         from MMTK_forcefield import Evaluator
         if threads is None:
             import MMTK.ForceFields
