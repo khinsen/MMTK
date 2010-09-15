@@ -152,6 +152,45 @@ NONB
                 for V in [-10., 2.]:
                     self._dihedralTerm(n, phase, V)
 
+class AmberPathIntegralTest(unittest.TestCase):
+    """
+    Test bonded energies with the Amber99 Forcefield
+    with no parameters
+    """
+
+    def setUp(self):
+        self.universe = InfiniteUniverse(Amber99ForceField())
+
+    def test_pi_quantum_spring_potential(self):
+        self.universe.h = Atom('H',amber_atom_type="CT",amber_charge=0.)
+        temperature = 100*Units.K
+        self.universe.addObject(Environment.PathIntegrals(temperature))
+        nb=4
+        self.universe.h.setNumberOfBeads(nb) 
+        k = (Units.k_B*temperature)*(Units.k_B*temperature)*float(nb*nb)*self.universe.h.mass() / (Units.hbar*Units.hbar*2.)
+        beadpos=[Vector(-2.,-3.,-4.),Vector(0.,0.,0.),Vector(5.,1.,3.),Vector(1,-2,3)]
+        self.universe.h.setBeadPositions(beadpos)
+        numerical_vqu = 0.
+        for bead in range(nb): 
+            dr = (beadpos[bead]-beadpos[(bead+1)%nb]).length()
+            numerical_vqu += k*dr*dr
+
+        piterms = self.universe.energyTerms()
+        self.assertAlmostEqual(piterms['path integral spring'], numerical_vqu, 10)
+
+    def test_pi_water_energy(self):
+        self.universe.water = Molecule('water')
+        e0, grad = self.universe.energyAndGradients()
+        for a in self.universe.atomList():
+            a.setNumberOfBeads(4)
+        self.universe.addObject(Environment.PathIntegrals(100*Units.K))
+        piterms = self.universe.energyTerms()
+        self.assertEqual(piterms['path integral spring'], 0.)
+        self.assertAlmostEqual(piterms['harmonic bond'], e0, 10)
+        #e1, grad1 = self.universe.energyAndGradients()
+        #self.assertEqual(e0, e1)
+        #for a in self.universe.atomList():
+        #    self.assert_((grad1[a]-grad[a]).length() == 0.)
 
 
 class NonbondedListTest:
@@ -233,6 +272,7 @@ def suite():
     s.addTest(loader.loadTestsFromTestCase(OrthorhombicUniverseNonbondedListTest))
     s.addTest(loader.loadTestsFromTestCase(ParallelepipedicUniverseNonbondedListTest))
     s.addTest(loader.loadTestsFromTestCase(LennardJonesSubsetTest))
+    s.addTest(loader.loadTestsFromTestCase(AmberPathIntegralTest))
     return s
 
 

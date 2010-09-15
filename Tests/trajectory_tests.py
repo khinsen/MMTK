@@ -48,7 +48,11 @@ class InfiniteUniverseWithPITest:
         self.universe.addObject(Molecule('water',
                                          position = Vector(-0.2, 0., 0.)))
         for a in self.universe.atomList():
-            a.setNumberOfBeads(4)
+            a.setNumberOfBeads(3)
+            pos = a.position()
+            displacedbeads = [pos+Vector(-1.,-1.,-1.),pos,pos+Vector(1.,1.,1.)]
+            a.setBeadPositions(displacedbeads)
+        
 
 class SinglePrecisionTest:
 
