@@ -189,11 +189,13 @@ class ParticleScalar(ParticleProperty):
 
     def __getitem__(self, item):
         if not isinstance(item, int):
+            assert item.numberOfBeads() == 1
             item = item.index
         return self.array[item]
 
     def __setitem__(self, item, value):
         if not isinstance(item, int):
+            assert item.numberOfBeads() == 1
             item = item.index
         self.array[item] = value
 
@@ -265,11 +267,13 @@ class ParticleVector(ParticleProperty):
 
     def __getitem__(self, item):
         if not isinstance(item, int):
+            assert item.numberOfBeads() == 1
             item = item.index
         return Vector(self.array[item])
 
     def __setitem__(self, item, value):
         if not isinstance(item, int):
+            assert item.numberOfBeads() == 1
             item = item.index
         self.array[item] = value.array
 
@@ -476,11 +480,13 @@ class ParticleTensor(ParticleProperty):
 
     def __getitem__(self, item):
         if not isinstance(item, int):
+            assert item.numberOfBeads() == 1
             item = item.index
         return Tensor(self.array[item])
 
     def __setitem__(self, item, value):
         if not isinstance(item, int):
+            assert item.numberOfBeads() == 1
             item = item.index
         self.array[item] = value.array
 
@@ -546,8 +552,10 @@ class SymmetricPairTensor(ParticleProperty):
     def __getitem__(self, item):
         i1, i2 = item
         if not isinstance(i1, int):
+            assert i1.numberOfBeads() == 1
             i1 = i1.index
         if not isinstance(i2, int):
+            assert i2.numberOfBeads() == 1
             i2 = i2.index
         if i1 > i2:
             i1, i2 = i2, i1
@@ -558,8 +566,10 @@ class SymmetricPairTensor(ParticleProperty):
     def __setitem__(self, item, value):
         i1, i2 = item
         if not isinstance(i1, int):
+            assert i1.numberOfBeads() == 1
             i1 = i1.index
         if not isinstance(i2, int):
+            assert i2.numberOfBeads() == 1
             i2 = i2.index
         if i1 > i2:
             i1, i2 = i2, i1
