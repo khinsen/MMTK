@@ -1,7 +1,6 @@
 # Pyro-based trajectory server
 #
 # Written by Konrad Hinsen
-# last revision: 2006-11-27
 #
 
 from TrajectoryInspector import TrajectoryInspector

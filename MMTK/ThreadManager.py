@@ -1,7 +1,6 @@
 # Thread manager for long-running threads (MD etc.)
 #
 # Written by Konrad Hinsen
-# last revision: 2010-7-22
 #
 
 _undocumented = 1

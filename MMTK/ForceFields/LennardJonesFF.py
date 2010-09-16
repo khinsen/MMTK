@@ -1,7 +1,6 @@
 # A Lennard-Jones force fields for simple liquids
 #
 # Written by Konrad Hinsen
-# last revision: 2009-5-13
 #
 
 """

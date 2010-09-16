@@ -2,7 +2,6 @@
 # places.
 #
 # Written by Konrad Hinsen
-# last revision: 2009-1-16
 #
 
 import os, sys

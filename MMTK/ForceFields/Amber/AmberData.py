@@ -1,7 +1,6 @@
 # This module handles input and application of Amber parameter files.
 #
 # Written by Konrad Hinsen
-# last revision: 2009-5-13
 #
 
 from MMTK import Units

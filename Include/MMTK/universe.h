@@ -1,7 +1,6 @@
 /* Include file for C universe-related functions.
  *
  * Written by Konrad Hinsen
- * last revision: 2007-4-23
  */
 
 #ifndef MMTK_UNIVERSE_H

@@ -1,7 +1,6 @@
 # Manipulation of internal coordinates
 #
 # Written by Konrad Hinsen
-# last revision: 2009-3-16
 #
 
 """

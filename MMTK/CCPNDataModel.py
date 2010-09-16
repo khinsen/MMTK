@@ -5,7 +5,6 @@
 # from CCPN MolSystems and MolStructures.
 #
 # Written by Konrad Hinsen
-# last revision: 2006-10-16
 #
 
 """Interface to the CCPN Data Model

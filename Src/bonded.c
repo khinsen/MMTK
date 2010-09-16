@@ -1,7 +1,6 @@
 /* Low-level force field calculations: bonded interactions
  *
  * Written by Konrad Hinsen
- * last revision: 2010-9-2
  */
 
 #define NO_IMPORT

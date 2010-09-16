@@ -1,7 +1,6 @@
 # Trajectory actions in Cython
 #
 # Written by Konrad Hinsen
-# last revision: 2010-1-22
 #
 
 include 'MMTK/trajectory.pxi'

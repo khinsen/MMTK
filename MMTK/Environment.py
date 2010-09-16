@@ -1,7 +1,6 @@
 # This module defines environment objects for universes.
 #
 # Written by Konrad Hinsen
-# last revision: 2010-9-6
 #
 
 """

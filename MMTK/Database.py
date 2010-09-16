@@ -1,7 +1,6 @@
 # This module manages the chemical database.
 #
 # Written by Konrad Hinsen
-# last revision: 2009-11-10
 #
 
 """

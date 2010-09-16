@@ -1,7 +1,6 @@
 # Define unit conversion factors and physical constants
 #
 # Written by Konrad Hinsen
-# last revision: 2009-1-21
 #
 
 """

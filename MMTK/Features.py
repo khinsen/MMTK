@@ -1,7 +1,6 @@
 # This module contains feature management classes.
 #
 # Written by Konrad Hinsen
-# last revision: 2009-2-5
 #
 
 from MMTK import Environment

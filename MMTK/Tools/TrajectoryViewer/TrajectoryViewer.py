@@ -1,7 +1,6 @@
 # Trajectory viewer for MMTK trajectory files
 #
 # Written by Konrad Hinsen
-# last revision: 2007-7-3
 #
 
 from Tkinter import *

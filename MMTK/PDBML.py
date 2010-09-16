@@ -1,7 +1,6 @@
 # Read PDBML files
 #
 # Written by Konrad Hinsen
-# last revision: 2006-5-4
 #
 
 """

@@ -1,7 +1,6 @@
 # Energy term interface for Python code
 #
 # Written by Konrad Hinsen
-# last revision: 2007-1-11
 #
 
 include 'MMTK/forcefield.pxi'

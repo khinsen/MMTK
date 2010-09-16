@@ -1,7 +1,6 @@
 /* Low-level Langevin dynamics integrators
  *
  * Written by Konrad Hinsen
- * last revision: 2010-6-3
  */
 
 #include "MMTK/universe.h"

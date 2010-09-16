@@ -2,7 +2,7 @@
  * General include file for MMTK C modules.
  *
  * Written by Konrad Hinsen
- * last revision: 2007-1-11 */
+ */
 
 #ifndef MMTK_H
 

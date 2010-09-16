@@ -1,7 +1,6 @@
 # This module implements trajetories and trajectory generators.
 #
 # Written by Konrad Hinsen
-# last revision: 2009-11-9
 #
 
 """

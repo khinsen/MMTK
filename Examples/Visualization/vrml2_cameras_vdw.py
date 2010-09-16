@@ -14,7 +14,6 @@
 # Molecular Organisation and Assembly in Cells (MOAC) Doctoral
 # Training Centre, University of Warwick, CV4 7AL, UK
 #
-# last revision: 2004-06-09
 #
 from MMTK import *
 from MMTK.Proteins import Protein

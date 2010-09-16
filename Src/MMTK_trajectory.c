@@ -2,7 +2,6 @@
  * Trajectory objects using netCDF files.
  *
  * Written by Konrad Hinsen
- * last revision: 2010-9-9
  */
 
 #define _TRAJECTORY_MODULE

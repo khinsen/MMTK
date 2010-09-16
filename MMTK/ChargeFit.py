@@ -1,7 +1,6 @@
 # This module contains code for charge fitting.
 #
 # Written by Konrad Hinsen
-# last revision: 2009-1-16
 #
 
 """
