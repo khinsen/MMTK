@@ -782,6 +782,12 @@ class Bead(object):
             self.index = atom.index + bead_number
         self._mass = atom._mass/atom.nbeads
 
+    def numberOfBeads(self):
+        return 1
+
+    def beads(self):
+        return [self]
+
     def position(self, conf = None):
         if self.atom.array is None:
             assert conf is None
@@ -799,13 +805,13 @@ class Bead(object):
         if self.atom.array is None:
             self.pos[self.bead_number] = position
         else:
-            self.array[self.index, :] = position.array
+            self.atom.array[self.index, :] = position.array
 
     def translateBy(self, vector):
         if self.atom.array is None:
             self.atom.pos[self.bead_number] += vector
         else:
-            self.array[self.index, :] += vector.array
+            self.atom.array[self.index, :] += vector.array
 
 class Group(CompositeChemicalObject, ChemicalObject):
 
