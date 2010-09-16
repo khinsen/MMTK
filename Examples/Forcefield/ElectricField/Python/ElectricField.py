@@ -40,8 +40,8 @@ class ElectricFieldTerm(EnergyTerm):
         results['virial'] = -energy
         if do_gradients:
             gradients = ParticleVector(self.universe)
-            for atom in self.universe.atomList():
-                gradients[atom] = self.charges[atom]*self.strength
+            for bead in self.universe.beadIterator():
+                gradients[bead] = self.charges[bead]*self.strength
             results['gradients'] = gradients
         if do_force_constants:
             # The force constants are zero -> nothing to calculate.
@@ -83,6 +83,12 @@ class ElectricField(ForceField):
     def ready(self, global_data):
         return True
 
+    # For a force field that supports path integrals (i.e. calculates
+    # the right terms for all beads etc.), the method supportsPathIntegrals,
+    # whose default implementation returns False, must be overridden.
+    def supportsPathIntegrals(self):
+        return True
+
     # The following method is called by the energy evaluation engine
     # to obtain a list of the evaluator objects
     # that handle the calculations.
@@ -97,7 +103,9 @@ class ElectricField(ForceField):
         charges = ParticleScalar(universe)
         for o in universe:
             for a in o.atomList():
-                charges[a] = o.getAtomProperty(a, self.charge_property)
+                c = o.getAtomProperty(a, self.charge_property)
+                for b in a.beads():
+                    charges[b] = c
         # Here we pass all the parameters to
         # the energy term code that handles energy calculations.
         return [ElectricFieldTerm(universe, self.strength, charges)]

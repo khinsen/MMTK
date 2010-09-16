@@ -37,6 +37,12 @@ class ElectricField(ForceField):
     def ready(self, global_data):
         return True
 
+    # For a force field that supports path integrals (i.e. calculates
+    # the right terms for all beads etc.), the method supportsPathIntegrals,
+    # whose default implementation returns False, must be overridden.
+    def supportsPathIntegrals(self):
+        return True
+
     # The following method is called by the energy evaluation engine
     # to obtain a list of the low-level evaluator objects (the C routines)
     # that handle the calculations.
@@ -51,7 +57,10 @@ class ElectricField(ForceField):
         charges = ParticleScalar(universe)
         for o in universe:
             for a in o.atomList():
-                charges[a] = o.getAtomProperty(a, self.charge_property)
+                c = o.getAtomProperty(a, self.charge_property)
+                for b in a.beads():
+                    charges[b] = c
+        print charges.array
         # Here we pass all the parameters as "simple" data types to
         # the C code that handles energy calculations.
         return [ElectricFieldTerm(universe._spec, charges.array,
