@@ -1,7 +1,6 @@
 # This module handles the skeleton descriptions stored in trajectory files.
 #
 # Written by Konrad Hinsen
-# last revision: 2009-7-10
 #
 
 import MMTK

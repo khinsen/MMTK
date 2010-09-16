@@ -4,7 +4,6 @@
 # resides on a different machine.
 #
 # Written by Konrad Hinsen
-# last revision: 2006-11-27
 #
 
 from Scientific.IO.NetCDF import NetCDFFile

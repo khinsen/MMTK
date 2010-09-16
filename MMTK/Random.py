@@ -1,7 +1,6 @@
 # Functions for finding random points and orientations.
 #
 # Written by: Konrad Hinsen
-# Last revision: 2009-4-29
 # 
 
 """

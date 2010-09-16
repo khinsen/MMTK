@@ -21,7 +21,6 @@
 # modifications to this module.
 #
 # Written by Konrad Hinsen
-# last revision: 2010-9-10
 #
 
 from MMTK.ForceFields.BondedInteractions import BondedForceField

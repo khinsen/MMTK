@@ -1,7 +1,6 @@
 # This module implements subspaces for motion analysis etc.
 #
 # Written by Konrad Hinsen
-# last revision: 2010-4-14
 #
 
 """

@@ -1,7 +1,6 @@
 # This file provides the Amber force field, using Amber parameter files.
 #
 # Written by Konrad Hinsen
-# last revision: 2009-5-13
 #
 
 """

@@ -1,7 +1,6 @@
 # MMTK initialization
 #
 # Written by Konrad Hinsen
-# last revision: 2009-1-16
 #
 
 """

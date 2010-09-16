@@ -2,7 +2,6 @@
 # bond angles, and dihedral angles.
 #
 # Written by Konrad Hinsen
-# last revision: 2008-11-3
 #
 
 """

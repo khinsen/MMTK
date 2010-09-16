@@ -1,7 +1,6 @@
 # This module defines scalar and vector fields in molecular systems
 #
 # Written by Konrad Hinsen
-# last revision: 2009-2-5
 #
 
 """

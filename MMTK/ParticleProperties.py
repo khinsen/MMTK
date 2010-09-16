@@ -2,7 +2,6 @@
 # simulation, i.e. configurations, force vectors, etc.
 #
 # Written by Konrad Hinsen
-# last revision: 2010-2-26
 #
 
 """

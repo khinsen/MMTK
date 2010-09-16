@@ -1,7 +1,6 @@
 # Basic tests
 #
 # Written by Konrad Hinsen
-# last revision: 2008-10-29
 #
 
 import unittest

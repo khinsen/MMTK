@@ -2,7 +2,6 @@
 # and force field evaluators.
 #
 # Written by Konrad Hinsen
-# last revision: 2010-1-22
 #
 
 from MMTK import ParticleProperties, Universe, Utility

@@ -1,7 +1,6 @@
 /* Low-level force field calculations: non-bonded interactions
  *
  * Written by Konrad Hinsen
- * last revision: 2007-4-24
  */
 
 #define NO_IMPORT

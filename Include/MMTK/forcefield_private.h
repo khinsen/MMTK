@@ -1,7 +1,6 @@
 /* Private include file for C force field calculations.
  *
  * Written by Konrad Hinsen
- * last revision: 2007-4-24
  */
 
 #ifndef MMTK_FORCEFIELD_PRIVATE_H

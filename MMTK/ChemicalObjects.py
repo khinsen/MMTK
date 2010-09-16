@@ -2,7 +2,6 @@
 # complexes. They are made as copies from blueprints in the database.
 #
 # Written by Konrad Hinsen
-# last revision: 2010-9-13
 #
 
 """

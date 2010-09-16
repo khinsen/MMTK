@@ -2,7 +2,6 @@
 # Requires that a TrajectoryServer is running on each participating machine.
 #
 # Written by Konrad Hinsen
-# last revision: 2000-2-24
 #
 
 import Pyro.core, Pyro.naming, Pyro.errors

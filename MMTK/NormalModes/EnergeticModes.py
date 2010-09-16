@@ -1,7 +1,6 @@
 # Energetic normal mode calculations.
 #
 # Written by Konrad Hinsen
-# last revision: 2009-5-12
 #
 
 """

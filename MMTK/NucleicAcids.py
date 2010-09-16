@@ -1,7 +1,6 @@
 # This module implements classes for nucleotide chains.
 #
 # Written by Konrad Hinsen
-# last revision: 2010-7-23
 #
 
 """

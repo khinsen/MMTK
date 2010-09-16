@@ -2,7 +2,6 @@
 # for non-bonded interactions
 #
 # Written by Konrad Hinsen
-# last revision: 2010-9-7
 #
 
 from MMTK import Units, Utility

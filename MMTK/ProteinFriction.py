@@ -1,7 +1,6 @@
 # Friction constants for protein C-alpha models
 #
 # Written by Konrad Hinsen
-# last revision: 2010-3-24
 #
 
 """

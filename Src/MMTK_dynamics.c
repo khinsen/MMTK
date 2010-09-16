@@ -1,7 +1,6 @@
 /* Low-level dynamics integrators
  *
  * Written by Konrad Hinsen
- * last revision: 2010-7-21
  */
 
 #include "MMTK/universe.h"

@@ -1,7 +1,6 @@
 /* Deformation energy calculation.
  *
  * Written by Konrad Hinsen
- * last revision: 2009-12-4
  */
 
 #include "MMTK/universe.h"

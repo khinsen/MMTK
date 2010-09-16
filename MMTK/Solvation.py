@@ -1,7 +1,6 @@
 # This module contains code for solvation.
 #
 # Written by Konrad Hinsen
-# last revision: 2009-4-29
 #
 
 """

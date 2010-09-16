@@ -2,7 +2,6 @@
  *
  * Written by Lutz Ehrlich
  * Adapted to MMTK conventions by Konrad Hinsen
- * last revision: 2008-5-21
  */
 
 #include "MMTK/universe.h"

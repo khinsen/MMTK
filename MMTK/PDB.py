@@ -1,7 +1,6 @@
 # This module deals with input and output of configurations in PDB format.
 #
 # Written by Konrad Hinsen
-# last revision: 2010-2-16
 #
 
 """

@@ -1,7 +1,6 @@
 /* Include file for C force field calculations.
  *
  * Written by Konrad Hinsen
- * last revision: 2006-5-10
  */
 
 #ifndef MMTK_FORCEFIELD_H

@@ -2,7 +2,6 @@
 # in code, without a database definition.
 #
 # Written by Konrad Hinsen
-# last revision: 2009-2-10
 #
 
 """

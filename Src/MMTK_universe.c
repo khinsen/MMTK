@@ -1,7 +1,6 @@
 /* Low-level functions for universes
  *
  * Written by Konrad Hinsen
- * last revision: 2010-2-2
  */
 
 #define _UNIVERSE_MODULE

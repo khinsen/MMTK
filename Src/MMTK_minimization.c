@@ -1,7 +1,6 @@
 /* Low-level minimization
  *
  * Written by Konrad Hinsen
- * last revision: 2009-7-10
  */
 
 #include "MMTK/universe.h"

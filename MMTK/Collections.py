@@ -1,7 +1,6 @@
 # This module defines collections of chemical objects.
 #
 # Written by Konrad Hinsen
-# last revision: 2010-9-13
 #
 
 """

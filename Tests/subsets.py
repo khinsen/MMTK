@@ -1,7 +1,6 @@
 # Subset energy tests
 #
 # Written by Konrad Hinsen
-# last revision: 2010-9-7
 #
 
 from Scientific import N

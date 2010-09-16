@@ -1,7 +1,6 @@
 # This module implements energy minimizers.
 #
 # Written by Konrad Hinsen
-# last revision: 2010-7-22
 #
 
 """

@@ -3,7 +3,6 @@
 # Note: this is still in a rather experimental state.
 #
 # Written by Konrad Hinsen
-# last revision: 2005-9-26
 #
 
 import sys

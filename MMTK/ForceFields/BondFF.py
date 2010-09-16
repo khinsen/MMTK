@@ -1,7 +1,6 @@
 # Detailed harmonic force field for proteins
 #
 # Written by Konrad Hinsen
-# last revision: 2010-9-10
 #
 
 """

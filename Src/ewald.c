@@ -1,7 +1,6 @@
 /* Ewald method for electrostatic interactions
  *
  * Written by Konrad Hinsen
- * last revision: 2009-12-9
  */
 
 

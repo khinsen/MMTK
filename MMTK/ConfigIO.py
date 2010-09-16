@@ -1,7 +1,6 @@
 # This module deals with input and output of configurations.
 #
 # Written by Konrad Hinsen
-# last revision: 2008-10-29
 #
 
 """

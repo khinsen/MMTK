@@ -1,7 +1,6 @@
 # This module implements test functions.
 #
 # Written by Konrad Hinsen
-# last revision: 2009-5-13
 #
 
 """

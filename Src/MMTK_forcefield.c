@@ -1,7 +1,6 @@
 /* Low-level force field calculations
  *
  * Written by Konrad Hinsen
- * last revision: 2009-3-18
  */
 
 #define _FORCEFIELD_MODULE

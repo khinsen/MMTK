@@ -2,7 +2,6 @@
 # and a visualization base class
 #
 # Written by Konrad Hinsen
-# last revision: 2009-5-12
 #
 
 """

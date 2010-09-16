@@ -1,7 +1,6 @@
 # Functions that help to create/modify the database
 #
 # Written by Konrad Hinsen
-# last revision: 1999-9-2
 #
 
 _undocumented = 1

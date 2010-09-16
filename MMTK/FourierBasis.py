@@ -1,7 +1,6 @@
 # Fourier basis for low-frequency normal mode calculations.
 #
 # Written by Konrad Hinsen
-# last revision: 2009-2-10
 #
 
 """
