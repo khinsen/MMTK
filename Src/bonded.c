@@ -78,7 +78,7 @@ harmonic_bond_evaluator(PyFFEnergyTermObject *self,
       }
     }
     if (energy->force_constants != NULL) {
-      double f1 = 2.*param[1]*dr/lrij;
+      double f1 = (lrij == 0.) ? 0. : 2.*param[1]*dr/lrij;
       double f2 = 2.*param[1];
       add_pair_fc(energy, i, j, rij, sqr(lrij), f1, f2);
     }

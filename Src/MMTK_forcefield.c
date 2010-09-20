@@ -1417,7 +1417,7 @@ add_pair_fc(energy_data *energy, int i, int j, vector3 dr,
     fcij = data + 9*n*i+3*j;
     for (k = 0; k < 3; k++) {
       for (l = 0; l < 3; l++) {
-	double f = (f2-f1)*dr[k]*dr[l]/r_sq;
+	double f = (r_sq == 0.) ? 0. : (f2-f1)*dr[k]*dr[l]/r_sq;
 	fcii[3*n*k+l] += f;
 	fcjj[3*n*k+l] += f;
 	fcij[3*n*k+l] -= f;
