@@ -42,6 +42,12 @@ class HarmonicOscillatorForceField(ForceField):
     def ready(self, global_data):
         return True
 
+    # For a force field that supports path integrals (i.e. calculates
+    # the right terms for all beads etc.), the method supportsPathIntegrals,
+    # whose default implementation returns False, must be overridden.
+    def supportsPathIntegrals(self):
+        return True
+
     # The following method is called by the energy evaluation engine
     # to obtain a list of the low-level evaluator objects (the C routines)
     # that handle the calculations.
@@ -53,7 +59,9 @@ class HarmonicOscillatorForceField(ForceField):
             raise ValueError("sorry, no subsets here")
         # Here we pass all the parameters to the Pyrex code
         # that handles energy calculations.
+        f, offsets = self.beadOffsetsAndFactor([self.atom_index], global_data)
         return [HarmonicOscillatorTerm(universe,
-                                       self.atom_index,
+                                       self.atom_index + o[0],
                                        self.center,
-                                       self.force_constant)]
+                                       self.force_constant)
+                for o in offsets]
