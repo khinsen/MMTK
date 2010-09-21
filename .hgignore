@@ -3,6 +3,7 @@ syntax: glob
 *~
 **.pyc
 **.pyo
+**.so
 build
 dist
 Test
@@ -17,4 +18,5 @@ config/*.o
 Src/MMTK_energy_term.c
 Src/MMTK_state_accessor.c
 Src/MMTK_trajectory_action.c
+Examples/Forcefield/*/Cython/*.c
 1
