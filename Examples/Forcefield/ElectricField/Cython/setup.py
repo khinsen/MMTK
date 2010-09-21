@@ -5,7 +5,7 @@
 # Then run "python test.py"
 
 from distutils.core import setup, Extension
-from Pyrex.Distutils import build_ext
+from Cython.Distutils import build_ext
 import os, sys
 
 compile_args = []
