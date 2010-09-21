@@ -791,7 +791,7 @@ class Bead(object):
     def position(self, conf = None):
         if self.atom.array is None:
             assert conf is None
-            return self.pos[self.bead_number]
+            return self.atom.pos[self.bead_number]
         if conf is None:
             array = self.atom.array
         else:
@@ -803,7 +803,7 @@ class Bead(object):
     def setPosition(self, position):
         assert position is not None
         if self.atom.array is None:
-            self.pos[self.bead_number] = position
+            self.atom.pos[self.bead_number] = position
         else:
             self.atom.array[self.index, :] = position.array
 
