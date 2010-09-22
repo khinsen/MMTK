@@ -18,6 +18,7 @@ class InfiniteUniverseTest:
                                          position = Vector(-0.2, 0., 0.)))
         self.universe.addObject(Molecule('water',
                                          position = Vector(0.2, 0., 0.)))
+        self.initial = self.universe.copyConfiguration()
 
 
 class OrthorhombicUniverseTest:
@@ -28,6 +29,7 @@ class OrthorhombicUniverseTest:
                                          position = Vector(-0.2, 0., 0.)))
         self.universe.addObject(Molecule('water',
                                          position = Vector(0.2, 0., 0.)))
+        self.initial = self.universe.copyConfiguration()
 
 class ParallelepipedicUniverseTest:
 
@@ -39,6 +41,7 @@ class ParallelepipedicUniverseTest:
                                          position = Vector(-0.2, 0., 0.)))
         self.universe.addObject(Molecule('water',
                                          position = Vector(0.2, 0., 0.)))
+        self.initial = self.universe.copyConfiguration()
 
 class InfiniteUniverseWithPITest:
 
@@ -51,6 +54,7 @@ class InfiniteUniverseWithPITest:
             pos = a.position()
             displacedbeads = [pos+Vector(-1.,-1.,-1.),pos,pos+Vector(1.,1.,1.)]
             a.setBeadPositions(displacedbeads)
+        self.initial = self.universe.copyConfiguration()
         
 
 class SinglePrecisionTest:
@@ -68,15 +72,12 @@ class DoublePrecisionTest:
 class TrajectoryTest:
 
     def tearDown(self):
-        return
         try:
             os.remove('test.nc')
         except OSError:
             pass
 
     def test_snapshot(self):
-
-        initial = self.universe.copyConfiguration()
 
         transformation = Translation(Vector(0.,0.,0.01)) \
                          * Rotation(Vector(0.,0.,1.), 1.*Units.deg)
@@ -97,7 +98,7 @@ class TrajectoryTest:
             snapshot()
         trajectory.close()
 
-        self.universe.setConfiguration(initial)
+        self.universe.setConfiguration(self.initial)
         trajectory = Trajectory(None, "test.nc")
         t_universe = trajectory.universe
         for i in range(101):
@@ -116,7 +117,20 @@ class TrajectoryTest:
             self.universe.foldCoordinatesIntoBox()
         trajectory.close()
 
-
+        if not isinstance(self.universe, ParallelepipedicPeriodicUniverse):
+            trajectory = Trajectory(None, "test.nc")
+            t_universe = trajectory.universe
+            for bead in t_universe.beadIterator():
+                pt = trajectory.readParticleTrajectory(bead)
+                self.universe.setConfiguration(self.initial)
+                conf = self.universe.configuration()
+                for i in range(101):
+                    t_configuration = trajectory[i]['configuration']
+                    max_diff = N.maximum.reduce(N.fabs((pt[i] - conf[bead]).array))
+                    self.assert_(max_diff < self.tolerance)
+                    self.universe.applyTransformation(transformation)
+            trajectory.close()
+        
 class InfiniteUniverseTestSP(unittest.TestCase,
                              InfiniteUniverseTest,
                              TrajectoryTest,

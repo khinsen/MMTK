@@ -737,7 +737,7 @@ class ParticleTrajectoryReader(object):
 
     def __init__(self, trajectory):
         self.trajectory = trajectory
-        self.natoms = self.trajectory.universe.numberOfAtoms()
+        self.npoints = self.trajectory.universe.numberOfPoints()
         self._trajectory = trajectory.trajectory
         self.cache = {}
         self.cache_lifetime = 2
@@ -765,12 +765,12 @@ class ParticleTrajectoryReader(object):
         for k in delete:
             del self.cache[k]
         cache_size = min(10, max(1, 100000/max(1, len(self.trajectory))))
-        natoms = min(cache_size, self.natoms-index)
-        data = self._trajectory.readParticleTrajectories(index, natoms,
+        npoints = min(cache_size, self.npoints-index)
+        data = self._trajectory.readParticleTrajectories(index, npoints,
                                                          variable,
                                                          first, last, skip,
                                                          correct, box)
-        for i in range(natoms):
+        for i in range(npoints):
             key = (index+i, variable, first, last, skip, correct, box)
             self.cache[key] = (data[i], self.cache_lifetime)
         return data[0]
@@ -795,6 +795,7 @@ class ParticleTrajectory(object):
     
     def __init__(self, trajectory, atom, first=0, last=None, skip=1,
                  variable = "configuration"):
+        assert atom.numberOfBeads() == 1
         if last is None:
             last = len(trajectory)
         if variable == "box_coordinates":
