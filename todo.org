@@ -1,0 +1,68 @@
+* Path integrals
+
+** Force fields
+
+*** TODO Nonbonded lists
+Iteration over pairs should include only pairs with compatible bead
+indices. Problem: index compatibility is a rather complex and thus
+costly computation. A lookup table could be used, but may result in
+bad cache performance.
+
+** ParticleProperty
+
+*** TODO Indexing with a multi-bead atom
+Idea: define intensive and extensive quantities, with intensive ones returning the
+average over the beads and extensive ones the sum. This could also be extended to
+allow indexing of ParticleProperties with multi-atom objects (though the weights for
+calculating averages are not obvious).
+
+** Trajectories
+
+*** DONE Reading a ParticleTrajectory for a bead
+
+*** TODO Reading a ParticleTrajectory for a multi-bead atom
+Same problem as for ParticleProperties.
+
+** Integration
+
+*** TODO Integrator using fourier-transform variables
+
+*** TODO Constraints
+
+*** TODO Langevin integration for rigid bodies (quaternions)
+
+** Tests
+
+*** TODO Coordinate manipulation (methods in Collections.GroupOfAtoms)
+ - [X] translation
+ - [X] rotation
+ - [ ] center of mass
+ - [ ] moment of inertia
+ - [ ] bounding box
+ - [ ] bounding sphere
+ - [ ] rms difference
+ - [ ] findTransformation
+ - [ ] kineticEnergy
+ - [ ] temperature
+ - [ ] momentum
+ - [ ] angularMomentum
+ - [ ] angularVelocity
+ - [ ] booleanMask
+
+*** TODO Energy evaluation
+
+*** TODO Trajectories
+
+*** TODO ParticleProperties
+
+
+* New features
+
+** TODO [#C] Make energy gradients available for subsets of the total force field
+
+
+* Bugs
+
+** TODO [#C] Opening a trajectory written for a universe created from a MoleculeFactory doesn't work.
+
+** TODO Trajectory test fails for ParallelepipedicPeriodicUniverse in readParticleTrajectory
