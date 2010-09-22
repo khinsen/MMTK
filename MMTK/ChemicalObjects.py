@@ -813,6 +813,9 @@ class Bead(object):
         else:
             self.atom.array[self.index, :] += vector.array
 
+    def universe(self):
+        return self.atom.universe()
+
 class Group(CompositeChemicalObject, ChemicalObject):
 
     """
