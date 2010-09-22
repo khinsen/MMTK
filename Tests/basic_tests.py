@@ -6,6 +6,62 @@
 import unittest
 import MMTK
 import MMTK.Utility
+from Scientific import N
+
+class TranslationTest(unittest.TestCase):
+
+    def test_atom_translation_and_rotation(self):
+        atom = MMTK.Atom('C')
+        p = MMTK.Vector(0., 0., 1.)
+        atom.setPosition(p)
+        universe = MMTK.InfiniteUniverse()
+        universe.addObject(atom)
+        opos = atom.position()
+        displace = MMTK.Vector(1.,2.,3.)
+        atom.translateBy(displace)
+        npos = atom.position()
+        self.assertAlmostEqual(opos[0],npos[0]-1.,5)
+        self.assertAlmostEqual(opos[1],npos[1]-2.,5)
+        self.assertAlmostEqual(opos[2],npos[2]-3.,5)
+        for i in range(3):
+            atom.rotateAroundAxis(MMTK.Vector(0.,0.,0.),MMTK.Vector(0.,1.,0.),N.pi/3.)
+        for i in range(3):
+            atom.rotateAroundOrigin(MMTK.Vector(0.,1.,0.),N.pi/3.)
+        dpos = atom.position()
+        self.assertAlmostEqual(dpos[0],npos[0],5)
+        self.assertAlmostEqual(dpos[1],npos[1],5)
+        self.assertAlmostEqual(dpos[2],npos[2],5)
+
+
+    def test_pi_atom_translation_and_rotation(self):
+        atom = MMTK.Atom('C')
+        np = 3
+        atom.setNumberOfBeads(np)
+        beadpos=[MMTK.Vector(-2.,-3.,-4.),MMTK.Vector(5.,1.,3.),MMTK.Vector(1,-2,3)]
+        atom.setBeadPositions(beadpos)
+        universe = MMTK.InfiniteUniverse()
+        universe.addObject(atom)
+        opos = atom.beadPositions()
+        displace = MMTK.Vector(1.,2.,3.)
+        atom.translateBy(displace)
+        npos = atom.beadPositions()
+        for x in range(len(opos)):
+            self.assertAlmostEqual(opos[x][0]+1.,npos[x][0],5) 
+            self.assertAlmostEqual(opos[x][1]+2.,npos[x][1],5) 
+            self.assertAlmostEqual(opos[x][2]+3.,npos[x][2],5) 
+
+        conf = universe.configuration()
+        for i in range(6):
+            atom.rotateAroundAxis(MMTK.Vector(0.,0.,0.),MMTK.Vector(0.,0.,1.),N.pi/3.)
+        for i in range(6):
+            atom.rotateAroundOrigin(MMTK.Vector(0.,1.,0.),N.pi/3.)
+        for i in range(7):
+            atom.rotateAroundAxis(MMTK.Vector(0.,0.,0.),MMTK.Vector(1.,0.,0.),2*N.pi/7.)
+        dpos = atom.beadPositions()
+        for x in range(len(opos)):
+            self.assertAlmostEqual(dpos[x][0],npos[x][0],5) 
+            self.assertAlmostEqual(dpos[x][1],npos[x][1],5) 
+            self.assertAlmostEqual(dpos[x][2],npos[x][2],5) 
 
 class PositionTest(unittest.TestCase):
 
