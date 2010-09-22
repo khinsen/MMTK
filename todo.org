@@ -8,6 +8,10 @@ indices. Problem: index compatibility is a rather complex and thus
 costly computation. A lookup table could be used, but may result in
 bad cache performance.
 
+*** DONE Check that the bead numbers of all atoms in the universe are consistent
+
+*** TODO Merge path integral setup in EnergyEvaluator and EnergyEvaluatorParameters
+
 ** ParticleProperty
 
 *** TODO Indexing with a multi-bead atom

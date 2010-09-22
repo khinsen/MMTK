@@ -116,7 +116,7 @@ NONB
             diff = N.fabs(N.ravel(num_fc-fc[a1, a2].array))
             error = N.maximum.reduce(diff)
             self.assert_(error < 5.e-2)
-            
+      
     def _dihedralTerm(self, n, phase, V):
 
         mod_file = self.mod_template % \
@@ -266,7 +266,83 @@ class LennardJonesSubsetTest(unittest.TestCase,
         self.subset1 = Collection(self.universe.atomList()[:10])
         self.subset2 = Collection(self.universe.atomList()[20:30])
 
-            
+class PathIntegralConsistencyTest(unittest.TestCase):
+
+    def _consistent(self, i, nbi, j, nbj):
+        if nbi > nbj:
+            i, nbi, j, nbj = j, nbj, i, nbi
+        # integer division - needs to be changed for Python 3
+        f = nbj/nbi
+        return i == j/f
+
+    def test_consistency(self):
+        # A temporary hack to make this test work while nonbonded interactions
+        # are still unimplemented for path integrals.
+        ff = Amber99ForceField()
+        ff.supportsPathIntegrals = lambda: True
+        universe = InfiniteUniverse(ff)
+        universe.addObject(Molecule('water'))
+        universe.addObject(Environment.PathIntegrals(50.*Units.K))
+        atoms = universe.atomList()
+        atoms[0].setNumberOfBeads(4)
+        atoms[1].setNumberOfBeads(2)
+        universe.configuration()
+        index_to_atom = dict(sum(([(b.index, b.atom) for b in a.beads()]
+                                  for a in atoms), []))
+        index_to_bead = dict(sum(([(b.index, b.bead_number) for b in a.beads()]
+                                  for a in atoms), []))
+        try:
+            params = universe.energyEvaluatorParameters()
+        except ValueError:
+            self.fail()
+        try:
+            ev = universe.energyEvaluator()
+        except ValueError:
+            self.fail()
+        # first, test the test function
+        self.assertTrue(self._consistent(0, 2, 0, 4))
+        self.assertTrue(self._consistent(0, 2, 1, 4))
+        self.assertFalse(self._consistent(0, 2, 2, 4))
+        self.assertFalse(self._consistent(0, 2, 3, 4))
+        # next, do the real test
+        for i, j, d0, k in params['harmonic_distance_term']:
+            ai = index_to_atom[i]
+            aj = index_to_atom[j]
+            if ai == aj:
+                self.assert_((i-j+1) % ai.numberOfBeads() == 0)
+            else:
+                self.assert_(self._consistent(index_to_bead[i], ai.numberOfBeads(),
+                                              index_to_bead[j], aj.numberOfBeads()))
+
+    def test_inconsistency1(self):
+        # A temporary hack to make this test work while nonbonded interactions
+        # are still unimplemented for path integrals.
+        ff = Amber99ForceField()
+        ff.supportsPathIntegrals = lambda: True
+        universe = InfiniteUniverse(ff)
+        universe.addObject(Molecule('water'))
+        universe.addObject(Environment.PathIntegrals(50.*Units.K))
+        atoms = universe.atomList()
+        atoms[0].setNumberOfBeads(4)
+        atoms[1].setNumberOfBeads(3)
+        self.assertRaises(ValueError, universe.energyEvaluatorParameters, ())
+        self.assertRaises(ValueError, universe.energyEvaluator, ())
+
+    def test_inconsistency2(self):
+        # A temporary hack to make this test work while nonbonded interactions
+        # are still unimplemented for path integrals.
+        ff = Amber99ForceField()
+        ff.supportsPathIntegrals = lambda: True
+        universe = InfiniteUniverse(ff)
+        universe.addObject(Molecule('water'))
+        universe.addObject(Environment.PathIntegrals(50.*Units.K))
+        atoms = universe.atomList()
+        atoms[0].setNumberOfBeads(2)
+        atoms[1].setNumberOfBeads(3)
+        atoms[2].setNumberOfBeads(6)
+        self.assertRaises(ValueError, universe.energyEvaluatorParameters, ())
+        self.assertRaises(ValueError, universe.energyEvaluator, ())
+
 def suite():
     loader = unittest.TestLoader()
     s = unittest.TestSuite()
@@ -276,6 +352,7 @@ def suite():
     s.addTest(loader.loadTestsFromTestCase(ParallelepipedicUniverseNonbondedListTest))
     s.addTest(loader.loadTestsFromTestCase(LennardJonesSubsetTest))
     s.addTest(loader.loadTestsFromTestCase(AmberPathIntegralTest))
+    s.addTest(loader.loadTestsFromTestCase(PathIntegralConsistencyTest))
     return s
 
 
