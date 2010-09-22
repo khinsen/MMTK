@@ -158,7 +158,11 @@ class AmberPathIntegralTest(unittest.TestCase):
     """
 
     def setUp(self):
-        self.universe = InfiniteUniverse(Amber99ForceField())
+        # A temporary hack to make this test work while nonbonded interactions
+        # are still unimplemented for path integrals.
+        ff = Amber99ForceField()
+        ff.supportsPathIntegrals = lambda: True
+        self.universe = InfiniteUniverse(ff)
 
     def test_pi_quantum_spring_potential(self):
         self.universe.h = Atom('H',amber_atom_type="CT",amber_charge=0.)

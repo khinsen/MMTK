@@ -25,7 +25,7 @@ class PositionTest(unittest.TestCase):
     def test_pi_atom_position(self):
         atom = MMTK.Atom('C')
         atom.index = 42
-        atom.setNBeads(3)
+        atom.setNumberOfBeads(3)
         universe = MMTK.InfiniteUniverse()
         universe.addObject(atom)
         self.assert_(universe.numberOfPoints() == 3)
