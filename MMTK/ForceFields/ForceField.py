@@ -80,14 +80,8 @@ class ForceField(object):
 
     def beadOffsetsAndFactor(self, atom_indices, global_data):
         nbeads = global_data.get('nbeads')
-        nbead_array = global_data.get('nbead_array')
-        if nbead_array == []:
-            universe = global_data.get('universe')
-            nbead_array = N.zeros((universe.numberOfPoints(),), N.Int)
-            for a in universe.atomIterator():
-                nbead_array[a.index] = a.numberOfBeads()
-            global_data.set('nbead_array', nbead_array)
-        nb = [nbead_array[i] for i in atom_indices]
+        bead_data = global_data.get('bead_data')
+        nb = [bead_data[i, 1] for i in atom_indices]
         assert all(nbeads % n == 0 for n in nb)
         f = nbeads / max(nb)
         return f, N.transpose([N.repeat(N.arange(n), nbeads/n/f) for n in nb])
@@ -251,7 +245,6 @@ class EnergyEvaluatorParameters(object):
                 if nbead_values[i+1] % nbead_values[i] != 0:
                     raise ValueError("number of beads not consistent for all atoms: %s"
                                      % str(nbead_values))
-            self.global_data.set('nbeads', nbeads)
 
             pi_environments = self.universe.environmentObjectList(
                                                 Environment.PathIntegrals)
@@ -268,8 +261,14 @@ class EnergyEvaluatorParameters(object):
         else:
 
             nbeads = 1
-            self.global_data.set('nbeads', nbeads)
             
+        self.global_data.set('nbeads', nbeads)
+        bead_data = N.zeros((self.universe.numberOfPoints(), 2), N.Int16)
+        for b in universe.beadIterator():
+            bead_data[b.index, 0] = b.bead_number
+            bead_data[b.index, 1] = b.atom.numberOfBeads()
+        self.global_data.set('bead_data', bead_data)
+
         self.params = self.ff.evaluatorParameters(self.universe,
                                                   subset1, subset2,
                                                   self.global_data)
@@ -306,7 +305,6 @@ class EnergyEvaluator(object):
                 if nbead_values[i+1] % nbead_values[i] != 0:
                     raise ValueError("number of beads not consistent for all atoms: %s"
                                      % str(nbead_values))
-            self.global_data.set('nbeads', nbeads)
 
             pi_environments = self.universe.environmentObjectList(
                                                 Environment.PathIntegrals)
@@ -330,7 +328,13 @@ class EnergyEvaluator(object):
         else:
 
             nbeads = 1
-            self.global_data.set('nbeads', nbeads)
+
+        self.global_data.set('nbeads', nbeads)
+        bead_data = N.zeros((self.universe.numberOfPoints(), 2), N.Int16)
+        for b in universe.beadIterator():
+            bead_data[b.index, 0] = b.bead_number
+            bead_data[b.index, 1] = b.atom.numberOfBeads()
+        self.global_data.set('bead_data', bead_data)
 
         terms.extend(self.ff.evaluatorTerms(self.universe,
                                             subset1, subset2,

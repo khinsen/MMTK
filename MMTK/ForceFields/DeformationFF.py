@@ -70,8 +70,9 @@ class DeformationForceField(ForceField):
         else:
             atom_subset = N.array([], N.Int)
             excluded_pairs = nothing
-        nbl = NonbondedList(excluded_pairs, nothing, atom_subset, universe._spec,
-                            self.cutoff)
+        nbl = NonbondedList(excluded_pairs, nothing, atom_subset,
+                            global_data.get('nbeads'), global_data.get('bead_data'),
+                            universe._spec, self.cutoff)
         update = NonbondedListTerm(nbl)
         cutoff = self.cutoff
         if cutoff is None:

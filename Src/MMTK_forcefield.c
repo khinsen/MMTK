@@ -1140,7 +1140,7 @@ nblist_item(PyNonbondedListObject *self, Py_ssize_t i)
       return NULL;
     }
   }
-  return Py_BuildValue("ii", self->iterator.a1, self->iterator.a2);
+  return Py_BuildValue("iii", self->iterator.a1, self->iterator.a2, self->iterator.weight);
 }
 
 /* Methods */
@@ -1253,7 +1253,7 @@ nblist_pair_indices(PyObject *self, PyObject *args)
   if (!PyArg_ParseTuple(args, ""))
     return NULL;
   n[0] = nblist_length(nblist);
-  n[1] = 2;
+  n[1] = 3;
 #if defined(NUMPY)
   array = (PyArrayObject *)PyArray_SimpleNew(2, n, PyArray_LONG);
 #else
@@ -1267,6 +1267,7 @@ nblist_pair_indices(PyObject *self, PyObject *args)
   while (nblist_iterate(nblist, &iterator)) {
     index[i++] = iterator.a1;
     index[i++] = iterator.a2;
+    index[i++] = iterator.weight;
   }
   return (PyObject *)array;
 }
@@ -1912,10 +1913,12 @@ NonbondedList(PyObject *dummy, PyObject *args)
   PyObject *cutoff_ob = NULL;
   if (self == NULL)
     return NULL;
-  if (!PyArg_ParseTuple(args, "O!O!O!O!O",
+  if (!PyArg_ParseTuple(args, "O!O!O!iO!O!O",
 			&PyArray_Type, &self->excluded_pairs,
 			&PyArray_Type, &self->one_four_pairs,
 			&PyArray_Type, &self->atom_subset,
+			&self->nbeads,
+			&PyArray_Type, &self->bead_data,
 			&PyUniverseSpec_Type, &self->universe_spec,
 			&cutoff_ob)) {
     nblist_dealloc(self);
@@ -1932,9 +1935,15 @@ NonbondedList(PyObject *dummy, PyObject *args)
     nblist_dealloc(self);
     return NULL;
   }
+  if (((PyArrayObject *)self->bead_data)->descr->type_num != PyArray_SHORT) {
+    PyErr_SetString(PyExc_TypeError, "bead data must be an int16 array");
+    nblist_dealloc(self);
+    return NULL;
+  }
   Py_INCREF(self->excluded_pairs);
   Py_INCREF(self->one_four_pairs);
   Py_INCREF(self->atom_subset);
+  Py_INCREF(self->bead_data);
   Py_INCREF(self->universe_spec);
   return (PyObject *)self;
 }

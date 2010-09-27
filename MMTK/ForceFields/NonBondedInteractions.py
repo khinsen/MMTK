@@ -26,6 +26,9 @@ class NonBondedForceField(ForceField):
     def ready(self, global_data):
         return 'bonded' in global_data.get('initialized')
 
+    def supportsPathIntegrals(self):
+        return True
+
     def excludedPairs(self, subset1, subset2, global_data):
         if 'excluded_pairs' not in global_data.get('initialized'):
             excluded_pairs = set(global_data.get('excluded_pairs'))
@@ -67,6 +70,7 @@ class NonBondedForceField(ForceField):
             else:
                 atom_subset = N.array([], N.Int)
             nbl = NonbondedList(excluded_pairs, one_four_pairs, atom_subset,
+                                global_data.get('nbeads'), global_data.get('bead_data'),
                                 universe._spec, self.cutoff)
             update = NonbondedListTerm(nbl)
             update.info = False
@@ -98,12 +102,13 @@ class LJForceField(NonBondedForceField):
         atom_types = {}
         atom_type_names = []
         for o in universe:
-            for a in o.atomList():
+            for a in o.atomIterator():
                 t = self._atomType(o, a, global_data)
                 if not atom_types.has_key(t):
                     atom_types[t] = len(atom_types)
                     atom_type_names.append(t)
-                lj_type[a.index] = atom_types[t]
+                for b in a.beads():
+                    lj_type[b.index] = atom_types[t]
         n_types = len(atom_types)
         eps_sigma = N.zeros((n_types, n_types, 2), N.Float)
         for t, i in atom_types.items():
@@ -178,8 +183,10 @@ class ElectrostaticForceField(NonBondedForceField):
         n = universe.numberOfPoints()
         charge = N.zeros((n,), N.Float)
         for o in universe:
-            for a in o.atomList():
-                charge[a.index] = self._charge(o, a, global_data)
+            for a in o.atomIterator():
+                c = self._charge(o, a, global_data)
+                for b in a.beads():
+                    charge[b.index] = c
         charge = charge*N.sqrt(self.scale_factor)
         if self.cutoff is None:
             cutoff = 0.
@@ -241,8 +248,10 @@ class ESEwaldForceField(NonBondedForceField):
         n = universe.numberOfPoints()
         charge = N.zeros((n,), N.Float)
         for o in universe:
-            for a in o.atomList():
-                charge[a.index] = self._charge(o, a, global_data)
+            for a in o.atomIterator():
+                c = self._charge(o, a, global_data)
+                for b in a.beads():
+                    charge[b.index] = c
         charge = charge*N.sqrt(self.scale_factor)
         precision = self.options.get('ewald_precision', 1.e-6)
         p = N.sqrt(-N.log(precision))
@@ -340,8 +349,10 @@ class ESMPForceField(NonBondedForceField):
         charge = N.zeros((n,), N.Float)
         atom_types = {}
         for o in universe:
-            for a in o.atomList():
-                charge[a.index] = self._charge(o, a, global_data)
+            for a in o.atomIterator():
+                c = self._charge(o, a, global_data)
+                for b in a.beads():
+                    charge[b.index] = c
         charge = N.zeros((n,), N.Float)
         params = {}
         if n < 10000:

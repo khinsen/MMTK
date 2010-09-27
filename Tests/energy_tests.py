@@ -116,7 +116,7 @@ NONB
             diff = N.fabs(N.ravel(num_fc-fc[a1, a2].array))
             error = N.maximum.reduce(diff)
             self.assert_(error < 5.e-2)
-      
+   
     def _dihedralTerm(self, n, phase, V):
 
         mod_file = self.mod_template % \
@@ -158,11 +158,7 @@ class AmberPathIntegralTest(unittest.TestCase):
     """
 
     def setUp(self):
-        # A temporary hack to make this test work while nonbonded interactions
-        # are still unimplemented for path integrals.
-        ff = Amber99ForceField()
-        ff.supportsPathIntegrals = lambda: True
-        self.universe = InfiniteUniverse(ff)
+        self.universe = InfiniteUniverse(Amber99ForceField())
 
     def test_pi_quantum_spring_potential(self):
         self.universe.h = Atom('H',amber_atom_type="CT",amber_charge=0.)
@@ -183,18 +179,38 @@ class AmberPathIntegralTest(unittest.TestCase):
 
     def test_pi_water_energy(self):
         self.universe.water = Molecule('water')
+        atoms = self.universe.atomList()
         e0, grad = self.universe.energyAndGradients()
+        g0 = [grad[a] for a in atoms]
         for a in self.universe.atomList():
             a.setNumberOfBeads(4)
         self.universe.addObject(Environment.PathIntegrals(100*Units.K))
         piterms = self.universe.energyTerms()
         self.assertEqual(piterms['path integral spring'], 0.)
         self.assertAlmostEqual(piterms['harmonic bond'], e0, 10)
-        #e1, grad1 = self.universe.energyAndGradients()
-        #self.assertEqual(e0, e1)
-        #for a in self.universe.atomList():
-        #    self.assert_((grad1[a]-grad[a]).length() == 0.)
+        e1, grad = self.universe.energyAndGradients()
+        self.assertAlmostEqual(e0, e1, 7)
+        g1 = [4.*grad[a.beads()[0]] for a in atoms]
+        for i in range(len(atoms)):
+            self.assert_((g1[i]-g0[i]).length() == 0.)
 
+    def test_pi_two_water_energy(self):
+        self.universe.addObject(Molecule('water', position=Vector(0., 0., 0.)))
+        self.universe.addObject(Molecule('water', position=Vector(1., 0., 0.)))
+        atoms = self.universe.atomList()
+        piterms = self.universe.energyTerms()
+        e0, grad = self.universe.energyAndGradients()
+        g0 = [grad[a] for a in atoms]
+        for a in self.universe.atomList():
+            a.setNumberOfBeads(2)
+        self.universe.addObject(Environment.PathIntegrals(100*Units.K))
+        piterms = self.universe.energyTerms()
+        self.assertEqual(piterms['path integral spring'], 0.)
+        e1, grad = self.universe.energyAndGradients()
+        self.assertAlmostEqual(e0, e1, 7)
+        g1 = [2.*grad[a.beads()[0]] for a in atoms]
+        for i in range(len(atoms)):
+            self.assert_((g1[i]-g0[i]).length() < 1.e-7)
 
 class NonbondedListTest:
 
@@ -202,17 +218,19 @@ class NonbondedListTest:
 
         self.universe.configuration()
         atoms = self.universe.atomList()
-        atom_indices = N.array([a.index for a in self.universe.atomList()])
+        atom_indices = N.array([a.index for a in atoms])
         empty = N.zeros((0, 2), N.Int)
 
         for cutoff in [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.]:
 
             nblist = NonbondedList(empty, empty, atom_indices,
+                                   1, N.array(len(atoms)*[[0, 1]], N.Int16),
                                    self.universe._spec, cutoff)
             nblist.update(self.universe.configuration().array)
             distances = nblist.pairDistances()
             pairs1 = nblist.pairIndices()
-            pairs1 = [sorted_tuple(pairs1[i]) for i in range(len(pairs1))
+            self.assert_((pairs1[:, 2] == 1).all())
+            pairs1 = [sorted_tuple(pairs1[i, :2]) for i in range(len(pairs1))
                       if distances[i] < cutoff]
             pairs1.sort(lambda a, b: cmp(a[0], b[0]) or cmp(a[1], b[1]))
 
@@ -227,6 +245,41 @@ class NonbondedListTest:
 
             self.assertEqual(pairs1, pairs2)
 
+    def test_nonbondedList_pi(self):
+
+        for a in self.universe.atomIterator():
+            a.setNumberOfBeads(2)
+        self.universe.configuration()
+        atoms = self.universe.atomList()
+        beads = sum((a.beads() for a in atoms), [])
+        bead_indices = N.array([b.index for b in beads])
+        empty = N.zeros((0, 2), N.Int)
+
+        for cutoff in [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.]:
+
+            nblist = NonbondedList(empty, empty, bead_indices,
+                                   4, N.array(len(atoms)*[[0, 2], [1, 2]], N.Int16),
+                                   self.universe._spec, cutoff)
+            nblist.update(self.universe.configuration().array)
+            distances = nblist.pairDistances()
+            pairs1 = nblist.pairIndices()
+            self.assert_((pairs1[:, 2] == 2).all())
+            pairs1 = [sorted_tuple(pairs1[i, :2]) for i in range(len(pairs1))
+                      if distances[i] < cutoff]
+            pairs1.sort(lambda a, b: cmp(a[0], b[0]) or cmp(a[1], b[1]))
+
+            pairs2 = []
+            for i in range(len(atoms)):
+                for j in range(i+1, len(atoms)):
+                    d = self.universe.distance(atoms[i], atoms[j])
+                    if d < cutoff:
+                        pairs2.append(sorted_tuple((atoms[i].index,
+                                                    atoms[j].index)))
+                        pairs2.append(sorted_tuple((atoms[i].index+1,
+                                                    atoms[j].index+1)))
+            pairs2.sort(lambda a, b: cmp(a[0], b[0]) or cmp(a[1], b[1]))
+
+            self.assertEqual(pairs1, pairs2)
 
 class InfiniteUniverseNonbondedListTest(unittest.TestCase,
                                         NonbondedListTest):
@@ -276,11 +329,7 @@ class PathIntegralConsistencyTest(unittest.TestCase):
         return i == j/f
 
     def test_consistency(self):
-        # A temporary hack to make this test work while nonbonded interactions
-        # are still unimplemented for path integrals.
-        ff = Amber99ForceField()
-        ff.supportsPathIntegrals = lambda: True
-        universe = InfiniteUniverse(ff)
+        universe = InfiniteUniverse(Amber99ForceField())
         universe.addObject(Molecule('water'))
         universe.addObject(Environment.PathIntegrals(50.*Units.K))
         atoms = universe.atomList()
@@ -315,11 +364,7 @@ class PathIntegralConsistencyTest(unittest.TestCase):
                                               index_to_bead[j], aj.numberOfBeads()))
 
     def test_inconsistency1(self):
-        # A temporary hack to make this test work while nonbonded interactions
-        # are still unimplemented for path integrals.
-        ff = Amber99ForceField()
-        ff.supportsPathIntegrals = lambda: True
-        universe = InfiniteUniverse(ff)
+        universe = InfiniteUniverse(Amber99ForceField())
         universe.addObject(Molecule('water'))
         universe.addObject(Environment.PathIntegrals(50.*Units.K))
         atoms = universe.atomList()
@@ -329,11 +374,7 @@ class PathIntegralConsistencyTest(unittest.TestCase):
         self.assertRaises(ValueError, universe.energyEvaluator, ())
 
     def test_inconsistency2(self):
-        # A temporary hack to make this test work while nonbonded interactions
-        # are still unimplemented for path integrals.
-        ff = Amber99ForceField()
-        ff.supportsPathIntegrals = lambda: True
-        universe = InfiniteUniverse(ff)
+        universe = InfiniteUniverse(Amber99ForceField())
         universe.addObject(Molecule('water'))
         universe.addObject(Environment.PathIntegrals(50.*Units.K))
         atoms = universe.atomList()

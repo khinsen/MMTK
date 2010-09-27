@@ -242,6 +242,7 @@ int
 nblist_iterate(PyNonbondedListObject *nblist, struct nblist_iterator *iterator)
 {
   long *excluded, *one_four;
+  short *bead_data;
   int n_ex, n_14;
   int ix, iy, iz, use_box;
 
@@ -258,72 +259,94 @@ nblist_iterate(PyNonbondedListObject *nblist, struct nblist_iterator *iterator)
     iterator->j = iterator->box2->n-1;
     iterator->state = nblist_continue;
   case nblist_continue:
-    iterator->j++;
-    if (iterator->j == iterator->box2->n) {
-      int lasti = iterator->box1->n - ((iterator->box1==iterator->box2)?1:0);
-      iterator->i++;
-      if (iterator->i >= lasti) {
-	do {
-	  iterator->ineighbor++;
-	  if (iterator->ineighbor == nblist->nneighbors) {
-	    do {
-	      iterator->ibox++;
-	      if (iterator->ibox == nblist->nboxes) {
-		iterator->state = nblist_finished;
-		return 0;
+    bead_data = (short *)((PyArrayObject *)nblist->bead_data)->data;
+    do {
+      iterator->j++;
+      if (iterator->j == iterator->box2->n) {
+	int lasti = iterator->box1->n - ((iterator->box1==iterator->box2)?1:0);
+	iterator->i++;
+	if (iterator->i >= lasti) {
+	  do {
+	    iterator->ineighbor++;
+	    if (iterator->ineighbor == nblist->nneighbors) {
+	      do {
+		iterator->ibox++;
+		if (iterator->ibox == nblist->nboxes) {
+		  iterator->state = nblist_finished;
+		  return 0;
+		}
+		iterator->box1 = nblist->boxes+iterator->ibox;
+		iterator->ineighbor = 0;
+	      } while (iterator->box1->n == 0);
+	    }
+	    ix = nblist->neighbors[iterator->ineighbor][0]
+	      + iterator->box1->ix;
+	    iy = nblist->neighbors[iterator->ineighbor][1]
+	      + iterator->box1->iy;
+	    iz = nblist->neighbors[iterator->ineighbor][2]
+	      + iterator->box1->iz;
+	    use_box = 1;
+	    if (nblist->universe_spec->is_periodic) {
+	      if (ix < 0) ix += nblist->box_count[0];
+	      if (iy < 0) iy += nblist->box_count[1];
+	      if (iz < 0) iz += nblist->box_count[2];
+	      if (ix >= nblist->box_count[0])
+		ix -= nblist->box_count[0];
+	      if (iy >= nblist->box_count[1])
+		iy -= nblist->box_count[1];
+	      if (iz >= nblist->box_count[2])
+		iz -= nblist->box_count[2];
+	    }
+	    else if (ix < 0 || iy < 0 || iz < 0
+		     || ix >= nblist->box_count[0]
+		     || iy >= nblist->box_count[1]
+		     || iz >= nblist->box_count[2]) {
+	      use_box = 0;
+	    }
+	    iterator->jbox = ix + nblist->box_count[0]
+	                     *(iy + nblist->box_count[1]*iz);
+	    if (iterator->jbox < iterator->ibox)
+	      use_box = 0;
+	    if (use_box) {
+	      if (nblist->boxes[iterator->jbox].n == 0) {
+		use_box = 0;
 	      }
-	      iterator->box1 = nblist->boxes+iterator->ibox;
-	      iterator->ineighbor = 0;
-	    } while (iterator->box1->n == 0);
-	  }
-	  ix = nblist->neighbors[iterator->ineighbor][0]
-	       + iterator->box1->ix;
-	  iy = nblist->neighbors[iterator->ineighbor][1]
-               + iterator->box1->iy;
-	  iz = nblist->neighbors[iterator->ineighbor][2]
-               + iterator->box1->iz;
-	  use_box = 1;
-	  if (nblist->universe_spec->is_periodic) {
-	    if (ix < 0) ix += nblist->box_count[0];
-	    if (iy < 0) iy += nblist->box_count[1];
-	    if (iz < 0) iz += nblist->box_count[2];
-	    if (ix >= nblist->box_count[0])
-	      ix -= nblist->box_count[0];
-	    if (iy >= nblist->box_count[1])
-	      iy -= nblist->box_count[1];
-	    if (iz >= nblist->box_count[2])
-	      iz -= nblist->box_count[2];
-	  }
-	  else if (ix < 0 || iy < 0 || iz < 0
-		   || ix >= nblist->box_count[0]
-		   || iy >= nblist->box_count[1]
-		   || iz >= nblist->box_count[2]) {
-	    use_box = 0;
-	  }
-	  iterator->jbox = ix + nblist->box_count[0]
-	                   *(iy + nblist->box_count[1]*iz);
-	  if (iterator->jbox < iterator->ibox)
-	    use_box = 0;
-	  if (use_box) {
-	    if (nblist->boxes[iterator->jbox].n == 0) {
-	      use_box = 0;
+	      if (iterator->ibox == iterator->jbox &&
+		  nblist->boxes[iterator->jbox].n == 1) {
+		use_box = 0;
+	      }
 	    }
-	    if (iterator->ibox == iterator->jbox &&
-		nblist->boxes[iterator->jbox].n == 1) {
-	      use_box = 0;
-	    }
-	  }
-	} while (!use_box);
-	iterator->box2 = nblist->boxes+iterator->jbox;
-	iterator->i = 0;
+	  } while (!use_box);
+	  iterator->box2 = nblist->boxes+iterator->jbox;
+	  iterator->i = 0;
+	}
+	if (iterator->ibox == iterator->jbox)
+	  iterator->j = iterator->i + 1;
+	else
+	  iterator->j = 0;
       }
-      if (iterator->ibox == iterator->jbox)
-	iterator->j = iterator->i + 1;
-      else
-	iterator->j = 0;
-    }
-    iterator->a1 = iterator->box1->atoms[iterator->i];
-    iterator->a2 = iterator->box2->atoms[iterator->j];
+      iterator->a1 = iterator->box1->atoms[iterator->i];
+      iterator->a2 = iterator->box2->atoms[iterator->j];
+      if (nblist->nbeads == 1)
+	iterator->weight = 1;
+      else {
+	short bn1 = bead_data[2*iterator->a1];
+	short nb1 = bead_data[2*iterator->a1+1];
+	short bn2 = bead_data[2*iterator->a2];
+	short nb2 = bead_data[2*iterator->a2+1];
+	iterator->weight = 0;
+	if (nb1 > nb2) {
+	  short f = nb1/nb2;
+	  if (bn2 == bn1/f)
+	    iterator->weight = nblist->nbeads / nb1;
+	}
+	else {
+	  short f = nb2/nb1;
+	  if (bn1 == bn2/f)
+	    iterator->weight = nblist->nbeads / nb2;
+	}
+      }
+    } while (iterator->weight == 0);
     iterator->n++;
     return 1;
     break;
@@ -540,6 +563,27 @@ nblist_iterate(PyNonbondedListObject *nblist, struct nblist_iterator *iterator)
 }
 #endif
 
+int
+pair_weight(int a1, int a2, short *bead_data, int nbeads)
+{
+  short bn1 = bead_data[2*a1];
+  short nb1 = bead_data[2*a1+1];
+  short bn2 = bead_data[2*a2];
+  short nb2 = bead_data[2*a2+1];
+  int weight = 0;
+  if (nb1 > nb2) {
+    short f = nb1/nb2;
+    if (bn2 == bn1/f)
+      weight = nbeads / nb1;
+  }
+  else {
+    short f = nb2/nb1;
+    if (bn1 == bn2/f)
+      weight = nbeads / nb2;
+  }
+  return weight;
+}
+
 void
 nonbonded_evaluator(PyFFEnergyTermObject *self,
 		    PyFFEvaluatorObject *eval,
@@ -551,6 +595,7 @@ nonbonded_evaluator(PyFFEnergyTermObject *self,
   int n_ex = 2*((PyArrayObject *)nblist->excluded_pairs)->dimensions[0];
   long *one_four = (long *)((PyArrayObject *)nblist->one_four_pairs)->data;
   int n_14 = 2*((PyArrayObject *)nblist->one_four_pairs)->dimensions[0];
+  short *bead_data = (short *)((PyArrayObject *)nblist->bead_data)->data;
   distance_fn *d_fn = nblist->universe_spec->distance_function;
   double *distance_data = nblist->universe_spec->geometry_data;
   vector3 *x = (vector3 *)input->coordinates->data;
@@ -650,12 +695,15 @@ nonbonded_evaluator(PyFFEnergyTermObject *self,
 	  int a1 = box1->atoms[i];
 	  for (j = i+1; j < box2->n; j++) {
 	    int a2 = box2->atoms[j];
-	    if (--slicecounter == 0) {
-	      slicecounter = input->nslices;
-	      pair_term(1., 1., 1.);
+	    int w = pair_weight(a1, a2, bead_data, nblist->nbeads);
+	    if (w != 0) {
+	      if (--slicecounter == 0) {
+		slicecounter = input->nslices;
+		pair_term(w, w, w);
 #if THREAD_DEBUG
-	      paircount++;
+		paircount++;
 #endif
+	      }
 	    }
 	  }
 	}
@@ -665,12 +713,15 @@ nonbonded_evaluator(PyFFEnergyTermObject *self,
 	  int a1 = box1->atoms[i];
 	  for (j = 0; j < box2->n; j++) {
 	    int a2 = box2->atoms[j];
-	    if (--slicecounter == 0) {
-	      slicecounter = input->nslices;
-	      pair_term(1., 1., 1.);
+	    int w = pair_weight(a1, a2, bead_data, nblist->nbeads);
+	    if (w != 0) {
+	      if (--slicecounter == 0) {
+		slicecounter = input->nslices;
+		pair_term(w, w, w);
 #if THREAD_DEBUG
-	      paircount++;
+		paircount++;
 #endif
+	      }
 	    }
 	  }
 	}

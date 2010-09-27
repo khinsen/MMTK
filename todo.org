@@ -2,7 +2,7 @@
 
 ** Force fields
 
-*** TODO Nonbonded lists
+*** DONE Nonbonded lists
 Iteration over pairs should include only pairs with compatible bead
 indices. Problem: index compatibility is a rather complex and thus
 costly computation. A lookup table could be used, but may result in

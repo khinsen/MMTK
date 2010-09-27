@@ -161,7 +161,7 @@ enum nblist_iterator_states { nblist_start, nblist_continue, nblist_finished,
 
 struct nblist_iterator {
   nbbox *box1, *box2;
-  int ibox, jbox, ineighbor, i, j, a1, a2;
+  int ibox, jbox, ineighbor, i, j, a1, a2, weight;
   Py_ssize_t n;
   int state;
 };
@@ -172,11 +172,13 @@ typedef struct {
   PyObject *excluded_pairs;
   PyObject *one_four_pairs;
   PyObject *atom_subset;
+  PyObject *bead_data;
   PyUniverseSpecObject *universe_spec;
   vector3 *lastx;
   int *box_number;
   int *box_atoms;
   nbbox *boxes;
+  int nbeads;
   int box_count[3];
   int nboxes;
   int allocated_boxes;
