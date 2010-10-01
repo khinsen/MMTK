@@ -563,25 +563,22 @@ nblist_iterate(PyNonbondedListObject *nblist, struct nblist_iterator *iterator)
 }
 #endif
 
-int
-pair_weight(int a1, int a2, short *bead_data, int nbeads)
-{
-  short bn1 = bead_data[2*a1];
-  short nb1 = bead_data[2*a1+1];
-  short bn2 = bead_data[2*a2];
-  short nb2 = bead_data[2*a2+1];
-  int weight = 0;
-  if (nb1 > nb2) {
-    short f = nb1/nb2;
-    if (bn2 == bn1/f)
-      weight = nbeads / nb1;
-  }
-  else {
-    short f = nb2/nb1;
-    if (bn1 == bn2/f)
-      weight = nbeads / nb2;
-  }
-  return weight;
+#define pair_weight(a1, a2, nbeads) \
+{ \
+  short bn1 = bead_data[2*a1]; \
+  short nb1 = bead_data[2*a1+1]; \
+  short bn2 = bead_data[2*a2]; \
+  short nb2 = bead_data[2*a2+1]; \
+  if (nb1 > nb2) { \
+    short f = nb1/nb2; \
+    if (bn2 == bn1/f) \
+      weight = nbeads/nb1; \
+  } \
+  else { \
+    short f = nb2/nb1; \
+    if (bn1 == bn2/f) \
+      weight = nbeads/nb2; \
+  } \
 }
 
 void
@@ -695,11 +692,12 @@ nonbonded_evaluator(PyFFEnergyTermObject *self,
 	  int a1 = box1->atoms[i];
 	  for (j = i+1; j < box2->n; j++) {
 	    int a2 = box2->atoms[j];
-	    int w = pair_weight(a1, a2, bead_data, nblist->nbeads);
-	    if (w != 0) {
+            int weight = 0; 
+	    pair_weight(a1, a2, nblist->nbeads);
+	    if (weight != 0) {
 	      if (--slicecounter == 0) {
 		slicecounter = input->nslices;
-		pair_term(w, w, w);
+		pair_term(weight, weight, weight);
 #if THREAD_DEBUG
 		paircount++;
 #endif
@@ -713,11 +711,12 @@ nonbonded_evaluator(PyFFEnergyTermObject *self,
 	  int a1 = box1->atoms[i];
 	  for (j = 0; j < box2->n; j++) {
 	    int a2 = box2->atoms[j];
-	    int w = pair_weight(a1, a2, bead_data, nblist->nbeads);
-	    if (w != 0) {
+            int weight = 0; 
+	    pair_weight(a1, a2, nblist->nbeads);
+	    if (weight != 0) {
 	      if (--slicecounter == 0) {
 		slicecounter = input->nslices;
-		pair_term(w, w, w);
+		pair_term(weight, weight, weight);
 #if THREAD_DEBUG
 		paircount++;
 #endif
