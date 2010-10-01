@@ -83,6 +83,7 @@ class ForceField(object):
         bead_data = global_data.get('bead_data')
         nb = [bead_data[i, 1] for i in atom_indices]
         assert all(nbeads % n == 0 for n in nb)
+        # Integer divisions, become // in Python 3
         f = nbeads / max(nb)
         return f, N.transpose([N.repeat(N.arange(n), nbeads/n/f) for n in nb])
 
@@ -233,7 +234,11 @@ class EnergyEvaluatorParameters(object):
 
         spring_parameters = []
 
-        pi_atoms = [a for a in self.universe.atomList() if a.numberOfBeads() > 1]
+        if subset1 is None:
+            pi_atoms = [a for a in self.universe.atomIterator() if a.numberOfBeads() > 1]
+        else:
+            pi_atoms = list(set(a for a in subset1.atomIterator() if a.numberOfBeads() > 1)
+                            | set(a for a in subset2.atomIterator() if a.numberOfBeads() > 1))
         if pi_atoms:
 
             if not self.ff.supportsPathIntegrals():
@@ -293,7 +298,11 @@ class EnergyEvaluator(object):
 
         terms = []
 
-        pi_atoms = [a for a in self.universe.atomList() if a.numberOfBeads() > 1]
+        if subset1 is None:
+            pi_atoms = [a for a in self.universe.atomIterator() if a.numberOfBeads() > 1]
+        else:
+            pi_atoms = list(set(a for a in subset1.atomIterator() if a.numberOfBeads() > 1)
+                            | set(a for a in subset2.atomIterator() if a.numberOfBeads() > 1))
         if pi_atoms:
 
             if not self.ff.supportsPathIntegrals():

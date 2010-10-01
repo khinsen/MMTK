@@ -12,6 +12,11 @@ bad cache performance.
 
 *** TODO Merge path integral setup in EnergyEvaluator and EnergyEvaluatorParameters
 
+*** TODO Look at Ewald summation
+Either make it work or make it fail with an exception when there are path integrals
+
+*** DONE Check that subsets are treated correctly
+
 ** ParticleProperty
 
 *** TODO Indexing with a multi-bead atom
@@ -59,6 +64,9 @@ Same problem as for ParticleProperties.
 
 *** TODO ParticleProperties
 
+** I/O
+
+*** TODO PDB output
 
 * New features
 

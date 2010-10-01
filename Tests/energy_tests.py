@@ -159,14 +159,15 @@ class AmberPathIntegralTest(unittest.TestCase):
 
     def setUp(self):
         self.universe = InfiniteUniverse(Amber99ForceField())
+        self.temperature = 100.*Units.K
+        self.universe.addObject(Environment.PathIntegrals(self.temperature))
 
     def test_pi_quantum_spring_potential(self):
         self.universe.h = Atom('H',amber_atom_type="CT",amber_charge=0.)
-        temperature = 100*Units.K
-        self.universe.addObject(Environment.PathIntegrals(temperature))
         nb=4
-        self.universe.h.setNumberOfBeads(nb) 
-        k = (Units.k_B*temperature)*(Units.k_B*temperature)*float(nb*nb)*self.universe.h.mass() / (Units.hbar*Units.hbar*2.)
+        self.universe.h.setNumberOfBeads(nb)
+        kT = Units.k_B*self.temperature
+        k = kT*kT*float(nb*nb)*self.universe.h.mass() / (Units.hbar*Units.hbar*2.)
         beadpos=[Vector(-2.,-3.,-4.),Vector(0.,0.,0.),Vector(5.,1.,3.),Vector(1,-2,3)]
         self.universe.h.setBeadPositions(beadpos)
         numerical_vqu = 0.
@@ -176,6 +177,12 @@ class AmberPathIntegralTest(unittest.TestCase):
 
         piterms = self.universe.energyTerms()
         self.assertAlmostEqual(piterms['path integral spring'], numerical_vqu, 10)
+        piterms = self.universe.energyTerms(self.universe.h)
+        self.assertAlmostEqual(piterms['path integral spring'], numerical_vqu, 10)
+        self.universe.h2 = Atom('H', amber_atom_type='CT', amber_charge = 0.,
+                                position = Vector(1., 0., 0.))
+        piterms = self.universe.energyTerms(self.universe.h)
+        self.assertAlmostEqual(piterms['path integral spring'], numerical_vqu, 10)
 
     def test_pi_water_energy(self):
         self.universe.water = Molecule('water')
@@ -184,7 +191,6 @@ class AmberPathIntegralTest(unittest.TestCase):
         g0 = [grad[a] for a in atoms]
         for a in self.universe.atomList():
             a.setNumberOfBeads(4)
-        self.universe.addObject(Environment.PathIntegrals(100*Units.K))
         piterms = self.universe.energyTerms()
         self.assertEqual(piterms['path integral spring'], 0.)
         self.assertAlmostEqual(piterms['harmonic bond'], e0, 10)
@@ -193,6 +199,8 @@ class AmberPathIntegralTest(unittest.TestCase):
         g1 = [4.*grad[a.beads()[0]] for a in atoms]
         for i in range(len(atoms)):
             self.assert_((g1[i]-g0[i]).length() == 0.)
+        e2, grad = self.universe.energyAndGradients(self.universe.water)
+        self.assertAlmostEqual(e0, e2, 7)
 
     def test_pi_two_water_energy(self):
         self.universe.addObject(Molecule('water', position=Vector(0., 0., 0.)))
@@ -203,7 +211,6 @@ class AmberPathIntegralTest(unittest.TestCase):
         g0 = [grad[a] for a in atoms]
         for a in self.universe.atomList():
             a.setNumberOfBeads(2)
-        self.universe.addObject(Environment.PathIntegrals(100*Units.K))
         piterms = self.universe.energyTerms()
         self.assertEqual(piterms['path integral spring'], 0.)
         e1, grad = self.universe.energyAndGradients()
@@ -370,8 +377,8 @@ class PathIntegralConsistencyTest(unittest.TestCase):
         atoms = universe.atomList()
         atoms[0].setNumberOfBeads(4)
         atoms[1].setNumberOfBeads(3)
-        self.assertRaises(ValueError, universe.energyEvaluatorParameters, ())
-        self.assertRaises(ValueError, universe.energyEvaluator, ())
+        self.assertRaises(ValueError, universe.energyEvaluatorParameters)
+        self.assertRaises(ValueError, universe.energyEvaluator)
 
     def test_inconsistency2(self):
         universe = InfiniteUniverse(Amber99ForceField())
@@ -381,8 +388,8 @@ class PathIntegralConsistencyTest(unittest.TestCase):
         atoms[0].setNumberOfBeads(2)
         atoms[1].setNumberOfBeads(3)
         atoms[2].setNumberOfBeads(6)
-        self.assertRaises(ValueError, universe.energyEvaluatorParameters, ())
-        self.assertRaises(ValueError, universe.energyEvaluator, ())
+        self.assertRaises(ValueError, universe.energyEvaluatorParameters)
+        self.assertRaises(ValueError, universe.energyEvaluator)
 
 def suite():
     loader = unittest.TestLoader()

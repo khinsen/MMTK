@@ -35,9 +35,15 @@ class NonBondedForceField(ForceField):
             if subset1 is not None:
                 set1 = set(a.index for a in subset1.atomList())
                 set2 = set(a.index for a in subset2.atomList())
-                excluded_pairs |= set(Utility.orderedPairs(list(set1-set2)))
-                excluded_pairs |= set(Utility.orderedPairs(list(set2-set1)))
-                atom_subset = list(set1 | set2)
+                added_excluded_pairs = set(Utility.orderedPairs(list(set1-set2))) \
+                                       | set(Utility.orderedPairs(list(set2-set1)))
+                added_excluded_pairs = sum(([(i+oi, j+oj)
+                                             for oi, oj in self.beadOffsetsAndFactor((i, j),
+                                                                                     global_data)[1]]
+                                            for i, j in added_excluded_pairs), [])
+                excluded_pairs |= set(added_excluded_pairs)
+                bead_data = global_data.get('bead_data')
+                atom_subset = sum((range(i, i+bead_data[i, 1]) for i in list(set1 | set2)), [])
                 atom_subset.sort()
             else:
                 atom_subset = None
