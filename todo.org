@@ -2,11 +2,9 @@
 
 ** Force fields
 
-*** DONE Nonbonded lists
-Iteration over pairs should include only pairs with compatible bead
-indices. Problem: index compatibility is a rather complex and thus
-costly computation. A lookup table could be used, but may result in
-bad cache performance.
+*** TODO Nonbonded list optimization
+The current algorithm leads to a quadratic complexity as a function of
+bead number.
 
 *** DONE Check that the bead numbers of all atoms in the universe are consistent
 
@@ -72,6 +70,13 @@ Same problem as for ParticleProperties.
 
 ** TODO [#C] Make energy gradients available for subsets of the total force field
 
+
+* Improvements
+
+** TODO [#A] Alert for data base conflicts
+At every database access, check if there are multiple definitions in
+different directories of the search path and alert the user of the
+possible conflict.
 
 * Bugs
 
