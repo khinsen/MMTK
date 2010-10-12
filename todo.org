@@ -5,7 +5,7 @@
 
 * Improvements
 
-** TODO [#A] Alert for data base conflicts
+** DONE [#A] Alert for data base conflicts
 At every database access, check if there are multiple definitions in
 different directories of the search path and alert the user of the
 possible conflict.
