@@ -1,0 +1,18 @@
+* New features
+
+** TODO [#C] Make energy gradients available for subsets of the total force field
+
+
+* Improvements
+
+** TODO [#A] Alert for data base conflicts
+At every database access, check if there are multiple definitions in
+different directories of the search path and alert the user of the
+possible conflict.
+
+
+* Bugs
+
+** TODO [#C] Opening a trajectory written for a universe created from a MoleculeFactory doesn't work.
+
+** TODO Trajectory test fails for ParallelepipedicPeriodicUniverse in readParticleTrajectory
