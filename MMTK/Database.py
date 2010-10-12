@@ -19,6 +19,7 @@ __docformat__ = 'epytext'
 from MMTK import Utility
 import copy
 import os
+import sys
 
 #
 # Find database path
@@ -36,26 +37,35 @@ for i in range(len(path)):
 #
 # Some miscellaneous functions for use by other modules
 #
-def databasePath(filename, directory, try_direct = 0):
+def databasePath(filename, directory, try_direct = False):
     if Utility.isURL(filename):
         return filename
     filename = os.path.expanduser(filename)
     if try_direct and os.path.exists(filename):
         return os.path.normcase(filename)
+    entries = []
     if os.path.split(filename)[0] == '':
         for p in path:
             if Utility.isURL(p):
                 url = Utility.joinURL(p, directory+'/'+filename)
                 if Utility.checkURL(url):
-                    return url
+                    entries.append(url)
             else:
                 full_name = os.path.join(os.path.join(p, directory), filename)
                 if os.path.exists(full_name):
-                    return os.path.normcase(full_name)
-    raise IOError("Database entry %s/%s not found" % (directory, filename))
-
+                    entries.append(os.path.normcase(full_name))
+    if len(entries) == 0:
+        raise IOError("Database entry %s/%s not found" % (directory, filename))
+    else:
+        if len(entries) > 1:
+            Utility.warning("multiple database entries for %s/%s, using first one"
+                            % (directory, filename))
+            for e in entries:
+                sys.stderr.write(e+'\n')
+        return entries[0]
+        
 def PDBPath(filename):
-    return databasePath(filename, 'PDB', 1)
+    return databasePath(filename, 'PDB', True)
 
 def addDatabaseDirectory(directory):
     "Add a directory to the database search path"
@@ -77,7 +87,7 @@ class Database(object):
     def findType(self, name):
         name = name.lower()
         if not self.types.has_key(name):
-            filename = databasePath(name, self.directory, 0)
+            filename = databasePath(name, self.directory, False)
             self.types[name] = self.type_constructor(filename, name)
         return self.types[name]
 
