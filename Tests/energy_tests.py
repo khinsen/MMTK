@@ -151,6 +151,54 @@ NONB
                 for V in [-10., 2.]:
                     self._dihedralTerm(n, phase, V)
 
+class LennardJonesTest(unittest.TestCase):
+    """
+    Lennard Jones Tests
+    """
+    def test_periodic(self):
+       universe = OrthorhombicPeriodicUniverse((1.,1.,1.),
+                                        LennardJonesForceField(0.4))
+       universe.addObject(Atom('Ar', position=Vector(0.0, -0.5, -0.1)))
+       universe.addObject(Atom('Ar', position=Vector(0.5, 0.0, 0.4)))
+       self.assertAlmostEqual(universe.energy(), 0.0, 6)
+
+       universe.atomList()[0].setPosition(Vector(-0.45, 0., -0.))
+       universe.atomList()[1].setPosition(Vector(0.3, 0., 0.))
+       eperiodic = universe.energy()
+       r = universe.distance(universe.atomList()[0], universe.atomList()[1])
+       numerical_v = 4*120*Units.K*Units.k_B*(((0.34)/r)**12-((0.34)/r)**6)
+       self.assert_(eperiodic > 1.e-15)
+       self.assertAlmostEqual(eperiodic, numerical_v, 6)
+
+       universe.atomList()[0].setPosition(Vector(0., 0., 0.))
+       universe.atomList()[1].setPosition(Vector(0.21, 0.21, 0.21))
+       self.assert_(universe.energy() - eperiodic < 1.e-15)
+
+    def test_pi_periodic(self):
+       universe = OrthorhombicPeriodicUniverse((1.,1.,1.),
+                                        LennardJonesForceField(0.40))
+
+       universe.addObject(Environment.PathIntegrals(100.*Units.K))
+       for x in range(2):
+            universe.addObject(Atom('Ar',nbeads=2))
+       universe.atomList()[0].setBeadPositions([Vector(0.0,0.,0.),Vector(0.1,0.,0.)])
+       universe.atomList()[1].setBeadPositions([Vector(0.5,0.,0.),Vector(-0.4,0.,0.)])
+       self.assertAlmostEqual(universe.pathIntegralEnergies()[0], 0.0, 6)
+
+       universe.atomList()[0].setBeadPositions([Vector(-0.45,0.,0.),Vector(0.4,0.,0.)])
+       universe.atomList()[1].setBeadPositions([Vector(0.3,0.,0.),Vector(0.45,0.,0.)])
+       eperiodic = universe.pathIntegralEnergies()[0]
+       r1 = universe.distance(universe.atomList()[0].beadPositions()[0], universe.atomList()[1].beadPositions()[0])
+       r2 = universe.distance(universe.atomList()[0].beadPositions()[1], universe.atomList()[1].beadPositions()[1])
+       numerical_v = 2*120*Units.K*Units.k_B*(((0.34)/r1)**12-((0.34)/r1)**6)
+       numerical_v = numerical_v + 2*120*Units.K*Units.k_B*(((0.34)/r2)**12-((0.34)/r2)**6)
+       self.assert_(eperiodic > 1.e-15)
+       self.assertAlmostEqual(eperiodic, numerical_v, 4)
+
+       universe.atomList()[0].setBeadPositions([Vector(0.,0.,0.),Vector(0.4,0.,0.)])
+       universe.atomList()[1].setBeadPositions([Vector(0.25,0.,0.),Vector(0.45,0.,0.)])
+       self.assert_(universe.pathIntegralEnergies()[0] - eperiodic < 1.e-15)
+
 class AmberPathIntegralTest(unittest.TestCase):
     """
     Test bonded energies with the Amber99 Forcefield
@@ -401,6 +449,7 @@ def suite():
     s.addTest(loader.loadTestsFromTestCase(LennardJonesSubsetTest))
     s.addTest(loader.loadTestsFromTestCase(AmberPathIntegralTest))
     s.addTest(loader.loadTestsFromTestCase(PathIntegralConsistencyTest))
+    s.addTest(loader.loadTestsFromTestCase(LennardJonesTest))
     return s
 
 
