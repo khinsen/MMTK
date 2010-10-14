@@ -2,15 +2,15 @@
 
 ** Force fields
 
-*** TODO Nonbonded list optimization
+*** TODO [#C] Nonbonded list optimization
 The current algorithm leads to a quadratic complexity as a function of
 bead number.
 
 *** DONE Check that the bead numbers of all atoms in the universe are consistent
 
-*** TODO Merge path integral setup in EnergyEvaluator and EnergyEvaluatorParameters
+*** TODO [#C] Merge path integral setup in EnergyEvaluator and EnergyEvaluatorParameters
 
-*** TODO Fix reciprocal sums in Ewald summation
+*** TODO [#A] Fix reciprocal sums in Ewald summation
 The reciprocal sum must be calculated once for each time slice, using
 only the beads whose bead numbers fit the time slice. The self term
 must also be fixed to sum over the atoms (not beads) and multiply with
@@ -20,7 +20,7 @@ the number of time slices
 
 ** ParticleProperty
 
-*** TODO Indexing with a multi-bead atom
+*** TODO [#B] Indexing with a multi-bead atom
 Idea: define intensive and extensive quantities, with intensive ones returning the
 average over the beads and extensive ones the sum. This could also be extended to
 allow indexing of ParticleProperties with multi-atom objects (though the weights for
@@ -30,16 +30,20 @@ calculating averages are not obvious).
 
 *** DONE Reading a ParticleTrajectory for a bead
 
-*** TODO Reading a ParticleTrajectory for a multi-bead atom
+*** TODO [#B] Reading a ParticleTrajectory for a multi-bead atom
 Same problem as for ParticleProperties.
 
 ** Integration
 
-*** TODO Integrator using fourier-transform variables
+*** TODO [#A] Integrators
+**** TODO Velocity-Verlet integrator using normal mode variables
+**** TODO Colored-noise Langevin version of this integrator
+**** TODO Nose-Hoover-Chain version of this integrator
+**** TODO Add a barostat
 
 *** TODO Constraints
-
-*** TODO Langevin integration for rigid bodies (quaternions)
+**** TODO Distance constraints
+**** TODO Rigid-body integrator (quaternions)
 
 ** Tests
 
@@ -67,7 +71,11 @@ Same problem as for ParticleProperties.
 
 ** I/O
 
-*** TODO PDB output
+*** TODO [#A] PDB output
+Currently: centroids
+Add new file type(s) for representing all the beads:
+ - 'pdb.pi_altloc' altloc (max. 26 beads)
+ - 'pdb.pi_model' model
 
 * New features
 
