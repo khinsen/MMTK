@@ -10,8 +10,11 @@ bead number.
 
 *** TODO Merge path integral setup in EnergyEvaluator and EnergyEvaluatorParameters
 
-*** TODO Look at Ewald summation
-Either make it work or make it fail with an exception when there are path integrals
+*** TODO Fix reciprocal sums in Ewald summation
+The reciprocal sum must be calculated once for each time slice, using
+only the beads whose bead numbers fit the time slice. The self term
+must also be fixed to sum over the atoms (not beads) and multiply with
+the number of time slices
 
 *** DONE Check that subsets are treated correctly
 
@@ -77,6 +80,7 @@ Same problem as for ParticleProperties.
 At every database access, check if there are multiple definitions in
 different directories of the search path and alert the user of the
 possible conflict.
+
 
 * Bugs
 

@@ -344,6 +344,9 @@ class MMNonbondedForceField(MMAtomParameters, NonBondedForceField):
         self.collectCharges(universe, global_data)
         lj = self._getLJForceField(universe)
         es = self._getESForceField(universe)
+        if global_data.get('nbeads') > 1:
+            assert lj.supportsPathIntegrals()
+            assert es.supportsPathIntegrals()
         compound = CompoundForceField(lj, es)
         return compound.evaluatorParameters(universe, subset1, subset2,
                                             global_data)
@@ -353,6 +356,9 @@ class MMNonbondedForceField(MMAtomParameters, NonBondedForceField):
         self.collectCharges(universe, global_data)
         lj = self._getLJForceField(universe)
         es = self._getESForceField(universe)
+        if global_data.get('nbeads') > 1:
+            assert lj.supportsPathIntegrals()
+            assert es.supportsPathIntegrals()
         compound = CompoundForceField(lj, es)
         return compound.evaluatorTerms(universe, subset1, subset2, global_data)
 
