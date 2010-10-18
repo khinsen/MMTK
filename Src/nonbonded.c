@@ -738,12 +738,16 @@ nonbonded_evaluator(PyFFEnergyTermObject *self,
   for (k = 2*input->slice_id; k < n_ex; k += 2*input->nslices) {
     int a1 = excluded[k];
     int a2 = excluded[k+1];
-    pair_term(-1., -1., -1.);
+    int weight = 0; 
+    pair_weight(a1, a2, nblist->nbeads);
+    pair_term(-weight, -weight, -weight);
   }
   for (k = 2*input->slice_id; k < n_14; k += 2*input->nslices) {
     int a1 = one_four[k];
     int a2 = one_four[k+1];
-    pair_term(lj_one_four, es_one_four, ewald_one_four);
+    int weight = 0; 
+    pair_weight(a1, a2, nblist->nbeads);
+    pair_term(lj_one_four*weight, es_one_four*weight, ewald_one_four*weight);
   }
 
   energy->energy_terms[self->index] = lj_energy1 + lj_energy2;
