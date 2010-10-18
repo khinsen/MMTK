@@ -1627,20 +1627,23 @@ EsEwaldTerm(PyObject *dummy, PyObject *args)
   PyFFEnergyTermObject *self = PyFFEnergyTerm_New();
   PyArrayObject *box_shape;
   long *kmax;
-  int natoms, nkvect;
+  int natoms, nkvect, nbeads;
   size_t scratch_size;
   if (self == NULL)
     return NULL;
-  if (!PyArg_ParseTuple(args, "O!O!O!O!ddO!dd",
+  if (!PyArg_ParseTuple(args, "O!O!O!O!ddO!ddO!i",
 			&PyUniverseSpec_Type, &self->universe_spec,
 			&PyArray_Type, &box_shape,
 			&PyNonbondedList_Type, &self->data[0],
 			&PyArray_Type, &self->data[1],
 			&self->param[0], &self->param[3],
 			&PyArray_Type, &self->data[2],
-			&self->param[1], &self->param[2]))
+			&self->param[1], &self->param[2],
+			&PyArray_Type, &self->data[3],
+                        &nbeads))
     return NULL;
 
+  self->param[4] = nbeads;
   natoms = ((PyArrayObject *)self->data[1])->dimensions[0];
   kmax = (long *)((PyArrayObject *)self->data[2])->data;
   nkvect = init_kvectors(self->universe_spec->box_function,
@@ -1666,6 +1669,7 @@ EsEwaldTerm(PyObject *dummy, PyObject *args)
   Py_INCREF(self->data[0]);
   Py_INCREF(self->data[1]);
   Py_INCREF(self->data[2]);
+  Py_INCREF(self->data[3]);
   self->eval_func = es_ewald_evaluator;
   self->thread_safe = 1;
   self->threaded = 1;

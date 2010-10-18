@@ -247,11 +247,6 @@ class ESEwaldForceField(NonBondedForceField):
                      'ewald_precision', 'no_reciprocal_sum', 'method',
                      'scale_factor']
 
-    def supportsPathIntegrals(self):
-        # Reciprocal sums don't work for path integrals yet
-        print "!!!"
-        return self.options.get('no_reciprocal_sum', False)
-
     def evaluatorParameters(self, universe, subset1, subset2, global_data):
         rsum = not self.options.get('no_reciprocal_sum', False)
         if not universe.is_periodic and rsum:
@@ -320,7 +315,9 @@ class ESEwaldForceField(NonBondedForceField):
         ev = EsEwaldTerm(universe._spec, shape, nblist, params['charge'],
                          params['real_cutoff'], params['k_cutoff_sq'],
                          params['k_max'], params['one_four_factor'],
-                         params['beta'])
+                         params['beta'],
+                         global_data.get('bead_data'),
+                         global_data.get('nbeads'))
         update.addTerm(ev, 2)
         if update.info:
             return [ev]

@@ -59,6 +59,7 @@ reciprocal_sum(energy_spec *input, energy_data *energy,
 	       double volume, double *charge, double beta,
 	       long *kmax, double cutoff_sq,
 	       box_fn *box_transformation_fn, double *universe_data,
+               int nbeads, short *bead_data,
 	       void *scratch, PyFFEvaluatorObject *eval,
 	       PyFFEnergyTermObject *term)
 {
@@ -77,7 +78,7 @@ reciprocal_sum(energy_spec *input, energy_data *energy,
   int atoms_per_slice, first_atom, last_atom;
   int vectors_per_slice, first_vector, last_vector;
   double e;
-  int i, nk;
+  int i, nk, nb;
 
   if (input->thread_id == 0) {
     (*box_transformation_fn)(x, xb, input->natoms, universe_data, 1);
@@ -178,55 +179,61 @@ reciprocal_sum(energy_spec *input, energy_data *energy,
     if (xk != 0)
       expfactor *= 2;
 
-    sum.real = sum.imag = 0.;
-    for (i = 0; i < input->natoms; i++) {
-      complex temp;
-      temp.real = c_mult_real(eikx[nx*i+xk], eiky[ny*i+iyk]);
-      temp.imag = c_mult_imag(eikx[nx*i+xk], eiky[ny*i+iyk]);
-      eikr[i].real = c_mult_real(temp, eikz[nz*i+izk]);
-      eikr[i].imag = c_mult_imag(temp, eikz[nz*i+izk]);
-      sum.real += charge[i]*eikr[i].real;
-      sum.imag += charge[i]*eikr[i].imag;
-    }
-    e += c_abssq(sum)*expfactor;
-    if (energy->gradients != NULL) {
+    for (nb = 0; nb < nbeads; nb++) {
+      sum.real = sum.imag = 0.;
       for (i = 0; i < input->natoms; i++) {
-	vector3 grad;
-	double a = 4.*M_PI*expfactor*electrostatic_energy_factor *
-	  charge[i]*(sum.imag*eikr[i].real-sum.real*eikr[i].imag)/volume;
-	grad[0] = a*k[0];
-	grad[1] = a*k[1];
-	grad[2] = a*k[2];
+        if (bead_data[2*i] == nb / (nbeads / bead_data[2*i+1])) {
+          complex temp;
+          temp.real = c_mult_real(eikx[nx*i+xk], eiky[ny*i+iyk]);
+          temp.imag = c_mult_imag(eikx[nx*i+xk], eiky[ny*i+iyk]);
+          eikr[i].real = c_mult_real(temp, eikz[nz*i+izk]);
+          eikr[i].imag = c_mult_imag(temp, eikz[nz*i+izk]);
+          sum.real += charge[i]*eikr[i].real;
+          sum.imag += charge[i]*eikr[i].imag;
+        }
+      }
+      e += c_abssq(sum)*expfactor;
+      if (energy->gradients != NULL) {
+        for (i = 0; i < input->natoms; i++) {
+          if (bead_data[2*i] == nb / (nbeads / bead_data[2*i+1])) {
+            vector3 grad;
+            double a = 4.*M_PI*expfactor*electrostatic_energy_factor *
+              charge[i]*(sum.imag*eikr[i].real-sum.real*eikr[i].imag)/volume;
+            grad[0] = a*k[0];
+            grad[1] = a*k[1];
+            grad[2] = a*k[2];
 #ifdef GRADIENTFN
-	if (energy->gradient_fn != NULL)
-	  (*energy->gradient_fn)(energy, i, grad);
-	else
+            if (energy->gradient_fn != NULL)
+              (*energy->gradient_fn)(energy, i, grad);
+            else
 #endif
-        {
-	  vector3 *f = (vector3 *)((PyArrayObject *)energy->gradients)->data;
-	  f[i][0] += grad[0];
-	  f[i][1] += grad[1];
-	  f[i][2] += grad[2];
-	}
+              {
+                vector3 *f = (vector3 *)((PyArrayObject *)energy->gradients)->data;
+                f[i][0] += grad[0];
+                f[i][1] += grad[1];
+                f[i][2] += grad[2];
+              }
+          }
+        }
       }
-    }
-    if (energy->force_constants != NULL) {
-      tensor3 fij;
-      int j;
-      tensor_product(fij, k, k,
-		     4.*M_PI*expfactor*electrostatic_energy_factor/volume);
+      if (energy->force_constants != NULL) {
+        tensor3 fij;
+        int j;
+        tensor_product(fij, k, k,
+                       4.*M_PI*expfactor*electrostatic_energy_factor/volume);
 #if 0
-      for (i = 0; i < input->natoms; i++)
-	for (j = i; j < input->natoms; j++) {
-	  double f = charge[i]*charge[j];
-	}
-      if (energy->fc_fn != NULL) {
-      }
-      else {
-      }
+        for (i = 0; i < input->natoms; i++)
+          for (j = i; j < input->natoms; j++) {
+            double f = charge[i]*charge[j];
+          }
+        if (energy->fc_fn != NULL) {
+        }
+        else {
+        }
 #endif
-      PyErr_SetString(PyExc_ValueError, "not yet implemented");
-      energy->error = 1;
+        PyErr_SetString(PyExc_ValueError, "not yet implemented");
+        energy->error = 1;
+      }
     }
   }
   if (input->thread_id != 0)
@@ -303,11 +310,13 @@ es_ewald_evaluator(PyFFEnergyTermObject *self,
 
   double *charge = (double *)((PyArrayObject *)self->data[1])->data;
   long *kmax = (long *)((PyArrayObject *)self->data[2])->data;
+  short *bead_data = (short *)((PyArrayObject *)self->data[3])->data;
   double inv_cutoff = (self->param[0] == 0.) ? 0. : 1./self->param[0];
   double beta = self->param[2];
   double reciprocal_cutoff_sq = self->param[3];
   double charge_sum;
   double e = 0.;
+  int nbeads = (int)self->param[4];
   int k;
 
   if (reciprocal_cutoff_sq > 0.)
@@ -316,17 +325,19 @@ es_ewald_evaluator(PyFFEnergyTermObject *self,
   if (input->slice_id == 0) {
     charge_sum = 0.;
     for (k = 0; k < input->natoms; k++)
-      charge_sum += charge[k]*charge[k];
+      if (bead_data[2*k] == 0)
+        charge_sum += charge[k]*charge[k];
     e -= charge_sum*electrostatic_energy_factor * 
          (beta/sqrt(M_PI)+0.5*inv_cutoff*erfc(beta*self->param[0]));
   }
-  energy->energy_terms[self->index] = e;
+  energy->energy_terms[self->index] = nbeads*e;
 
   if (reciprocal_cutoff_sq > 0.)
     energy->energy_terms[self->index+1] =
       reciprocal_sum(input, energy, volume, charge, beta,
 		     kmax, reciprocal_cutoff_sq,
 		     box_transformation_fn, universe_data,
+                     nbeads, bead_data,
 		     self->scratch, eval, self);
 
   energy->energy_terms[self->virial_index] +=

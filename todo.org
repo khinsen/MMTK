@@ -4,13 +4,14 @@
 
 *** TODO [#C] Nonbonded list optimization
 The current algorithm leads to a quadratic complexity as a function of
-bead number.
+bead number. The pair weights for the exclusion and 1-4 lists can be
+precomputed.
 
 *** DONE Check that the bead numbers of all atoms in the universe are consistent
 
 *** TODO [#C] Merge path integral setup in EnergyEvaluator and EnergyEvaluatorParameters
 
-*** TODO [#A] Fix reciprocal sums in Ewald summation
+*** DONE [#A] Fix reciprocal sums in Ewald summation
 The reciprocal sum must be calculated once for each time slice, using
 only the beads whose bead numbers fit the time slice. The self term
 must also be fixed to sum over the atoms (not beads) and multiply with
