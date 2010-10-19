@@ -1,18 +1,3 @@
-# Include some definitions for Python internals
-include 'python.pxi'
-# Include the definitions for Numeric arrays
-include 'numeric.pxi'
-
-cdef extern from "MMTK/core.h":
-
-    ctypedef double vector3[3]
-
-cdef extern from "MMTK/universe.h": 
-
-    void import_MMTK_universe()
-
-import_MMTK_universe()
-
 cdef extern from "MMTK/trajectory.h":
 
     void import_MMTK_trajectory()
@@ -46,8 +31,31 @@ cdef extern from "MMTK/trajectory.h":
         data value
         int length
         int type
-        #int class
+        int data_class "class"
         int modified
+
+    cdef char *length_unit_name
+    cdef char *volume_unit_name
+    cdef char *time_unit_name
+    cdef char *frequency_unit_name
+    cdef char *frequency_square_unit_name
+    cdef char *velocity_unit_name
+    cdef char *mass_unit_name
+    cdef char *energy_unit_name
+    cdef char *energy_gradient_unit_name
+    cdef char *temperature_unit_name
+    cdef char *pressure_unit_name
+
+    ctypedef struct PyTrajectoryOutputSpec
+
+    cdef PyTrajectoryOutputSpec *PyTrajectory_OutputSpecification(object universe,
+                                                                  object spec_list,
+                                                                  char *description,
+                                                                  PyTrajectoryVariable *data)
+    cdef void PyTrajectory_OutputFinish(PyTrajectoryOutputSpec *spec, int step, int error_flag,
+                                        int time_stamp_flag, PyTrajectoryVariable *data)
+    cdef int PyTrajectory_Output(PyTrajectoryOutputSpec *spec, int step,
+                                 PyTrajectoryVariable *data, PyThreadState **thread)
 
 import_MMTK_trajectory()
 

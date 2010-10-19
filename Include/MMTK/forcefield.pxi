@@ -1,18 +1,3 @@
-# Include some definitions for Python internals
-include 'python.pxi'
-# Include the definitions for Numeric arrays
-include 'numeric.pxi'
-
-cdef extern from "MMTK/core.h":
-
-    ctypedef double vector3[3]
-
-cdef extern from "MMTK/universe.h": 
-
-    void import_MMTK_universe()
-
-import_MMTK_universe()
-
 cdef extern from "MMTK/forcefield.h":
 
     void import_MMTK_forcefield()

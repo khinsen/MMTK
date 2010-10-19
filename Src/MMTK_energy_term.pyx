@@ -3,6 +3,10 @@
 # Written by Konrad Hinsen
 #
 
+include "MMTK/python.pxi"
+include "MMTK/numeric.pxi"
+include "MMTK/core.pxi"
+include "MMTK/universe.pxi"
 include 'MMTK/forcefield.pxi'
 
 import MMTK
