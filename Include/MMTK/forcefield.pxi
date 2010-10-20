@@ -32,11 +32,23 @@ cdef extern from "MMTK/forcefield.h":
         # algorithm.
         int small_change
 
+    ctypedef struct energy_data
+    ctypedef int gradient_function(energy_data *energy,
+                                   int i, vector3 gradient)
+    ctypedef int fc_function(energy_data *energy,
+                             int i, int j, tensor3 fc,
+                             double r_sq)
     ctypedef struct energy_data:
         # An array or a sparse gradient storage.
         PyObject *gradients
+        # A pointer to a function that gets/sets the gradient components,
+        # used when gradients is NOT an array.
+        gradient_function *gradient_fn
         # An array or a sparse force constant matrix.
         PyObject *force_constants
+        # A pointer to a function that gets/sets the force constant components,
+        # used when force_constannt is NOT an array.
+        fc_function *fc_fn
         # An array of energy term values. Each energy term should
         # access only its alloted slots in there, plus the virial
         # term indicated by self->virial_index
@@ -62,9 +74,17 @@ cdef extern from "MMTK/forcefield.h":
         cdef char *evaluator_name
         cdef char **term_names
 
-    ctypedef class MMTK_forcefield.EnergyEvaluator \
-                     [object PyFFEvaluatorObject]:
-        pass
+    ctypedef struct PyFFEvaluatorObject
+    
+    ctypedef void ff_eval_function(PyFFEvaluatorObject *evaluator,
+                                   energy_data *ed,
+                                   N.ndarray[double, ndim=2] configuration,
+                                   int small_change) nogil
+
+    ctypedef struct PyFFEvaluatorObject:
+        ff_eval_function eval_func
+        double *energy_terms
+        PyThreadState *tstate_save
 
 import_MMTK_forcefield()
 

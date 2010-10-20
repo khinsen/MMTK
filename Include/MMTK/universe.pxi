@@ -2,10 +2,12 @@ cdef extern from "MMTK/universe.h":
 
     void import_MMTK_universe()
 
-    ctypedef void distance_fn(vector3 d, vector3 r1, vector3 r2, double *data) nogil
+    ctypedef void distance_fn(vector3 d, vector3 r1, vector3 r2,
+                              double *data) nogil
     ctypedef void correction_fn(vector3 *x, int natoms, double *data) nogil
     ctypedef double volume_fn(double scale_factor, double *data) nogil
-    ctypedef void box_fn(vector3 *x, vector3 *b, int n, double *data, int to_box) nogil
+    ctypedef void box_fn(vector3 *x, vector3 *b, int n, double *data,
+                         int to_box) nogil
     ctypedef void bounding_box_fn(vector3 *box1, vector3 *box2, vector3 *x,
                                   int n, double *data) nogil
 
@@ -21,5 +23,8 @@ cdef extern from "MMTK/universe.h":
         int is_periodic
         int is_orthogonal
         int geometry_data_length
+
+    cdef int PyUniverseSpec_StateLock(PyUniverseSpecObject *universe,
+                                      int action) nogil
 
 import_MMTK_universe()
