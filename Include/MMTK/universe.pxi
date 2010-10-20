@@ -27,4 +27,6 @@ cdef extern from "MMTK/universe.h":
     cdef int PyUniverseSpec_StateLock(PyUniverseSpecObject *universe,
                                       int action) nogil
 
+    cdef void **PyUniverse_API
+    
 import_MMTK_universe()

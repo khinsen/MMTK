@@ -86,5 +86,7 @@ cdef extern from "MMTK/forcefield.h":
         double *energy_terms
         PyThreadState *tstate_save
 
+    cdef void **PyFF_API
+
 import_MMTK_forcefield()
 
