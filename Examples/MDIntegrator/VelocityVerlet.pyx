@@ -14,29 +14,7 @@ include "MMTK/numeric.pxi"
 include "MMTK/core.pxi"
 include "MMTK/universe.pxi"
 include "MMTK/trajectory.pxi"
-
-cdef extern from "MMTK/forcefield.h":
-
-    ctypedef struct energy_data:
-        void *gradients
-        void *gradient_fn
-        void *force_constants
-        void *fc_fn
-        double *energy_terms
-        double energy
-        double virial
-        int virial_available
-        int error
-
-    ctypedef struct PyFFEvaluatorObject
-
-    ctypedef void ff_eval_function(PyFFEvaluatorObject *evaluator,
-                                   energy_data *ed,
-                                   N.ndarray[double, ndim=2] configuration,
-                                   int small_change) nogil
-
-    ctypedef struct PyFFEvaluatorObject:
-        ff_eval_function eval_func
+include "MMTK/forcefield.pxi"
 
 cdef extern from "stdlib.h":
 
@@ -55,10 +33,10 @@ cdef class TrajectoryGenerator(object):
     cdef readonly actions
     cdef PyTrajectoryVariable *tvars
     cdef PyTrajectoryOutputSpec *tspec
-    cdef PyThreadState *this_thread
     cdef PyUniverseSpecObject *universe_spec
     cdef int natoms, df
     cdef N.ndarray conf_array
+    cdef int lock_state
 
     """
     Trajectory generator base class
@@ -142,13 +120,15 @@ cdef class TrajectoryGenerator(object):
                                              PyTrajectory_Configuration)
         self.universe_spec = <PyUniverseSpecObject *>self.universe._spec
         if self.universe_spec.geometry_data_length > 0:
-            self.declareTrajectoryVariable_box(self.universe_spec.geometry_data,
-                                               self.universe_spec.geometry_data_length)
+            self.declareTrajectoryVariable_box(
+                self.universe_spec.geometry_data,
+                self.universe_spec.geometry_data_length)
         masses = self.universe.masses()
         self.declareTrajectoryVariable_array(masses.array,
                                              "masses",
                                              "Masses:\n",
-                                             mass_unit_name, PyTrajectory_Internal)
+                                             mass_unit_name,
+                                             PyTrajectory_Internal)
         self.natoms = self.universe.numberOfAtoms()
         self.df = self.universe.degreesOfFreedom()
         self.declareTrajectoryVariable_int(&self.df,
@@ -164,7 +144,8 @@ cdef class TrajectoryGenerator(object):
         cdef PyTrajectoryVariable *tv
         cdef int i, n
         if self.tvars == NULL:
-            self.tvars = <PyTrajectoryVariable *>malloc(2*sizeof(PyTrajectoryVariable))
+            self.tvars = <PyTrajectoryVariable *> \
+                         malloc(2*sizeof(PyTrajectoryVariable))
             if self.tvars == NULL:
                 raise MemoryError
             self.tvars[0] = v
@@ -175,7 +156,8 @@ cdef class TrajectoryGenerator(object):
             while tv.name != NULL:
                 n += 1
                 tv += 1
-            tv = <PyTrajectoryVariable *>malloc((n+2)*sizeof(PyTrajectoryVariable))
+            tv = <PyTrajectoryVariable *> \
+                 malloc((n+2)*sizeof(PyTrajectoryVariable))
             if tv == NULL:
                 raise MemoryError
             for i in range(n):
@@ -185,8 +167,9 @@ cdef class TrajectoryGenerator(object):
             free(self.tvars)
             self.tvars = tv
 
-    cdef void declareTrajectoryVariable_double(self, double * var, char *name, char *text,
-                                               char*unit, int data_class) except *:
+    cdef void declareTrajectoryVariable_double(self, double * var, char *name,
+                                               char *text, char*unit,
+                                               int data_class) except *:
         cdef PyTrajectoryVariable v
         v.name = name
         v.text = text
@@ -196,8 +179,9 @@ cdef class TrajectoryGenerator(object):
         v.value.dp = var
         self._addTrajectoryVariable(v)
 
-    cdef void declareTrajectoryVariable_int(self, int * var, char *name, char *text,
-                                            char*unit, int data_class) except *:
+    cdef void declareTrajectoryVariable_int(self, int * var, char *name,
+                                            char *text, char*unit,
+                                            int data_class) except *:
         cdef PyTrajectoryVariable v
         v.name = name
         v.text = text
@@ -207,8 +191,9 @@ cdef class TrajectoryGenerator(object):
         v.value.ip = var
         self._addTrajectoryVariable(v)
 
-    cdef void declareTrajectoryVariable_array(self, N.ndarray array, char *name, char *text,
-                                              char*unit, int data_class) except *:
+    cdef void declareTrajectoryVariable_array(self, N.ndarray array, char*name,
+                                              char *text, char*unit,
+                                              int data_class) except *:
         cdef PyTrajectoryVariable v
         v.name = name
         v.text = text
@@ -239,25 +224,99 @@ cdef class TrajectoryGenerator(object):
         if self.tspec == NULL:
             raise MemoryError
 
-    cdef void finalizeTrajectoryActions(self, int last_step, int error=False) except *:
+    cdef void finalizeTrajectoryActions(self, int last_step,
+                                        int error=False) except *:
         if error:
             PyTrajectory_OutputFinish(self.tspec, last_step, 1, 1, self.tvars)
         else:
             PyTrajectory_OutputFinish(self.tspec, last_step, 0, 1, self.tvars)
 
-    cdef void trajectoryActions(self, int step) except *:
-        self.this_thread = PyEval_SaveThread()
-        PyTrajectory_Output(self.tspec, step, self.tvars, &self.this_thread)
-        PyEval_RestoreThread(self.this_thread)
+    cdef int trajectoryActions(self, int step) except -1:
+        return PyTrajectory_Output(self.tspec, step, self.tvars, NULL)
 
     cdef void foldCoordinatesIntoBox(self) nogil:
         self.universe_spec.correction_function(<vector3 *>self.conf_array.data,
-                                               self.natoms, self.universe_spec.geometry_data)
+                                               self.natoms,
+                                               self.universe_spec.geometry_data)
+
+    cdef void acquireReadLock(self) nogil:
+        PyUniverseSpec_StateLock(self.universe_spec, 1)
+        self.lock_state = 1
+
+    cdef void releaseReadLock(self) nogil:
+        PyUniverseSpec_StateLock(self.universe_spec, 2)
+        self.lock_state = 0
+
+    cdef void acquireWriteLock(self) nogil:
+        PyUniverseSpec_StateLock(self.universe_spec, -1)
+        self.lock_state = -1
+
+    cdef void releaseWriteLock(self) nogil:
+        PyUniverseSpec_StateLock(self.universe_spec, -2)
+        self.lock_state = 0
+
+#
+# Base class for trajectory generators that call the C-level
+# energy evaluators. It implements a mechanism that makes such
+# generators thread-safe.
+#
+cdef class EnergyBasedTrajectoryGenerator(TrajectoryGenerator):
+
+    cdef PyFFEvaluatorObject *evaluator
+    cdef evaluator_object
+    
+    def __init__(self, universe, options):
+        TrajectoryGenerator.__init__(universe.options)
+        evaluator_object = None
+        self.evaluator = NULL
+
+    cdef void initializeTrajectoryActions(self, char *name) except *:
+        TrajectoryGenerator.initializeTrajectoryActions(self, name)
+        # Construct a C evaluator object for the force field, using
+        # the specified number of threads or the default value
+        nt = self.getOption('threads')
+        self.evaluator_object = \
+                self.universe.energyEvaluator(threads=nt).CEvaluator()
+        self.evaluator = <PyFFEvaluatorObject*>self.evaluator_object
+
+    cdef void finalizeTrajectoryActions(self, int last_step,
+                                        int error=False) except *:
+        TrajectoryGenerator.finalizeTrajectoryActions(self, last_step, error)
+        self.evaluator = NULL
+        self.evaluator_object = None
+    
+    cdef int trajectoryActions(self, int step) except -1:
+        cdef int ret_code
+        self.evaluator.tstate_save = PyEval_SaveThread()
+        if self.lock_state != 0:
+            PyUniverseSpec_StateLock(self.universe_spec, 2*self.lock_state)
+        ret_code = PyTrajectory_Output(self.tspec, step, self.tvars,
+                                       &self.evaluator.tstate_save)
+        if self.lock_state != 0:
+            PyUniverseSpec_StateLock(self.universe_spec, self.lock_state)
+        PyEval_RestoreThread(self.evaluator.tstate_save)
+        return ret_code
+
+    cdef void calculateEnergies(self, N.ndarray[double, ndim=2] conf_array,
+                                energy_data *energy, int small_change=0) \
+                            except *:
+        self.evaluator.tstate_save = PyEval_SaveThread()
+        if self.lock_state == -1:
+            PyUniverseSpec_StateLock(self.universe_spec, -2)
+        if self.lock_state != 1:
+            PyUniverseSpec_StateLock(self.universe_spec, 1)
+        self.evaluator.eval_func(self.evaluator, energy, conf_array,
+                                 small_change)
+        if self.lock_state != 1:
+            PyUniverseSpec_StateLock(self.universe_spec, 2)
+        if self.lock_state == -1:
+            PyUniverseSpec_StateLock(self.universe_spec, -1)
+        PyEval_RestoreThread(self.evaluator.tstate_save)
 
 #
 # Velocity Verlet integrator
 #
-cdef class VelocityVerletIntegrator(TrajectoryGenerator):
+cdef class VelocityVerletIntegrator(EnergyBasedTrajectoryGenerator):
 
     """
     Velocity-Verlet molecular dynamics integrator
@@ -328,93 +387,112 @@ cdef class VelocityVerletIntegrator(TrajectoryGenerator):
     restart_data = ['configuration', 'velocities', 'energy',
                     'thermodynamic', 'auxiliary']
 
+    # Cython compiler directives set for efficiency:
+    # - No bound checks on index operations
+    # - No support for negative indices
+    # - Division uses C semantics
     @cython.boundscheck(False)
     @cython.wraparound(False)
+    @cython.cdivision(True)
     cdef start(self):
         cdef N.ndarray[double, ndim=2] x, v, g, dv
-        cdef N.ndarray[double, ndim=1] m, im
+        cdef N.ndarray[double, ndim=1] m
+        cdef energy_data energy
         cdef double time, delta_t, ke
         cdef int natoms, nsteps, step
         cdef Py_ssize_t i, j, k
-        cdef PyFFEvaluatorObject *evaluator
-        cdef energy_data ed
     
         # Check if velocities have been initialized
         if self.universe.velocities() is None:
             raise ValueError("no velocities")
 
-        # Construct a C evaluator object for the force field, using
-        # the specified number of threads or the default value
-        nt = self.getOption('threads')
-        ev_object = self.universe.energyEvaluator(threads=nt).CEvaluator()
-        evaluator = <PyFFEvaluatorObject*>ev_object
-
+        # Gather state variables and parameters
         configuration = self.universe.configuration()
         velocities = self.universe.velocities()
         gradients = ParticleProperties.ParticleVector(self.universe)
         masses = self.universe.masses()
-        inv_masses = 1./masses
         delta_t = self.getOption('delta_t')
         nsteps = self.getOption('steps')
         natoms = self.universe.numberOfAtoms()
     
+        # For efficiency, the Cython code works at the array
+        # level rather than at the ParticleProperty level.
         x = configuration.array
         v = velocities.array
         g = gradients.array
         m = masses.array
-        im = inv_masses.array
-        dv = ParticleProperties.ParticleVector(self.universe).array
-        ed.gradients = <void *>g
-        ed.gradient_fn = NULL
-        ed.force_constants = NULL
-        ed.fc_fn = NULL
-        
-        self.declareTrajectoryVariable_double(&time,
-                                              "time",
-                                              "Time: %lf\n",
-                                              time_unit_name, PyTrajectory_Time)
-        self.declareTrajectoryVariable_array(v,
-                                             "velocities",
-                                             "Velocities:\n",
-                                             velocity_unit_name, PyTrajectory_Velocities)
-        self.declareTrajectoryVariable_array(g,
-                                             "gradients",
-                                             "Energy gradients:\n",
-                                             energy_gradient_unit_name, PyTrajectory_Gradients)
-        self.declareTrajectoryVariable_double(&ed.energy,
-                                              "potential_energy",
-                                              "Potential energy: %lf\n",
-                                              energy_unit_name, PyTrajectory_Energy)
-        self.declareTrajectoryVariable_double(&ke,
-                                              "kinetic_energy",
-                                              "Kinetic energy: %lf\n",
-                                              energy_unit_name, PyTrajectory_Energy)
+        dv = N.zeros((natoms, 3), N.float)
+
+        # Ask for energy gradients to be calculated and stored in
+        # the array g. Force constants are not requested.
+        energy.gradients = <void *>g
+        energy.gradient_fn = NULL
+        energy.force_constants = NULL
+        energy.fc_fn = NULL
+
+        # Declare the variables accessible to trajectory actions.
+        self.declareTrajectoryVariable_double(
+            &time, "time", "Time: %lf\n", time_unit_name, PyTrajectory_Time)
+        self.declareTrajectoryVariable_array(
+            v, "velocities", "Velocities:\n", velocity_unit_name,
+            PyTrajectory_Velocities)
+        self.declareTrajectoryVariable_array(
+            g, "gradients", "Energy gradients:\n", energy_gradient_unit_name,
+            PyTrajectory_Gradients)
+        self.declareTrajectoryVariable_double(
+            &energy.energy,"potential_energy", "Potential energy: %lf\n",
+            energy_unit_name, PyTrajectory_Energy)
+        self.declareTrajectoryVariable_double(
+            &ke, "kinetic_energy", "Kinetic energy: %lf\n",
+            energy_unit_name, PyTrajectory_Energy)
         self.initializeTrajectoryActions("Velocity Verlet")
 
-        with nogil:
-            ke = 0.
-            self.foldCoordinatesIntoBox()
-            evaluator.eval_func(evaluator, &ed, x, 0);
-            for i in range(natoms):
-                for j in range(3):
-                    dv[i, j] = -0.5*delta_t*g[i, j]*im[i]
-                    ke += 0.5*m[i]*v[i, j]*v[i, j]
+        # Acquire the write lock of the universe. This is necessary to
+        # make sure that the integrator's modifications to positions
+        # and velocities are synchronized with other threads that
+        # attempt to use or modify these same values.
+        #
+        # Note that the write lock will be released temporarily
+        # for trajectory actions. It will also be converted to
+        # a read lock temporarily for energy evaluation. This
+        # is taken care of automatically by the respective methods
+        # of class EnergyBasedTrajectoryGenerator.
+        self.acquireWriteLock()
+
+        # Preparation: Calculate initial half-step accelerations
+        # and run the trajectory actions on the initial state.
+        ke = 0.
+        self.foldCoordinatesIntoBox()
+        self.calculateEnergies(x, &energy, 0)
+        for i in range(natoms):
+            for j in range(3):
+                dv[i, j] = -0.5*delta_t*g[i, j]/m[i]
+                ke += 0.5*m[i]*v[i, j]*v[i, j]
         self.trajectoryActions(step)
+
+        # Main integration loop
         time = 0.
         for step in range(nsteps):
-            with nogil:
-                for i in range(natoms):
-                    for j in range(3):
-                        v[i, j] += dv[i, j]
-                        x[i, j] += delta_t*v[i, j]
-                self.foldCoordinatesIntoBox()
-                evaluator.eval_func(evaluator, &ed, x, 1);
-                ke = 0.
-                for i in range(natoms):
-                    for j in range(3):
-                        dv[i, j] = -0.5*delta_t*g[i, j]*im[i]
-                        v[i, j] += dv[i, j]
-                        ke += 0.5*m[i]*v[i, j]*v[i, j]
-                time += delta_t
+            # First half-step
+            for i in range(natoms):
+                for j in range(3):
+                    v[i, j] += dv[i, j]
+                    x[i, j] += delta_t*v[i, j]
+            # Mid-step energy calculation
+            self.foldCoordinatesIntoBox()
+            self.calculateEnergies(x, &energy, 1)
+            # Second half-step
+            ke = 0.
+            for i in range(natoms):
+                for j in range(3):
+                    dv[i, j] = -0.5*delta_t*g[i, j]/m[i]
+                    v[i, j] += dv[i, j]
+                    ke += 0.5*m[i]*v[i, j]*v[i, j]
+            time += delta_t
             self.trajectoryActions(step)
+
+        # Release the write lock.
+        self.releaseWriteLock()
+
+        # Finalize all trajectory actions (close files etc.)
         self.finalizeTrajectoryActions(nsteps)
