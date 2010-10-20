@@ -9,6 +9,7 @@ include MMTK/Database/Molecules/*
 include MMTK/Database/Proteins/*
 include MMTK/Database/PDB/*
 recursive-include Include *.pxi
+recursive-include Include *.pxd
 include Src/*.c
 include Src/*.i
 include Src/*.h
@@ -32,20 +33,23 @@ recursive-include Examples *.py
 recursive-include Examples *.c
 recursive-include Examples *.pyx
 include Examples/Forcefield/README
-exclude Examples/Forcefield/HarmonicOscillator/Pyrex/*.c
-exclude Examples/Forcefield/ElectricField/Pyrex/*.c
+exclude Examples/Forcefield/HarmonicOscillator/Cython/*.c
+exclude Examples/Forcefield/ElectricField/Cython/*.c
 include Examples/MolecularDynamics/argon.conf.gz
 include Examples/LangevinDynamics/*.c
 include Examples/LangevinDynamics/ranf.h
 include Examples/LangevinDynamics/README
+include Examples/MDIntegrator/README
 prune Examples/Forcefield/HarmonicOscillator/C/build
 prune Examples/Forcefield/HarmonicOscillator/C/dist
-prune Examples/Forcefield/HarmonicOscillator/Pyrex/build
-prune Examples/Forcefield/HarmonicOscillator/Pyrex/dist
+prune Examples/Forcefield/HarmonicOscillator/Cython/build
+prune Examples/Forcefield/HarmonicOscillator/Cython/dist
 prune Examples/Forcefield/ElectricField/C/build
 prune Examples/Forcefield/ElectricField/C/dist
-prune Examples/Forcefield/ElectricField/Pyrex/build
-prune Examples/Forcefield/ElectricField/Pyrex/dist
+prune Examples/Forcefield/ElectricField/Cython/build
+prune Examples/Forcefield/ElectricField/Cython/dist
+prune Examples/MDIntegrator/build
+prune Examples/MDIntegrator/dist
 recursive-include Tools *.py
 include MMTK/Tools/TrajectoryViewer/README
 exclude *~

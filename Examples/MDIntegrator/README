@@ -1,0 +1,14 @@
+The files in this directory are provided as an illustration of how to
+implement molecular dynamics integrators and similar algorithms in
+Cython.  The Velocity Verlet integrator provided as an example is
+intentionally kept simple; it supports neither fixed atoms nor
+distance constraints, and has neither a thermostat nor a barostat.
+
+To compile and link the C module, type
+
+   python setup.py build_ext --inplace
+
+To run the test script, type
+
+   python test.py
+
