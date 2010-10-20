@@ -5,6 +5,7 @@ from VelocityVerlet import VelocityVerletIntegrator
 from MMTK.Dynamics import Heater, TranslationRemover, RotationRemover
 from MMTK.Trajectory import Trajectory, TrajectoryOutput, \
                             RestartTrajectoryOutput, StandardLogOutput
+import time
 
 # Define system
 universe = InfiniteUniverse(Amber99ForceField(mod_files=['frcmod.ff99SB']))
@@ -49,3 +50,16 @@ integrator(steps=100,
                       # Log output to screen every 10 steps.
                       StandardLogOutput(10)])
 trajectory.close()
+
+print "Starting background thread..."
+thread = integrator(steps = 10000, background = True,
+                    actions = [TranslationRemover(0, None, 50),
+                               RotationRemover(0, None, 50)])
+print "Monitoring progress:"
+while thread.is_alive():
+    state = thread.copyState()
+    if state is not None:
+        print "CPU time:", time.clock()
+        print "Simulation time:", state['time']
+        print "Potential energy:", state['potential_energy']
+    time.sleep(0.1)
