@@ -57,5 +57,7 @@ cdef extern from "MMTK/trajectory.h":
     cdef int PyTrajectory_Output(PyTrajectoryOutputSpec *spec, int step,
                                  PyTrajectoryVariable *data, PyThreadState **thread)
 
+    cdef void **PyTrajectory_API
+    
 import_MMTK_trajectory()
 

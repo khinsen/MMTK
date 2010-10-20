@@ -18,5 +18,6 @@ config/*.o
 Src/MMTK_energy_term.c
 Src/MMTK_state_accessor.c
 Src/MMTK_trajectory_action.c
+Src/MMTK_trajectory_generator.c
 Examples/Forcefield/*/Cython/*.c
 1
