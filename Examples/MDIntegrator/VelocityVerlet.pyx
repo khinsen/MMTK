@@ -27,10 +27,11 @@ cdef extern from "stdlib.h":
 #
 cdef class TrajectoryGenerator(object):
 
-    cdef public universe
-    cdef public options, call_options
-    cdef public features
+    cdef readonly universe
+    cdef readonly options, call_options
+    cdef readonly features
     cdef readonly actions
+    cdef public state_accessor
     cdef PyTrajectoryVariable *tvars
     cdef PyTrajectoryOutputSpec *tspec
     cdef PyUniverseSpecObject *universe_spec
@@ -58,17 +59,6 @@ cdef class TrajectoryGenerator(object):
 
     def getActions(self):
         try:
-            self.actions = self.getOption('actions')
-        except ValueError:
-            self.actions = []
-        try:
-            if self.getOption('background'):
-                import MMTK_state_accessor
-                self.state_accessor = MMTK_state_accessor.StateAccessor()
-                self.actions.append(self.state_accessor)
-        except ValueError:
-            pass
-        try:
             steps = self.getOption('steps')
         except ValueError:
             steps = None
@@ -92,21 +82,22 @@ cdef class TrajectoryGenerator(object):
         return value
 
     def optionString(self, options):
-        s = ''
-        for o in options:
-            s = s + o + '=' + `self.getOption(o)` + ', '
-        return s[:-2]
-
-    def run(self, function, args):
-        if self.getOption('background'):
-            import ThreadManager
-            return ThreadManager.TrajectoryGeneratorThread(self.universe,
-                                      function, args, self.state_accessor)
-        else:
-            apply(function, args)
+        return sum((o + '=' + `self.getOption(o)` + ', ' for o in options),
+                   '')[:-2]
 
     def __call__(self, **options):
         self.setCallOptions(options)
+        try:
+            self.actions = self.getOption('actions')
+        except ValueError:
+            self.actions = []
+        try:
+            if self.getOption('background'):
+                import MMTK_state_accessor
+                self.state_accessor = MMTK_state_accessor.StateAccessor()
+                self.actions.append(self.state_accessor)
+        except ValueError:
+            pass
         Features.checkFeatures(self, self.universe)
         if self.tvars != NULL:
             free(self.tvars)
@@ -135,6 +126,15 @@ cdef class TrajectoryGenerator(object):
                                            "degrees_of_freedom",
                                            "Degrees of freedom: %d\n",
                                            "", PyTrajectory_Internal)
+        if self.getOption('background'):
+            from MMTK import ThreadManager
+            return ThreadManager.TrajectoryGeneratorThread(
+                self.universe, self.start_py, (), self.state_accessor)
+        else:
+            self.start()
+            return None
+
+    def start_py(self):
         self.start()
 
     cdef start(self):
