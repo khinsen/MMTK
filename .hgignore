@@ -4,6 +4,7 @@ syntax: glob
 **.pyc
 **.pyo
 **.so
+**.nc
 build
 dist
 Test
@@ -20,4 +21,5 @@ Src/MMTK_state_accessor.c
 Src/MMTK_trajectory_action.c
 Src/MMTK_trajectory_generator.c
 Examples/Forcefield/*/Cython/*.c
+Examples/MDIntegrator/*.c
 1
