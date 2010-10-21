@@ -342,7 +342,9 @@ def OutputFile(filename, format = None):
         else:
             _file_types[format[0]](filename, format[1])
 
-_file_types = {'pdb': PDB.PDBOutputFile,
+_file_types = {('pdb',): PDB.PDBOutputFile,
+               ('pdb', 'pi_model'): PDB.PDBOutputFileModel,
+               ('pdb', 'pi_altloc'): PDB.PDBOutputFileAltLoc,
                ('vrml',): VRMLFile,
                ('vrml', 'wireframe'): VRMLWireframeFile,
                ('vrml', 'highlight'): VRMLHighlight,

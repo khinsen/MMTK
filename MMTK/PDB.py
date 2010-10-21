@@ -600,8 +600,8 @@ class PDBOutputFile(object):
             self.file.writeLine('ENDMDL', '')
             self.model_number = self.model_number + 1
         self.file.writeLine('MODEL', {'serial_number': self.model_number})
-        
-    def write(self, object, configuration = None, tag = None):
+
+    def writeModel(self, object, configuration = None, slice_index = None, tag = None):
         """Write  an object to the file
         @param object: the object to be written
         @type object: L{MMTK.Collections.GroupOfAtoms}
@@ -611,7 +611,7 @@ class PDBOutputFile(object):
         """
         if not ChemicalObjects.isChemicalObject(object):
             for o in object:
-                self.write(o, configuration)
+                self.writeModel(o, configuration, slice_index)
         else:
             toplevel = tag is None
             if toplevel:
@@ -624,38 +624,50 @@ class PDBOutputFile(object):
                                       cmp(x[1].number, y[1].number))
                     for atom_name, atom in sorted_atoms:
                         atom = object.getAtom(atom)
-                        p = atom.position(configuration)
-                        if Utility.isDefinedPosition(p):
-                            try: occ = atom.occupancy
-                            except AttributeError: occ = 0.
-                            try: temp = atom.temperature_factor
-                            except AttributeError: temp = 0.
-                            self.file.writeAtom(atom_name, p/Units.Ang,
-                                                occ, temp, atom.type.symbol)
-                            self.atom_sequence.append(atom)
-                        else:
-                            self.warning = True
+                        self.writeAtom(atom, atom_name, configuration, slice_index)
                         setattr(atom, tag, None)
             else:
                 if hasattr(object, 'is_protein'):
                     for chain in object:                    
-                        self.write(chain, configuration, tag)
+                        self.writeModel(chain, configuration, slice_index, tag)
                 elif hasattr(object, 'is_chain'):
                         self.file.nextChain(None, object.name)
                         for residue in object:
-                            self.write(residue, configuration, tag)
+                            self.writeModel(residue, configuration, slice_index, tag)
                         self.file.terminateChain()
                 elif hasattr(object, 'molecules'):
                     for m in object.molecules:
-                        self.write(m, configuration, tag)
+                        self.writeModel(m, configuration, slice_index, tag)
                 elif hasattr(object, 'groups'):
                     for g in object.groups:
-                        self.write(g, configuration, tag)
+                        self.writeModel(g, configuration, slice_index, tag)
             if toplevel:
                 for a in object.atomList():
                     if not hasattr(a, tag):
-                        self.write(a, configuration, tag)
+                        self.writeModel(a, configuration, slice_index, tag)
                     delattr(a, tag)
+    
+    write = writeModel
+
+    def writeAtom(self, atom, atom_name, configuration = None, slice_index = None):
+        """
+        Writes the position of the atom.
+        """
+        if slice_index is not None:
+            bead_number = slice_index / (self.nbeads / atom.numberOfBeads())
+            p = atom.beadPositions()[bead_number]
+        else:
+            p = atom.position(configuration)
+        if Utility.isDefinedPosition(p):
+            try: occ = atom.occupancy
+            except AttributeError: occ = 0.
+            try: temp = atom.temperature_factor
+            except AttributeError: temp = 0.
+            self.file.writeAtom(atom_name, p/Units.Ang,
+                          occ, temp, atom.type.symbol)
+            self.atom_sequence.append(atom)
+        else:
+            self.warning = True
 
     def close(self):
         """
@@ -668,3 +680,64 @@ class PDBOutputFile(object):
             Utility.warning('Some atoms are missing in the output file ' + \
                             'because their positions are undefined.')
             self.warning = False
+
+
+#
+# This object represents a PDB file for outputting path integrals to PDB.
+#
+class PDBOutputFileModel(PDBOutputFile):
+
+    """
+    PDB file for output
+    """
+
+    def write(self, object, configuration = None, tag = None):
+        """
+        Writes path integral PDBs with bead positions specified by model number. 
+        """
+        nbead_values = list(set(a.numberOfBeads() for a in object.atomList()))
+        nbead_values.sort()
+        self.nbeads = nbead_values[-1]
+        for slice_index in range(self.nbeads):
+            self.nextModel()
+            self.writeModel(object, configuration, slice_index, tag)
+
+#
+# This object represents a PDB file for output.
+#
+class PDBOutputFileAltLoc(PDBOutputFile):
+
+    """
+    PDB file for output
+    """
+
+    def write(self, object, configuration = None, tag = None):
+        """
+        Writes path integral PDBs with bead positions specified by atom alternate locations.
+        """
+        nbead_values = list(set(a.numberOfBeads() for a in object.atomList()))
+        nbead_values.sort()
+        self.nbeads = nbead_values[-1]
+        if self.nbeads > 36:
+            raise IOError("At least one atom with greater than 36 beads, alternate location PDB write not supported, use pi_model")
+
+        self.writeModel(object, configuration, tag = tag)
+
+    def writeAtom(self, atom, atom_name, configuration = None, slice_index = None):
+        """
+        Writes the position of the atom, looping over beads
+        """
+        altloc_charmap = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890"
+        for bead in range(atom.numberOfBeads()):
+            p = atom.beadPositions()[bead]
+            if Utility.isDefinedPosition(p):
+                try: occ = atom.occupancy
+                except AttributeError: occ = 0.
+                try: temp = atom.temperature_factor
+                except AttributeError: temp = 0.
+                self.file.writeAtom(atom_name, p/Units.Ang,
+                              occ, temp, atom.type.symbol, altloc_charmap[bead])
+                self.atom_sequence.append(atom)
+            else:
+                self.warning = True
+
