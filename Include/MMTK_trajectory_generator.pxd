@@ -20,8 +20,8 @@ cdef extern from "stdlib.h":
 
 cdef class TrajectoryGenerator(object):
 
-    cdef readonly universe
-    cdef readonly options, call_options
+    cdef readonly universe, options, name
+    cdef readonly call_options
     cdef readonly features
     cdef readonly actions
     cdef public state_accessor
@@ -44,7 +44,7 @@ cdef class TrajectoryGenerator(object):
     cdef void declareTrajectoryVariable_box(self, double * var, int l) except *
     cdef void _addTrajectoryVariable(self, PyTrajectoryVariable v) except *
 
-    cdef void initializeTrajectoryActions(self, char *name) except *
+    cdef void initializeTrajectoryActions(self) except *
     cdef void finalizeTrajectoryActions(self, int last_step, int error=?) \
               except *
     cdef int trajectoryActions(self, int step) except -1

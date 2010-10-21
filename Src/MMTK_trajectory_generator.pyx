@@ -30,9 +30,10 @@ cdef class TrajectoryGenerator(object):
     generates trajectories: integrators, minimizers, etc.
     """
 
-    def __init__(self, universe, options):
+    def __init__(self, universe, options, name):
         self.universe = universe
         self.options = options
+        self.name = name
         self.call_options = {}
         self.features = []
         self.tvars = NULL
@@ -201,10 +202,10 @@ cdef class TrajectoryGenerator(object):
         v.length = l
         self._addTrajectoryVariable(v)
 
-    cdef void initializeTrajectoryActions(self, char *name) except *:
+    cdef void initializeTrajectoryActions(self) except *:
         self.tspec = PyTrajectory_OutputSpecification(self.universe,
                                                       self.getActions(),
-                                                      name, self.tvars);
+                                                      self.name, self.tvars);
         if self.tspec == NULL:
             raise MemoryError
 
@@ -246,13 +247,13 @@ cdef class TrajectoryGenerator(object):
 #
 cdef class EnergyBasedTrajectoryGenerator(TrajectoryGenerator):
 
-    def __init__(self, universe, options):
-        TrajectoryGenerator.__init__(self, universe, options)
+    def __init__(self, universe, options, name):
+        TrajectoryGenerator.__init__(self, universe, options, name)
         evaluator_object = None
         self.evaluator = NULL
 
-    cdef void initializeTrajectoryActions(self, char *name) except *:
-        TrajectoryGenerator.initializeTrajectoryActions(self, name)
+    cdef void initializeTrajectoryActions(self) except *:
+        TrajectoryGenerator.initializeTrajectoryActions(self)
         # Construct a C evaluator object for the force field, using
         # the specified number of threads or the default value
         nt = self.getOption('threads')
