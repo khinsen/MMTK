@@ -78,7 +78,7 @@ cdef extern from "MMTK/forcefield.h":
     
     ctypedef void ff_eval_function(PyFFEvaluatorObject *evaluator,
                                    energy_data *ed,
-                                   N.ndarray[double, ndim=2] configuration,
+                                   PyArrayObject *configuration,
                                    int small_change) nogil
 
     ctypedef struct PyFFEvaluatorObject:
