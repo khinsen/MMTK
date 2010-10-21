@@ -34,7 +34,7 @@ cdef class PyEnergyTerm(EnergyTerm):
         else:
             raise AttributeError, name
 
-    cdef void c_evaluate(self, EnergyEvaluator eval,
+    cdef void c_evaluate(self, PyFFEvaluatorObject *eval,
                          energy_spec *input, energy_data *energy) except *:
         cdef int do_gradients, do_fc
         do_gradients = energy.gradients != NULL

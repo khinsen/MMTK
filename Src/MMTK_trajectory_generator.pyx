@@ -286,7 +286,7 @@ cdef class EnergyBasedTrajectoryGenerator(TrajectoryGenerator):
             PyUniverseSpec_StateLock(self.universe_spec, -2)
         if self.lock_state != 1:
             PyUniverseSpec_StateLock(self.universe_spec, 1)
-        self.evaluator.eval_func(self.evaluator, energy, conf_array,
+        self.evaluator.eval_func(self.evaluator, energy, <PyArrayObject *>conf_array,
                                  small_change)
         if self.lock_state != 1:
             PyUniverseSpec_StateLock(self.universe_spec, 2)
