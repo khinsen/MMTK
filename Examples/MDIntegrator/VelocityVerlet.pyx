@@ -72,7 +72,7 @@ cdef class VelocityVerletIntegrator(MMTK_trajectory_generator.EnergyBasedTraject
         @type background: C{bool}
         """
         MMTK_trajectory_generator.EnergyBasedTrajectoryGenerator.__init__(
-            self, universe, options)
+            self, universe, options, "Velocity Verlet integrator")
         # Supported features: none for the moment, to keep it simple
         self.features = []
 
@@ -143,7 +143,7 @@ cdef class VelocityVerletIntegrator(MMTK_trajectory_generator.EnergyBasedTraject
         self.declareTrajectoryVariable_double(
             &ke, "kinetic_energy", "Kinetic energy: %lf\n",
             energy_unit_name, PyTrajectory_Energy)
-        self.initializeTrajectoryActions("Velocity Verlet")
+        self.initializeTrajectoryActions()
 
         # Acquire the write lock of the universe. This is necessary to
         # make sure that the integrator's modifications to positions
