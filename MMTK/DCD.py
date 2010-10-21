@@ -80,7 +80,7 @@ def writeDCD(vector_list, dcd_file_name, factor, atom_order=None,
 
     i_start = 0       # always start at frame 0
     n_savc  = 1       # save every frame
-    fd = MMTK_DCD.writeOpenDCD(dcd_file_name, natoms, len(vector_list),
+    fd = MMTK_DCD.writeOpenDCD(dcd_file_name, npoints, len(vector_list),
                                i_start, n_savc, delta_t)
     for vector in vector_list:
         if conf_flag:
