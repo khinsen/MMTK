@@ -171,11 +171,12 @@ class MMBondedForceField(MMAtomParameters, BondedForceField):
             for o1, o2, o3, o4 in offsets:
                 atoms = [(t2,i2,o2), (t3,i3,o3), (t4,i4,o4)]
                 atoms.sort(_order)
-                i2, i3, i4 = [a[1] for a in atoms]
-                o2, o3, o4 = [a[2] for a in atoms]
                 for p in terms:
                     if p[2] != 0.:
-                        data.add('dihedrals', (i1+o1, i2+o2, i3+o3, i4+o4,
+                        data.add('dihedrals', (i1+o1,
+                                               atoms[0][1]+atoms[0][2],
+                                               atoms[1][1]+atoms[1][2],
+                                               atoms[2][1]+atoms[2][2],
                                                p[0], p[1], p[2]*f*self.scale_factor))
 
     def bondLengthDatabase(self, universe):
