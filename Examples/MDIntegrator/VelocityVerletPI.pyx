@@ -74,7 +74,7 @@ cdef class VelocityVerletIntegrator(MMTK_trajectory_generator.EnergyBasedTraject
         MMTK_trajectory_generator.EnergyBasedTrajectoryGenerator.__init__(
             self, universe, options, "Velocity Verlet integrator")
         # Supported features: PathIntegrals
-        self.features = [Features.PathIntegralsFeature]
+        self.features = [Features.PathIntegralsWithSpringTermsFeature]
 
     default_options = {'first_step': 0, 'steps': 100, 'delta_t': 1.*Units.fs,
                        'background': False, 'threads': None,

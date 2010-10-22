@@ -257,11 +257,12 @@ class EnergyEvaluatorParameters(object):
                 beta = pi_environments[0].beta
             else:
                 raise ValueError('exactly one path integral environment required')
-            for a in pi_atoms:
-                nb = a.numberOfBeads()
-                k = float(nb*nb*nb)*a.mass() / (beta*beta*Units.hbar*Units.hbar*2.)
-                for b in range(nb):
-                    spring_parameters.append((a.index+b, a.index+(b+1)%nb, 0., k))
+            if pi_environments[0].include_spring_terms:
+                for a in pi_atoms:
+                    nb = a.numberOfBeads()
+                    k = float(nb*nb*nb)*a.mass() / (beta*beta*Units.hbar*Units.hbar*2.)
+                    for b in range(nb):
+                        spring_parameters.append((a.index+b, a.index+(b+1)%nb, 0., k))
 
         else:
 
@@ -321,18 +322,19 @@ class EnergyEvaluator(object):
                 beta = pi_environments[0].beta
             else:
                 raise ValueError('exactly one path integral environment required')
-            indices = []
-            parameters = []
-            for a in pi_atoms:
-                nb = a.numberOfBeads()
-                k = float(nb*nb*nb)*a.mass() / (beta*beta*Units.hbar*Units.hbar*2.)
-                for b in range(nb):
-                    indices.append([a.index+b, a.index+(b+1)%nb])
-                    parameters.append([0., k])
-            terms.append(HarmonicDistanceTerm(universe._spec,
-                                              N.array(indices),
-                                              N.array(parameters),
-                                              "path integral spring"))
+            if pi_environments[0].include_spring_terms:
+                indices = []
+                parameters = []
+                for a in pi_atoms:
+                    nb = a.numberOfBeads()
+                    k = float(nb*nb*nb)*a.mass() / (beta*beta*Units.hbar*Units.hbar*2.)
+                    for b in range(nb):
+                        indices.append([a.index+b, a.index+(b+1)%nb])
+                        parameters.append([0., k])
+                terms.append(HarmonicDistanceTerm(universe._spec,
+                                                  N.array(indices),
+                                                  N.array(parameters),
+                                                  "path integral spring"))
 
         else:
 

@@ -62,13 +62,27 @@ class PathIntegralsFeatureClass(Feature):
 
     def isInUniverse(self, universe):
         for o in universe._environment:
-            if o.__class__ is Environment.PathIntegrals:
+            if o.__class__ is Environment.PathIntegrals \
+                   and not o.include_spring_terms:
                 return True
         return False
 
-    description = 'Path Integrals'
+    description = 'Path Integrals without spring terms in the potential energy'
 
 PathIntegralsFeature = PathIntegralsFeatureClass()
+
+class PathIntegralsWithSpringTermsFeatureClass(Feature):
+
+    def isInUniverse(self, universe):
+        for o in universe._environment:
+            if o.__class__ is Environment.PathIntegrals \
+                   and o.include_spring_terms:
+                return True
+        return False
+
+    description = 'Path Integrals with spring terms in the potential energy'
+
+PathIntegralsWithSpringTermsFeature = PathIntegralsWithSpringTermsFeatureClass()
 
 #
 # Nose thermostat feature

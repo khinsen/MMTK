@@ -98,7 +98,7 @@ class VelocityVerletIntegrator(Integrator):
         self.features = [Features.FixedParticleFeature,
                          Features.NoseThermostatFeature,
                          Features.AndersenBarostatFeature,
-                         Features.PathIntegralsFeature,
+                         Features.PathIntegralsWithSpringTermsFeature,
                          Features.DistanceConstraintsFeature]
 
     def __call__(self, **options):

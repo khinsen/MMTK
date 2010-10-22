@@ -117,7 +117,7 @@ class PathIntegrals(EnvironmentObject):
     as well as the number of beads in the system
     """
 
-    def __init__(self, temperature):
+    def __init__(self, temperature, include_spring_terms=True):
         """
         @param temperature: the temperature used for path integral interactions
         @type temperature: C{float}
@@ -126,6 +126,7 @@ class PathIntegrals(EnvironmentObject):
         self.parameters = N.array([temperature])
         self.coordinates = N.array([0.,0.])
         self.beta = 1./(MMTK.Units.k_B*temperature)
+        self.include_spring_terms = include_spring_terms
 
     def setTemperature(self, temperature):
         self.parameters[0] = temperature
