@@ -60,8 +60,9 @@ cdef class TrajectoryGenerator(object):
 
 cdef class EnergyBasedTrajectoryGenerator(TrajectoryGenerator):
 
-    cdef PyFFEvaluatorObject *evaluator
     cdef evaluator_object
+    cdef c_evaluator_object
+    cdef PyFFEvaluatorObject *evaluator
 
     cdef void calculateEnergies(self, N.ndarray[double, ndim=2] conf_array,
                                 energy_data *energy, int small_change=?) \

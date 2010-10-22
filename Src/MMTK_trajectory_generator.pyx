@@ -249,7 +249,8 @@ cdef class EnergyBasedTrajectoryGenerator(TrajectoryGenerator):
 
     def __init__(self, universe, options, name):
         TrajectoryGenerator.__init__(self, universe, options, name)
-        evaluator_object = None
+        self.evaluator_object = None
+        self.c_evaluator_object = None
         self.evaluator = NULL
 
     cdef void initializeTrajectoryActions(self) except *:
@@ -257,14 +258,15 @@ cdef class EnergyBasedTrajectoryGenerator(TrajectoryGenerator):
         # Construct a C evaluator object for the force field, using
         # the specified number of threads or the default value
         nt = self.getOption('threads')
-        self.evaluator_object = \
-                self.universe.energyEvaluator(threads=nt).CEvaluator()
-        self.evaluator = <PyFFEvaluatorObject*>self.evaluator_object
+        self.evaluator_object = self.universe.energyEvaluator(threads=nt)
+        self.c_evaluator_object = self.evaluator_object.CEvaluator()
+        self.evaluator = <PyFFEvaluatorObject*>self.c_evaluator_object
 
     cdef void finalizeTrajectoryActions(self, int last_step,
                                         int error=False) except *:
         TrajectoryGenerator.finalizeTrajectoryActions(self, last_step, error)
         self.evaluator = NULL
+        self.c_evaluator_object = None
         self.evaluator_object = None
     
     cdef int trajectoryActions(self, int step) except -1:
