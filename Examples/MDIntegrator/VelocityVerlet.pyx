@@ -28,9 +28,7 @@ cdef class VelocityVerletIntegrator(MMTK_trajectory_generator.EnergyBasedTraject
     """
     Velocity-Verlet molecular dynamics integrator
 
-    The integrator can handle fixed atoms, distance constraints,
-    a thermostat, and a barostat, as well as any combination.
-    It is fully thread-safe.
+    The integrator is fully thread-safe.
 
     The integration is started by calling the integrator object.
     All the keyword options (see documnentation of __init__) can be
@@ -81,7 +79,7 @@ cdef class VelocityVerletIntegrator(MMTK_trajectory_generator.EnergyBasedTraject
                        'actions': []}
 
     available_data = ['configuration', 'velocities', 'gradients',
-                      'energy', 'thermodynamic', 'time', 'auxiliary']
+                      'energy', 'time']
 
     restart_data = ['configuration', 'velocities', 'energy']
 
