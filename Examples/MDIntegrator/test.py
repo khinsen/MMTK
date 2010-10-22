@@ -42,7 +42,6 @@ integrator(steps=100,
                       RotationRemover(0, None, 50),
                       # Write every second step to the trajectory file.
                       TrajectoryOutput(trajectory, ("time", "energy",
-                                                    "thermodynamic",
                                                     "configuration"),
                                        0, None, 2),
                       # Write restart data every fifth step.
