@@ -260,7 +260,7 @@ class EnergyEvaluatorParameters(object):
             if pi_environments[0].include_spring_terms:
                 for a in pi_atoms:
                     nb = a.numberOfBeads()
-                    k = float(nb*nb*nb)*a.mass() / (beta*beta*Units.hbar*Units.hbar*2.)
+                    k = float(nbeads*nb)*a.mass() / (beta*beta*Units.hbar*Units.hbar*2.)
                     for b in range(nb):
                         spring_parameters.append((a.index+b, a.index+(b+1)%nb, 0., k))
 
@@ -327,7 +327,7 @@ class EnergyEvaluator(object):
                 parameters = []
                 for a in pi_atoms:
                     nb = a.numberOfBeads()
-                    k = float(nb*nb*nb)*a.mass() / (beta*beta*Units.hbar*Units.hbar*2.)
+                    k = float(nbeads*nb)*a.mass() / (beta*beta*Units.hbar*Units.hbar*2.)
                     for b in range(nb):
                         indices.append([a.index+b, a.index+(b+1)%nb])
                         parameters.append([0., k])

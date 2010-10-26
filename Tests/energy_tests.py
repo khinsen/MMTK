@@ -215,7 +215,7 @@ class AmberPathIntegralTest(unittest.TestCase):
         nb=4
         self.universe.h.setNumberOfBeads(nb)
         kT = Units.k_B*self.temperature
-        k = kT*kT*float(nb*nb)*self.universe.h.mass() / (Units.hbar*Units.hbar*2.)
+        k = kT*kT*float(nb)*self.universe.h.mass() / (Units.hbar*Units.hbar*2.)
         beadpos=[Vector(-2.,-3.,-4.),Vector(0.,0.,0.),Vector(5.,1.,3.),Vector(1,-2,3)]
         self.universe.h.setBeadPositions(beadpos)
         numerical_vqu = 0.
