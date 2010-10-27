@@ -669,10 +669,6 @@ class Universe(Collections.GroupOfAtoms, Visualization.Viewable):
             if block:
                 self.releaseWriteStateLock()
 
-    def degreesOfFreedom(self):
-        return GroupOfAtoms.degreesOfFreedom(self) \
-               - self.numberOfDistanceConstraints()
-
     def distanceConstraintList(self):
         """
         @returns: the list of distance constraints
@@ -1181,11 +1177,11 @@ class Universe(Collections.GroupOfAtoms, Visualization.Viewable):
     #
     # More efficient reimplementations of methods in Collections.GroupOfAtoms
     #
-    def numberOfFixedAtoms(self):
+    def numberOfFixedPoints(self):
         return self.getParticleBoolean('fixed').sumOverParticles()
 
     def degreesOfFreedom(self):
-        return 3*(self.numberOfAtoms()-self.numberOfFixedAtoms()) \
+        return 3*(self.numberOfPoints()-self.numberOfFixedPoints()) \
                - self.numberOfDistanceConstraints()
 
     def mass(self):

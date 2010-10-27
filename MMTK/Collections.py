@@ -73,7 +73,15 @@ class GroupOfAtoms(object):
         @returns: the number of mechanical degrees of freedom
         @rtype: C{int}
         """
-        return 3*(self.numberOfAtoms()-self.numberOfFixedAtoms())
+        n = 0
+        for a in self.atomIterator():
+            try:
+                fixed = a.fixed
+            except AttributeError:
+                fixed = False
+            if not fixed:
+                n += a.numberOfBeads()
+        return 3*n
 
     def atomCollection(self):
         """
@@ -514,7 +522,7 @@ class GroupOfAtoms(object):
         energy = 0.
         for b in self.beadIterator():
             v = velocities[b]
-            energy += energy + b._mass*(v*v)
+            energy += b._mass*(v*v)
         return 0.5*energy
 
     def temperature(self, velocities = None):
