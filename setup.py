@@ -337,6 +337,12 @@ standard and non-standard problems in molecular simulations.
                                 include_dirs=include_dirs,
                                 libraries=libraries,
                                 define_macros=macros),
+                      Extension('mtrand',
+                                ['Src/mtrand.%s' % src_ext, 'Src/randomkit.c'],
+                                extra_compile_args = compile_args,
+                                include_dirs=include_dirs,
+                                libraries=libraries,
+                                define_macros=macros),
                       ],
 
        data_files = data_files,

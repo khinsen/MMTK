@@ -6,3 +6,7 @@ cdef extern from "Python.h":
 
     cdef PyThreadState *PyEval_SaveThread()
     cdef void PyEval_RestoreThread(PyThreadState *thread)
+
+    cdef void *PyMem_Malloc(ssize_t length)
+    cdef void PyMem_Free(void *)
+    
