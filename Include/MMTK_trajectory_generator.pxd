@@ -56,6 +56,8 @@ cdef class TrajectoryGenerator(object):
     cdef void acquireWriteLock(self) nogil
     cdef void releaseWriteLock(self) nogil
 
+    cdef _initialize(self)
+
     cdef start(self)
 
 cdef class EnergyBasedTrajectoryGenerator(TrajectoryGenerator):

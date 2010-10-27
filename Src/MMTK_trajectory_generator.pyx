@@ -111,6 +111,7 @@ cdef class TrajectoryGenerator(object):
                                            "degrees_of_freedom",
                                            "Degrees of freedom: %d\n",
                                            "", PyTrajectory_Internal)
+        self._initialize()
         if self.getOption('background'):
             from MMTK import ThreadManager
             return ThreadManager.TrajectoryGeneratorThread(
@@ -118,6 +119,9 @@ cdef class TrajectoryGenerator(object):
         else:
             self.start()
             return None
+
+    cdef _initialize(self):
+        pass
 
     def start_py(self):
         self.start()
@@ -253,8 +257,7 @@ cdef class EnergyBasedTrajectoryGenerator(TrajectoryGenerator):
         self.c_evaluator_object = None
         self.evaluator = NULL
 
-    cdef void initializeTrajectoryActions(self) except *:
-        TrajectoryGenerator.initializeTrajectoryActions(self)
+    cdef _initialize(self):
         # Construct a C evaluator object for the force field, using
         # the specified number of threads or the default value
         nt = self.getOption('threads')
@@ -262,12 +265,12 @@ cdef class EnergyBasedTrajectoryGenerator(TrajectoryGenerator):
         self.c_evaluator_object = self.evaluator_object.CEvaluator()
         self.evaluator = <PyFFEvaluatorObject*>self.c_evaluator_object
 
+    cdef void initializeTrajectoryActions(self) except *:
+        TrajectoryGenerator.initializeTrajectoryActions(self)
+
     cdef void finalizeTrajectoryActions(self, int last_step,
                                         int error=False) except *:
         TrajectoryGenerator.finalizeTrajectoryActions(self, last_step, error)
-        self.evaluator = NULL
-        self.c_evaluator_object = None
-        self.evaluator_object = None
     
     cdef int trajectoryActions(self, int step) except -1:
         cdef int ret_code

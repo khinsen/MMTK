@@ -28,17 +28,15 @@ allow indexing of ParticleProperties with multi-atom objects (though the weights
 calculating averages are not obvious).
 
 ** Trajectories
-
 *** DONE Reading a ParticleTrajectory for a bead
 
 *** TODO [#B] Reading a ParticleTrajectory for a multi-bead atom
 Same problem as for ParticleProperties.
 
 ** Integration
-
 *** TODO [#A] Integrators
-**** TODO Velocity-Verlet integrator using normal mode variables
-**** TODO Colored-noise Langevin version of this integrator
+**** DONE Velocity-Verlet integrator using normal mode variables
+**** DONE Colored-noise Langevin version of this integrator
 **** TODO Nose-Hoover-Chain version of this integrator
 **** TODO Add a barostat
 
@@ -46,6 +44,8 @@ Same problem as for ParticleProperties.
 **** TODO Distance constraints
 **** TODO Rigid-body integrator (quaternions)
 
+** TODO Estimator for kinetic energy
+see paper by Ceriotti et al.
 ** Tests
 
 *** TODO Coordinate manipulation (methods in Collections.GroupOfAtoms)
@@ -90,6 +90,10 @@ At every database access, check if there are multiple definitions in
 different directories of the search path and alert the user of the
 possible conflict.
 
+
+** TODO Documentation in Spinx
+
+** TODO Check for undefined positions before integration, normal mode analysis etc.
 
 * Bugs
 

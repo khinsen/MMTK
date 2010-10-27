@@ -20,6 +20,7 @@ Src/MMTK_energy_term.c
 Src/MMTK_state_accessor.c
 Src/MMTK_trajectory_action.c
 Src/MMTK_trajectory_generator.c
+Src/MMTK_PINormalModeIntegrator.c
 Src/mtrand.c
 Examples/Forcefield/*/Cython/*.c
 Examples/MDIntegrator/*.c
