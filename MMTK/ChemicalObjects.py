@@ -605,6 +605,9 @@ class Atom(ChemicalObject):
         @type mass: C{float}
         """
         self._mass = mass
+        universe = self.universe()
+        if universe is not None:
+            universe._changed(True)
 
     def getAtom(self, atom):
         return self
