@@ -108,6 +108,16 @@ cdef class PINormalModeIntegrator(MMTK_trajectory_generator.EnergyBasedTrajector
 
     restart_data = ['configuration', 'velocities', 'energy']
 
+    # The implementation of the equations of motion follows the article
+    #   Ceriotti et al., J. Chem. Phys. 133, 124104 (2010)
+    # with the following differences:
+    # 1) The normal mode coordinates are larger by a factor sqrt(nbeads).
+    # 2) The spring energy is smaller by a factor of nbeads to take
+    #    into account the factor nbeads in Eq. (3) of the paper cited above.
+    #    The potential energy of the system is also smaller by a factor of
+    #    nbeads compared to the notation in this paper.
+    # 3) Velocities are used instead of momenta in the integrator.
+
     @cython.boundscheck(True)
     @cython.wraparound(False)
     @cython.cdivision(True)
@@ -171,23 +181,19 @@ cdef class PINormalModeIntegrator(MMTK_trajectory_generator.EnergyBasedTrajector
     cdef void propagateOscillators(self, N.ndarray[double, ndim=2] nmc,
                                    N.ndarray[double, ndim=2] nmv,
                                    int bead_index, int nb, double beta, double dt):
-        cdef double omega_p = sqrt(nb)/(beta*hbar)
-        cdef double omega_k, omega_k_dt, s, c, sqrtnb
+        cdef double omega_n = nb/(beta*hbar)
+        cdef double omega_k, omega_k_dt, s, c
         cdef double temp
         cdef int i, k
-        # With the factor sqrtnb we get energy conservation and the right
-        # relation between average kinetic and potential energy, but for
-        # now we don't know where it is supposed to come from.
-        sqrtnb = sqrt(nb)
         for i in range(3):
             nmc[i, bead_index] += dt*nmv[i, bead_index]
             for k in range(1, nb):
-                omega_k = 2.*omega_p*sin(k*M_PI/nb)
+                omega_k = 2.*omega_n*sin(k*M_PI/nb)
                 omega_k_dt = omega_k*dt
                 s = sin(omega_k_dt)
                 c = cos(omega_k_dt)
-                temp = c*nmv[i, bead_index+k]-sqrtnb*omega_k*s*nmc[i, bead_index+k]
-                nmc[i, bead_index+k] = s*nmv[i, bead_index+k]/(sqrtnb*omega_k) + c*nmc[i, bead_index+k]
+                temp = c*nmv[i, bead_index+k]-omega_k*s*nmc[i, bead_index+k]
+                nmc[i, bead_index+k] = s*nmv[i, bead_index+k]/omega_k + c*nmc[i, bead_index+k]
                 nmv[i, bead_index+k] = temp
 
     @cython.boundscheck(True)
@@ -219,15 +225,15 @@ cdef class PINormalModeIntegrator(MMTK_trajectory_generator.EnergyBasedTrajector
                                         double beta):
         cdef int i, j, k, nb
         cdef double sumsq
-        cdef double omega_p, omega_k
+        cdef double omega_n, omega_k
         cdef double e = 0.
         for i in range(nmc.shape[1]):
             if bd[i, 0] == 0:
                 nb = bd[i, 1]
-                omega_p = sqrt(nb)/(beta*hbar)
+                omega_n = nb/(beta*hbar)
                 # Start at j=1 because the contribution from the centroid is zero
                 for j in range(1, nb):
-                    omega_k = 2.*omega_p*sin(j*M_PI/nb)
+                    omega_k = 2.*omega_n*sin(j*M_PI/nb)
                     sumsq = 0.
                     for k in range(3):
                         sumsq += nmc[k, i+j]*nmc[k, i+j]
@@ -235,7 +241,7 @@ cdef class PINormalModeIntegrator(MMTK_trajectory_generator.EnergyBasedTrajector
                     # the maximal frequency.
                     if j != nb/2:
                         sumsq *= 2.
-                    e += 0.5*m[i]*sumsq*omega_k*omega_k
+                    e += 0.5*m[i]*sumsq*omega_k*omega_k/nb
         return e
 
     cdef void applyThermostat(self, N.ndarray[double, ndim=2] v, N.ndarray[double, ndim=2] nmv,
