@@ -257,7 +257,7 @@ cdef class PINormalModeIntegrator(MMTK_trajectory_generator.EnergyBasedTrajector
         cdef N.ndarray[double, ndim=1] m
         cdef N.ndarray[short, ndim=2] bd
         cdef energy_data energy
-        cdef double time, delta_t, ke, se, beta, temperature
+        cdef double time, delta_t, ke, ke_nm, se, beta, temperature
         cdef int nbeads, nsteps, step
         cdef Py_ssize_t i, j, k
     
@@ -412,6 +412,17 @@ cdef class PINormalModeIntegrator(MMTK_trajectory_generator.EnergyBasedTrajector
                 for j in range(3):
                     ke += 0.5*m[i]*v[i, j]*v[i, j]
             temperature = 2.*ke/(3.*nbeads*k_B)
+            if False:
+                ke_nm = 0.
+                for i in range(nbeads):
+                    if bd[i, 0] == 0:
+                        for j in range(3):
+                            for k in range(bd[i, 1]):
+                                if k == 0 or k == bd[i, 1]/2:
+                                    ke_nm += 0.5*m[i]*nmv[j, i+k]*nmv[j, i+k]/bd[i, 1]
+                                else:
+                                    ke_nm += m[i]*nmv[j, i+k]*nmv[j, i+k]/bd[i, 1]
+                assert fabs(ke-ke_nm) < 1.e-7
             # End of time step
             time += delta_t
             self.trajectoryActions(step)
@@ -446,34 +457,31 @@ cdef class PILangevinNormalModeIntegrator(PINormalModeIntegrator):
         cdef N.ndarray[double, ndim=1] g = self.gamma
         cdef int nbeads = v.shape[0]
         cdef double f, c1, c2
-        cdef double omega_p, mb
+        cdef double omega_n, mb
         cdef int i, j, k, nb
-        # Conversion to normal mode coordinates
-        for i in range(nbeads):
-            # bd[i, 0] == 0 means "first bead of an atom"
-            if bd[i, 0] == 0:
-                self.cartesianToNormalMode(v, nmv, i, bd[i, 1])
-        # Modify velocities
         for i in range(nbeads):
             # bd[i, 0] == 0 means "first bead of an atom"
             if bd[i, 0] == 0:
                 nb = bd[i, 1]
-                omega_p = sqrt(nb)/(beta*hbar)
-                mb = sqrt(m[i]*nb*nb/beta)
+                # Conversion to normal mode coordinates
+                self.cartesianToNormalMode(v, nmv, i, nb)
+                # Modify velocities
+                omega_n = nb/(beta*hbar)
+                mb = sqrt(nb/(beta*m[i]))
                 for k in range(nb):
                     if k == 0:
                         f = g[i]
                     else:
-                        f = 4.*omega_p*sin(k*M_PI/nb)
+                        f = 4.*omega_n*sin(k*M_PI/nb)
                     c1 = exp(-0.5*dt*f)
                     c2 = sqrt(1-c1*c1)
                     for j in range(3):
-                        nmv[j, i+k] = c1*nmv[j, i+k] + c2*mb*mtrand.standard_normal()
-        # Conversion back to Cartesian coordinates
-        for i in range(nbeads):
-            # bd[i, 0] == 0 means "first bead of an atom"
-            if bd[i, 0] == 0:
-                self.normalModeToCartesian(v, nmv, i, bd[i, 1])
+                        if k == 0 or k == nb/2:
+                            nmv[j, i+k] = c1*nmv[j, i+k] + c2*mb*mtrand.standard_normal()
+                        else:
+                            nmv[j, i+k] = c1*nmv[j, i+k] + sqrt(0.5)*c2*mb*mtrand.standard_normal()
+                # Conversion back to Cartesian coordinates
+                self.normalModeToCartesian(v, nmv, i, nb)
 
     @cython.boundscheck(True)
     @cython.wraparound(False)
