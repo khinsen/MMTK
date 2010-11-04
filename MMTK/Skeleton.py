@@ -119,6 +119,7 @@ class c:
                 attr = o
             elif attr:
                 setattr(collection, attr, o.make(info, conf))
+                attr = None
             else:
                 collection.addObject(o.make(info, conf))
         return collection
