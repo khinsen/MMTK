@@ -56,7 +56,6 @@ class NoseThermostat(EnvironmentObject):
                                 thermostat coordinate
         @type relaxation_time: C{float}
         """
-        self.arguments = (temperature, relaxation_time)
         self.parameters = N.array([temperature, relaxation_time])
         self.coordinates = N.array([0., 0.])
 
@@ -91,7 +90,6 @@ class AndersenBarostat(EnvironmentObject):
                                 barostat coordinate
         @type relaxation_time: C{float}
         """
-        self.arguments = (pressure, relaxation_time)
         self.parameters = N.array([pressure, relaxation_time])
         self.coordinates = N.array([0.])
 
@@ -122,14 +120,17 @@ class PathIntegrals(EnvironmentObject):
         @param temperature: the temperature used for path integral interactions
         @type temperature: C{float}
         """
-        self.arguments = (temperature,)
-        self.parameters = N.array([temperature])
+        self.temperature = temperature
         self.coordinates = N.array([0.,0.])
         self.beta = 1./(MMTK.Units.k_B*temperature)
         self.include_spring_terms = include_spring_terms
 
+    def description(self):
+        return "o('Environment." + self.__class__.__name__ + \
+               `(self.temperature, self.include_spring_terms)` + "')"
+
     def setTemperature(self, temperature):
-        self.parameters[0] = temperature
+        self.temperature = temperature
         self.beta = 1./(MMTK.Units.k_B*temperature)
 
     def checkCompatibilityWith(self, other):
