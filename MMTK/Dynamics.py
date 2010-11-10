@@ -124,10 +124,8 @@ class VelocityVerletIntegrator(Integrator):
         type = 'NVE'
         if Features.NoseThermostatFeature in used_features:
             type = 'NVT'
-            for object in self.universe._environment:
-                if object.__class__ is Environment.NoseThermostat:
-                    thermostat = object
-                    break
+            thermostat = self.universe.environmentObjectList(
+                                          Environment.NoseThermostat)[0]
             t_parameters = thermostat.parameters
             t_coordinates = thermostat.coordinates
         else:
@@ -140,10 +138,8 @@ class VelocityVerletIntegrator(Integrator):
                 type = 'NPH'
             else:
                 type = 'NPT'
-            for object in self.universe._environment:
-                if object.__class__ is Environment.AndersenBarostat:
-                    barostat = object
-                    break
+            barostat = self.universe.environmentObjectList(
+                                          Environment.AndersenBarostat)[0]
             b_parameters = barostat.parameters
             b_coordinates = barostat.coordinates
         else:
