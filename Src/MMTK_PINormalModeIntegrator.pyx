@@ -74,6 +74,9 @@ cdef class PINormalModeIntegrator(MMTK_trajectory_generator.EnergyBasedTrajector
      - category "energy": potential and kinetic energy, plus
        extended-system energy terms if a thermostat and/or barostat
        are used
+
+     - category "auxiliary": primitive and virial quantum energy estimators
+
     """
 
     def __init__(self, universe, **options):
@@ -104,7 +107,7 @@ cdef class PINormalModeIntegrator(MMTK_trajectory_generator.EnergyBasedTrajector
                        'actions': []}
 
     available_data = ['configuration', 'velocities', 'gradients',
-                      'energy', 'thermodynamic', 'time']
+                      'energy', 'thermodynamic', 'time', 'auxiliary']
 
     restart_data = ['configuration', 'velocities', 'energy']
 
@@ -258,7 +261,8 @@ cdef class PINormalModeIntegrator(MMTK_trajectory_generator.EnergyBasedTrajector
         cdef N.ndarray[short, ndim=2] bd
         cdef energy_data energy
         cdef double time, delta_t, ke, ke_nm, se, beta, temperature
-        cdef int nbeads, nsteps, step
+        cdef double qe_prim, qe_vir
+        cdef int natoms, nbeads, nsteps, step
         cdef Py_ssize_t i, j, k
     
         # Check if velocities have been initialized
@@ -272,6 +276,7 @@ cdef class PINormalModeIntegrator(MMTK_trajectory_generator.EnergyBasedTrajector
         masses = self.universe.masses()
         delta_t = self.getOption('delta_t')
         nsteps = self.getOption('steps')
+        natoms = self.universe.numberOfAtoms()
         nbeads = self.universe.numberOfPoints()
         bd = self.evaluator_object.global_data.get('bead_data')
         pi_environment = self.universe.environmentObjectList(Environment.PathIntegrals)[0]
@@ -322,6 +327,15 @@ cdef class PINormalModeIntegrator(MMTK_trajectory_generator.EnergyBasedTrajector
         self.declareTrajectoryVariable_double(
             &temperature, "temperature", "Temperature: %lf\n",
             temperature_unit_name, PyTrajectory_Thermodynamic)
+        self.declareTrajectoryVariable_double(
+            &qe_prim, "quantum_energy_primitive",
+            "Primitive quantum energy estimator: %lf\n",
+            energy_unit_name, PyTrajectory_Auxiliary)
+        if energy.virial_available:
+            self.declareTrajectoryVariable_double(
+                &qe_vir, "quantum_energy_virial",
+                "Virial quantum energy estimator: %lf\n",
+                energy_unit_name, PyTrajectory_Auxiliary)
         self.initializeTrajectoryActions()
 
         # Acquire the write lock of the universe. This is necessary to
@@ -345,6 +359,8 @@ cdef class PINormalModeIntegrator(MMTK_trajectory_generator.EnergyBasedTrajector
             if bd[i, 0] == 0:
                 self.cartesianToNormalMode(x, nmc, i, bd[i, 1])
         se = self.springEnergyNormalModes(nmc, m, bd, beta)
+        qe_prim = energy.energy - se + 1.5*nbeads/beta
+        qe_vir = energy.energy + 0.5*energy.virial + 1.5*natoms/beta
 
         ke = 0.
         for i in range(nbeads):
@@ -399,6 +415,8 @@ cdef class PINormalModeIntegrator(MMTK_trajectory_generator.EnergyBasedTrajector
             self.foldCoordinatesIntoBox()
             self.calculateEnergies(x, &energy, 1)
             se = self.springEnergyNormalModes(nmc, m, bd, beta)
+            qe_prim = energy.energy - se + 1.5*nbeads/beta
+            qe_vir = energy.energy + 0.5*energy.virial + 1.5*natoms/beta
             # Second integration half-step
             for i in range(nbeads):
                 for j in range(3):
