@@ -73,13 +73,14 @@ _category = {
 def categorizeVariables(variable_names):
     categories = DictWithDefault([])
     for name in variable_names:
+        if name in ['description', 'step']:
+            continue
         words = string.split(name, '_')
         try:
             c = _category[words[-1]]
         except KeyError:
-            c = ''
-        if c:
-            categories[c].append(name)
+            c = 'auxiliary'
+        categories[c].append(name)
     for list in categories.values():
         list.sort()
     if categories.has_key('energy'):
