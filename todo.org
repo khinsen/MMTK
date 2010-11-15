@@ -1,7 +1,6 @@
 * Path integrals
 
 ** Force fields
-
 *** TODO [#C] Nonbonded list optimization
 The current algorithm leads to a quadratic complexity as a function of
 bead number. The pair weights for the exclusion and 1-4 lists can be
@@ -19,6 +18,7 @@ the number of time slices
 
 *** DONE Check that subsets are treated correctly
 
+*** TODO Make angle and dihedral restraint terms path-integral compatible
 ** ParticleProperty
 
 *** TODO [#B] Indexing with a multi-bead atom
@@ -81,7 +81,6 @@ Add new file type(s) for representing all the beads:
 * New features
 
 ** TODO [#C] Make energy gradients available for subsets of the total force field
-
 
 * Improvements
 

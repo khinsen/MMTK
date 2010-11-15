@@ -54,6 +54,9 @@ class HarmonicDistanceRestraint(ForceField):
         self.force_constant = force_constant
         ForceField.__init__(self, 'harmonic distance restraint')
 
+    def supportsPathIntegrals(self):
+        return True
+
     def evaluatorParameters(self, universe, subset1, subset2, global_data):
         if subset1 is not None:
             s1 = subset1.atomList()
@@ -61,14 +64,16 @@ class HarmonicDistanceRestraint(ForceField):
             if not ((self.atom1 in s1 and self.atom2 in s2) or \
                     (self.atom1 in s2 and self.atom2 in s1)):
                 raise ValueError("restraint outside subset")
+        f, offsets = self.beadOffsetsAndFactor([self.index1, self.index2],
+                                               global_data)
         return {'harmonic_distance_term':
-                [(self.index1, self.index2,
-                  self.distance, self.force_constant)]}
+                [(self.index1+o1, self.index2+o2,
+                  self.distance, f*self.force_constant)
+                 for o1, o2 in offsets]}
 
     def evaluatorTerms(self, universe, subset1, subset2, global_data):
         params = self.evaluatorParameters(universe, subset1, subset2,
                                           global_data)['harmonic_distance_term']
-        assert len(params) == 1
         indices = N.array([params[0][:2]])
         parameters = N.array([params[0][2:]])
         return [HarmonicDistanceTerm(universe._spec, indices, parameters,
