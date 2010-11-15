@@ -81,7 +81,21 @@ def forceConstantTest(universe, atoms = None, delta = 0.0001):
                 num_fc.append(0.5*(grad_plus[b2]-grad_minus[b2])/delta)
             print N.array(map(lambda a: a.array, num_fc))
 
-
+#
+# Check consistency of gradients and virial
+#
+def virialTest(universe):
+    """
+    Test the virial by comparing to an explicit computation from
+    positions and gradients.
+    @param universe: the universe on which the test is performed
+    @type universe: L{MMTK.Universe.Universe}
+    """
+    ev = universe.energyEvaluator()
+    e, grad = ev(gradients = True)
+    virial = ev.lastVirial()
+    conf = universe.configuration()
+    print virial, -(conf*grad).sumOverParticles()
 
 if __name__ == '__main__':
 
@@ -96,3 +110,5 @@ if __name__ == '__main__':
     world.addObject(m)
     gradientTest(world, atoms, delta)
     forceConstantTest(world, atoms, delta)
+    virialTest(world)
+    
