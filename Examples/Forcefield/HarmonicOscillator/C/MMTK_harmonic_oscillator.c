@@ -43,12 +43,7 @@ harmonic_evaluator(PyFFEnergyTermObject *self,
      returns the value of each term separately), the total energy is
      always the sum of all terms. Here we have only one energy term. */
   energy->energy_terms[self->index] = 0.5*k*(dx*dx + dy*dy + dz*dz);
-
-  /* Signal the absence of a virial value, making the total virial
-     invalid. Of course one can calculate the virial for a harmonic
-     restraint, but this is an occasion to illustrate its absence - for
-     an example with a virial, see ElectricField. */
-  energy->virial_available = 0;
+  energy->energy_terms[self->virial_index] -= k*(dx*dx + dy*dy + dz*dz);
 
   /* If only the energy is asked for, stop here. */
   if (energy->gradients == NULL && energy->force_constants == NULL)

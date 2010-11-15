@@ -1,6 +1,4 @@
-# Example for a forcefield implementation in Pyrex.
-# Use Pyrex 0.9.3 or later.
-
+# Example for a forcefield implementation in Cython.
 
 #
 # Get all the required declarations
@@ -54,7 +52,7 @@ cdef class HarmonicOscillatorTerm(EnergyTerm):
     # The third argument is a C structure that contains the
     # energy term fields and gradient arrays for storing the results.
     # For details, see MMTK_forcefield.pxi.
-    cdef void evaluate(self, EnergyEvaluator eval,
+    cdef void evaluate(self, PyFFEvaluatorObject *eval,
                        energy_spec *input, energy_data *energy):
         cdef vector3 *coordinates, *gradients
         cdef double *fc
@@ -65,7 +63,7 @@ cdef class HarmonicOscillatorTerm(EnergyTerm):
         dy = coordinates[self.atom_index][1] - self.ref_y
         dz = coordinates[self.atom_index][2] - self.ref_z
         energy.energy_terms[self.index] = 0.5*self.k*(dx*dx + dy*dy + dz*dz)
-        energy.virial_available = 0 # we don't do virials here
+        energy.energy_terms[self.virial_index] -= self.k*(dx*dx + dy*dy + dz*dz)
         if energy.gradients != NULL:
             gradients = <vector3 *>(<PyArrayObject *> energy.gradients).data
             gradients[self.atom_index][0] += self.k*dx
