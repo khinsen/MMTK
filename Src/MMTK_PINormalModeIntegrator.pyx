@@ -401,9 +401,9 @@ cdef class PINormalModeIntegrator(MMTK_trajectory_generator.EnergyBasedTrajector
                 
         se = self.springEnergyNormalModes(nmc, m, bd, beta)
         qe_prim = energy.energy - se + 1.5*nbeads/beta
-        qe_vir = energy.energy + 0.5*energy.virial# + 1.5*nbeads/beta
+        qe_vir = energy.energy - 0.5*energy.virial# + 1.5*nbeads/beta
         qe_cvir = energy.energy \
-                  + 0.5*self.centroidVirial(x, nmc, g, bd) \
+                  - 0.5*self.centroidVirial(x, nmc, g, bd) \
                   + 1.5*natoms/beta
 
         ke = 0.
@@ -460,9 +460,9 @@ cdef class PINormalModeIntegrator(MMTK_trajectory_generator.EnergyBasedTrajector
             self.calculateEnergies(x, &energy, 1)
             se = self.springEnergyNormalModes(nmc, m, bd, beta)
             qe_prim = energy.energy - se + 1.5*nbeads/beta
-            qe_vir = energy.energy + 0.5*energy.virial# + 1.5*nbeads/beta
+            qe_vir = energy.energy - 0.5*energy.virial# + 1.5*nbeads/beta
             qe_cvir = energy.energy \
-                      + 0.5*self.centroidVirial(x, nmc, g, bd) \
+                      - 0.5*self.centroidVirial(x, nmc, g, bd) \
                       + 1.5*natoms/beta
             # Second integration half-step
             for i in range(nbeads):
