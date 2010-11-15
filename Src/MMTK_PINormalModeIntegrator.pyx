@@ -265,6 +265,24 @@ cdef class PINormalModeIntegrator(MMTK_trajectory_generator.EnergyBasedTrajector
                     e += 0.5*m[i]*sumsq*omega_k*omega_k/nb
         return e
 
+    @cython.boundscheck(True)
+    @cython.wraparound(False)
+    @cython.cdivision(True)
+    cdef double centroidVirial(self,
+                               N.ndarray[double, ndim=2] x,
+                               N.ndarray[double, ndim=2] nmc,
+                               N.ndarray[double, ndim=2] g,
+                               N.ndarray[short, ndim=2] bd):
+        cdef double cvirial = 0.
+        cdef int i, j, k
+        for i in range(x.shape[0]):
+            # bd[i, 0] == 0 means "first bead of an atom"
+            if bd[i, 0] == 0:
+                for j in range(3):
+                    for k in range(bd[i, 1]):
+                        cvirial -= (x[i+k, j]-nmc[j, i])*g[i+k, j]
+        return cvirial
+
     cdef void applyThermostat(self, N.ndarray[double, ndim=2] v, N.ndarray[double, ndim=2] nmv,
                               N.ndarray[double, ndim=1] m, N.ndarray[short, ndim=2] bd,
                               double dt, double beta):
@@ -279,7 +297,7 @@ cdef class PINormalModeIntegrator(MMTK_trajectory_generator.EnergyBasedTrajector
         cdef N.ndarray[short, ndim=2] bd
         cdef energy_data energy
         cdef double time, delta_t, ke, ke_nm, se, beta, temperature
-        cdef double qe_prim, qe_vir
+        cdef double qe_prim, qe_vir, qe_cvir
         cdef int natoms, nbeads, nsteps, step
         cdef Py_ssize_t i, j, k
     
@@ -349,11 +367,14 @@ cdef class PINormalModeIntegrator(MMTK_trajectory_generator.EnergyBasedTrajector
             &qe_prim, "quantum_energy_primitive",
             "Primitive quantum energy estimator: %lf\n",
             energy_unit_name, PyTrajectory_Auxiliary)
-        if energy.virial_available:
-            self.declareTrajectoryVariable_double(
-                &qe_vir, "quantum_energy_virial",
-                "Virial quantum energy estimator: %lf\n",
-                energy_unit_name, PyTrajectory_Auxiliary)
+        self.declareTrajectoryVariable_double(
+            &qe_vir, "quantum_energy_virial",
+            "Virial quantum energy estimator: %lf\n",
+            energy_unit_name, PyTrajectory_Auxiliary)
+        self.declareTrajectoryVariable_double(
+            &qe_cvir, "quantum_energy_centroid_virial",
+            "Centroid virial quantum energy estimator: %lf\n",
+            energy_unit_name, PyTrajectory_Auxiliary)
         self.initializeTrajectoryActions()
 
         # Acquire the write lock of the universe. This is necessary to
@@ -377,9 +398,13 @@ cdef class PINormalModeIntegrator(MMTK_trajectory_generator.EnergyBasedTrajector
             if bd[i, 0] == 0:
                 self.fixBeadPositions(x, i, bd[i, 1])
                 self.cartesianToNormalMode(x, nmc, i, bd[i, 1])
+                
         se = self.springEnergyNormalModes(nmc, m, bd, beta)
         qe_prim = energy.energy - se + 1.5*nbeads/beta
-        qe_vir = energy.energy + 0.5*energy.virial + 1.5*natoms/beta
+        qe_vir = energy.energy + 0.5*energy.virial# + 1.5*nbeads/beta
+        qe_cvir = energy.energy \
+                  + 0.5*self.centroidVirial(x, nmc, g, bd) \
+                  + 1.5*natoms/beta
 
         ke = 0.
         for i in range(nbeads):
@@ -432,11 +457,13 @@ cdef class PINormalModeIntegrator(MMTK_trajectory_generator.EnergyBasedTrajector
                     self.normalModeToCartesian(x, nmc, i, bd[i, 1])
                     self.normalModeToCartesian(v, nmv, i, bd[i, 1])
             # Mid-step energy calculation
-            self.foldCoordinatesIntoBox()
             self.calculateEnergies(x, &energy, 1)
             se = self.springEnergyNormalModes(nmc, m, bd, beta)
             qe_prim = energy.energy - se + 1.5*nbeads/beta
-            qe_vir = energy.energy + 0.5*energy.virial + 1.5*natoms/beta
+            qe_vir = energy.energy + 0.5*energy.virial# + 1.5*nbeads/beta
+            qe_cvir = energy.energy \
+                      + 0.5*self.centroidVirial(x, nmc, g, bd) \
+                      + 1.5*natoms/beta
             # Second integration half-step
             for i in range(nbeads):
                 for j in range(3):
@@ -463,6 +490,7 @@ cdef class PINormalModeIntegrator(MMTK_trajectory_generator.EnergyBasedTrajector
                 assert fabs(ke-ke_nm) < 1.e-7
             # End of time step
             time += delta_t
+            self.foldCoordinatesIntoBox()
             self.trajectoryActions(step)
 
         # Release the write lock.
