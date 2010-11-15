@@ -36,6 +36,7 @@ Same problem as for ParticleProperties.
 ** Integration
 *** TODO [#A] Integrators
 **** DONE Velocity-Verlet integrator using normal mode variables
+**** DONE Fix normal mode coordinates with PBC
 **** DONE Colored-noise Langevin version of this integrator
 **** TODO Nose-Hoover-Chain version of this integrator
 **** TODO Add a barostat
@@ -47,7 +48,6 @@ Same problem as for ParticleProperties.
 ** TODO Estimator for kinetic energy
 see paper by Ceriotti et al.
 ** Tests
-
 *** TODO Coordinate manipulation (methods in Collections.GroupOfAtoms)
  - [X] translation
  - [X] rotation
@@ -72,7 +72,7 @@ see paper by Ceriotti et al.
 
 ** I/O
 
-*** TODO [#A] PDB output
+*** DONE [#A] PDB output
 Currently: centroids
 Add new file type(s) for representing all the beads:
  - 'pdb.pi_altloc' altloc (max. 26 beads)
@@ -100,3 +100,6 @@ possible conflict.
 ** TODO [#C] Opening a trajectory written for a universe created from a MoleculeFactory doesn't work.
 
 ** TODO Trajectory test fails for ParallelepipedicPeriodicUniverse in readParticleTrajectory
+** TODO GroupOfAtoms.angularVelocity can't do an inverse on a singular matrix
+needs pseudoinverse instead of regular inverse
+

@@ -11,6 +11,7 @@ cimport MMTK_trajectory_generator
 from MMTK import Units, ParticleProperties, Features, Environment
 import MMTK_trajectory
 import MMTK_forcefield
+import MMTK_universe
 import numbers
 
 import mtrand
@@ -121,6 +122,23 @@ cdef class PINormalModeIntegrator(MMTK_trajectory_generator.EnergyBasedTrajector
     #    nbeads compared to the notation in this paper.
     # 3) Velocities are used instead of momenta in the integrator.
 
+
+    @cython.boundscheck(True)
+    @cython.wraparound(False)
+    @cython.cdivision(True)
+    cdef fixBeadPositions(self, N.ndarray[double, ndim=2] x,
+                               int bead_index, int nb):
+        cdef int i, j
+        cdef vector3 *xv = <vector3 *> x.data
+        cdef vector3 temp
+        if self.universe_spec.is_periodic and nb > 1:
+            for j in range(1, nb):
+                self.universe_spec.distance_function(temp,
+                    xv[bead_index+j-1], xv[bead_index+j],
+                    self.universe_spec.geometry_data)
+                for i in range(3):
+                    xv[bead_index+j][i] = xv[bead_index+j-1][i] + temp[i]
+    
     @cython.boundscheck(True)
     @cython.wraparound(False)
     @cython.cdivision(True)
@@ -357,6 +375,7 @@ cdef class PINormalModeIntegrator(MMTK_trajectory_generator.EnergyBasedTrajector
 
         for i in range(nbeads):
             if bd[i, 0] == 0:
+                self.fixBeadPositions(x, i, bd[i, 1])
                 self.cartesianToNormalMode(x, nmc, i, bd[i, 1])
         se = self.springEnergyNormalModes(nmc, m, bd, beta)
         qe_prim = energy.energy - se + 1.5*nbeads/beta
@@ -398,6 +417,7 @@ cdef class PINormalModeIntegrator(MMTK_trajectory_generator.EnergyBasedTrajector
             for i in range(nbeads):
                 # bd[i, 0] == 0 means "first bead of an atom"
                 if bd[i, 0] == 0:
+                    self.fixBeadPositions(x, i, bd[i, 1])
                     self.cartesianToNormalMode(x, nmc, i, bd[i, 1])
                     self.cartesianToNormalMode(v, nmv, i, bd[i, 1])
             # Harmonic oscillator time propagation
