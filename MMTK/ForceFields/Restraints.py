@@ -113,15 +113,20 @@ class HarmonicAngleRestraint(ForceField):
         self.force_constant = force_constant
         ForceField.__init__(self, 'harmonic angle restraint')
 
+    def supportsPathIntegrals(self):
+        return True
+
     def evaluatorParameters(self, universe, subset1, subset2, global_data):
+        f, offsets = self.beadOffsetsAndFactor([self.index1, self.index2, self.index3],
+                                               global_data)
         return {'harmonic_angle_term':
-                 [(self.index1, self.index2, self.index3,
-                   self.angle, self.force_constant)]}
+                [(self.index1+o1, self.index2+o2, self.index3+o3,
+                   self.angle, f*self.force_constant)
+                 for o1, o2, o3 in offsets]}
 
     def evaluatorTerms(self, universe, subset1, subset2, global_data):
         params = self.evaluatorParameters(universe, subset1, subset2,
                                           global_data)['harmonic_angle_term']
-        assert len(params) == 1
         indices = N.array([params[0][:3]])
         parameters = N.array([params[0][3:]])
         return [HarmonicAngleTerm(universe._spec, indices, parameters,
@@ -159,16 +164,23 @@ class HarmonicDihedralRestraint(ForceField):
                           dihedral, force_constant) 
         ForceField.__init__(self, 'harmonic dihedral restraint')
 
+    def supportsPathIntegrals(self):
+        return True
+
     def evaluatorParameters(self, universe, subset1, subset2, global_data):
-        return {'cosine_dihedral_term': [(self.index1, self.index2,
-                                          self.index3, self.index4,
-                                          0., self.dihedral,
-                                          0., self.force_constant)]}
+        f, offsets = self.beadOffsetsAndFactor([self.index1, self.index2,
+                                                self.index3, self.index4],
+                                               global_data)
+        return {'cosine_dihedral_term':
+                [(self.index1+o1, self.index2+o2,
+                  self.index3+o3, self.index4+o4,
+                  0., self.dihedral,
+                  0., f*self.force_constant)
+                 for o1, o2, o3, o4 in offsets]}
 
     def evaluatorTerms(self, universe, subset1, subset2, global_data):
         params = self.evaluatorParameters(universe, subset1, subset2,
                                           global_data)['cosine_dihedral_term']
-        assert len(params) == 1
         indices = N.array([params[0][:4]])
         parameters = N.array([params[0][4:]])
         return [CosineDihedralTerm(universe._spec, indices, parameters,

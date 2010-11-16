@@ -18,7 +18,7 @@ the number of time slices
 
 *** DONE Check that subsets are treated correctly
 
-*** TODO Make angle and dihedral restraint terms path-integral compatible
+*** DONE Make angle and dihedral restraint terms path-integral compatible
 ** ParticleProperty
 
 *** TODO [#B] Indexing with a multi-bead atom
