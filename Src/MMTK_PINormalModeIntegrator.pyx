@@ -165,7 +165,7 @@ cdef class PINormalModeIntegrator(MMTK_trajectory_generator.EnergyBasedTrajector
                     nmc[i, bead_index+nb-j] = w2[2*j+1]
                 nmc[i, bead_index+nb/2] = w2[nb]
             fftw_destroy_plan(p)
-    
+
     @cython.boundscheck(True)
     @cython.wraparound(False)
     @cython.cdivision(True)
@@ -274,13 +274,14 @@ cdef class PINormalModeIntegrator(MMTK_trajectory_generator.EnergyBasedTrajector
                                N.ndarray[double, ndim=2] g,
                                N.ndarray[short, ndim=2] bd):
         cdef double cvirial = 0.
-        cdef int i, j, k
+        cdef int i, j, k, nb
         for i in range(x.shape[0]):
             # bd[i, 0] == 0 means "first bead of an atom"
             if bd[i, 0] == 0:
+                nb = bd[i, 1]
                 for j in range(3):
-                    for k in range(bd[i, 1]):
-                        cvirial -= (x[i+k, j]-nmc[j, i])*g[i+k, j]
+                    for k in range(nb):
+                        cvirial -= (x[i+k, j]-nmc[j, i]/nb)*g[i+k, j]
         return cvirial
 
     cdef void applyThermostat(self, N.ndarray[double, ndim=2] v, N.ndarray[double, ndim=2] nmv,
@@ -401,7 +402,7 @@ cdef class PINormalModeIntegrator(MMTK_trajectory_generator.EnergyBasedTrajector
                 
         se = self.springEnergyNormalModes(nmc, m, bd, beta)
         qe_prim = energy.energy - se + 1.5*nbeads/beta
-        qe_vir = energy.energy - 0.5*energy.virial# + 1.5*nbeads/beta
+        qe_vir = energy.energy - 0.5*energy.virial
         qe_cvir = energy.energy \
                   - 0.5*self.centroidVirial(x, nmc, g, bd) \
                   + 1.5*natoms/beta
@@ -460,7 +461,7 @@ cdef class PINormalModeIntegrator(MMTK_trajectory_generator.EnergyBasedTrajector
             self.calculateEnergies(x, &energy, 1)
             se = self.springEnergyNormalModes(nmc, m, bd, beta)
             qe_prim = energy.energy - se + 1.5*nbeads/beta
-            qe_vir = energy.energy - 0.5*energy.virial# + 1.5*nbeads/beta
+            qe_vir = energy.energy - 0.5*energy.virial
             qe_cvir = energy.energy \
                       - 0.5*self.centroidVirial(x, nmc, g, bd) \
                       + 1.5*natoms/beta
