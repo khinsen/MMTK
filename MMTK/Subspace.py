@@ -234,12 +234,14 @@ class RigidMotionSubspace(Subspace):
                     for a in atoms:
                         v[a] = d.cross(a.position()-center)
                     for vt in vectors[iv:]:
-                        v = v - v.dotProduct(vt)*vt
-                    vectors.append(v/N.sqrt(v.dotProduct(v)))
+                        v -= v.dotProduct(vt)*vt
+                    norm_sq = N.sqrt(v.dotProduct(v))
+                    if norm_sq > 0.:
+                        vectors.append(v/norm_sq)
         Subspace.__init__(self, universe, vectors)
         # The vector set is already orthonormal by construction
-        # (assuming that the rigid bodies have no atoms in common),
-        # so we can eliminate the lengthy SVD procedure
+        # if the rigid bodies have no atoms in common. In that case,
+        # we can eliminate the lengthy SVD procedure
         count = ParticleProperties.ParticleScalar(universe)
         for o in objects:
             count = count + o.booleanMask()

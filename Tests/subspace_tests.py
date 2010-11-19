@@ -9,6 +9,39 @@ from MMTK.Proteins import Protein
 from MMTK.ForceFields import HarmonicForceField
 from MMTK.Subspace import RigidMotionSubspace, PairDistanceSubspace
 from MMTK import NormalModes
+from Scientific.Geometry.Transformation import Rotation, Translation
+
+class RigidBodyTest(unittest.TestCase):
+
+    """
+    Test rigid-body motion subspace
+    """
+    
+    def setUp(self):
+        self.universe = MMTK.InfiniteUniverse()
+        self.universe.m1 = MMTK.Molecule('water',
+                                         position=MMTK.Vector(0., 0., 0.))
+        self.universe.m2 = MMTK.Molecule('water',
+                                         position=MMTK.Vector(1., 0., 0.))
+
+    def test_projections(self):
+        rbs = [self.universe.m1,
+               MMTK.Collection([self.universe.m2.H1,
+                                self.universe.m2.H2])]
+        s = RigidMotionSubspace(self.universe, rbs)
+        self.assertEqual(len(s), 11)
+        basis = s.getBasis()
+        self.assertEqual(len(basis), 11)
+        complement = s.complement()
+        complement_basis = complement.getBasis()
+        self.assertEqual(len(complement_basis),
+                         self.universe.degreesOfFreedom()-11)
+        for rb in rbs:
+            for t in [Translation(MMTK.Vector(0.1, -0.2, 1.5)),
+                      Rotation(MMTK.Vector(0.3, 1.2, -2.3), 0.001)]:
+                d = rb.displacementUnderTransformation(t)
+                self.assert_((s.projectionOf(d)-d).norm() < 1.e-7)
+                self.assert_(s.projectionComplementOf(d).norm() < 1.e-7)
 
 class PeptideTest(unittest.TestCase):
 
