@@ -1,5 +1,4 @@
 * Path integrals
-
 ** Force fields
 *** TODO [#C] Nonbonded list optimization
 The current algorithm leads to a quadratic complexity as a function of
@@ -42,6 +41,7 @@ Same problem as for ParticleProperties.
 **** TODO Add a barostat
 
 *** TODO Constraints
+**** TODO Subspace constraints
 **** TODO Distance constraints
 **** TODO Rigid-body integrator (quaternions)
 
@@ -102,3 +102,4 @@ possible conflict.
 ** TODO GroupOfAtoms.angularVelocity can't do an inverse on a singular matrix
 needs pseudoinverse instead of regular inverse
 
+** TODO Method phiAngle() doesn't work for proline
