@@ -243,14 +243,7 @@ class EnergyEvaluatorParameters(object):
 
             if not self.ff.supportsPathIntegrals():
                 raise ValueError("Some force field term doesn't handle path integrals")
-            nbead_values = list(set(a.numberOfBeads() for a in self.universe.atomList()))
-            nbead_values.sort()
-            nbeads = nbead_values[-1]
-            for i in range(len(nbead_values)-1):
-                if nbead_values[i+1] % nbead_values[i] != 0:
-                    raise ValueError("number of beads not consistent for all atoms: %s"
-                                     % str(nbead_values))
-
+            nbeads = self.universe.maxNumberOfBeads()
             pi_environments = self.universe.environmentObjectList(
                                                 Environment.PathIntegrals)
             if len(pi_environments) == 1:
@@ -308,14 +301,7 @@ class EnergyEvaluator(object):
 
             if not self.ff.supportsPathIntegrals():
                 raise ValueError("Some force field term doesn't handle path integrals")
-            nbead_values = list(set(a.numberOfBeads() for a in self.universe.atomList()))
-            nbead_values.sort()
-            nbeads = nbead_values[-1]
-            for i in range(len(nbead_values)-1):
-                if nbead_values[i+1] % nbead_values[i] != 0:
-                    raise ValueError("number of beads not consistent for all atoms: %s"
-                                     % str(nbead_values))
-
+            nbeads = self.universe.maxNumberOfBeads()
             pi_environments = self.universe.environmentObjectList(
                                                 Environment.PathIntegrals)
             if len(pi_environments) == 1:

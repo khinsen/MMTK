@@ -635,6 +635,15 @@ class GroupOfAtoms(object):
             mask[b] = 1
         return mask
 
+    def maxNumberOfBeads(self):
+        nbead_values = list(set(a.numberOfBeads() for a in self.atomIterator()))
+        nbead_values.sort()
+        for i in range(len(nbead_values)-1):
+            if nbead_values[i+1] % nbead_values[i] != 0:
+                raise ValueError("number of beads not consistent for all atoms: %s"
+                                 % str(nbead_values))
+        return nbead_values[-1]
+        
 #
 # This class defines a general collection that can contain
 # chemical objects and other collections.
