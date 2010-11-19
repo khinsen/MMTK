@@ -629,10 +629,10 @@ class GroupOfAtoms(object):
         universe = self.universe()
         if universe is None:
             raise ValueError("object not in a universe")
-        array = N.zeros((universe.numberOfAtoms(),), N.Int)
+        array = N.zeros((universe.numberOfPoints(),), N.Int)
         mask = ParticleProperties.ParticleScalar(universe, array)
-        for a in self.atomIterator():
-            mask[a] = 1
+        for b in self.beadIterator():
+            mask[b] = 1
         return mask
 
 #
