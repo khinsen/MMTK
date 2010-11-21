@@ -7,7 +7,7 @@
 SPC/E force field for water simulations
 """
 
-__docformat__ = 'epytext'
+__docformat__ = 'restructuredtext'
 
 from MMTK.ForceFields import MMForceField
 
@@ -58,10 +58,10 @@ class SPCEForceField(MMForceField.MMForceField):
 
     def __init__(self, lj_options=None, es_options=None):
         """
-        @param lj_options: parameters for Lennard-Jones
+        :param lj_options: parameters for Lennard-Jones
                            interactions; one of:
                             - a number, specifying the cutoff
-                            - C{None}, meaning the default method
+                            - None, meaning the default method
                               (no cutoff; inclusion of all
                               pairs, using the minimum-image
                               conventions for periodic universes)
@@ -71,10 +71,10 @@ class SPCEForceField(MMForceField.MMForceField):
                               terms) or "cutoff", with the cutoff
                               specified by the dictionary
                               entry "cutoff".
-        @param es_options: parameters for electrostatic
+        :param es_options: parameters for electrostatic
                            interactions; one of:
                             - a number, specifying the cutoff
-                            - C{None}, meaning the default method
+                            - None, meaning the default method
                               (all pairs without cutoff for
                               non-periodic system, Ewald summation
                               for periodic systems)

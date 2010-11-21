@@ -12,7 +12,7 @@ client code. They are used by the classes in ChemicalObjects and
 ForceField.
 """
 
-__docformat__ = 'epytext'
+__docformat__ = 'restructuredtext'
 
 from MMTK import Database, Utility
 from copy import copy
@@ -52,19 +52,19 @@ class Bond(object):
 
     def hasAtom(self, a):
         """
-        @param a: an atom
-        @type a: L{MMTK.Atom}
-        @returns: C{True} if a participates in the bond
+        :param a: an atom
+        :type a: :class:`~MMTK.ChemicalObjects.Atom`
+        :returns: True if a participates in the bond
         """
         return a is self.a1 or a is self.a2
 
     def otherAtom(self, a):
         """
-        @param a: an atom involved in the bond
-        @type a: L{MMTK.Atom}
-        @returns: the atom at the other end of the bond
-        @rtype: L{MMTK.Atom}
-        @raises ValueError: if a does not belong to the bond
+        :param a: an atom involved in the bond
+        :type a: :class:`~MMTK.ChemicalObjects.Atom`
+        :returns: the atom at the other end of the bond
+        :rtype: :class:`~MMTK.ChemicalObjects.Atom`
+        :raises ValueError: if a does not belong to the bond
         """
         if a is self.a1:
             return self.a2
@@ -139,11 +139,11 @@ class BondAngle(object):
 
     def otherBond(self, bond):
         """
-        @param bond: a bond involved in the angle
-        @type bond: L{Bond}
-        @returns: the other bond involved in the angle
-        @rtype: L{Bond}
-        @raises ValueError: if bond does not belong to the angle
+        :param bond: a bond involved in the angle
+        :type bond: :class:`~MMTK.Bonds.Bond`
+        :returns: the other bond involved in the angle
+        :rtype: :class:`~MMTK.Bonds.Bond`
+        :raises ValueError: if bond does not belong to the angle
         """
         if bond is self.b1:
             return self.b2
@@ -264,9 +264,9 @@ class BondList(list):
 
     def bondAngles(self):
         """
-        @returns: a list of all bond angles that can be formed from the
+        :returns: a list of all bond angles that can be formed from the
                   bonds in the list
-        @rtype: L{BondAngleList}
+        :rtype: :class:`~MMTK.Bonds.BondAngleList`
         """
         if self.bond_angles is None:
             # find all atoms that are involved in more than one bond
@@ -297,9 +297,9 @@ class BondList(list):
 
     def dihedralAngles(self):
         """
-        @returns: a list of all dihedral angles that can be formed from the
+        :returns: a list of all dihedral angles that can be formed from the
                   bonds in the list
-        @rtype: L{DihedralAngleList}
+        :rtype: :class:`~MMTK.Bonds.DihedralAngleList`
         """
         if self.dihedral_angles is None:
             self.dihedral_angles = self.bondAngles().dihedralAngles()
@@ -307,19 +307,19 @@ class BondList(list):
 
     def bondedTo(self, atom):
         """
-        @param atom: an atom
-        @type atom: L{MMTK.Atom}
-        @returns: a list of all atoms to which the given atom is bound
-        @rtype: C{list}
+        :param atom: an atom
+        :type atom: :class:`~MMTK.ChemicalObjects.Atom`
+        :returns: a list of all atoms to which the given atom is bound
+        :rtype: list
         """
         return [b.otherAtom(atom) for b in self if b.hasAtom(atom)]
 
     def bondsOf(self, atom):
         """
-        @param atom: an atom
-        @type atom: L{MMTK.Atom}
-        @returns: a list of all bonds in which the given atom is involved
-        @rtype: C{list}
+        :param atom: an atom
+        :type atom: :class:`~MMTK.ChemicalObjects.Atom`
+        :returns: a list of all bonds in which the given atom is involved
+        :rtype: list
         """
         return [b for b in self if b.hasAtom(atom)]
 
@@ -328,7 +328,7 @@ class BondList(list):
         Create an attribute in all atoms of all bonds that points to the
         bonded atom.
 
-        @note: Bond attributes are only set temporarily for optimization
+        :note: Bond attributes are only set temporarily for optimization
                purposes.
         """
         for b in self:
@@ -356,9 +356,9 @@ class BondAngleList(object):
 
     def dihedralAngles(self):
         """
-        @returns: a list of all dihedral angles that can be formed from the
+        :returns: a list of all dihedral angles that can be formed from the
                   bond angles in the list
-        @rtype: L{DihedralAngleList}
+        :rtype: :class:`~MMTK.Bonds.DihedralAngleList`
         """
         # find all bonds that are involved in more than one bond angle
         angles = {}

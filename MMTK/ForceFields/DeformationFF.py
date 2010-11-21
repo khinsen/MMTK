@@ -8,7 +8,7 @@ Deformation force field (elastic network model)
 For proteins, CalphaForceField is usually a better choice.
 """
 
-__docformat__ = 'epytext'
+__docformat__ = 'restructuredtext'
 
 from MMTK.ForceFields.ForceField import ForceField, ForceFieldData
 from MMTK import Utility
@@ -26,7 +26,7 @@ class DeformationForceField(ForceField):
 
     The pair interaction force constant has the form
     k(r)=factor*exp(-(r**2-0.01)/range**2). The default value
-    for |range| is appropriate for a C-alpha model of a protein.
+    for range is appropriate for a C-alpha model of a protein.
     The offset of 0.01 is a convenience for defining factor;
     with this definition, factor is the force constant for a
     distance of 0.1nm.
@@ -34,17 +34,17 @@ class DeformationForceField(ForceField):
 
     def __init__(self, fc_length = 0.7, cutoff = 1.2, factor = 46402.):
         """
-        @param fc_length: a range parameter
-        @type fc_length: C{float}
-        @param cutoff: the cutoff for pair interactions, should be
+        :param fc_length: a range parameter
+        :type fc_length: float
+        :param cutoff: the cutoff for pair interactions, should be
                        at least 2.5 nm. Pair interactions in periodic
                        systems are calculated using the minimum-image
                        convention; the cutoff should therefore never be
                        larger than half the smallest edge length of the
                        elementary cell.
-        @type cutoff: C{float}
-        @param factor: a global scaling factor
-        @type factor: C{float}
+        :type cutoff: float
+        :param factor: a global scaling factor
+        :type factor: float
         """
         self.arguments = (fc_length, cutoff, factor)
         ForceField.__init__(self, 'deformation')

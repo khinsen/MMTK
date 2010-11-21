@@ -8,7 +8,7 @@ C-alpha force field for protein normal mode analysis
 (Elastic Network Model)
 """
 
-__docformat__ = 'epytext'
+__docformat__ = 'restructuredtext'
 
 from MMTK.ForceFields.ForceField import ForceField, ForceFieldData
 from MMTK import Utility
@@ -27,15 +27,15 @@ class CalphaForceField(ForceField):
 
     def __init__(self, cutoff = None, scale_factor = 1., version=1):
         """
-        @param cutoff: the cutoff for pair interactions, should be
+        :param cutoff: the cutoff for pair interactions, should be
                        at least 2.5 nm. Pair interactions in periodic
                        systems are calculated using the minimum-image
                        convention; the cutoff should therefore never be
                        larger than half the smallest edge length of the
                        elementary cell.
-        @type cutoff: C{float}
-        @param scale_factor: a global scaling factor
-        @type scale_factor: C{float}
+        :type cutoff: float
+        :param scale_factor: a global scaling factor
+        :type scale_factor: float
         """
         ForceField.__init__(self, 'calpha')
         self.arguments = (cutoff,)

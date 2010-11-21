@@ -7,7 +7,7 @@
 Energy minimizers
 """
 
-__docformat__ = 'epytext'
+__docformat__ = 'restructuredtext'
 
 from MMTK import Features, Trajectory, Units
 from MMTK_minimization import conjugateGradient, steepestDescent
@@ -61,28 +61,28 @@ class SteepestDescentMinimizer(Minimizer):
 
     def __init__(self, universe, **options):
         """
-        @param universe: the universe on which the integrator acts
-        @type universe: L{MMTK.Universe}
-        @keyword steps: the number of minimization steps (default is 100)
-        @type steps: C{int}
-        @keyword step_size: the initial size of a minimization step
+        :param universe: the universe on which the integrator acts
+        :type universe: :class:`~MMTK.Universe.Universe`
+        :keyword steps: the number of minimization steps (default is 100)
+        :type steps: int
+        :keyword step_size: the initial size of a minimization step
                             (default is 0.002 nm)
-        @type step_size: C{float}
-        @keyword convergence: the root-mean-square gradient length at which
+        :type step_size: float
+        :keyword convergence: the root-mean-square gradient length at which
                               minimization stops (default is 0.01 kJ/mol/nm)
-        @type convergence: C{float}
-        @keyword actions: a list of actions to be executed periodically
+        :type convergence: float
+        :keyword actions: a list of actions to be executed periodically
                           (default is none)
-        @type actions: C{list}
-        @keyword threads: the number of threads to use in energy evaluation
+        :type actions: list
+        :keyword threads: the number of threads to use in energy evaluation
                           (default set by MMTK_ENERGY_THREADS)
-        @type threads: C{int}
-        @keyword background: if True, the integration is executed as a
+        :type threads: int
+        :keyword background: if True, the integration is executed as a
                              separate thread (default: False)
-        @type background: C{bool}
-        @keyword mpi_communicator: an MPI communicator object, or C{None},
-                                   meaning no parallelization (default: C{None})
-        @type mpi_communicator: C{Scientific.MPI.MPICommunicator}
+        :type background: bool
+        :keyword mpi_communicator: an MPI communicator object, or None,
+                                   meaning no parallelization (default: None)
+        :type mpi_communicator: Scientific.MPI.MPICommunicator
         """
 	Minimizer.__init__(self, universe, options)
 	self.features = [Features.FixedParticleFeature,
@@ -94,7 +94,7 @@ class SteepestDescentMinimizer(Minimizer):
     def __call__(self, **options):
         """
         Run the minimizer. The keyword options are the same as described
-        under L{__init__}.
+        under __init__.
         """
 	self.setCallOptions(options)
 	Features.checkFeatures(self, self.universe)
@@ -142,25 +142,25 @@ class ConjugateGradientMinimizer(Minimizer):
 
     def __init__(self, universe, **options):
         """
-        @param universe: the universe on which the integrator acts
-        @type universe: L{MMTK.Universe}
-        @keyword steps: the number of minimization steps (default is 100)
-        @type steps: C{int}
-        @keyword step_size: the initial size of a minimization step
+        :param universe: the universe on which the integrator acts
+        :type universe: :class:`~MMTK.Universe.Universe`
+        :keyword steps: the number of minimization steps (default is 100)
+        :type steps: int
+        :keyword step_size: the initial size of a minimization step
                             (default is 0.002 nm)
-        @type step_size: C{float}
-        @keyword convergence: the root-mean-square gradient length at which
+        :type step_size: float
+        :keyword convergence: the root-mean-square gradient length at which
                               minimization stops (default is 0.01 kJ/mol/nm)
-        @type convergence: C{float}
-        @keyword actions: a list of actions to be executed periodically
+        :type convergence: float
+        :keyword actions: a list of actions to be executed periodically
                           (default is none)
-        @type actions: C{list}
-        @keyword threads: the number of threads to use in energy evaluation
+        :type actions: list
+        :keyword threads: the number of threads to use in energy evaluation
                           (default set by MMTK_ENERGY_THREADS)
-        @type threads: C{int}
-        @keyword background: if True, the integration is executed as a
+        :type threads: int
+        :keyword background: if True, the integration is executed as a
                              separate thread (default: False)
-        @type background: C{bool}
+        :type background: bool
         """
 	Minimizer.__init__(self, universe, options)
 	self.features = [Features.FixedParticleFeature,
@@ -171,7 +171,7 @@ class ConjugateGradientMinimizer(Minimizer):
     def __call__(self, **options):
         """
         Run the minimizer. The keyword options are the same as described
-        under L{__init__}.
+        under __init__.
         """
 	self.setCallOptions(options)
 	Features.checkFeatures(self, self.universe)

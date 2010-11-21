@@ -13,11 +13,11 @@ and NAMD. It can be read by various visualization programs.
 The DCD format is defined as a binary (unformatted) Fortran
 format and is therefore platform-dependent.
 
-@undocumented: writePDB
-@undocumented: writeDCD
+:undocumented: writePDB
+:undocumented: writeDCD
 """
 
-__docformat__ = 'epytext'
+__docformat__ = 'restructuredtext'
 
 import MMTK_DCD
 from MMTK import PDB, Trajectory, Units
@@ -41,8 +41,9 @@ class DCDReader(Trajectory.TrajectoryGenerator):
     Reading is started by calling the reader object.
     The following data categories and variables are available for
     output:
-      - category "time": time
-      - category "configuration": configuration
+
+    * category "time": time
+    * category "configuration": configuration
     """
 
     default_options = {}
@@ -53,11 +54,11 @@ class DCDReader(Trajectory.TrajectoryGenerator):
 
     def __init__(self, universe, **options):
         """
-        @param universe: the universe for which the information from the
+        :param universe: the universe for which the information from the
                          trajectory file is read
-        @param options: keyword options
-        @keyword dcd_file: the name of the DCD trajecory file to be read
-        @keyword actions: a list of actions to be executed periodically
+        :param options: keyword options
+        :keyword dcd_file: the name of the DCD trajecory file to be read
+        :keyword actions: a list of actions to be executed periodically
                           (default is none)
         """
         Trajectory.TrajectoryGenerator.__init__(self, universe, options)
@@ -108,14 +109,14 @@ def writeDCDPDB(conf_list, dcd_file_name, pdb_file_name, delta_t=0.1):
     Write a sequence of configurations to a DCD file and generate
     a compatible PDB file.
 
-    @param conf_list: the sequence of configurations
-    @type conf_list: sequence of L{MMTK.Configuration}
-    @param dcd_file_name: the name of the DCD file
-    @type dcd_file_name: C{str}
-    @param pdb_file_name: the name of the PDB file
-    @type pdb_file_name: C{str}
-    @param delta_t: the time step between two configurations
-    @type delta_t: C{float}
+    :param conf_list: the sequence of configurations
+    :type conf_list: sequence of :class:`~MMTK.ParticleProperties.Configuration`
+    :param dcd_file_name: the name of the DCD file
+    :type dcd_file_name: str
+    :param pdb_file_name: the name of the PDB file
+    :type pdb_file_name: str
+    :param delta_t: the time step between two configurations
+    :type delta_t: float
     """
     universe = conf_list[0].universe
     sequence = writePDB(universe, conf_list[0], pdb_file_name)
@@ -132,14 +133,14 @@ def writeVelocityDCDPDB(vel_list, dcd_file_name, pdb_file_name, delta_t=0.1):
     Write a sequence of velocity particle vectors to a DCD file and generate
     a compatible PDB file.
 
-    @param vel_list: the sequence of velocity particle vectors
-    @type vel_list: sequence of L{MMTK.ParticleVector}
-    @param dcd_file_name: the name of the DCD file
-    @type dcd_file_name: C{str}
-    @param pdb_file_name: the name of the PDB file
-    @type pdb_file_name: C{str}
-    @param delta_t: the time step between two velocity sets
-    @type delta_t: C{float}
+    :param vel_list: the sequence of velocity particle vectors
+    :type vel_list: sequence of :class:`~MMTK.ParticleProperties.ParticleVector`
+    :param dcd_file_name: the name of the DCD file
+    :type dcd_file_name: str
+    :param pdb_file_name: the name of the PDB file
+    :type pdb_file_name: str
+    :param delta_t: the time step between two velocity sets
+    :type delta_t: float
     """
     universe = vel_list[0].universe
     sequence = writePDB(universe, universe.configuration(), pdb_file_name)

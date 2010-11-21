@@ -8,7 +8,7 @@
 Atoms, groups, molecules and similar objects
 """
 
-__docformat__ = 'epytext'
+__docformat__ = 'restructuredtext'
 
 from MMTK import Bonds, Collections, Database, \
                  Units, Utility, Visualization
@@ -86,9 +86,9 @@ class ChemicalObject(Collections.GroupOfAtoms, Visualization.Viewable):
 
     def universe(self):
         """
-        @returns: the universe to which the object belongs,
-                  or C{None} if the object does not belong to any universe
-        @rtype: L{MMTK.Universe}
+        :returns: the universe to which the object belongs,
+                  or None if the object does not belong to any universe
+        :rtype: :class:`~MMTK.Universe.Universe`
         """
         if self.parent is None:
             return None
@@ -97,33 +97,33 @@ class ChemicalObject(Collections.GroupOfAtoms, Visualization.Viewable):
 
     def bondedUnits(self):
         """
-        @returns: the largest subobjects which can contain bonds.
+        :returns: the largest subobjects which can contain bonds.
                   There are no bonds between any of the subobjects
                   in the list.
-        @rtype: C{list}
+        :rtype: list
         """
         return [self]
 
     def atomList(self):
         """
-        @returns: a list containing all atoms in the object
-        @rtype: C{list}
+        :returns: a list containing all atoms in the object
+        :rtype: list
         """
         pass
 
     def atomIterator(self):
         """
-        @returns: an iterator over all atoms in the object
-        @rtype: C{iterator}
+        :returns: an iterator over all atoms in the object
+        :rtype: iterator
         """
         pass
 
     def fullName(self):
         """
-        @returns: the full name of the object. The full name consists
+        :returns: the full name of the object. The full name consists
                   of the proper name of the object preceded by
                   the full name of its parent separated by a dot.
-        @rtype: C{str}
+        :rtype: str
         """
         if self.parent is None or not isChemicalObject(self.parent):
             return self.name
@@ -132,16 +132,16 @@ class ChemicalObject(Collections.GroupOfAtoms, Visualization.Viewable):
 
     def degreesOfFreedom(self):
         """
-        @returns: the number of degrees of freedom of the object
-        @rtype: C{int}
+        :returns: the number of degrees of freedom of the object
+        :rtype: int
         """
         return Collections.GroupOfAtoms.degreesOfFreedom(self) \
                - self.numberOfDistanceConstraints()
 
     def distanceConstraintList(self):
         """
-        @returns: the distance constraints of the object
-        @rtype: C{list}
+        :returns: the distance constraints of the object
+        :rtype: list
         """
         return []
 
@@ -153,8 +153,8 @@ class ChemicalObject(Collections.GroupOfAtoms, Visualization.Viewable):
 
     def numberOfDistanceConstraints(self):
         """
-        @returns: the number of distance constraints of the object
-        @rtype: C{int}
+        :returns: the number of distance constraints of the object
+        :rtype: int
         """
         return 0
 
@@ -214,7 +214,7 @@ class ChemicalObject(Collections.GroupOfAtoms, Visualization.Viewable):
         level can be defined both in the chemical database and for
         each atom individually by assignment to the attribute.
         
-        @returns: the value of the specified property for the given
+        :returns: the value of the specified property for the given
                   atom from the chemical database.
         """
 
@@ -312,7 +312,7 @@ class ChemicalObject(Collections.GroupOfAtoms, Visualization.Viewable):
 
 def isChemicalObject(object):
     """
-    @returns: C{True} if object is a chemical object
+    :returns: True if object is a chemical object
     """
     return hasattr(object, 'is_chemical_object')
 
@@ -517,13 +517,13 @@ class Atom(ChemicalObject):
 
     def __init__(self, atom_spec, _memo = None, **properties):
         """
-        @param atom_spec: a string (not case sensitive) specifying
+        :param atom_spec: a string (not case sensitive) specifying
                           the chemical element
-        @type atom_spec: C{str}
-        @keyword position: the position of the atom
-        @type position: C{Scientific.Geometry.Vector}
-        @keyword name: a name given to the atom
-        @type name: C{str}
+        :type atom_spec: str
+        :keyword position: the position of the atom
+        :type position: Scientific.Geometry.Vector
+        :keyword name: a name given to the atom
+        :type name: str
         """
         Utility.uniqueID.registerObject(self)
         ChemicalObject.__init__(self, atom_spec, _memo)
@@ -559,8 +559,8 @@ class Atom(ChemicalObject):
     def setPosition(self, position):
         """
         Changes the position of the atom.
-        @param position: the new position
-        @type position: C{Scientific.Geometry.Vector}
+        :param position: the new position
+        :type position: Scientific.Geometry.Vector
         """
         if position is None:
             if self.array is None:
@@ -578,9 +578,9 @@ class Atom(ChemicalObject):
 
     def position(self, conf = None):
         """
-        @returns: the position in configuration conf. If conf is 
+        :returns: the position in configuration conf. If conf is 
                   'None', use the current configuration. If the atom has
-                  not been assigned a position, the return value is C{None}.
+                  not been assigned a position, the return value is None.
         """
         if self.array is None:
             assert conf is None
@@ -608,8 +608,8 @@ class Atom(ChemicalObject):
 
     def beadPositions(self):
         """
-        @returns: the positions of all beads of this atom
-        @rtype: C{list}
+        :returns: the positions of all beads of this atom
+        :rtype: list
         """
         if self.array is None:
             try:
@@ -621,8 +621,8 @@ class Atom(ChemicalObject):
 
     def setBeadPositions(self, bead_positions):
         """
-        @param bead_positions: positions for all beads of the atom
-        @type bead_positions: C{list}
+        :param bead_positions: positions for all beads of the atom
+        :type bead_positions: list
         """
         assert len(bead_positions) == self.nbeads
         if self.array is None:
@@ -635,8 +635,8 @@ class Atom(ChemicalObject):
     def setMass(self, mass):
         """
         Changes the mass of the atom.
-        @param mass: the mass
-        @type mass: C{float}
+        :param mass: the mass
+        :type mass: float
         """
         self._mass = mass
         universe = self.universe()
@@ -645,15 +645,15 @@ class Atom(ChemicalObject):
 
     def numberOfBeads(self):
         """
-        @returns: the number of beads
-        @rtype: C{int}
+        :returns: the number of beads
+        :rtype: int
         """
         return self.nbeads
 
     def setNumberOfBeads(self, nbeads):
         """
-        @param nbeads: the number of beads
-        @type nbeads: C{int}
+        :param nbeads: the number of beads
+        :type nbeads: int
         """
         if nbeads != self.nbeads:
             self.unsetArray()
@@ -712,8 +712,8 @@ class Atom(ChemicalObject):
 
     def bondedTo(self):
         """
-        @returns: a list of all atoms to which a chemical bond exists.
-        @rtype: C{list}
+        :returns: a list of all atoms to which a chemical bond exists.
+        :rtype: list
         """
         try:
             return self.bonded_to__
@@ -837,13 +837,13 @@ class Group(CompositeChemicalObject, ChemicalObject):
 
     def __init__(self, group_spec, _memo = None, **properties):
         """
-        @param group_spec: a string (not case sensitive) that specifies
+        :param group_spec: a string (not case sensitive) that specifies
                            the group name in the chemical database
-        @type group_spec: C{str}
-        @keyword position: the position of the center of mass of the group
-        @type position: C{Scientific.Geometry.Vector}
-        @keyword name: a name given to the group
-        @type name: C{str}
+        :type group_spec: str
+        :keyword position: the position of the center of mass of the group
+        :type position: Scientific.Geometry.Vector
+        :keyword name: a name given to the group
+        :type name: str
         """
         if group_spec is not None:
             # group_spec is None when called from MoleculeFactory
@@ -880,21 +880,21 @@ class Molecule(CompositeChemicalObject, ChemicalObject):
 
     def __init__(self, molecule_spec, _memo = None, **properties):
         """
-        @param molecule_spec: a string (not case sensitive) that specifies
+        :param molecule_spec: a string (not case sensitive) that specifies
                               the molecule name in the chemical database
-        @type molecule_spec: C{str}
-        @keyword position: the position of the center of mass of the molecule
-        @type position: C{Scientific.Geometry.Vector}
-        @keyword name: a name given to the molecule
-        @type name: C{str}
-        @keyword configuration: the name of a configuration listed in the
+        :type molecule_spec: str
+        :keyword position: the position of the center of mass of the molecule
+        :type position: Scientific.Geometry.Vector
+        :keyword name: a name given to the molecule
+        :type name: str
+        :keyword configuration: the name of a configuration listed in the
                                 database definition of the molecule, which
                                 is used to initialize the atom positions.
                                 If no configuration is specified, the
                                 configuration named "default" will be used,
                                 if it exists. Otherwise the atom positions
                                 are undefined.
-        @type configuration: C{str}
+        :type configuration: str
         """
         if molecule_spec is not None:
             # molecule_spec is None when called from MoleculeFactory
@@ -1218,21 +1218,21 @@ class Complex(CompositeChemicalObject, ChemicalObject):
 
     def __init__(self, complex_spec, _memo = None, **properties):
         """
-        @param complex_spec: a string (not case sensitive) that specifies
+        :param complex_spec: a string (not case sensitive) that specifies
                               the complex name in the chemical database
-        @type complex_spec: C{str}
-        @keyword position: the position of the center of mass of the complex
-        @type position: C{Scientific.Geometry.Vector}
-        @keyword name: a name given to the complex
-        @type name: C{str}
-        @keyword configuration: the name of a configuration listed in the
+        :type complex_spec: str
+        :keyword position: the position of the center of mass of the complex
+        :type position: Scientific.Geometry.Vector
+        :keyword name: a name given to the complex
+        :type name: str
+        :keyword configuration: the name of a configuration listed in the
                                 database definition of the complex, which
                                 is used to initialize the atom positions.
                                 If no configuration is specified, the
                                 configuration named "default" will be used,
                                 if it exists. Otherwise the atom positions
                                 are undefined.
-        @type configuration: C{str}
+        :type configuration: str
         """
         ChemicalObject.__init__(self, complex_spec, _memo)
         properties = copy.copy(properties)
@@ -1309,12 +1309,12 @@ class AtomCluster(CompositeChemicalObject, ChemicalObject):
 
     def __init__(self, atoms, **properties):
         """
-        @param atoms: a list of atoms in the cluster
-        @type atoms: C{list}
-        @keyword position: the position of the center of mass of the cluster
-        @type position: C{Scientific.Geometry.Vector}
-        @keyword name: a name given to the cluster
-        @type name: C{str}
+        :param atoms: a list of atoms in the cluster
+        :type atoms: list
+        :keyword position: the position of the center of mass of the cluster
+        :type position: Scientific.Geometry.Vector
+        :keyword name: a name given to the cluster
+        :type name: str
         """
         self.atoms = list(atoms)
         self.parent = None

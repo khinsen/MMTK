@@ -8,7 +8,7 @@
 Molecule factory for creating chemical objects
 """
 
-__docformat__ = 'epytext'
+__docformat__ = 'restructuredtext'
 
 from MMTK import Bonds, ChemicalObjects
 
@@ -35,10 +35,11 @@ class GroupTemplate(object):
     def addAtom(self, atom_name, element):
         """
         Add an atom.
-        @param atom_name: the name of the atom
-        @type atom_name: C{str}
-        @param element: the chemical element symbol
-        @type element: C{str}
+
+        :param atom_name: the name of the atom
+        :type atom_name: str
+        :param element: the chemical element symbol
+        :type element: str
         """
         if self.locked:
             raise ValueError("group is locked")
@@ -49,10 +50,11 @@ class GroupTemplate(object):
     def addSubgroup(self, subgroup_name, subgroup):
         """
         Add a subgroup.
-        @param subgroup_name: the name of the subgroup within this group
-        @type subgroup_name: C{str}
-        @param subgroup: the subgroup type
-        @type subgroup: C{str}
+
+        :param subgroup_name: the name of the subgroup within this group
+        :type subgroup_name: str
+        :param subgroup: the subgroup type
+        :type subgroup: str
         """
         if self.locked:
             raise ValueError("group is locked")
@@ -62,10 +64,11 @@ class GroupTemplate(object):
     def addBond(self, atom1, atom2):
         """
         Add a bond.
-        @param atom1: the name of the first atom
-        @type atom1: C{str}
-        @param atom2: the name of the second atom
-        @type atom2: C{str}
+
+        :param atom1: the name of the first atom
+        :type atom1: str
+        :param atom2: the name of the second atom
+        :type atom2: str
         """
         if self.locked:
             raise ValueError("group is locked")
@@ -161,8 +164,7 @@ class GroupTemplate(object):
 # The MoleculeFactory class
 #
 class MoleculeFactory(object):
-    
-    """
+    '''
     MoleculeFactory
 
     A MoleculeFactory serves to create molecules without reference to database
@@ -170,13 +172,13 @@ class MoleculeFactory(object):
     bonds. Each MoleculeFactory constitutes an independent set of definitions.
     Definitions within a MoleculeFactory can refer to each other.
 
-    Each MoleculeFactory stores a set of L{ChemicalObjects.Group}
+    Each MoleculeFactory stores a set of :class:`~MMTK.ChemicalObjects.Group`
     objects which are referred to by names. The typical operation sequence is to
     create a new group and then add atoms, bonds, and subgroups. It is also
     possible to define coordinates and arbitrary attributes (in particular for
-    force fields). In the end, a finished object can be retrieved as a
-    L{MMTK.ChemicalObjects.Molecule} object.
-    """
+    force fields). In the end, a finished object can be retrieved as a 
+    :class:`~MMTK.ChemicalObjects.Molecule` object.
+    '''
 
     def __init__(self):
         self.groups = {}
@@ -193,36 +195,39 @@ class MoleculeFactory(object):
     def addSubgroup(self, group, subgroup_name, subgroup):
         """
         Add a subgroup to a group
-        @param group: the name of the group
-        @type group: C{str}
-        @param subgroup_name: the name of the subgroup within the group
-        @type subgroup_name: C{str}
-        @param subgroup: the subgroup type
-        @type subgroup: C{str}
+
+        :param group: the name of the group
+        :type group: str
+        :param subgroup_name: the name of the subgroup within the group
+        :type subgroup_name: str
+        :param subgroup: the subgroup type
+        :type subgroup: str
         """
         self.groups[group].addSubgroup(subgroup_name, self.groups[subgroup])
 
     def addAtom(self, group, atom_name, element):
         """
         Add an atom to a group
-        @param group: the name of the group
-        @type group: C{str}
-        @param atom_name: the name of the atom
-        @type atom_name: C{str}
-        @param element: the chemical element symbol
-        @type element: C{str}
+
+        :param group: the name of the group
+        :type group: str
+        :param atom_name: the name of the atom
+        :type atom_name: str
+        :param element: the chemical element symbol
+        :type element: str
         """
         self.groups[group].addAtom(atom_name, element)
 
     def addBond(self, group, atom1, atom2):
         """
         Add a bond to a group
-        @param group: the name of the group
-        @type group: C{str}
-        @param atom1: the name of the first atom
-        @type atom1: C{str}
-        @param atom2: the name of the second atom
-        @type atom2: C{str}
+
+        :param group: the name of the group
+        :type group: str
+        :param atom1: the name of the first atom
+        :type atom1: str
+        :param atom2: the name of the second atom
+        :type atom2: str
         """
         self.groups[group].addBond(atom1, atom2)
 
@@ -237,11 +242,12 @@ class MoleculeFactory(object):
 
     def retrieveMolecule(self, group):
         """
-        @param group: the name of the group to be used as a template
-        @type group: C{str}
-        @returns: a molecule defined by the contents of the group
-        @rtype C{MMTK.ChemicalObjects.Molecule}
+        :param group: the name of the group to be used as a template
+        :type group: str
+        :returns: a molecule defined by the contents of the group
+        :rtype: :class:`~MMTK.ChemicalObjects.Molecule`
         """
+
         group = self.groups[group]
         return self.makeChemicalObjects(group, True)
     

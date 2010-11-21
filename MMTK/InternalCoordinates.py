@@ -7,7 +7,7 @@
 Manipulation of molecular configurations in terms of internal coordinates
 """
 
-__docformat__ = 'epytext'
+__docformat__ = 'restructuredtext'
 
 import MMTK
 from Scientific import N
@@ -96,28 +96,28 @@ class BondLength(InternalCoordinate):
 
     def __init__(self, atom1, atom2):
         """
-        @param atom1: the first atom that defines the bond
-        @type atom1: L{MMTK.ChemicalObjects.Atom}
-        @param atom2: the second atom that defines the bond
-        @type atom2: L{MMTK.ChemicalObjects.Atom}
+        :param atom1: the first atom that defines the bond
+        :type atom1: :class:`~MMTK.ChemicalObjects.Atom`
+        :param atom2: the second atom that defines the bond
+        :type atom2: :class:`~MMTK.ChemicalObjects.Atom`
         """
         InternalCoordinate.__init__(self, [atom1, atom2])
         self.findFragments((atom1, atom2, atom2), (atom2, atom1, atom1))
 
     def getValue(self, conf = None):
         """
-        @param conf: a configuration (defaults to the current configuration)
-        @type conf: L{MMTK.ParticleProperties.Configuration}
-        @returns: the length of the bond in the configuration conf
-        @rtype: C{float}
+        :param conf: a configuration (defaults to the current configuration)
+        :type conf: :class:`~MMTK.ParticleProperties.Configuration`
+        :returns: the length of the bond in the configuration conf
+        :rtype: float
         """
         return self.universe.distance(self.atoms[0], self.atoms[1], conf)
 
     def setValue(self, value):
         """
         Sets the length of the bond
-        @param value: the desired length of the bond
-        @type value: C{float}
+        :param value: the desired length of the bond
+        :type value: float
         """
         v = self.universe.distanceVector(self.atoms[0], self.atoms[1])
         axis = v.normal()
@@ -158,22 +158,22 @@ class BondAngle(InternalCoordinate):
 
     def __init__(self, atom1, atom2, atom3):
         """
-        @param atom1: the first atom that defines the angle
-        @type atom1: L{MMTK.ChemicalObjects.Atom}
-        @param atom2: the second and central atom that defines the bond
-        @type atom2: L{MMTK.ChemicalObjects.Atom}
-        @param atom3: the third atom that defines the bond
-        @type atom3: L{MMTK.ChemicalObjects.Atom}
+        :param atom1: the first atom that defines the angle
+        :type atom1: :class:`~MMTK.ChemicalObjects.Atom`
+        :param atom2: the second and central atom that defines the bond
+        :type atom2: :class:`~MMTK.ChemicalObjects.Atom`
+        :param atom3: the third atom that defines the bond
+        :type atom3: :class:`~MMTK.ChemicalObjects.Atom`
         """
         InternalCoordinate.__init__(self, [atom1, atom2, atom3])
         self.findFragments((atom1, atom2, atom3), (atom3, atom2, atom1))
 
     def getValue(self, conf = None):
         """
-        @param conf: a configuration (defaults to the current configuration)
-        @type conf: L{MMTK.ParticleProperties.Configuration}
-        @returns: the size of the angle in the configuration conf
-        @rtype: C{float}
+        :param conf: a configuration (defaults to the current configuration)
+        :type conf: :class:`~MMTK.ParticleProperties.Configuration`
+        :returns: the size of the angle in the configuration conf
+        :rtype: float
         """
         return self.universe.angle(self.atoms[0], self.atoms[1],
                                    self.atoms[2], conf)
@@ -181,8 +181,8 @@ class BondAngle(InternalCoordinate):
     def setValue(self, value):
         """
         Sets the size of the angle
-        @param value: the desired angle
-        @type value: C{float}
+        :param value: the desired angle
+        :type value: float
         """
         from Scientific.Geometry import delta
         v1 = self.universe.distanceVector(self.atoms[1], self.atoms[0])
@@ -236,26 +236,26 @@ class DihedralAngle(InternalCoordinate):
 
     def __init__(self, atom1, atom2, atom3, atom4):
         """
-        @param atom1: the first atom that defines the dihedral
-        @type atom1: L{MMTK.ChemicalObjects.Atom}
-        @param atom2: the second atom that defines the dihedral,
+        :param atom1: the first atom that defines the dihedral
+        :type atom1: :class:`~MMTK.ChemicalObjects.Atom`
+        :param atom2: the second atom that defines the dihedral,
                       must be on the central bond
-        @type atom2: L{MMTK.ChemicalObjects.Atom}
-        @param atom3: the third atom that defines the dihedral,
+        :type atom2: :class:`~MMTK.ChemicalObjects.Atom`
+        :param atom3: the third atom that defines the dihedral,
                       must be on the central bond
-        @type atom3: L{MMTK.ChemicalObjects.Atom}
-        @param atom4: the fourth atom that defines the dihedral
-        @type atom4: L{MMTK.ChemicalObjects.Atom}
+        :type atom3: :class:`~MMTK.ChemicalObjects.Atom`
+        :param atom4: the fourth atom that defines the dihedral
+        :type atom4: :class:`~MMTK.ChemicalObjects.Atom`
         """
         InternalCoordinate.__init__(self, [atom1, atom2, atom3, atom4])
         self.findFragments((atom2, atom3, atom3), (atom3, atom2, atom2))
 
     def getValue(self, conf = None):
         """
-        @param conf: a configuration (defaults to the current configuration)
-        @type conf: L{MMTK.ParticleProperties.Configuration}
-        @returns: the size of the dihedral angle in the configuration conf
-        @rtype: C{float}
+        :param conf: a configuration (defaults to the current configuration)
+        :type conf: :class:`~MMTK.ParticleProperties.Configuration`
+        :returns: the size of the dihedral angle in the configuration conf
+        :rtype: float
         """
         return self.universe.dihedral(self.atoms[0], self.atoms[1],
                                       self.atoms[2], self.atoms[3], conf)
@@ -263,8 +263,8 @@ class DihedralAngle(InternalCoordinate):
     def setValue(self, value):
         """
         Sets the size of the dihedral
-        @param value: the desired dihedral angle
-        @type value: C{float}
+        :param value: the desired dihedral angle
+        :type value: float
         """
         from Scientific.Geometry import delta
         angle  = self.universe.dihedral(self.atoms[0], self.atoms[1],

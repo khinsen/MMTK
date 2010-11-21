@@ -19,7 +19,7 @@ of the techniques can be found in the following articles:
     Proteins 34 (1999): 369-382
 """
 
-__docformat__ = 'epytext'
+__docformat__ = 'restructuredtext'
 
 try:
     from MMTK_forcefield import NonbondedList
@@ -76,17 +76,17 @@ class DeformationFunction(DeformationEvaluationFunction):
     def __init__(self, universe, fc_length = 0.7, cutoff = 1.2,
                  factor = 46402., form = 'exponential'):
         """
-        @param universe: the universe for which the deformation function
+        :param universe: the universe for which the deformation function
                          is defined
-        @type universe: L{MMTK.Universe.Universe}
-        @param fc_length: the range parameter r_0 in the pair interaction term
-        @type fc_length: C{float}
-        @param cutoff: the cutoff used in the deformation calculation
-        @type cutoff: C{float}
-        @param factor: a global scaling factor
-        @type factor: C{float}
-        @param form: the functional form ('exponential' or 'calpha')
-        @type form: C{str}
+        :type universe: :class:`~MMTK.Universe.Universe`
+        :param fc_length: the range parameter r_0 in the pair interaction term
+        :type fc_length: float
+        :param cutoff: the cutoff used in the deformation calculation
+        :type cutoff: float
+        :param factor: a global scaling factor
+        :type factor: float
+        :param form: the functional form ('exponential' or 'calpha')
+        :type form: str
         """
         DeformationEvaluationFunction.__init__(self, universe, fc_length,
                                                cutoff, factor, form)
@@ -119,17 +119,17 @@ class NormalizedDeformationFunction(DeformationFunction):
     def __init__(self, universe, fc_length = 0.7, cutoff = 1.2,
                  factor = 46402., form = 'exponential'):
         """
-        @param universe: the universe for which the deformation function
+        :param universe: the universe for which the deformation function
                          is defined
-        @type universe: L{MMTK.Universe.Universe}
-        @param fc_length: the range parameter r_0 in the pair interaction term
-        @type fc_length: C{float}
-        @param cutoff: the cutoff used in the deformation calculation
-        @type cutoff: C{float}
-        @param factor: a global scaling factor
-        @type factor: C{float}
-        @param form: the functional form ('exponential' or 'calpha')
-        @type form: C{str}
+        :type universe: :class:`~MMTK.Universe.Universe`
+        :param fc_length: the range parameter r_0 in the pair interaction term
+        :type fc_length: float
+        :param cutoff: the cutoff used in the deformation calculation
+        :type cutoff: float
+        :param factor: a global scaling factor
+        :type factor: float
+        :param form: the functional form ('exponential' or 'calpha')
+        :type form: str
         """
         DeformationFunction.__init__(self, universe, fc_length,
                                      cutoff, factor, form)
@@ -157,17 +157,17 @@ class FiniteDeformationFunction(DeformationEvaluationFunction):
     def __init__(self, universe, fc_length = 0.7, cutoff = 1.2,
                  factor = 46402., form = 'exponential'):
         """
-        @param universe: the universe for which the deformation function
+        :param universe: the universe for which the deformation function
                          is defined
-        @type universe: L{MMTK.Universe.Universe}
-        @param fc_length: the range parameter r_0 in the pair interaction term
-        @type fc_length: C{float}
-        @param cutoff: the cutoff used in the deformation calculation
-        @type cutoff: C{float}
-        @param factor: a global scaling factor
-        @type factor: C{float}
-        @param form: the functional form ('exponential' or 'calpha')
-        @type form: C{str}
+        :type universe: :class:`~MMTK.Universe.Universe`
+        :param fc_length: the range parameter r_0 in the pair interaction term
+        :type fc_length: float
+        :param cutoff: the cutoff used in the deformation calculation
+        :type cutoff: float
+        :param factor: a global scaling factor
+        :type factor: float
+        :param form: the functional form ('exponential' or 'calpha')
+        :type form: str
         """
         DeformationEvaluationFunction.__init__(self, universe, fc_length,
                                                cutoff, factor, form)
@@ -206,17 +206,17 @@ class DeformationEnergyFunction(DeformationEvaluationFunction):
     def __init__(self, universe, fc_length = 0.7, cutoff = 1.2,
                  factor = 46402., form = 'exponential'):
         """
-        @param universe: the universe for which the deformation function
+        :param universe: the universe for which the deformation function
                          is defined
-        @type universe: L{MMTK.Universe.Universe}
-        @param fc_length: the range parameter r_0 in the pair interaction term
-        @type fc_length: C{float}
-        @param cutoff: the cutoff used in the deformation calculation
-        @type cutoff: C{float}
-        @param factor: a global scaling factor
-        @type factor: C{float}
-        @param form: the functional form ('exponential' or 'calpha')
-        @type form: C{str}
+        :type universe: :class:`~MMTK.Universe.Universe`
+        :param fc_length: the range parameter r_0 in the pair interaction term
+        :type fc_length: float
+        :param cutoff: the cutoff used in the deformation calculation
+        :type cutoff: float
+        :param factor: a global scaling factor
+        :type factor: float
+        :param form: the functional form ('exponential' or 'calpha')
+        :type form: str
         """
         DeformationEvaluationFunction.__init__(self, universe, fc_length,
                                                cutoff, factor, form)
@@ -269,17 +269,17 @@ class NormalizedDeformationEnergyFunction(DeformationEnergyFunction):
     def __init__(self, universe, fc_length = 0.7, cutoff = 1.2,
                  factor = 46402., form = 'exponential'):
         """
-        @param universe: the universe for which the deformation function
+        :param universe: the universe for which the deformation function
                          is defined
-        @type universe: L{MMTK.Universe.Universe}
-        @param fc_length: the range parameter r_0 in the pair interaction term
-        @type fc_length: C{float}
-        @param cutoff: the cutoff used in the deformation calculation
-        @type cutoff: C{float}
-        @param factor: a global scaling factor
-        @type factor: C{float}
-        @param form: the functional form ('exponential' or 'calpha')
-        @type form: C{str}
+        :type universe: :class:`~MMTK.Universe.Universe`
+        :param fc_length: the range parameter r_0 in the pair interaction term
+        :type fc_length: float
+        :param cutoff: the cutoff used in the deformation calculation
+        :type cutoff: float
+        :param factor: a global scaling factor
+        :type factor: float
+        :param form: the functional form ('exponential' or 'calpha')
+        :type form: str
         """
         DeformationEnergyFunction.__init__(self, universe, fc_length,
                                            cutoff, factor, form)
@@ -310,17 +310,17 @@ class FiniteDeformationEnergyFunction(DeformationEvaluationFunction):
     def __init__(self, universe, fc_length = 0.7, cutoff = 1.2,
                  factor = 46402., form = 'exponential'):
         """
-        @param universe: the universe for which the deformation function
+        :param universe: the universe for which the deformation function
                          is defined
-        @type universe: L{MMTK.Universe.Universe}
-        @param fc_length: the range parameter r_0 in the pair interaction term
-        @type fc_length: C{float}
-        @param cutoff: the cutoff used in the deformation calculation
-        @type cutoff: C{float}
-        @param factor: a global scaling factor
-        @type factor: C{float}
-        @param form: the functional form ('exponential' or 'calpha')
-        @type form: C{str}
+        :type universe: :class:`~MMTK.Universe.Universe`
+        :param fc_length: the range parameter r_0 in the pair interaction term
+        :type fc_length: float
+        :param cutoff: the cutoff used in the deformation calculation
+        :type cutoff: float
+        :param factor: a global scaling factor
+        :type factor: float
+        :param form: the functional form ('exponential' or 'calpha')
+        :type form: str
         """
         DeformationEvaluationFunction.__init__(self, universe, fc_length,
                                                cutoff, factor, form)
@@ -368,17 +368,17 @@ class DeformationReducer(DeformationEvaluationFunction):
     def __init__(self, universe, fc_length = 0.7, cutoff = 1.2,
                  factor = 46402., form = 'exponential'):
         """
-        @param universe: the universe for which the deformation function
+        :param universe: the universe for which the deformation function
                          is defined
-        @type universe: L{MMTK.Universe.Universe}
-        @param fc_length: the range parameter r_0 in the pair interaction term
-        @type fc_length: C{float}
-        @param cutoff: the cutoff used in the deformation calculation
-        @type cutoff: C{float}
-        @param factor: a global scaling factor
-        @type factor: C{float}
-        @param form: the functional form ('exponential' or 'calpha')
-        @type form: C{str}
+        :type universe: :class:`~MMTK.Universe.Universe`
+        :param fc_length: the range parameter r_0 in the pair interaction term
+        :type fc_length: float
+        :param cutoff: the cutoff used in the deformation calculation
+        :type cutoff: float
+        :param factor: a global scaling factor
+        :type factor: float
+        :param form: the functional form ('exponential' or 'calpha')
+        :type form: str
         """
         DeformationEvaluationFunction.__init__(self, universe, fc_length,
                                                cutoff, factor, form)
@@ -411,17 +411,17 @@ class FiniteDeformationReducer(DeformationEvaluationFunction):
     def __init__(self, universe, fc_length = 0.7, cutoff = 1.2,
                  factor = 46402., form = 'exponential'):
         """
-        @param universe: the universe for which the deformation function
+        :param universe: the universe for which the deformation function
                          is defined
-        @type universe: L{MMTK.Universe.Universe}
-        @param fc_length: the range parameter r_0 in the pair interaction term
-        @type fc_length: C{float}
-        @param cutoff: the cutoff used in the deformation calculation
-        @type cutoff: C{float}
-        @param factor: a global scaling factor
-        @type factor: C{float}
-        @param form: the functional form ('exponential' or 'calpha')
-        @type form: C{str}
+        :type universe: :class:`~MMTK.Universe.Universe`
+        :param fc_length: the range parameter r_0 in the pair interaction term
+        :type fc_length: float
+        :param cutoff: the cutoff used in the deformation calculation
+        :type cutoff: float
+        :param factor: a global scaling factor
+        :type factor: float
+        :param form: the functional form ('exponential' or 'calpha')
+        :type form: str
         """
         DeformationEvaluationFunction.__init__(self, universe, fc_length,
                                                cutoff, factor, form)

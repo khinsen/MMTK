@@ -25,7 +25,7 @@
 Molecular surfaces and volumes.
 """
 
-__docformat__ = 'epytext'
+__docformat__ = 'restructuredtext'
 
 from MMTK import surfm
 from MMTK.Collections import Collection
@@ -34,13 +34,13 @@ from Scientific import N
 
 def surfaceAndVolume(object, probe_radius = 0.):
     """
-    @param object: a chemical object
-    @type object: L{MMTK.Collections.GroupOfAtoms}
-    @param probe_radius: the distance from the vdW-radii of the atoms
+    :param object: a chemical object
+    :type object: :class:`~MMTK.Collections.GroupOfAtoms`
+    :param probe_radius: the distance from the vdW-radii of the atoms
                          at which the surface is computed
-    @type probe_radius: C{float}
-    @returns: the molecular surface and volume of object
-    @rtype: C{tuple}
+    :type probe_radius: float
+    :returns: the molecular surface and volume of object
+    :rtype: tuple
     """
     atoms = object.atomList()
     smap = surfm.surface_atoms(atoms, probe_radius, ret_fmt = 2)
@@ -54,14 +54,14 @@ def surfaceAndVolume(object, probe_radius = 0.):
 
 def surfaceAtoms(object, probe_radius = 0.):
     """
-    @param object: a chemical object
-    @type object: L{MMTK.Collections.GroupOfAtoms}
-    @param probe_radius: the distance from the vdW-radii of the atoms
+    :param object: a chemical object
+    :type object: :class:`~MMTK.Collections.GroupOfAtoms`
+    :param probe_radius: the distance from the vdW-radii of the atoms
                          at which the surface is computed
-    @type probe_radius: C{float}
-    @returns: a dictionary that maps the surface atoms to their
+    :type probe_radius: float
+    :returns: a dictionary that maps the surface atoms to their
               exposed surface areas
-    @rtype: C{dict}
+    :rtype: dict
     """
     atoms = object.atomList()
     smap = surfm.surface_atoms(atoms, probe_radius, ret_fmt = 1)
@@ -75,18 +75,18 @@ def surfaceAtoms(object, probe_radius = 0.):
 
 def surfacePointsAndGradients(object, probe_radius = 0., point_density = 258):
     """
-    @param object: a chemical object
-    @type object: L{MMTK.Collections.GroupOfAtoms}
-    @param probe_radius: the distance from the vdW-radii of the atoms
+    :param object: a chemical object
+    :type object: :class:`~MMTK.Collections.GroupOfAtoms`
+    :param probe_radius: the distance from the vdW-radii of the atoms
                          at which the surface is computed
-    @type probe_radius: C{float}
-    @param point_density: the density of points that describe the surface
-    @type point_density: C{int}
-    @returns: a dictionary that maps the surface atoms to a tuple
+    :type probe_radius: float
+    :param point_density: the density of points that describe the surface
+    :type point_density: int
+    :returns: a dictionary that maps the surface atoms to a tuple
               containing three surface-related quantities: the exposed surface
               area, a list of points in the exposed surface, and a gradient
               vector pointing outward from the surface.
-    @rtype: C{dict}
+    :rtype: dict
     """
     atoms = object.atomList()
     smap = surfm.surface_atoms(atoms, probe_radius, ret_fmt = 4,
@@ -129,17 +129,18 @@ def findContacts(object1, object2, contact_factor = 1.0, cutoff = 0.0):
     Identifies contacts between two molecules. A contact is defined as a pair
     of atoms whose distance is less than contact_factor*(r1+r2+cutoff),
     where r1 and r2 are the atomic van-der-Waals radii.
-    @param object1: a chemical object
-    @type object1: L{MMTK.Collections.GroupOfAtoms}
-    @param object2: a chemical object
-    @type object2: L{MMTK.Collections.GroupOfAtoms}
-    @param contact_factor: a scale factor in the contact distance criterion
-    @type contact_factor: C{float}
-    @param cutoff: a constant in the contact distance criterion
-    @type cutoff: C{float}
-    @returns: a list of L{Contact} objects that describe atomic contacts
+
+    :param object1: a chemical object
+    :type object1: :class:`~MMTK.Collections.GroupOfAtoms`
+    :param object2: a chemical object
+    :type object2: :class:`~MMTK.Collections.GroupOfAtoms`
+    :param contact_factor: a scale factor in the contact distance criterion
+    :type contact_factor: float
+    :param cutoff: a constant in the contact distance criterion
+    :type cutoff: float
+    :returns: a list of Contact objects that describe atomic contacts
               between object1 and object2. 
-    @rtype: C{list}
+    :rtype: list
     """
     max_object1 = len(object1.atomList())
     atoms = object1.atomList() + object2.atomList()

@@ -3,7 +3,7 @@
 # Written by Konrad Hinsen
 #
 
-__docformat__ = 'epytext'
+__docformat__ = 'restructuredtext'
 
 from MMTK import Units, ParticleProperties, Visualization
 from Scientific import N
@@ -89,14 +89,14 @@ class Mode(ParticleProperties.ParticleVector):
 
     def view(self, factor=1., subset=None):
         """
-        Start an animation of the mode. See L{MMTK.Visualization} for
+        Start an animation of the mode. See :class:`~MMTK.Visualization` for
         the configuration of external viewers.
 
-        @param factor: a scaling factor for the amplitude of the motion
-        @type factor: C{float}
-        @param subset: the subset of the universe to be shown
+        :param factor: a scaling factor for the amplitude of the motion
+        :type factor: float
+        :param subset: the subset of the universe to be shown
                        (default: the whole universe)
-        @type subset: L{MMTK.Collections.GroupOfAtoms}
+        :type subset: :class:`~MMTK.Collections.GroupOfAtoms`
         """
         Visualization.viewMode(self, factor, subset)
 
@@ -138,8 +138,9 @@ class NormalModes(object):
         Discards all modes outside a given range of mode numbers.
         This is done to reduce memory requirements, especially before
         saving the modesto a file.
-        @param first: the number of the first mode to be kept
-        @param last: the number of the last mode to be kept - 1
+
+        :param first: the number of the first mode to be kept
+        :param last: the number of the last mode to be kept - 1
         """
         junk1 = list(self.sort_index[:first])
         junk2 = list(self.sort_index[last:])
@@ -161,24 +162,24 @@ class NormalModes(object):
 
     def fluctuations(self, first_mode=6):
         """
-        @param first_mode: the first mode to be taken into account for
+        :param first_mode: the first mode to be taken into account for
                            the fluctuation calculation. The default value
                            of 6 is right for molecules in vacuum.
-        @type first_mode: C{int}
-        @returns: the thermal fluctuations for each atom in the universe
-        @rtype: L{MMTK.ParticleProperties.ParticleScalar}
+        :type first_mode: int
+        :returns: the thermal fluctuations for each atom in the universe
+        :rtype: :class:`~MMTK.ParticleProperties.ParticleScalar`
         """
         raise NotImplementedError
 
     def anisotropicFluctuations(self, first_mode=6):
         """
-        @param first_mode: the first mode to be taken into account for
+        :param first_mode: the first mode to be taken into account for
                            the fluctuation calculation. The default value
                            of 6 is right for molecules in vacuum.
-        @type first_mode: C{int}
-        @returns: the anisotropic thermal fluctuations for each
+        :type first_mode: int
+        :returns: the anisotropic thermal fluctuations for each
                   atom in the universe
-        @rtype: L{MMTK.ParticleProperties.ParticleTensor}
+        :rtype: :class:`~MMTK.ParticleProperties.ParticleTensor`
         """
         raise NotImplementedError
 

@@ -10,7 +10,7 @@ Note: this format is not used by any other program at the moment. It should
 be considered experimental and subject to change.
 """
 
-__docformat__ = 'epytext'
+__docformat__ = 'restructuredtext'
 
 import MMTK
 from MMTK.MoleculeFactory import MoleculeFactory
@@ -26,19 +26,12 @@ class XMLMoleculeFactory(MoleculeFactory):
     An XML molecule factory reads an XML specification of a molecular
     system and builds the molecule objects and universe described
     therein. The universe can be obtained through the attribute
-    |universe|.
+    *universe*.
     
-    Constructor: XMLMoleculeFactory(||xml_file|)
-    
-    Arguments:
-        
-    |xml_file| -- name of the XML file to be read
+    :param file: the name of an XML file, or a file object
     """
 
     def __init__(self, file):
-        """
-        @param file: the name of an XML file, or a file object
-        """
         MoleculeFactory.__init__(self)
         for event, element in iterparse(file):
             tag = element.tag

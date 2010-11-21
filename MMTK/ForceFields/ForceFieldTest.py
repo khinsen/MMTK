@@ -7,7 +7,7 @@
 Force field consistency tests
 """
 
-__docformat__ = 'epytext'
+__docformat__ = 'restructuredtext'
 
 from MMTK import Utility
 from Scientific.Geometry import Vector, ex, ey, ez
@@ -20,13 +20,14 @@ import itertools
 def gradientTest(universe, atoms = None, delta = 0.0001):
     """
     Test gradients by comparing to numerical derivatives of the energy.
-    @param universe: the universe on which the test is performed
-    @type universe: L{MMTK.Universe.Universe}
-    @param atoms: the atoms of the universe for which the gradient
+
+    :param universe: the universe on which the test is performed
+    :type universe: :class:`~MMTK.Universe.Universe`
+    :param atoms: the atoms of the universe for which the gradient
                   is tested (default: all atoms)
-    @type atoms: C{list}
-    @param delta: the step size used in calculating the numerical derivatives
-    @type delta: C{float}
+    :type atoms: list
+    :param delta: the step size used in calculating the numerical derivatives
+    :type delta: float
     """
     e0, grad = universe.energyAndGradients()
     print 'Energy: ', e0
@@ -54,13 +55,14 @@ def forceConstantTest(universe, atoms = None, delta = 0.0001):
     """
     Test force constants by comparing to the numerical derivatives
     of the gradients.
-    @param universe: the universe on which the test is performed
-    @type universe: L{MMTK.Universe.Universe}
-    @param atoms: the atoms of the universe for which the gradient
+
+    :param universe: the universe on which the test is performed
+    :type universe: :class:`~MMTK.Universe.Universe`
+    :param atoms: the atoms of the universe for which the gradient
                   is tested (default: all atoms)
-    @type atoms: C{list}
-    @param delta: the step size used in calculating the numerical derivatives
-    @type delta: C{float}
+    :type atoms: list
+    :param delta: the step size used in calculating the numerical derivatives
+    :type delta: float
     """
     e0, grad0, fc = universe.energyGradientsAndForceConstants()
     if atoms is None:
@@ -88,8 +90,9 @@ def virialTest(universe):
     """
     Test the virial by comparing to an explicit computation from
     positions and gradients.
-    @param universe: the universe on which the test is performed
-    @type universe: L{MMTK.Universe.Universe}
+
+    :param universe: the universe on which the test is performed
+    :type universe: :class:`~MMTK.Universe.Universe`
     """
     ev = universe.energyEvaluator()
     e, grad = ev(gradients = True)

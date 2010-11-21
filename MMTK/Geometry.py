@@ -11,7 +11,7 @@ There are essentially two kinds of geometrical objects: shape objects
 and lattice objects, which define a regular arrangements of points.
 """
 
-__docformat__ = 'epytext'
+__docformat__ = 'restructuredtext'
 
 from Scientific.Geometry import Vector
 from Scientific import N
@@ -38,8 +38,8 @@ class GeometricalObject3D(object):
     
     def intersectWith(self, other):
         """
-        @param other: another 3D object
-        @returns: a 3D object that represents the intersection with C{other}
+        :param other: another 3D object
+        :returns: a 3D object that represents the intersection with other
         """
 	if self.__class__ > other.__class__:
 	    self, other = other, self
@@ -56,17 +56,17 @@ class GeometricalObject3D(object):
 
     def volume(self):
         """
-        @returns: the volume of the object
-        @rtype: C{float}
+        :returns: the volume of the object
+        :rtype: float
         """
         raise NotImplementedError
 
     def hasPoint(self, point):
         """
-        @param point: a point in 3D space
-        @type point: C{Scientific.Geometry.Vector}
-        @returns: C{True} of the point lies on the surface of the object
-        @rtype: C{bool}
+        :param point: a point in 3D space
+        :type point: Scientific.Geometry.Vector
+        :returns: True of the point lies on the surface of the object
+        :rtype: bool
         """
 	return self.distanceFrom(point) < eps
 
@@ -75,10 +75,10 @@ class GeometricalObject3D(object):
     # or "not implemented (yet)".
     def enclosesPoint(self, point):
         """
-        @param point: a point in 3D space
-        @type point: C{Scientific.Geometry.Vector}
-        @returns: C{True} of the point is inside the volume of the object
-        @rtype: C{bool}
+        :param point: a point in 3D space
+        :type point: Scientific.Geometry.Vector
+        :returns: True of the point is inside the volume of the object
+        :rtype: bool
         """
         return None
 
@@ -95,10 +95,10 @@ class Box(GeometricalObject3D):
 
     def __init__(self, corner1, corner2):
         """
-        @param corner1: one corner of the box
-        @type corner1: C{Scientific.Geometry.Vector}
-        @param corner2: the diagonally opposite corner
-        @type corner2: C{Scientific.Geometry.Vector}
+        :param corner1: one corner of the box
+        :type corner1: Scientific.Geometry.Vector
+        :param corner2: the diagonally opposite corner
+        :type corner2: Scientific.Geometry.Vector
         """
         c1 = N.minimum(corner1.array, corner2.array)
         c2 = N.maximum(corner1.array, corner2.array)
@@ -148,10 +148,10 @@ class Sphere(GeometricalObject3D):
 
     def __init__(self, center, radius):
         """
-        @param center: the center of the sphere
-        @type center: C{Scientific.Geometry.Vector}
-        @param radius: the radius of the sphere
-        @type radius: C{float}
+        :param center: the center of the sphere
+        :type center: Scientific.Geometry.Vector
+        :param radius: the radius of the sphere
+        :type radius: float
         """
 	self.center = center
 	self.radius = radius
@@ -180,12 +180,12 @@ class Cylinder(GeometricalObject3D):
 
     def __init__(self, center1, center2, radius):
         """
-        @param center1: the center of the bottom circle
-        @type center1: C{Scientific.Geometry.Vector}
-        @param center2: the center of the top circle
-        @type center2: C{Scientific.Geometry.Vector}
-        @param radius: the radius of the cylinder
-        @type radius: C{float}
+        :param center1: the center of the bottom circle
+        :type center1: Scientific.Geometry.Vector
+        :param center2: the center of the top circle
+        :type center2: Scientific.Geometry.Vector
+        :param radius: the radius of the cylinder
+        :type radius: float
         """
         self.center1 = center1            # center of base
         self.center2 = center2            # center of top
@@ -225,7 +225,7 @@ class Plane(GeometricalObject3D):
 
     def __init__(self, *args):
         """
-        @param args: three points (of type C{Scientific.Geometry.Vector})
+        :param args: three points (of type Scientific.Geometry.Vector)
                      that are not collinear, or a point in the plane and
                      the normal vector of the plane
         """
@@ -268,13 +268,13 @@ class Cone(GeometricalObject3D):
 
     def __init__(self, center, axis, angle):
         """
-        @param center: the center (tip) of the cone
-        @type center: C{Scientific.Geometry.Vector}
-        @param axis: the direction of the axis of rotational symmetry
-        @type axis: C{Scientific.Geometry.Vector}
-        @param angle: the angle between any straight line on the cone
+        :param center: the center (tip) of the cone
+        :type center: Scientific.Geometry.Vector
+        :param axis: the direction of the axis of rotational symmetry
+        :type axis: Scientific.Geometry.Vector
+        :param angle: the angle between any straight line on the cone
                       surface and the axis of symmetry
-        @type angle: C{float}
+        :type angle: float
         """
 	self.center = center
 	self.axis = axis.normal()
@@ -299,12 +299,12 @@ class Circle(GeometricalObject3D):
 
     def __init__(self, center, normal, radius):
         """
-        @param center: the center of the circle
-        @type center: C{Scientific.Geometry.Vector}
-        @param normal: the normal vector of the circle's plane
-        @type normal: C{Scientific.Geometry.Vector}
-        @param radius: the radius of the circle
-        @type radius: C{float}
+        :param center: the center of the circle
+        :type center: Scientific.Geometry.Vector
+        :param normal: the normal vector of the circle's plane
+        :type normal: Scientific.Geometry.Vector
+        :param radius: the radius of the circle
+        :type radius: float
         """
 	self.center = center
 	self.normal = normal
@@ -341,20 +341,20 @@ class Line(GeometricalObject3D):
 
     def __init__(self, point, direction):
         """
-        @param point: any point on the line
-        @type point: C{Scientific.Geometry.Vector}
-        @param direction: the direction of the line
-        @type direction: C{Scientific.Geometry.Vector}
+        :param point: any point on the line
+        :type point: Scientific.Geometry.Vector
+        :param direction: the direction of the line
+        :type direction: Scientific.Geometry.Vector
         """
 	self.point = point
 	self.direction = direction.normal()
 
     def distanceFrom(self, point):
         """
-        @param point: a point in space
-        @type point: C{Scientific.Geometry.Vector}
-        @returns: the smallest distance of the point from the line
-        @rtype: C{float}
+        :param point: a point in space
+        :type point: Scientific.Geometry.Vector
+        :returns: the smallest distance of the point from the line
+        :rtype: float
         """
 	d = self.point-point
 	d = d - (d*self.direction)*self.direction
@@ -362,10 +362,10 @@ class Line(GeometricalObject3D):
 
     def projectionOf(self, point):
         """
-        @param point: a point in space
-        @type point: C{Scientific.Geometry.Vector}
-        @returns: the orthogonal projection of the point onto the line
-        @rtype: C{Scientific.Geometry.Vector}
+        :param point: a point in space
+        :type point: Scientific.Geometry.Vector
+        :returns: the orthogonal projection of the point onto the line
+        :rtype: Scientific.Geometry.Vector
         """
 	d = self.point-point
 	d = d - (d*self.direction)*self.direction
@@ -373,10 +373,10 @@ class Line(GeometricalObject3D):
 
     def perpendicularVector(self, plane):
         """
-        @param plane: a plane
-        @type plane: L{Plane}
-        @returns: a vector in the plane perpendicular to the line
-        @rtype: C{Scientific.Geometry.Vector}
+        :param plane: a plane
+        :type plane: Plane
+        :returns: a vector in the plane perpendicular to the line
+        :rtype: Scientific.Geometry.Vector
         """
         return self.direction.cross(plane.normal)
 
@@ -576,16 +576,16 @@ class RhombicLattice(Lattice):
     def __init__(self, elementary_cell, lattice_vectors, cells,
                  function=None, base=None):
         """
-        @param elementary_cell: a list of points in the elementary cell
-        @param lattice_vectors: a list of lattice vectors. Each lattice
+        :param elementary_cell: a list of points in the elementary cell
+        :param lattice_vectors: a list of lattice vectors. Each lattice
                                 vector defines a lattice dimension (only
                                 values from one to three make sense) and
                                 indicates the displacement along this
                                 dimension from one cell to the next.
-        @param cells: a list of integers, whose length must equal the number
+        :param cells: a list of integers, whose length must equal the number
                       of dimensions. Each entry specifies how often a cell is
                       repeated along this dimension.
-        @param function: a function that is called for every lattice point with
+        :param function: a function that is called for every lattice point with
                          the vector describing the point as argument. The return
                          value of this function is stored in the lattice object.
                          If the function is 'None', the vector is directly
@@ -623,15 +623,15 @@ class BravaisLattice(RhombicLattice):
 
     def __init__(self, lattice_vectors, cells, function=None, base=None):
         """
-        @param lattice_vectors: a list of lattice vectors. Each lattice
+        :param lattice_vectors: a list of lattice vectors. Each lattice
                                 vector defines a lattice dimension (only
                                 values from one to three make sense) and
                                 indicates the displacement along this
                                 dimension from one cell to the next.
-        @param cells: a list of integers, whose length must equal the number
+        :param cells: a list of integers, whose length must equal the number
                       of dimensions. Each entry specifies how often a cell is
                       repeated along this dimension.
-        @param function: a function that is called for every lattice point with
+        :param function: a function that is called for every lattice point with
                          the vector describing the point as argument. The return
                          value of this function is stored in the lattice object.
                          If the function is 'None', the vector is directly
@@ -655,12 +655,12 @@ class SCLattice(BravaisLattice):
 
     def __init__(self, cellsize, cells, function=None, base=None):
         """
-        @param cellsize: the edge length of the elementary cell
-        @type cellsize: C{float}
-        @param cells: a list of integers, whose length must equal the number
+        :param cellsize: the edge length of the elementary cell
+        :type cellsize: float
+        :param cells: a list of integers, whose length must equal the number
                       of dimensions. Each entry specifies how often a cell is
                       repeated along this dimension.
-        @param function: a function that is called for every lattice point with
+        :param function: a function that is called for every lattice point with
                          the vector describing the point as argument. The return
                          value of this function is stored in the lattice object.
                          If the function is 'None', the vector is directly
@@ -686,12 +686,12 @@ class BCCLattice(RhombicLattice):
 
     def __init__(self, cellsize, cells, function=None, base=None):
         """
-        @param cellsize: the edge length of the elementary cell
-        @type cellsize: C{float}
-        @param cells: a list of integers, whose length must equal the number
+        :param cellsize: the edge length of the elementary cell
+        :type cellsize: float
+        :param cells: a list of integers, whose length must equal the number
                       of dimensions. Each entry specifies how often a cell is
                       repeated along this dimension.
-        @param function: a function that is called for every lattice point with
+        :param function: a function that is called for every lattice point with
                          the vector describing the point as argument. The return
                          value of this function is stored in the lattice object.
                          If the function is 'None', the vector is directly
@@ -718,12 +718,12 @@ class FCCLattice(RhombicLattice):
 
     def __init__(self, cellsize, cells, function=None, base=None):
         """
-        @param cellsize: the edge length of the elementary cell
-        @type cellsize: C{float}
-        @param cells: a list of integers, whose length must equal the number
+        :param cellsize: the edge length of the elementary cell
+        :type cellsize: float
+        :param cells: a list of integers, whose length must equal the number
                       of dimensions. Each entry specifies how often a cell is
                       repeated along this dimension.
-        @param function: a function that is called for every lattice point with
+        :param function: a function that is called for every lattice point with
                          the vector describing the point as argument. The return
                          value of this function is stored in the lattice object.
                          If the function is 'None', the vector is directly

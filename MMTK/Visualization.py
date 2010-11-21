@@ -32,7 +32,7 @@ and must give "vmd" or "xmol" after stripping off an optional
 directory specification.
 """
 
-__docformat__ = 'epytext'
+__docformat__ = 'restructuredtext'
 
 from MMTK import Units, Utility
 from Scientific import N
@@ -63,23 +63,25 @@ except KeyError: pass
 def definePDBViewer(progname, exec_path):
     """
     Define the program used to view PDB files.
-    @param progname: the canonical name of the PDB viewer. If it is
+
+    :param progname: the canonical name of the PDB viewer. If it is
                      a known one (one of "vmd", "xmol", "imol"),
                      special features such as animation may be
                      available.
-    @type progname: C{string}
-    @param exec_path: the path to the executable program
-    @type exec_path: C{string}
+    :type progname: str
+    :param exec_path: the path to the executable program
+    :type exec_path: str
     """
     viewer['pdb'] = (progname.lower(), exec_path)
 
 def defineVRMLiewer(progname, exec_path):
     """
     Define the program used to view VRML files.
-    @param progname: the canonical name of the VRML viewer
-    @type progname: C{string}
-    @param exec_path: the path to the executable program
-    @type exec_path: C{string}
+
+    :param progname: the canonical name of the VRML viewer
+    :type progname: str
+    :param exec_path: the path to the executable program
+    :type exec_path: str
     """
     viewer['vrml'] = (progname.lower(), exec_path)
 
@@ -99,39 +101,39 @@ class Viewable(object):
 
     def graphicsObjects(self, **options):
         """
-        @keyword configuration: the configuration in which the objects
+        :keyword configuration: the configuration in which the objects
                                 are drawn (default: the current configuration)
-        @type configuration: L{MMTK.ParticleProperties.Configuration}
-        @keyword model: the graphical representation to be used (one of
+        :type configuration: :class:`~MMTK.ParticleProperties.Configuration`
+        :keyword model: the graphical representation to be used (one of
                         "wireframe", "tube", "ball_and_stick", "vdw" and
                         "vdw_and_stick").  The vdw models use balls
                         with the radii taken from the atom objects.
                         Default is "wireframe".
-        @type model: C{str}
-        @keyword ball_radius: the radius of the balls representing the atoms
+        :type model: str
+        :keyword ball_radius: the radius of the balls representing the atoms
                               in a ball_and_stick model, default: 0.03
                               This is also used in vdw and vdw_and_stick when
                               an atom does not supply a radius.
-        @type ball_radius: C{float}
-        @keyword stick_radius: the radius of the sticks representing the bonds
+        :type ball_radius: float
+        :keyword stick_radius: the radius of the sticks representing the bonds
                                in a ball_and_stick, vdw_and_stick or tube model.
                                Default: 0.02 for the tube model, 0.01 for the
                                ball_and_stick and vdw_and_stick models
-        @type stick_radius: C{float}
-        @keyword graphics_module: the module in which the elementary graphics
+        :type stick_radius: float
+        :keyword graphics_module: the module in which the elementary graphics
                                   objects are defined
-                                  (default: C{Scientific.Visualization.VRML})
-        @type graphics_module: C{module}
-        @keyword color_values:  a color value for each atom which defines
+                                  (default: Scientific.Visualization.VRML)
+        :type graphics_module: module
+        :keyword color_values:  a color value for each atom which defines
                                 the color via the color scale object specified
                                 by the option color_scale. If no value is
                                 given, the atoms' colors are taken from the
                                 attribute 'color' of each atom object (default
                                 values for each chemical element are provided
                                 in the chemical database).
-        @type  color_values: L{MMTK.ParticleProperties.ParticleScalar}
-        @keyword color_scale: an object that returns a color object (as defined
-                              in the module C{Scientific.Visualization.Color})
+        :type  color_values: :class:`~MMTK.ParticleProperties.ParticleScalar`
+        :keyword color_scale: an object that returns a color object (as defined
+                              in the module Scientific.Visualization.Color)
                               when called with a number argument. Suitable
                               objects are defined by
                               Scientific.Visualization.Color.ColorScale and
@@ -140,14 +142,14 @@ class Viewable(object):
                               color_values is specified as well. The default
                               is a blue-to-red color scale that covers the
                               range of the values given in color_values.
-        @type color_scale: callable
-        @keyword color: a color name predefined in the module
+        :type color_scale: callable
+        :keyword color: a color name predefined in the module
                         Scientific.Visualization.Color. The corresponding
                         color is applied to all graphics objects that are
                         returned.
-        @returns: a list of graphics objects that represent
+        :returns: a list of graphics objects that represent
                   the object for which the method is called.
-        @rtype: C{list}
+        :rtype: list
         """
         conf = options.get('configuration', None)
         model = options.get('model', 'wireframe')
@@ -268,15 +270,15 @@ def viewSequence(object, conf_list, periodic = False, label = None):
     """
     Launches an animation using an external viewer.
 
-    @param object: the object for which the animation is displayed.
-    @type object: L{MMTK.Collections.GroupOfAtoms}
-    @param conf_list: a sequence of configurations that define the animation
-    @type conf_list: sequence
-    @param periodic: if C{True}, turn animation into a loop
-    @param label: an optional text string that some interfaces
+    :param object: the object for which the animation is displayed.
+    :type object: :class:`~MMTK.Collections.GroupOfAtoms`
+    :param conf_list: a sequence of configurations that define the animation
+    :type conf_list: sequence
+    :param periodic: if True, turn animation into a loop
+    :param label: an optional text string that some interfaces
                   use to pass a description of the object to the
                   visualization system.
-    @type label: C{str}
+    :type label: str
     """
     pdbviewer, exec_path = viewer.get('pdb', (None, None))
     function = {'vmd': viewSequenceVMD,
@@ -294,21 +296,21 @@ def viewTrajectory(trajectory, first=0, last=None, skip=1, subset = None,
     """
     Launches an animation based on a trajectory using an external viewer.
 
-    @param trajectory: the trajectory
-    @type trajectory: L{MMTK.Trajectory.Trajectory}
-    @param first: the first trajectory step to be used
-    @type first: C{int}
-    @param last: the first trajectory step NOT to be used
-    @type last: C{int}
-    @param skip: the distance between two consecutive steps shown
-    @type skip: C{int}
-    @param subset: the subset of the universe that is shown
+    :param trajectory: the trajectory
+    :type trajectory: :class:`~MMTK.Trajectory.Trajectory`
+    :param first: the first trajectory step to be used
+    :type first: int
+    :param last: the first trajectory step NOT to be used
+    :type last: int
+    :param skip: the distance between two consecutive steps shown
+    :type skip: int
+    :param subset: the subset of the universe that is shown
                    (default: the whole universe)
-    @type subset: L{MMTK.Collections.GroupOfAtoms}
-    @param label: an optional text string that some interfaces
+    :type subset: :class:`~MMTK.Collections.GroupOfAtoms`
+    :param label: an optional text string that some interfaces
                   use to pass a description of the object to the
                   visualization system.
-    @type label: C{str}
+    :type label: str
     """
     if type(trajectory) == type(''):
         from MMTK.Trajectory import Trajectory

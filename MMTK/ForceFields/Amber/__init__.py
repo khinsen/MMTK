@@ -6,7 +6,7 @@
 """
 Amber force fields
 
-@undocumented: AmberData
+:undocumented: AmberData
 """
 
 __docformat__ = 'epytext'
