@@ -8,7 +8,7 @@
 Quantities defined for each particle in a universe
 """
 
-__docformat__ = 'epytext'
+__docformat__ = 'restructuredtext'
 
 from MMTK import Utility
 from Scientific.Geometry import Vector, isVector, Tensor, isTensor
@@ -73,14 +73,14 @@ class ParticleProperty(object):
 
     def zero(self):
         """
-        @returns: an object of the element type (scalar, vector, etc.)
+        :returns: an object of the element type (scalar, vector, etc.)
                   with the value 0.
         """
         pass
 
     def sumOverParticles(self):
         """
-        @returns: the sum of the values for all particles.
+        :returns: the sum of the values for all particles.
         """
         pass
 
@@ -130,7 +130,8 @@ class ParticleProperty(object):
     def assign(self, other):
         """
         Copy all values from another compatible ParticleProperty object.
-        @param other: the data source
+
+        :param other: the data source
         """
         self._checkCompatibility(other)
         self.array[:] = other.array[:]
@@ -138,8 +139,9 @@ class ParticleProperty(object):
     def scaleBy(self, factor):
         """
         Multiply all values by a factor
-        @param factor: the scale factor
-        @type factor: C{float}
+
+        :param factor: the scale factor
+        :type factor: float
         """
         self.array[:] = self.array[:]*factor
 
@@ -147,8 +149,9 @@ class ParticleProperty(object):
         """
         Return a collection containing all atoms a for which 
         condition(property[a]) is True.
-        @param condition: a test function
-        @type condition: callable
+
+        :param condition: a test function
+        :type condition: callable
         """
         from MMTK.Collections import Collection
         return Collection([a for a in self.universe.atomList()
@@ -170,14 +173,14 @@ class ParticleScalar(ParticleProperty):
 
     def __init__(self, universe, data_array=None):
         """
-        @param universe: the universe for which the values are defined
-        @type universe: L{MMTK.Universe.Universe}
-        @param data_array: the data array containing the values for each
-                           particle. If C{None}, a new array containing
+        :param universe: the universe for which the values are defined
+        :type universe: :class:`~MMTK.Universe.Universe`
+        :param data_array: the data array containing the values for each
+                           particle. If None, a new array containing
                            zeros is created and used. Otherwise, the
                            array myst be of shape (N,), where N is the
                            number of particles in the universe.
-        @type data_array: C{Scientific.N.array_type}
+        :type data_array: Scientific.N.array_type
         """
         ParticleProperty.__init__(self, universe, 1, 0)
         if data_array is None:
@@ -202,15 +205,15 @@ class ParticleScalar(ParticleProperty):
 
     def maximum(self):
         """
-        @returns: the highest value in the data array particle
-        @rtype: C{float}
+        :returns: the highest value in the data array particle
+        :rtype: float
         """
         return N.maximum.reduce(self.array)
 
     def minimum(self):
         """
-        @returns: the smallest value in the data array particle
-        @rtype: C{float}
+        :returns: the smallest value in the data array particle
+        :rtype: float
         """
         return N.minimum.reduce(self.array)
 
@@ -219,8 +222,8 @@ class ParticleScalar(ParticleProperty):
 
     def applyFunction(self, function):
         """
-        @param function: a function that is applied to each data value
-        @returns: a new ParticleScalar object containing the function results
+        :param function: a function that is applied to each data value
+        :returns: a new ParticleScalar object containing the function results
         """
         return ParticleScalar(self.universe, function(self.array))
 
@@ -236,24 +239,24 @@ class ParticleVector(ParticleProperty):
     Vector property defined for each particle
 
     ParticleVector objects can be added to each other and
-    multiplied with scalars or L{ParticleScalar} objects; all
+    multiplied with scalars or :class:`~MMTK.ParticleProperties.ParticleScalar` objects; all
     of these operations result in another ParticleVector
     object. Multiplication with a vector or another ParticleVector object
-    yields a L{ParticleScalar} object containing the dot products
+    yields a :class:`~MMTK.ParticleProperties.ParticleScalar` object containing the dot products
     for each particle. Multiplications that treat ParticleVectors
     as vectors in a 3N-dimensional space are implemented as methods.
     """
 
     def __init__(self, universe, data_array=None):
         """
-        @param universe: the universe for which the values are defined
-        @type universe: L{MMTK.Universe.Universe}
-        @param data_array: the data array containing the values for each
-                           particle. If C{None}, a new array containing
+        :param universe: the universe for which the values are defined
+        :type universe: :class:`~MMTK.Universe.Universe`
+        :param data_array: the data array containing the values for each
+                           particle. If None, a new array containing
                            zeros is created and used. Otherwise, the
                            array myst be of shape (N,3), where N is the
                            number of particles in the universe.
-        @type data_array: C{Scientific.N.array_type}
+        :type data_array: Scientific.N.array_type
         """
         ParticleProperty.__init__(self, universe, 1, 1)
         if data_array is None:
@@ -304,8 +307,8 @@ class ParticleVector(ParticleProperty):
 
     def length(self):
         """
-        @returns: the length (norm) of the vector for each particle
-        @rtype: L{ParticleScalar}
+        :returns: the length (norm) of the vector for each particle
+        :rtype: :class:`~MMTK.ParticleProperties.ParticleScalar`
         """
         return ParticleScalar(self.universe,
                               N.sqrt(N.add.reduce(self.array**2,
@@ -316,9 +319,9 @@ class ParticleVector(ParticleProperty):
 
     def norm(self):
         """
-        @returns: the norm of the ParticleVector seen as a 3N-dimensional
+        :returns: the norm of the ParticleVector seen as a 3N-dimensional
                   vector
-        @rtype: C{float}
+        :rtype: float
         """
         return N.sqrt(N.add.reduce(N.ravel(self.array**2)))
     totalNorm = norm
@@ -329,9 +332,9 @@ class ParticleVector(ParticleProperty):
 
     def dotProduct(self, other):
         """
-        @param other: another ParticleVector
-        @type other: L{ParticleVector}
-        @returns: the dot product with other, treating both operands
+        :param other: another ParticleVector
+        :type other: :class:`~MMTK.ParticleProperties.ParticleVector`
+        :returns: the dot product with other, treating both operands
                   as 3N-dimensional vectors.
         """
         if self.universe != other.universe:
@@ -340,9 +343,9 @@ class ParticleVector(ParticleProperty):
 
     def massWeightedNorm(self):
         """
-        @returns: the mass-weighted norm of the ParticleVector seen as a
+        :returns: the mass-weighted norm of the ParticleVector seen as a
                   3N-dimensional vector
-        @rtype: C{float}
+        :rtype: float
         """
         m = self.universe.masses().array
         return N.sqrt(N.sum(N.ravel(m[:, N.NewAxis] *
@@ -355,11 +358,11 @@ class ParticleVector(ParticleProperty):
 
     def massWeightedDotProduct(self, other):
         """
-        @param other: another ParticleVector
-        @type other: L{ParticleVector}
-        @returns: the mass-weighted dot product with other treating both
+        :param other: another ParticleVector
+        :type other: :class:`~MMTK.ParticleProperties.ParticleVector`
+        :returns: the mass-weighted dot product with other treating both
                   operands as 3N-dimensional vectors
-        @rtype: C{float}
+        :rtype: float
         """
         if self.universe != other.universe:
             raise ValueError('Variables are for different universes')
@@ -369,10 +372,10 @@ class ParticleVector(ParticleProperty):
 
     def dyadicProduct(self, other):
         """
-        @param other: another ParticleVector
-        @type other: L{ParticleVector}
-        @returns: the dyadic product with other
-        @rtype: L{ParticleTensor}
+        :param other: another ParticleVector
+        :type other: :class:`~MMTK.ParticleProperties.ParticleVector`
+        :returns: the dyadic product with other
+        :rtype: :class:`~MMTK.ParticleProperties.ParticleTensor`
         """
         if self.universe != other.universe:
             raise ValueError('Variables are for different universes')
@@ -398,15 +401,15 @@ class Configuration(ParticleVector):
 
     def __init__(self, universe, data_array=None, cell = None):
         """
-        @param universe: the universe for which the values are defined
-        @type universe: L{MMTK.Universe.Universe}
-        @param data_array: the data array containing the values for each
-                           particle. If C{None}, a new array containing
+        :param universe: the universe for which the values are defined
+        :type universe: :class:`~MMTK.Universe.Universe`
+        :param data_array: the data array containing the values for each
+                           particle. If None, a new array containing
                            zeros is created and used. Otherwise, the
                            array myst be of shape (N,3), where N is the
                            number of particles in the universe.
-        @type data_array: C{Scientific.N.array_type}
-        @param cell: the cell parameters of the universe,
+        :type data_array: Scientific.N.array_type
+        :param cell: the cell parameters of the universe,
                      i.e. the return value of universe.cellParameters()
         """
         ParticleVector.__init__(self, universe, data_array)
@@ -451,20 +454,20 @@ class ParticleTensor(ParticleProperty):
     Rank-2 tensor property defined for each particle
 
     ParticleTensor objects can be added to each other and
-    multiplied with scalars or L{ParticleScalar} objects; all
+    multiplied with scalars or :class:`~MMTK.ParticleProperties.ParticleScalar` objects; all
     of these operations result in another ParticleTensor object.
     """
 
     def __init__(self, universe, data_array=None):
         """
-        @param universe: the universe for which the values are defined
-        @type universe: L{MMTK.Universe.Universe}
-        @param data_array: the data array containing the values for each
-                           particle. If C{None}, a new array containing
+        :param universe: the universe for which the values are defined
+        :type universe: :class:`~MMTK.Universe.Universe`
+        :param data_array: the data array containing the values for each
+                           particle. If None, a new array containing
                            zeros is created and used. Otherwise, the
                            array myst be of shape (N,3,3), where N is the
                            number of particles in the universe.
-        @type data_array: C{Scientific.N.array_type}
+        :type data_array: Scientific.N.array_type
         """
         ParticleProperty.__init__(self, universe, 1, 2)
         if data_array is None:
@@ -524,14 +527,14 @@ class SymmetricPairTensor(ParticleProperty):
 
     def __init__(self, universe, data_array=None):
         """
-        @param universe: the universe for which the values are defined
-        @type universe: L{MMTK.Universe.Universe}
-        @param data_array: the data array containing the values for each
-                           particle. If C{None}, a new array containing
+        :param universe: the universe for which the values are defined
+        :type universe: :class:`~MMTK.Universe.Universe`
+        :param data_array: the data array containing the values for each
+                           particle. If None, a new array containing
                            zeros is created and used. Otherwise, the
                            array myst be of shape (N,3,N,3), where N is the
                            number of particles in the universe.
-        @type data_array: C{Scientific.N.array_type}
+        :type data_array: Scientific.N.array_type
         """
         ParticleProperty.__init__(self, universe, 2, 2)
         if data_array is None:
@@ -603,16 +606,16 @@ SymmetricPairTensor.return_class = SymmetricPairTensor
 #
 def isParticleProperty(object):
     """
-    @param object: any object
-    @returns: C{True} if object is a L{ParticleProperty}
-    @rtype: C{bool}
+    :param object: any object
+    :returns: True if object is a :class:`~MMTK.ParticleProperties.ParticleProperty`
+    :rtype: bool
     """
     return isinstance(object, ParticleProperty)
 
 def isConfiguration(object):
     """
-    @param object: any object
-    @returns: C{True} if object is a L{Configuration}
-    @rtype: C{bool}
+    :param object: any object
+    :returns: True if object is a :class:`~MMTK.ParticleProperties.Configuration`
+    :rtype: bool
     """
     return isinstance(object, Configuration)

@@ -99,11 +99,11 @@ class ResidueChain(ChemicalObjects.Molecule):
 
     def residuesOfType(self, *types):
         """
-        @param types: residue type codes
-        @type types: C{str}
-        @returns: a collection that contains all residues whose type
-        (residue code) is contained in types
-        @rtype: L{MMTK.Collection}
+        :param types: residue type codes
+        :type types: str
+        :returns: a collection that contains all residues whose type
+                  (residue code) is contained in types
+        :rtype: :class:`~MMTK.Collections.Collection`
         """
         types = [t.lower() for t in types]
         rlist = [r for r in self.groups if r.type.symbol.lower() in types]
@@ -111,15 +111,15 @@ class ResidueChain(ChemicalObjects.Molecule):
 
     def residues(self):
         """
-        @returns: a collection containing all residues
-        @rtype: L{MMTK.Collection}
+        :returns: a collection containing all residues
+        :rtype: :class:`~MMTK.Collections.Collection`
         """
         return Collections.Collection(self.groups)
 
     def sequence(self):
         """
-        @returns: the residue sequence as a list of residue codes
-        @rtype: C{list} of C{str}
+        :returns: the residue sequence as a list of residue codes
+        :rtype: list of str
         """
         return [r.type.symbol.lower() for r in self.groups]
 
@@ -215,12 +215,12 @@ def defineAminoAcidResidue(full_name, code3, code1 = None):
     Once added to the residue table, the new residue can be used
     like any of the standard residues in the creation of peptide chains.
 
-    @param full_name: the name of the group definition in the chemical database
-    @type full_name: C{str}
-    @param code3: the three-letter residue code
-    @type code3: C{str}
-    @param code1: an optionel one-letter residue code
-    @type code1: C{str}
+    :param full_name: the name of the group definition in the chemical database
+    :type full_name: str
+    :param code3: the three-letter residue code
+    :type code3: str
+    :param code1: an optionel one-letter residue code
+    :type code1: str
     """
     code3 = code3.lower()
     if code1 is not None:
@@ -240,10 +240,10 @@ def defineNucleicAcidResidue(full_name, code):
     Once added to the residue table, the new residue can be used
     like any of the standard residues in the creation of nucleotide chains.
 
-    @param full_name: the name of the group definition in the chemical database
-    @type full_name: C{str}
-    @param code: the residue code
-    @type code3: C{str}
+    :param full_name: the name of the group definition in the chemical database
+    :type full_name: str
+    :param code: the residue code
+    :type code3: str
     """
     code = code.lower()
     if _aa_residue_names.has_key(code) or _na_residue_names.has_key(code):

@@ -7,7 +7,7 @@
 Peptide chains and proteins
 """
 
-__docformat__ = 'epytext'
+__docformat__ = 'restructuredtext'
 
 from MMTK import Biopolymers, Bonds, ChemicalObjects, Collections, \
                  ConfigIO, Database, Units, Universe, Utility
@@ -34,18 +34,18 @@ class Residue(Biopolymers.Residue):
 
     def __init__(self, name = None, model = 'all'):
         """
-        @param name: the name of the residue in the chemical database. This
+        :param name: the name of the residue in the chemical database. This
                      is the full name of the residue plus the suffix
                      "_nt" or "_ct" for the terminal variants.
-        @type name: C{str}
-        @param model: one of "all" (all-atom), "none" (no hydrogens),
+        :type name: str
+        :param model: one of "all" (all-atom), "none" (no hydrogens),
                       "polar" (united-atom with only polar hydrogens),
                       "polar_charmm" (like "polar", but defining
                       polar hydrogens like in the CHARMM force field),
                       "polar_opls" (like "polar", but defining
                       polar hydrogens like in the latest OPLS force field),
                       "calpha" (only the C_alpha atom).
-        @type model: C{str}
+        :type model: str
         """
         if name is not None:
             blueprint = _residueBlueprint(name, model)
@@ -89,22 +89,22 @@ class Residue(Biopolymers.Residue):
 
     def backbone(self):
         """
-        @returns: the peptide group
-        @rtype: L{MMTK.ChemicalObjects.Group}
+        :returns: the peptide group
+        :rtype: :class:`~MMTK.ChemicalObjects.Group`
         """
         return self.peptide
 
     def sidechains(self):
         """
-        @returns: the sidechain group
-        @rtype: L{MMTK.ChemicalObjects.Group}
+        :returns: the sidechain group
+        :rtype: :class:`~MMTK.ChemicalObjects.Group`
         """
         return self.sidechain
 
     def phiPsi(self, conf = None):
         """
-        @returns: the values of the backbone dihedral angles phi and psi.
-        @rtype: C{(float, float)}
+        :returns: the values of the backbone dihedral angles phi and psi.
+        :rtype: tuple (float, float)
         """
         universe = self.universe()
         if universe is None:
@@ -133,8 +133,8 @@ class Residue(Biopolymers.Residue):
 
     def phiAngle(self):
         """
-        @returns: an object representing the phi angle and allowing to modify it
-        @rtype: MMTK.InternalCoordinates.DihedralAngle
+        :returns: an object representing the phi angle and allowing to modify it
+        :rtype: MMTK.InternalCoordinates.DihedralAngle
         """
         from MMTK.InternalCoordinates import DihedralAngle
         C = None
@@ -149,8 +149,8 @@ class Residue(Biopolymers.Residue):
 
     def psiAngle(self):
         """
-        @returns: an object representing the psi angle and allowing to modify it
-        @rtype: MMTK.InternalCoordinates.DihedralAngle
+        :returns: an object representing the psi angle and allowing to modify it
+        :rtype: MMTK.InternalCoordinates.DihedralAngle
         """
         from MMTK.InternalCoordinates import DihedralAngle
         N = None
@@ -165,8 +165,8 @@ class Residue(Biopolymers.Residue):
 
     def chiAngle(self):
         """
-        @returns: an object representing the chi angle and allowing to modify it
-        @rtype: MMTK.InternalCoordinates.DihedralAngle
+        :returns: an object representing the chi angle and allowing to modify it
+        :rtype: MMTK.InternalCoordinates.DihedralAngle
         """
         from MMTK.InternalCoordinates import DihedralAngle
         try:
@@ -219,49 +219,50 @@ class PeptideChain(Biopolymers.ResidueChain):
     by peptide bonds. They are a special kind of molecule, i.e.
     all molecule operations are available.
 
-    Peptide chains act as sequences of residues. If C{p} is a PeptideChain
+    Peptide chains act as sequences of residues. If p is a PeptideChain
     object, then
-     - C{len(p)} yields the number of residues
-     - C{p[i]} yields residue number C{i}
-     - C{p[i:j]} yields the subchain from residue number C{i} up to
-                 but excluding residue number C{j}
+
+     * len(p) yields the number of residues
+     * p[i] yields residue number i
+     * p[i:j] yields the subchain from residue number i up to
+                 but excluding residue number j
+
+    :param sequence: the amino acid sequence. This can be a string
+                     containing the one-letter codes, or a list
+                     of three-letter codes, or a
+                     :class:`~MMTK.PDB.PDBPeptideChain` object.
+                     If a PDBPeptideChain object is supplied, the atomic
+                     positions it contains are assigned to the atoms
+                     of the newly generated peptide chain, otherwise the
+                     positions of all atoms are undefined.
+    :keyword model: one of "all" (all-atom), "no_hydrogens" or "none"
+                    (no hydrogens), "polar_hydrogens" or "polar"
+                    (united-atom with only polar hydrogens),
+                    "polar_charmm" (like "polar", but defining
+                    polar hydrogens like in the CHARMM force field),
+                    "polar_opls" (like "polar", but defining
+                    polar hydrogens like in the latest OPLS force field),
+                    "calpha" (only the C_alpha atom of each residue).
+                    Default is "all".
+    :type model: str
+    :keyword n_terminus: if True, the first residue is constructed
+                         using the N-terminal variant, if False the
+                         non-terminal version is used. Default is True.
+    :type n_terminus: bool
+    :keyword c_terminus: if True, the last residue is constructed
+                         using the C-terminal variant, if False the
+                         non-terminal version is used. Default is True.
+    :type c_terminus: bool
+    :keyword circular: if True, a peptide bond is constructed
+                       between the first and the last residues.
+                       Default is False.
+    :type circular: bool
+    :keyword name: a name for the chain (a string)
+    :type name: str
+
     """
 
     def __init__(self, sequence, **properties):
-        """
-        @param sequence: the amino acid sequence. This can be a string
-                         containing the one-letter codes, or a list
-                         of three-letter codes, or a
-                         L{MMTK.PDB.PDBPeptideChain} object.
-                         If a PDBPeptideChain object is supplied, the atomic
-                         positions it contains are assigned to the atoms
-                         of the newly generated peptide chain, otherwise the
-                         positions of all atoms are undefined.
-        @keyword model: one of "all" (all-atom), "no_hydrogens" or "none"
-                        (no hydrogens), "polar_hydrogens" or "polar"
-                        (united-atom with only polar hydrogens),
-                        "polar_charmm" (like "polar", but defining
-                        polar hydrogens like in the CHARMM force field),
-                        "polar_opls" (like "polar", but defining
-                        polar hydrogens like in the latest OPLS force field),
-                        "calpha" (only the C_alpha atom of each residue).
-                        Default is "all".
-        @type model: C{str}
-        @keyword n_terminus: if C{True}, the first residue is constructed
-                             using the N-terminal variant, if C{False} the
-                             non-terminal version is used. Default is C{True}.
-        @type n_terminus: C{bool}
-        @keyword c_terminus: if C{True}, the last residue is constructed
-                             using the C-terminal variant, if C{False} the
-                             non-terminal version is used. Default is C{True}.
-        @type c_terminus: C{bool}
-        @keyword circular: if C{True}, a peptide bond is constructed
-                           between the first and the last residues.
-                           Default is C{False}.
-        @type circular: C{bool}
-        @keyword name: a name for the chain (a string)
-        @type name: C{str}
-        """
         if sequence is not None:
             model = 'all'
             if properties.has_key('model'):
@@ -315,16 +316,16 @@ class PeptideChain(Biopolymers.ResidueChain):
 
     def sequence(self):
         """
-        @returns: the primary sequence as a list of three-letter
+        :returns: the primary sequence as a list of three-letter
                   residue codes.
-        @rtype: C{list}
+        :rtype: list
         """
         return [r.symbol for r in self.groups]
 
     def backbone(self):
         """
-        @returns: the peptide groups of all residues
-        @rtype: L{MMTK.Collections.Collection}
+        :returns: the peptide groups of all residues
+        :rtype: :class:`~MMTK.Collections.Collection`
         """
         backbone = Collections.Collection()
         for r in self.groups:
@@ -336,8 +337,8 @@ class PeptideChain(Biopolymers.ResidueChain):
     
     def sidechains(self):
         """
-        @returns: the sidechain groups of all residues
-        @rtype: L{MMTK.Collections.Collection}
+        :returns: the sidechain groups of all residues
+        :rtype: :class:`~MMTK.Collections.Collection`
         """
         sidechains = Collections.Collection()
         for r in self.groups:
@@ -349,8 +350,8 @@ class PeptideChain(Biopolymers.ResidueChain):
 
     def phiPsi(self, conf = None):
         """
-        @returns: a list of the (phi, psi) backbone angles for each residue
-        @rtype: C{list} of C{tuple} of C{float}
+        :returns: a list of the (phi, psi) backbone angles for each residue
+        :rtype: list of tuple of float
         """
         universe = self.universe()
         if universe is None:
@@ -375,10 +376,10 @@ class PeptideChain(Biopolymers.ResidueChain):
 
     def replaceResidue(self, r_old, r_new):
         """
-        @param r_old: the residue to be replaced (must be part of the chain)
-        @type r_old: L{Residue}
-        @param r_new: the residue that replaces r_old
-        @type r_new: L{Residue}
+        :param r_old: the residue to be replaced (must be part of the chain)
+        :type r_old: Residue
+        :param r_new: the residue that replaces r_old
+        :type r_new: Residue
         """
         n = self.groups.index(r_old)
         for a in r_old.atoms:
@@ -630,7 +631,7 @@ class Protein(ChemicalObjects.Complex):
     """
     Protein
 
-    A Protein object is a special kind of L{MMTK.ChemicalObjects.Complex}
+    A Protein object is a special kind of :class:`~MMTK.ChemicalObjects.Complex`
     object which is made up of peptide chains and possibly ligands.
 
     If the atoms in the peptide chains that make up a protein have
@@ -639,21 +640,23 @@ class Protein(ChemicalObjects.Complex):
     based on a distance criterion between cystein sidechains.
 
 
-    Proteins act as sequences of chains. If C{p} is a Protein object, then
-     - C{len(p)} yields the number of chains
-     - C{p[i]} yields chain number {i}
+    Proteins act as sequences of chains. If p is a Protein object, then
+
+    * len(p) yields the number of chains
+    * p[i] yields chain number i
+
     """
 
     def __init__(self, *items, **properties):
         """
-        @param items: either a sequence of peptide chain objects, or
+        :param items: either a sequence of peptide chain objects, or
                       a string, which is interpreted as the name of a
                       database definition for a protein.
                       If that definition does not exist, the string
                       is taken to be the name of a PDB file, from which
                       all peptide chains are constructed and
                       assembled into a protein.
-        @keyword model: one of "all" (all-atom), "no_hydrogens" or "none"
+        :keyword model: one of "all" (all-atom), "no_hydrogens" or "none"
                         (no hydrogens),"polar_hydrogens" or "polar"
                         (united-atom with only polar hydrogens),
                         "polar_charmm" (like "polar", but defining
@@ -662,11 +665,11 @@ class Protein(ChemicalObjects.Complex):
                         polar hydrogens like in the latest OPLS force field),
                         "calpha" (only the C_alpha atom of each residue).
                         Default is "all".
-        @type model: C{str}
-        @keyword position: the center-of-mass position of the protein
-        @type position: C{Scientific.Geometry.Vector}
-        @keyword name: a name for the protein
-        @type name: C{str}
+        :type model: str
+        :keyword position: the center-of-mass position of the protein
+        :type position: Scientific.Geometry.Vector
+        :keyword name: a name for the protein
+        :type name: str
         """
         if items == (None,):
             return
@@ -787,11 +790,11 @@ class Protein(ChemicalObjects.Complex):
 
     def residuesOfType(self, *types):
         """
-        @param types: a sequence of residue codes (one- or three-letter)
-        @type types: sequence of C{str}
-        @returns: all residues whose type (one- or three-letter code)
+        :param types: a sequence of residue codes (one- or three-letter)
+        :type types: sequence of str
+        :returns: all residues whose type (one- or three-letter code)
                   is contained in types
-        @rtype: L{MMTK.Collections.Collection}
+        :rtype: :class:`~MMTK.Collections.Collection`
         """
         rlist = Collections.Collection([])
         for m in self.molecules:
@@ -801,8 +804,8 @@ class Protein(ChemicalObjects.Complex):
 
     def backbone(self):
         """
-        @returns: the peptide groups of all residues in all chains
-        @rtype: L{MMTK.Collections.Collection}
+        :returns: the peptide groups of all residues in all chains
+        :rtype: :class:`~MMTK.Collections.Collection`
         """
         rlist = Collections.Collection([])
         for m in self.molecules:
@@ -812,8 +815,8 @@ class Protein(ChemicalObjects.Complex):
 
     def sidechains(self):
         """
-        @returns: the sidechain groups of all residues in all chains
-        @rtype: L{MMTK.Collections.Collection}
+        :returns: the sidechain groups of all residues in all chains
+        :rtype: :class:`~MMTK.Collections.Collection`
         """
         rlist = Collections.Collection([])
         for m in self.molecules:
@@ -823,8 +826,8 @@ class Protein(ChemicalObjects.Complex):
 
     def residues(self):
         """
-        @returns: all residues in all chains
-        @rtype: L{MMTK.Collections.Collection}
+        :returns: all residues in all chains
+        :rtype: :class:`~MMTK.Collections.Collection`
         """
         rlist = Collections.Collection([])
         for m in self.molecules:
@@ -834,9 +837,9 @@ class Protein(ChemicalObjects.Complex):
 
     def phiPsi(self, conf = None):
         """
-        @returns: a list of the (phi, psi) backbone angles for all residue
+        :returns: a list of the (phi, psi) backbone angles for all residue
                   in all chains
-        @rtype: C{list} of C{list} of C{tuple} of C{float}
+        :rtype: list of list of tuple of float
         """
         return [chain.phiPsi(conf) for chain in self]
 
@@ -884,16 +887,16 @@ class Protein(ChemicalObjects.Complex):
 #
 def isPeptideChain(x):
     """
-    @param x: any object
-    @returns: C{True} if x is a peptide chain
-    @rtype: C{bool}
+    :param x: any object
+    :returns: True if x is a peptide chain
+    :rtype: bool
     """
     return hasattr(x, 'is_peptide_chain')
 
 def isProtein(x):
     """
-    @param x: any object
-    @returns: C{True} if x is a protein
-    @rtype: C{bool}
+    :param x: any object
+    :returns: True if x is a protein
+    :rtype: bool
     """
     return hasattr(x, 'is_protein')

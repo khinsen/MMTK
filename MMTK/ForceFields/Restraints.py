@@ -21,7 +21,7 @@ Example::
  universe.setForceField(force_field)
 """
 
-__docformat__ = 'epytext'
+__docformat__ = 'restructuredtext'
 
 from MMTK.ForceFields.ForceField import ForceField
 from MMTK_forcefield import HarmonicDistanceTerm, HarmonicAngleTerm, \
@@ -36,13 +36,13 @@ class HarmonicDistanceRestraint(ForceField):
 
     def __init__(self, atom1, atom2, distance, force_constant):
         """
-        @param atom1: first atom
-        @type atom1: L{MMTK.ChemicalObjects.Atom}
-        @param atom2: second atom
-        @type atom2: L{MMTK.ChemicalObjects.Atom}
-        @param distance: the distance at which the restraint is zero
-        @type distance: C{float}
-        @param force_constant: the force constant of the restraint term.
+        :param atom1: first atom
+        :type atom1: :class:`~MMTK.ChemicalObjects.Atom`
+        :param atom2: second atom
+        :type atom2: :class:`~MMTK.ChemicalObjects.Atom`
+        :param distance: the distance at which the restraint is zero
+        :type distance: float
+        :param force_constant: the force constant of the restraint term.
                                The functional form of the restraint is
                                force_constant*((r1-r2).length()-distance)**2,
                                where r1 and r2 are the positions of the
@@ -87,15 +87,15 @@ class HarmonicAngleRestraint(ForceField):
 
     def __init__(self, atom1, atom2, atom3, angle, force_constant):
         """
-        @param atom1: first atom
-        @type atom1: L{MMTK.ChemicalObjects.Atom}
-        @param atom2: second (central) atom
-        @type atom2: L{MMTK.ChemicalObjects.Atom}
-        @param atom3: third atom
-        @type atom3: L{MMTK.ChemicalObjects.Atom}
-        @param angle: the angle at which the restraint is zero
-        @type angle: C{float}
-        @param force_constant: the force constant of the restraint term.
+        :param atom1: first atom
+        :type atom1: :class:`~MMTK.ChemicalObjects.Atom`
+        :param atom2: second (central) atom
+        :type atom2: :class:`~MMTK.ChemicalObjects.Atom`
+        :param atom3: third atom
+        :type atom3: :class:`~MMTK.ChemicalObjects.Atom`
+        :param angle: the angle at which the restraint is zero
+        :type angle: float
+        :param force_constant: the force constant of the restraint term.
                                The functional form of the restraint is
                                force_constant*(phi-angle)**2, where
                                phi is the angle atom1-atom2-atom3.
@@ -130,17 +130,17 @@ class HarmonicDihedralRestraint(ForceField):
 
     def __init__(self, atom1, atom2, atom3, atom4, dihedral, force_constant):
         """
-        @param atom1: first atom
-        @type atom1: L{MMTK.ChemicalObjects.Atom}
-        @param atom2: second (axis) atom
-        @type atom2: L{MMTK.ChemicalObjects.Atom}
-        @param atom3: third (axis)atom
-        @type atom3: L{MMTK.ChemicalObjects.Atom}
-        @param atom4: fourth atom
-        @type atom4: L{MMTK.ChemicalObjects.Atom}
-        @param dihedral: the dihedral angle at which the restraint is zero
-        @type dihedral: C{float}
-        @param force_constant: the force constant of the restraint term.
+        :param atom1: first atom
+        :type atom1: :class:`~MMTK.ChemicalObjects.Atom`
+        :param atom2: second (axis) atom
+        :type atom2: :class:`~MMTK.ChemicalObjects.Atom`
+        :param atom3: third (axis)atom
+        :type atom3: :class:`~MMTK.ChemicalObjects.Atom`
+        :param atom4: fourth atom
+        :type atom4: :class:`~MMTK.ChemicalObjects.Atom`
+        :param dihedral: the dihedral angle at which the restraint is zero
+        :type dihedral: float
+        :param force_constant: the force constant of the restraint term.
                                The functional form of the restraint is
                                force_constant*(phi-|dihedral|)**2, where
                                phi is the dihedral angle

@@ -7,7 +7,7 @@
 Anisotropic Network Model
 """
 
-__docformat__ = 'epytext'
+__docformat__ = 'restructuredtext'
 
 from MMTK.ForceFields.ForceField import ForceField, ForceFieldData
 from MMTK import Utility
@@ -26,14 +26,14 @@ class AnisotropicNetworkForceField(ForceField):
 
     def __init__(self, cutoff = None, scale_factor = 1.):
         """
-        @param cutoff: the cutoff for pair interactions. Pair interactions
+        :param cutoff: the cutoff for pair interactions. Pair interactions
                        in periodic systems are calculated using
                        the minimum-image convention; the cutoff should
                        therefore never be larger than half the smallest
                        edge length of the elementary cell.
-        @type cutoff: C{float}
-        @param scale_factor: a global scaling factor
-        @type scale_factor: C{float}
+        :type cutoff: float
+        :param scale_factor: a global scaling factor
+        :type scale_factor: float
         """
         ForceField.__init__(self, 'anisotropic_network')
         self.arguments = (cutoff,)

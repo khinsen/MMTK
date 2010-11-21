@@ -7,18 +7,18 @@
 A friction constant model for C-alpha models of proteins
 """
 
-__docformat__ = 'epytext'
+__docformat__ = 'restructuredtext'
 
 import MMTK.ParticleProperties
 from Scientific import N
 
 def calphaFrictionConstants(protein, set=2):
     """
-    @param protein: a c_alpha model protein
-    @type protein: L{MMTK.Proteins.Protein}
-    @param set: the number of a friction constant set (1, 2, 3, or 4)
-    @return: the estimated friction constants for the atoms in the protein
-    @rtype: L{MMTK.ParticleProperties.ParticleScalar}
+    :param protein: a c_alpha model protein
+    :type protein: :class:`~MMTK.Proteins.Protein`
+    :param set: the number of a friction constant set (1, 2, 3, or 4)
+    :return: the estimated friction constants for the atoms in the protein
+    :rtype: :class:`~MMTK.ParticleProperties.ParticleScalar`
     """
     radius = 1.5
     atoms = protein.atomCollection()

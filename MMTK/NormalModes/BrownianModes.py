@@ -7,7 +7,7 @@
 Brownian normal modes
 """
 
-__docformat__ = 'epytext'
+__docformat__ = 'restructuredtext'
 
 from MMTK import Features, Units, ParticleProperties, Random
 from Scientific.Functions.Interpolation import InterpolatingFunction
@@ -23,7 +23,7 @@ class BrownianMode(Core.Mode):
     """
     Single Brownian normal mode
 
-    Mode objects are created by indexing a L{BrownianModes} object.
+    Mode objects are created by indexing a :class:`~MMTK.NormalModes.BrownianModes.BrownianModes` object.
     They contain the atomic displacements corresponding to a single
     mode. In addition, the inverse of the relaxation time corresponding
     to the mode is stored in the attribute "inv_relaxation_time".
@@ -57,22 +57,9 @@ class BrownianModes(Core.NormalModes):
     of the universe must correspond to a local minimum of the potential
     energy.
 
-    Individual modes (see class L{BrownianMode})
+    Individual modes (see :class:`~MMTK.NormalModes.BrownianModes.BrownianMode`)
     can be extracted by indexing with an integer. Looping over the modes
     is possible as well.
-    """
-
-    """Brownian normal modes
-
-    Constructor: BrownianModes(|universe|, |friction|, |temperature|=300,
-                               |subspace|=None, |delta|=None, |sparse|=None)
-
-    Arguments:
-
-    |friction| -- a Class:MMTK.ParticleScalar object specifying the
-                  friction coefficient for each particle.
-                  Note: The friction coefficients are not mass-weighted,
-                  i.e. they have the dimension of an inverse time.
 
     Brownian modes describe the independent relaxation motions of a
     harmonic system with friction. They are obtained by diagonalizing the
@@ -83,65 +70,66 @@ class BrownianModes(Core.NormalModes):
     energy.
 
     A BrownianModes object behaves like a sequence of modes.
-    Individual modes (see class Class:MMTK.NormalModes.BrownianMode)
+    Individual modes (see :class:`~MMTK.NormalModes.BrownianMode`)
     can be extracted by indexing with an integer. Looping over the modes
     is possible as well.
+
+    :param universe: the system for which the normal modes are calculated;
+                     it must have a force field which provides the second
+                     derivatives of the potential energy
+    :type universe: :class:`~MMTK.Universe.Universe`
+    :param friction: the friction coefficient for each particle.
+                     Note: The friction coefficients are not mass-weighted,
+                     i.e. they have the dimension of an inverse time.
+    :type friction: :class:`~MMTK.ParticleProperties.ParticleScalar`
+    :param temperature: the temperature for which the amplitudes of the
+                        atomic displacement vectors are calculated. A
+                        value of None can be specified to have no scaling
+                        at all. In that case the mass-weighted norm
+                        of each normal mode is one.
+    :type temperature: float
+    :param subspace: the basis for the subspace in which the normal modes
+                     are calculated (or, more precisely, a set of vectors
+                     spanning the subspace; it does not have to be
+                     orthogonal). This can either be a sequence of
+                     :class:`~MMTK.ParticleProperties.ParticleVector` objects
+                     or a tuple of two such sequences. In the second case,
+                     the subspace is defined by the space spanned by the
+                     second set of vectors projected on the complement of
+                     the space spanned by the first set of vectors.
+                     The first set thus defines directions that are
+                     excluded from the subspace.
+                     The default value of None indicates a standard
+                     normal mode calculation in the 3N-dimensional
+                     configuration space.
+    :param delta: the rms step length for numerical differentiation.
+                  The default value of None indicates analytical
+                  differentiation.
+                  Numerical differentiation is available only when a
+                  subspace basis is used as well. Instead of calculating
+                  the full force constant matrix and then multiplying
+                  with the subspace basis, the subspace force constant
+                  matrix is obtained by numerical differentiation of the
+                  energy gradients along the basis vectors of the subspace.
+                  If the basis is much smaller than the full configuration
+                  space, this approach needs much less memory.
+    :type delta: float
+    :param sparse: a flag that indicates if a sparse representation of
+                   the force constant matrix is to be used. This is of
+                   interest when there are no long-range interactions and
+                   a subspace of smaller size then 3N is specified. In that
+                   case, the calculation will use much less memory with a
+                   sparse representation.
+    :type sparse: bool
     """
+
 
     features = []
 
     def __init__(self, universe = None, friction = None,
                  temperature = 300.*Units.K,
                  subspace = None, delta = None, sparse = False):
-        """
-        @param universe: the system for which the normal modes are calculated;
-                         it must have a force field which provides the second
-                         derivatives of the potential energy
-        @type universe: L{MMTK.Universe.Universe}
-        @param friction: the friction coefficient for each particle.
-                         Note: The friction coefficients are not mass-weighted,
-                         i.e. they have the dimension of an inverse time.
-        @type friction: L{MMTK.ParticleProperties.ParticleScalar}
-        @param temperature: the temperature for which the amplitudes of the
-                            atomic displacement vectors are calculated. A
-                            value of C{None} can be specified to have no scaling
-                            at all. In that case the mass-weighted norm
-                            of each normal mode is one.
-        @type temperature: C{float}
-        @param subspace: the basis for the subspace in which the normal modes
-                         are calculated (or, more precisely, a set of vectors
-                         spanning the subspace; it does not have to be
-                         orthogonal). This can either be a sequence of
-                         L{MMTK.ParticleProperties.ParticleVector} objects
-                         or a tuple of two such sequences. In the second case,
-                         the subspace is defined by the space spanned by the
-                         second set of vectors projected on the complement of
-                         the space spanned by the first set of vectors.
-                         The first set thus defines directions that are
-                         excluded from the subspace.
-                         The default value of C{None} indicates a standard
-                         normal mode calculation in the 3N-dimensional
-                         configuration space.
-        @param delta: the rms step length for numerical differentiation.
-                      The default value of C{None} indicates analytical
-                      differentiation.
-                      Numerical differentiation is available only when a
-                      subspace basis is used as well. Instead of calculating
-                      the full force constant matrix and then multiplying
-                      with the subspace basis, the subspace force constant
-                      matrix is obtained by numerical differentiation of the
-                      energy gradients along the basis vectors of the subspace.
-                      If the basis is much smaller than the full configuration
-                      space, this approach needs much less memory.
-        @type delta: C{float}
-        @param sparse: a flag that indicates if a sparse representation of
-                       the force constant matrix is to be used. This is of
-                       interest when there are no long-range interactions and
-                       a subspace of smaller size then 3N is specified. In that
-                       case, the calculation will use much less memory with a
-                       sparse representation.
-        @type sparse: C{bool}
-        """
+
         if universe == None:
             return
         Features.checkFeatures(self, universe)
@@ -170,10 +158,10 @@ class BrownianModes(Core.NormalModes):
 
     def rawMode(self, item):
         """
-        @param item: the index of a normal mode
-        @type item: C{int}
-        @returns: the unscaled mode vector
-        @rtype: L{BrownianMode}
+        :param item: the index of a normal mode
+        :type item: int
+        :returns: the unscaled mode vector
+        :rtype: :class:`~MMTK.NormalModes.BrownianModes.BrownianMode`
         """
         index = self.sort_index[item]
         return BrownianMode(self.universe, item,
@@ -192,27 +180,27 @@ class BrownianModes(Core.NormalModes):
                                time_range = (0., None, None),
                                first_mode = 6):
         """
-        @param subset: the subset of the universe used in the calculation
+        :param subset: the subset of the universe used in the calculation
                        (default: the whole universe)
-        @type subset: L{MMTK.Collections.GroupOfAtoms}
-        @param weights: the weight to be given to each atom in the average
+        :type subset: :class:`~MMTK.Collections.GroupOfAtoms`
+        :param weights: the weight to be given to each atom in the average
                         (default: atomic masses)
-        @type weights: L{MMTK.ParticleVectors.ParticleScalar}
-        @param time_range: the time values at which the mean-square
+        :type weights: :class:`~MMTK.ParticleProperties.ParticleScalar`
+        :param time_range: the time values at which the mean-square
                            displacement is evaluated, specified as a
                            range tuple (first, last, step).
                            The defaults are first=0, last=
                            20 times the longest vibration perdiod,
                            and step defined such that 300 points are
                            used in total.
-        @type time_range: C{tuple}
-        @param first_mode: the first mode to be taken into account for
+        :type time_range: tuple
+        :param first_mode: the first mode to be taken into account for
                            the fluctuation calculation. The default value
                            of 6 is right for molecules in vacuum.
-        @type first_mode: C{int}
-        @returns: the averaged mean-square displacement of the
+        :type first_mode: int
+        :returns: the averaged mean-square displacement of the
                   atoms in subset as a function of time
-        @rtype: C{Scientific.Functions.Interpolation.InterpolatingFunction}
+        :rtype: Scientific.Functions.Interpolation.InterpolatingFunction
         """
         if subset is None:
             subset = self.universe
@@ -240,24 +228,24 @@ class BrownianModes(Core.NormalModes):
                               weights=None, random_vectors=15,
                               first_mode = 6):
         """
-        @param q_range: the range of angular wavenumber values
-        @type q_range: C{tuple}
-        @param subset: the subset of the universe used in the calculation
+        :param q_range: the range of angular wavenumber values
+        :type q_range: tuple
+        :param subset: the subset of the universe used in the calculation
                        (default: the whole universe)
-        @type subset: L{MMTK.Collections.GroupOfAtoms}
-        @param weights: the weight to be given to each atom in the average
+        :type subset: :class:`~MMTK.Collections.GroupOfAtoms`
+        :param weights: the weight to be given to each atom in the average
                         (default: coherent scattering lengths)
-        @type weights: L{MMTK.ParticleVectors.ParticleScalar}
-        @param random_vectors: the number of random direction vectors
+        :type weights: :class:`~MMTK.ParticleProperties.ParticleScalar`
+        :param random_vectors: the number of random direction vectors
                                used in the orientational average
-        @type random_vectors: C{int}
-        @param first_mode: the first mode to be taken into account for
+        :type random_vectors: int
+        :param first_mode: the first mode to be taken into account for
                            the fluctuation calculation. The default value
                            of 6 is right for molecules in vacuum.
-        @type first_mode: C{int}
-        @returns: the Static Structure Factor as a
+        :type first_mode: int
+        :returns: the Static Structure Factor as a
                   function of angular wavenumber
-        @rtype: C{Scientific.Functions.Interpolation.InterpolatingFunction}
+        :rtype: Scientific.Functions.Interpolation.InterpolatingFunction
         """
         if subset is None:
             subset = self.universe
@@ -298,31 +286,31 @@ class BrownianModes(Core.NormalModes):
                                    subset=None, weights=None,
                                    random_vectors=15, first_mode = 6):
         """
-        @param q: the angular wavenumber
-        @type q: C{float}
-        @param time_range: the time values at which the mean-square
+        :param q: the angular wavenumber
+        :type q: float
+        :param time_range: the time values at which the mean-square
                            displacement is evaluated, specified as a
                            range tuple (first, last, step).
                            The defaults are first=0, last=
                            20 times the longest vibration perdiod,
                            and step defined such that 300 points are
                            used in total.
-        @type time_range: C{tuple}
-        @param subset: the subset of the universe used in the calculation
+        :type time_range: tuple
+        :param subset: the subset of the universe used in the calculation
                        (default: the whole universe)
-        @type subset: L{MMTK.Collections.GroupOfAtoms}
-        @param weights: the weight to be given to each atom in the average
+        :type subset: :class:`~MMTK.Collections.GroupOfAtoms`
+        :param weights: the weight to be given to each atom in the average
                         (default: coherent scattering lengths)
-        @type weights: L{MMTK.ParticleVectors.ParticleScalar}
-        @param random_vectors: the number of random direction vectors
+        :type weights: :class:`~MMTK.ParticleProperties.ParticleScalar`
+        :param random_vectors: the number of random direction vectors
                                used in the orientational average
-        @type random_vectors: C{int}
-        @param first_mode: the first mode to be taken into account for
+        :type random_vectors: int
+        :param first_mode: the first mode to be taken into account for
                            the fluctuation calculation. The default value
                            of 6 is right for molecules in vacuum.
-        @type first_mode: C{int}
-        @returns: the Coherent Scattering Function as a function of time
-        @rtype: C{Scientific.Functions.Interpolation.InterpolatingFunction}
+        :type first_mode: int
+        :returns: the Coherent Scattering Function as a function of time
+        :rtype: Scientific.Functions.Interpolation.InterpolatingFunction
         """
         if subset is None:
             subset = self.universe
@@ -371,28 +359,28 @@ class BrownianModes(Core.NormalModes):
                                      subset=None, random_vectors=15,
                                      first_mode = 6):
         """
-        @param q: the angular wavenumber
-        @type q: C{float}
-        @param time_range: the time values at which the mean-square
+        :param q: the angular wavenumber
+        :type q: float
+        :param time_range: the time values at which the mean-square
                            displacement is evaluated, specified as a
                            range tuple (first, last, step).
                            The defaults are first=0, last=
                            20 times the longest vibration perdiod,
                            and step defined such that 300 points are
                            used in total.
-        @type time_range: C{tuple}
-        @param subset: the subset of the universe used in the calculation
+        :type time_range: tuple
+        :param subset: the subset of the universe used in the calculation
                        (default: the whole universe)
-        @type subset: L{MMTK.Collections.GroupOfAtoms}
-        @param random_vectors: the number of random direction vectors
+        :type subset: :class:`~MMTK.Collections.GroupOfAtoms`
+        :param random_vectors: the number of random direction vectors
                                used in the orientational average
-        @type random_vectors: C{int}
-        @param first_mode: the first mode to be taken into account for
+        :type random_vectors: int
+        :param first_mode: the first mode to be taken into account for
                            the fluctuation calculation. The default value
                            of 6 is right for molecules in vacuum.
-        @type first_mode: C{int}
-        @returns: the Incoherent Scattering Function as a function of time
-        @rtype: C{Scientific.Functions.Interpolation.InterpolatingFunction}
+        :type first_mode: int
+        :returns: the Incoherent Scattering Function as a function of time
+        :rtype: Scientific.Functions.Interpolation.InterpolatingFunction
         """
         if subset is None:
             subset = self.universe
@@ -440,24 +428,24 @@ class BrownianModes(Core.NormalModes):
     def EISF(self, q_range = (0., 15.), subset=None, weights = None,
              random_vectors = 15, first_mode = 6):
         """
-        @param q_range: the range of angular wavenumber values
-        @type q_range: C{tuple}
-        @param subset: the subset of the universe used in the calculation
+        :param q_range: the range of angular wavenumber values
+        :type q_range: tuple
+        :param subset: the subset of the universe used in the calculation
                        (default: the whole universe)
-        @type subset: L{MMTK.Collections.GroupOfAtoms}
-        @param weights: the weight to be given to each atom in the average
+        :type subset: :class:`~MMTK.Collections.GroupOfAtoms`
+        :param weights: the weight to be given to each atom in the average
                         (default: incoherent scattering lengths)
-        @type weights: L{MMTK.ParticleVectors.ParticleScalar}
-        @param random_vectors: the number of random direction vectors
+        :type weights: :class:`~MMTK.ParticleProperties.ParticleScalar`
+        :param random_vectors: the number of random direction vectors
                                used in the orientational average
-        @type random_vectors: C{int}
-        @param first_mode: the first mode to be taken into account for
+        :type random_vectors: int
+        :param first_mode: the first mode to be taken into account for
                            the fluctuation calculation. The default value
                            of 6 is right for molecules in vacuum.
-        @type first_mode: C{int}
-        @returns: the Elastic Incoherent Structure Factor (EISF) as a
+        :type first_mode: int
+        :returns: the Elastic Incoherent Structure Factor (EISF) as a
                   function of angular wavenumber
-        @rtype: C{Scientific.Functions.Interpolation.InterpolatingFunction}
+        :rtype: Scientific.Functions.Interpolation.InterpolatingFunction
         """
         if subset is None:
             subset = self.universe

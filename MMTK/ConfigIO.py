@@ -8,10 +8,10 @@ I/O of molecular configurations
 
 Input: Z-Matrix and Cartesian
 Output: VRML
-PDB files are handled in L{MMTK.PDB}.
+PDB files are handled in :class:`~MMTK.PDB`.
 """
 
-__docformat__ = 'epytext'
+__docformat__ = 'restructuredtext'
 
 from MMTK import PDB, Units, Utility
 from Scientific.Geometry.Objects3D import Sphere, Cone, Plane, Line, \
@@ -40,7 +40,7 @@ class ZMatrix(object):
 
     def __init__(self, data):
         """
-        @param data: a list of atom definitions. Each atom definition (except
+        :param data: a list of atom definitions. Each atom definition (except
                      for the first three ones) is a list containing seven
                      elements:
 
@@ -115,7 +115,7 @@ class ZMatrix(object):
         Define the positions of the atoms in a chemical object by the
         internal coordinates of the Z-Matrix.
 
-        @param object: the object to which the Z-Matrix is applied
+        :param object: the object to which the Z-Matrix is applied
         """
         if not len(self.coordinates):
             self.findPositions()
@@ -137,7 +137,7 @@ class Cartesian(object):
     
     def __init__(self, data):
         """
-        @param data: a dictionary mapping atoms to tuples of length three
+        :param data: a dictionary mapping atoms to tuples of length three
                      that define its Cartesian coordinates
         """
         self.dict = data
@@ -149,7 +149,7 @@ class Cartesian(object):
         Define the positions of the atoms in a chemical object by the
         stored coordinates.
 
-        @param object: the object to which the coordinates are applied
+        :param object: the object to which the coordinates are applied
         """
         for a, r in self.dict.items():
             object.setPosition(a, Vector(r[0], r[1], r[2]))

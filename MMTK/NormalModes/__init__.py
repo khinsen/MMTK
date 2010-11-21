@@ -3,10 +3,10 @@
 """
 Normal modes
 
-@undocumented: Core
+:undocumented: Core
 """
 
-__docformat__ = 'epytext'
+__docformat__ = 'restructuredtext'
 
 from MMTK.NormalModes.EnergeticModes import EnergeticModes
 from MMTK.NormalModes.VibrationalModes import VibrationalModes

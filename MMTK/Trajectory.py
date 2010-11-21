@@ -7,7 +7,7 @@
 Trajectory files and their contents
 """
 
-__docformat__ = 'epytext'
+__docformat__ = 'restructuredtext'
 
 from MMTK import Collections, Units, Universe, Utility, \
                  ParticleProperties, Visualization
@@ -31,22 +31,20 @@ class Trajectory(object):
     Trajectory file
 
     The data in a trajectory file can be accessed by step or by
-    variable. If C{t} is a Trajectory object, then:
+    variable. If t is a Trajectory object, then:
 
-     - C{len(t)} is the number of steps
-
-     - C{t[i]} is the data for step C{i}, in the form of a dictionary that
+     * len(t) is the number of steps
+     * t[i] is the data for step i, in the form of a dictionary that
        maps variable names to data
-
-     - C{t[i:j]} and C{t[i:j:n]} return a L{SubTrajectory} object that refers
-       to a subset of the total number of steps (no data is copied)
-
-     - C{t.variable} returns the value of the named variable at all
+     * t[i:j] and t[i:j:n] return a :class:`~MMTK.Trajectory.SubTrajectory` 
+       object that refers to a subset of the total number of steps 
+       (no data is copied)
+     * t.variable returns the value of the named variable at all
        time steps. If the variable is a simple scalar, it is read
        completely and returned as an array. If the variable contains
-       data for each atom, a L{TrajectoryVariable} object is returned
-       from which data at specific steps can be obtained by further
-       indexing operations.
+       data for each atom, a :class:`~MMTK.Trajectory.TrajectoryVariable` 
+       object is returned from which data at specific steps can be obtained 
+       by further indexing operations.
 
     The routines that generate trajectories decide what variables
     are used and what they contain. The most frequently used variable
@@ -58,35 +56,35 @@ class Trajectory(object):
     def __init__(self, object, filename, mode = 'r', comment = None,
                  double_precision = False, cycle = 0, block_size = 1):
         """
-        @param object: the object whose data is stored in the trajectory file.
+        :param object: the object whose data is stored in the trajectory file.
                        This can be 'None' when opening a file for reading;
                        in that case, a universe object is constructed from the
                        description stored in the trajectory file. This universe
                        object can be accessed via the attribute 'universe'
                        of the trajectory object.
-        @type object: L{MMTK.ChemicalObjects.ChemicalObject}
-        @param filename: the name of the trajectory file
-        @type filename: C{str}
-        @param mode: one of "r" (read-only), "w" (create new file for writing),
+        :type object: :class:`~MMTK.ChemicalObjects.ChemicalObject`
+        :param filename: the name of the trajectory file
+        :type filename: str
+        :param mode: one of "r" (read-only), "w" (create new file for writing),
                      or "a" (append to existing file or create if the file does
                      not exist)
-        @type mode: C{str}
-        @param comment: optional comment that is stored in the file;
+        :type mode: str
+        :param comment: optional comment that is stored in the file;
                         allowed only with mode="r"
-        @type comment: C{str}
-        @param double_precision: if C{True}, data in the file is stored using
+        :type comment: str
+        :param double_precision: if True, data in the file is stored using
                                  double precision; default is single precision.
                                  Note that all I/O via trajectory objects is
                                  double precision; conversion from and to
                                  single precision file variables is handled
                                  automatically.
-        @type double_precision: C{bool}
-        @param cycle: if non-zero, a trajectory is created for a fixed number
+        :type double_precision: bool
+        :param cycle: if non-zero, a trajectory is created for a fixed number
                       of steps equal to the value of cycle, and these steps
                       are used cyclically. This is meant for restart
                       trajectories.
-        @type cycle: C{int}
-        @param block_size: an optimization parameter that influences the file
+        :type cycle: int
+        :param block_size: an optimization parameter that influences the file
                            structure and the I/O performance for very large
                            files. A block size of 1 is optimal for sequential
                            access to configurations etc., whereas a block size
@@ -95,7 +93,7 @@ class Trajectory(object):
                            The default value is 1. Note that older MMTK releases
                            always used a block size of 1 and cannot handle
                            trajectories with different block sizes.
-        @type block_size: C{int}
+        :type block_size: int
         """
         filename = os.path.expanduser(filename)
         self.filename = filename
@@ -257,17 +255,17 @@ class Trajectory(object):
         Read trajectory information for a single atom but for multiple
         time steps.
 
-        @param atom: the atom whose trajectory is requested
-        @type atom: L{MMTK.ChemicalObjects.Atom}
-        @param first: the number of the first step to be read
-        @type first: C{int}
-        @param last: the number of the first step not to be read.
-                     A value of C{None} indicates that the
+        :param atom: the atom whose trajectory is requested
+        :type atom: :class:`~MMTK.ChemicalObjects.Atom`
+        :param first: the number of the first step to be read
+        :type first: int
+        :param last: the number of the first step not to be read.
+                     A value of None indicates that the
                      whole trajectory should be read.
-        @type last: C{int}
-        @param skip: the number of steps to skip between two steps read
-        @type skip: C{int}
-        @param variable: the name of the trajectory variable to be read.
+        :type last: int
+        :param skip: the number of steps to skip between two steps read
+        :type skip: int
+        :param variable: the name of the trajectory variable to be read.
                          If the variable is "configuration", the resulting
                          trajectory is made continuous by eliminating all
                          jumps caused by periodic boundary conditions.
@@ -276,9 +274,9 @@ class Trajectory(object):
                          scaled to box coordinates. For non-periodic universes
                          there is no difference between box coordinates
                          and real coordinates.
-        @type variable: C{str}
-        @returns: the trajectory for a single atom
-        @rtype: L{ParticleTrajectory}
+        :type variable: str
+        :returns: the trajectory for a single atom
+        :rtype: :class:`~MMTK.Trajectory.ParticleTrajectory`
         """
         return ParticleTrajectory(self, atom, first, last, skip, variable)
 
@@ -289,28 +287,28 @@ class Trajectory(object):
         and extract the rigid-body motion (center-of-mass position plus
         orientation as a quaternion) by an optimal-transformation fit.
 
-        @param object: the object whose rigid-body trajectory is requested
-        @type object: L{MMTK.Collections.GroupOfAtoms}
-        @param first: the number of the first step to be read
-        @type first: C{int}
-        @param last: the number of the first step not to be read.
-                     A value of C{None} indicates that the
+        :param object: the object whose rigid-body trajectory is requested
+        :type object: :class:`~MMTK.Collections.GroupOfAtoms`
+        :param first: the number of the first step to be read
+        :type first: int
+        :param last: the number of the first step not to be read.
+                     A value of None indicates that the
                      whole trajectory should be read.
-        @type last: C{int}
-        @param skip: the number of steps to skip between two steps read
-        @type skip: C{int}
-        @param reference: the reference configuration for the fit
-        @type reference: L{MMTK.ParticleProperties.Configuration}
-        @returns: the trajectory for a single rigid body
-        @rtype: L{RigidBodyTrajectory}
+        :type last: int
+        :param skip: the number of steps to skip between two steps read
+        :type skip: int
+        :param reference: the reference configuration for the fit
+        :type reference: :class:`~MMTK.ParticleProperties.Configuration`
+        :returns: the trajectory for a single rigid body
+        :rtype: :class:`~MMTK.Trajectory.RigidBodyTrajectory`
         """
         return RigidBodyTrajectory(self, object, first, last, skip, reference)
 
     def variables(self):
         """
-        @returns: a list of the names of all variables that are stored
+        :returns: a list of the names of all variables that are stored
                   in the trajectory
-        @rtype: C{list} of C{str}
+        :rtype: list of str
         """
         vars = copy.copy(self.trajectory.file.variables.keys())
         vars.remove('step')
@@ -324,18 +322,18 @@ class Trajectory(object):
         Show an animation of the trajectory using an external visualization
         program.
 
-        @param first: the number of the first step in the animation
-        @type first: C{int}
-        @param last: the number of the first step not to include in the
-                     animation. A value of C{None} indicates that the
+        :param first: the number of the first step in the animation
+        :type first: int
+        :param last: the number of the first step not to include in the
+                     animation. A value of None indicates that the
                      whole trajectory should be used.
-        @type last: C{int}
-        @param skip: the number of steps to skip between two steps read
-        @type skip: C{int}
-        @param object: the object to be animated, which must be in the
-                       universe stored in the trajectory. C{None}
+        :type last: int
+        :param skip: the number of steps to skip between two steps read
+        :type skip: int
+        :param object: the object to be animated, which must be in the
+                       universe stored in the trajectory. None
                        stands for the whole universe.
-        @type object: L{MMTK.Collections.GroupOfAtoms}
+        :type object: :class:`~MMTK.Collections.GroupOfAtoms`
         """
         Visualization.viewTrajectory(self, first, last, skip, object)
 
@@ -434,15 +432,13 @@ class TrajectoryVariable(object):
     takes place when the TrajectoryVariable is indexed with a specific
     step number.
 
-    If C{t} is a TrajectoryVariable object, then:
+    If t is a TrajectoryVariable object, then:
 
-     - C{len(t)} is the number of steps
-
-     - C{t[i]} is the data for step C{i}, in the form of a ParticleScalar,
+     * len(t) is the number of steps
+     * t[i] is the data for step i, in the form of a ParticleScalar,
        a ParticleVector, or a Configuration object, depending on the
        variable
-
-     - C{t[i:j]} and C{t[i:j:n]} return a SubVariable object that refers
+     * t[i:j] and t[i:j:n] return a SubVariable object that refers
        to a subset of the total number of steps
     """
     
@@ -500,7 +496,7 @@ class TrajectoryVariable(object):
 class SubVariable(TrajectoryVariable):
 
     """
-    Reference to a subset of a L{TrajectoryVariable}
+    Reference to a subset of a :class:`~MMTK.Trajectory.TrajectoryVariable`
 
     A SubVariable object is created by slicing a TrajectoryVariable
     object or another SubVariable object. It provides all the operations
@@ -533,7 +529,7 @@ class TrajectorySet(object):
 
     A TrajectorySet permits to treat a sequence of trajectory files
     like a single trajectory for reading data. It behaves exactly like a
-    L{Trajectory} object. The trajectory files must all contain data
+    :class:`~MMTK.Trajectory.Trajectory` object. The trajectory files must all contain data
     for the same system. The variables stored in the individual files
     need not be the same, but only variables common to all files
     can be accessed.
@@ -547,13 +543,13 @@ class TrajectorySet(object):
 
     def __init__(self, object, filenames):
         """
-        @param object: the object whose data is stored in the trajectory files.
-                       This can be (and usually is) C{None};
+        :param object: the object whose data is stored in the trajectory files.
+                       This can be (and usually is) None;
                        in that case, a universe object is constructed from the
                        description stored in the first trajectory file.
                        This universe object can be accessed via the attribute
-                       C{universe} of the trajectory set object.
-        @param filenames: a list of trajectory file names or
+                       universe of the trajectory set object.
+        :param filenames: a list of trajectory file names or
                           (filename, first_step, last_step, increment)
                           tuples.
         """
@@ -784,13 +780,13 @@ class ParticleTrajectory(object):
     Trajectory data for a single particle
 
     A ParticleTrajectory object is created by calling the method
-    C{readParticleTrajectory} on a L{Trajectory} object.
+    :func:`~MMTK.Trajectory.Trajectory.readParticleTrajectory`
+    on a :class:`~MMTK.Trajectory.Trajectory` object.
 
-    If C{pt} is a ParticleTrajectory object, then
+    If pt is a ParticleTrajectory object, then
 
-     - C{len(pt)} is the number of steps stored in it
-
-     - C{pt[i]} is the value at step C{i} (a vector)
+     * len(pt) is the number of steps stored in it
+     * pt[i] is the value at step i (a vector)
     """
     
     def __init__(self, trajectory, atom, first=0, last=None, skip=1,
@@ -816,8 +812,9 @@ class ParticleTrajectory(object):
         """
         Adds a vector to the values at all steps. This does B{not}
         change the data in the trajectory file.
-        @param vector: the vector to be added
-        @type vector: C{Scientific.Geometry.Vector}
+
+        :param vector: the vector to be added
+        :type vector: Scientific.Geometry.Vector
         """
         N.add(self.array, vector.array[N.NewAxis, :], self.array)
 
@@ -830,13 +827,13 @@ class RigidBodyTrajectory(object):
     Rigid-body trajectory data
 
     A RigidBodyTrajectory object is created by calling the method
-    C{readRigidBodyTrajectory} on a L{Trajectory} object.
+    :func:`~MMTK.Trajectory.Trajectory.readRigidBodyTrajectory`
+    on a :class:`~MMTK.Trajectory.Trajectory` object.
 
-    If C{rbt} is a RigidBodyTrajectory object, then
+    If rbt is a RigidBodyTrajectory object, then
 
-     - C{len(rbt)} is the number of steps stored in it
-
-     - C{rbt[i]} is the value at step C{i} (a vector for the center of mass
+     * len(rbt) is the number of steps stored in it
+     * rbt[i] is the value at step i (a vector for the center of mass
        and a quaternion for the orientation)
     """
     
@@ -939,8 +936,8 @@ class RigidBodyTrajectory(object):
 #
 def isTrajectory(object):
     """
-    @param object: any Python object
-    @returns C{True} if object is a trajectory
+    :param object: any Python object
+    :returns: True if object is a trajectory
     """
     import MMTK_trajectory
     return isinstance(object, (Trajectory, MMTK_trajectory.trajectory_type))
@@ -1067,24 +1064,24 @@ class TrajectoryOutput(TrajectoryAction):
     def __init__(self, trajectory, data = None,
                  first=0, last=None, skip=1):
         """
-        @param trajectory: a trajectory object or a string, which is
+        :param trajectory: a trajectory object or a string, which is
                            interpreted as the name of a file that is opened
                            as a trajectory in append mode
-        @param data: a list of data categories. All variables provided by the
+        :param data: a list of data categories. All variables provided by the
                      trajectory generator that fall in any of the listed
                      categories are written to the trajectory file. See the
                      descriptions of the trajectory generators for a list
-                     of variables and categories. By default (C{data = None})
+                     of variables and categories. By default (data = None)
                      the categories "configuration", "energy",
                      "thermodynamic", and "time" are written.
-        @param first: the number of the first step at which the action is run
-        @type first: C{int}
-        @param last: the number of the step at which the action is suspended.
-                     A value of C{None} indicates that the action should
+        :param first: the number of the first step at which the action is run
+        :type first: int
+        :param last: the number of the step at which the action is suspended.
+                     A value of None indicates that the action should
                      be applied indefinitely.
-        @type last: C{int}
-        @param skip: the number of steps to skip between two action runs
-        @type skip: C{int}
+        :type last: int
+        :param skip: the number of steps to skip between two action runs
+        :type skip: int
         """
         TrajectoryAction.__init__(self, first, last, skip)
         self.destination = trajectory
@@ -1139,15 +1136,15 @@ class RestartTrajectoryOutput(TrajectoryOutput):
 
     def __init__(self, trajectory, skip=100, length=3):
         """
-        @param trajectory: a trajectory object or a string, which is interpreted
+        :param trajectory: a trajectory object or a string, which is interpreted
                            as the name of a file that is opened as a trajectory
-                           in append mode with a cycle length of C{length} and
+                           in append mode with a cycle length of length and
                            double-precision variables
-        @param skip: the number of steps between two write operations to the
+        :param skip: the number of steps between two write operations to the
                      restart trajectory
-        @type skip: C{int}
-        @param length: the number of steps stored in the restart trajectory;
-                       used only if C{trajectory} is a string
+        :type skip: int
+        :param length: the number of steps stored in the restart trajectory;
+                       used only if trajectory is a string
         """
         TrajectoryAction.__init__(self, 0, None, skip)
         self.destination = trajectory
@@ -1176,23 +1173,23 @@ class LogOutput(TrajectoryOutput):
 
     def __init__(self, file, data = None, first=0, last=None, skip=1):
         """
-        @param file: a file object or a string, which is interpreted as the
+        :param file: a file object or a string, which is interpreted as the
                      name of a file that is opened in write mode
-        @param data: a list of data categories. All variables provided by the
+        :param data: a list of data categories. All variables provided by the
                      trajectory generator that fall in any of the listed
                      categories are written to the trajectory file. See the
                      descriptions of the trajectory generators for a list
-                     of variables and categories. By default (C{data = None})
+                     of variables and categories. By default (data = None)
                      the categories "configuration", "energy",
                      "thermodynamic", and "time" are written.
-        @param first: the number of the first step at which the action is run
-        @type first: C{int}
-        @param last: the number of the step at which the action is suspended.
-                     A value of C{None} indicates that the action should
+        :param first: the number of the first step at which the action is run
+        :type first: int
+        :param last: the number of the step at which the action is suspended.
+                     A value of None indicates that the action should
                      be applied indefinitely.
-        @type last: C{int}
-        @param skip: the number of steps to skip between two action runs
-        @type skip: C{int}
+        :type last: int
+        :param skip: the number of steps to skip between two action runs
+        :type skip: int
         """
         TrajectoryOutput.__init__(self, file, data, first, last, skip)
 
@@ -1213,13 +1210,12 @@ class StandardLogOutput(LogOutput):
     trajectory-generating operation. It is a specialization of
     LogOutput to the most common case and writes data in the categories
     "time" and "energy" to the standard output stream.
+
+    :param skip: the number of steps to skip between two action runs
+    :type skip: int
     """
 
     def __init__(self, skip=50):
-        """
-        @param skip: the number of steps to skip between two action runs
-        @type skip: C{int}
-        """
         LogOutput.__init__(self, sys.stdout, None, 0, None, skip)
 
 #
@@ -1242,11 +1238,11 @@ class SnapshotGenerator(TrajectoryGenerator):
 
     def __init__(self, universe, **options):
         """
-        @param universe: the universe on which the generator acts
-        @keyword data: a dictionary that supplies values for variables
+        :param universe: the universe on which the generator acts
+        :keyword data: a dictionary that supplies values for variables
                        that are not part of the universe state
                        (e.g. potential energy)
-        @keyword actions: a list of actions to be executed periodically
+        :keyword actions: a list of actions to be executed periodically
                           (default is none)
         """
         TrajectoryGenerator.__init__(self, universe, options)
@@ -1352,9 +1348,9 @@ if False:
 #
 def trajectoryInfo(filename):
     """
-    @param filename: the name of a trajectory file
-    @type filename: C{str}
-    @returns: a string with summarial information about the trajectory
+    :param filename: the name of a trajectory file
+    :type filename: str
+    :returns: a string with summarial information about the trajectory
     """
     from Scientific.IO import NetCDF
     file = NetCDF.NetCDFFile(filename, 'r')

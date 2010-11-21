@@ -7,7 +7,7 @@
 Molecular Dynamics integrators
 """
 
-__docformat__ = 'epytext'
+__docformat__ = 'restructuredtext'
 
 from MMTK import Environment, Features, Trajectory, Units
 import MMTK_dynamics
@@ -75,24 +75,24 @@ class VelocityVerletIntegrator(Integrator):
 
     def __init__(self, universe, **options):
         """
-        @param universe: the universe on which the integrator acts
-        @type universe: L{MMTK.Universe}
-        @keyword steps: the number of integration steps (default is 100)
-        @type steps: C{int}
-        @keyword delta_t: the time step (default is 1 fs)
-        @type delta_t: C{float}
-        @keyword actions: a list of actions to be executed periodically
+        :param universe: the universe on which the integrator acts
+        :type universe: :class:`~MMTK.Universe.Universe`
+        :keyword steps: the number of integration steps (default is 100)
+        :type steps: int
+        :keyword delta_t: the time step (default is 1 fs)
+        :type delta_t: float
+        :keyword actions: a list of actions to be executed periodically
                           (default is none)
-        @type actions: C{list}
-        @keyword threads: the number of threads to use in energy evaluation
+        :type actions: list
+        :keyword threads: the number of threads to use in energy evaluation
                           (default set by MMTK_ENERGY_THREADS)
-        @type threads: C{int}
-        @keyword background: if True, the integration is executed as a
+        :type threads: int
+        :keyword background: if True, the integration is executed as a
                              separate thread (default: False)
-        @type background: C{bool}
-        @keyword mpi_communicator: an MPI communicator object, or C{None},
-                                   meaning no parallelization (default: C{None})
-        @type mpi_communicator: C{Scientific.MPI.MPICommunicator}
+        :type background: bool
+        :keyword mpi_communicator: an MPI communicator object, or None,
+                                   meaning no parallelization (default: None)
+        :type mpi_communicator: Scientific.MPI.MPICommunicator
         """
         Integrator.__init__(self, universe, options)
         self.features = [Features.FixedParticleFeature,
@@ -103,7 +103,7 @@ class VelocityVerletIntegrator(Integrator):
     def __call__(self, **options):
         """
         Run the integrator. The keyword options are the same as described
-        under L{__init__}.
+        under __init__.
         """
         self.setCallOptions(options)
         used_features = Features.checkFeatures(self, self.universe)
@@ -174,23 +174,23 @@ class VelocityScaler(Trajectory.TrajectoryAction):
 
     def __init__(self, temperature, window=0., first=0, last=None, skip=1):
         """
-        @param temperature: the temperature value to which the velocities
+        :param temperature: the temperature value to which the velocities
                             should be scaled
-        @type temperature: C{float}
-        @param window: the deviation from the ideal temperature that
+        :type temperature: float
+        :param window: the deviation from the ideal temperature that
                        is tolerated in either direction before rescaling
                        takes place
-        @type window: C{float}
-        @param first: the number of the first step at which the action
+        :type window: float
+        :param first: the number of the first step at which the action
                       is executed
-        @type first: C{int}
-        @param last: the number of the first step at which the action
-                     is no longer executed. A value of C{None} indicates
+        :type first: int
+        :param last: the number of the first step at which the action
+                     is no longer executed. A value of None indicates
                      that the action should be executed indefinitely.
-        @type last: C{int}
-        @param skip: the number of steps to skip between two applications
+        :type last: int
+        :param skip: the number of steps to skip between two applications
                      of the action
-        @type skip: C{int}
+        :type skip: int
         """
         Trajectory.TrajectoryAction.__init__(self, first, last, skip)
         self.parameters = N.array([temperature, window], N.Float)
@@ -207,24 +207,24 @@ class Heater(Trajectory.TrajectoryAction):
 
     def __init__(self, temp1, temp2, gradient, first=0, last=None, skip=1):
         """
-        @param temp1: the temperature value to which the velocities
+        :param temp1: the temperature value to which the velocities
                       should be scaled initially
-        @type temp1: C{float}
-        @param temp2: the final temperature value to which the velocities
+        :type temp1: float
+        :param temp2: the final temperature value to which the velocities
                       should be scaled
-        @type temp2: C{float}
-        @param gradient: the temperature gradient (in K/ps)
-        @type gradient: C{float}
-        @param first: the number of the first step at which the action
+        :type temp2: float
+        :param gradient: the temperature gradient (in K/ps)
+        :type gradient: float
+        :param first: the number of the first step at which the action
                       is executed
-        @type first: C{int}
-        @param last: the number of the first step at which the action
-                     is no longer executed. A value of C{None} indicates
+        :type first: int
+        :param last: the number of the first step at which the action
+                     is no longer executed. A value of None indicates
                      that the action should be executed indefinitely.
-        @type last: C{int}
-        @param skip: the number of steps to skip between two applications
+        :type last: int
+        :param skip: the number of steps to skip between two applications
                      of the action
-        @type skip: C{int}
+        :type skip: int
         """
         Trajectory.TrajectoryAction.__init__(self, first, last, skip)
         self.parameters = N.array([temp1, temp2, gradient], N.Float)
@@ -242,16 +242,16 @@ class BarostatReset(Trajectory.TrajectoryAction):
 
     def __init__(self, first=0, last=None, skip=1):
         """
-        @param first: the number of the first step at which the action
+        :param first: the number of the first step at which the action
                       is executed
-        @type first: C{int}
-        @param last: the number of the first step at which the action
-                     is no longer executed. A value of C{None} indicates
+        :type first: int
+        :param last: the number of the first step at which the action
+                     is no longer executed. A value of None indicates
                      that the action should be executed indefinitely.
-        @type last: C{int}
-        @param skip: the number of steps to skip between two applications
+        :type last: int
+        :param skip: the number of steps to skip between two applications
                      of the action
-        @type skip: C{int}
+        :type skip: int
         """
         Trajectory.TrajectoryAction.__init__(self, first, last, skip)
         self.parameters = N.zeros((0,), N.Float)
@@ -269,16 +269,16 @@ class TranslationRemover(Trajectory.TrajectoryAction):
 
     def __init__(self, first=0, last=None, skip=1):
         """
-        @param first: the number of the first step at which the action
+        :param first: the number of the first step at which the action
                       is executed
-        @type first: C{int}
-        @param last: the number of the first step at which the action
-                     is no longer executed. A value of C{None} indicates
+        :type first: int
+        :param last: the number of the first step at which the action
+                     is no longer executed. A value of None indicates
                      that the action should be executed indefinitely.
-        @type last: C{int}
-        @param skip: the number of steps to skip between two applications
+        :type last: int
+        :param skip: the number of steps to skip between two applications
                      of the action
-        @type skip: C{int}
+        :type skip: int
         """
         Trajectory.TrajectoryAction.__init__(self, first, last, skip)
         self.parameters = None
@@ -296,16 +296,16 @@ class RotationRemover(Trajectory.TrajectoryAction):
 
     def __init__(self, first=0, last=None, skip=1):
         """
-        @param first: the number of the first step at which the action
+        :param first: the number of the first step at which the action
                       is executed
-        @type first: C{int}
-        @param last: the number of the first step at which the action
-                     is no longer executed. A value of C{None} indicates
+        :type first: int
+        :param last: the number of the first step at which the action
+                     is no longer executed. A value of None indicates
                      that the action should be executed indefinitely.
-        @type last: C{int}
-        @param skip: the number of steps to skip between two applications
+        :type last: int
+        :param skip: the number of steps to skip between two applications
                      of the action
-        @type skip: C{int}
+        :type skip: int
         """
         Trajectory.TrajectoryAction.__init__(self, first, last, skip)
         self.parameters = None

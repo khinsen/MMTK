@@ -15,7 +15,7 @@ calculations or for analyzing complex motions. For an explanation, see:
     Mol. Sim. 23:275-292 (2000)
 """
 
-__docformat__ = 'epytext'
+__docformat__ = 'restructuredtext'
 
 from MMTK import Utility, ParticleProperties
 from Scientific.Geometry import Vector, ex, ey, ez
@@ -97,12 +97,12 @@ class Subspace(object):
 
     def __init__(self, universe, vectors):
         """
-        @param universe: the universe for which the subspace is created
-        @type universe: L{MMTK.Universe.Universe}
-        @param vectors: a list of L{MMTK.ParticleProperties.ParticleVector}
+        :param universe: the universe for which the subspace is created
+        :type universe: :class:`~MMTK.Universe.Universe`
+        :param vectors: a list of :class:`~MMTK.ParticleProperties.ParticleVector`
                         objects that define the subspace. They need not be
                         orthogonal or linearly independent.
-        @type vectors: C{list}
+        :type vectors: list
         """
         self.universe = universe
         self.vectors = vectors
@@ -122,9 +122,9 @@ class Subspace(object):
         Construct a basis for the subspace by orthonormalization of
         the input vectors using Singular Value Decomposition. The
         basis consists of a sequence of
-        L{MMTK.ParticleProperties.ParticleVector}
+        :class:`~MMTK.ParticleProperties.ParticleVector`
         objects that are orthonormal in configuration space.
-        @returns: the basis
+        :returns: the basis
         """
         if self._basis is None:
             basis = N.array([v.array for v in self.vectors], N.Float)
@@ -166,9 +166,9 @@ class Subspace(object):
 
     def projectionOf(self, vector):
         """
-        @param vector: a particle vector
-        @type vector: L{MMTK.ParticleProperties.ParticleVector}
-        @returns: the projection of the vector onto the subspace.
+        :param vector: a particle vector
+        :type vector: :class:`~MMTK.ParticleProperties.ParticleVector`
+        :returns: the projection of the vector onto the subspace.
         """
         vector = vector.array
         basis = self.getBasis().array
@@ -179,17 +179,17 @@ class Subspace(object):
 
     def projectionComplementOf(self, vector):
         """
-        @param vector: a particle vector
-        @type vector: L{MMTK.ParticleProperties.ParticleVector}
-        @returns: the projection of the vector onto the orthogonal complement
+        :param vector: a particle vector
+        :type vector: :class:`~MMTK.ParticleProperties.ParticleVector`
+        :returns: the projection of the vector onto the orthogonal complement
                   of the subspace.
         """
         return vector - self.projectionOf(vector)
 
     def complement(self):
         """
-        @returns: the orthogonal complement subspace
-        @rtype: L{MMTK.Subspace.Subspace}
+        :returns: the orthogonal complement subspace
+        :rtype: :class:`~MMTK.Subspace.Subspace`
         """
         basis = []
         for i in range(self.universe.numberOfAtoms()):
@@ -211,9 +211,9 @@ class RigidMotionSubspace(Subspace):
 
     def __init__(self, universe, objects):
         """
-        @param universe: the universe for which the subspace is created
-        @type universe: L{MMTK.Universe.Universe}
-        @param objects: a sequence of objects whose rigid-body motion is
+        :param universe: the universe for which the subspace is created
+        :type universe: :class:`~MMTK.Universe.Universe`
+        :param objects: a sequence of objects whose rigid-body motion is
                         included in the subspace
         """
         if not Utility.isSequenceObject(objects):
@@ -264,9 +264,9 @@ class PairDistanceSubspace(Subspace):
 
     def __init__(self, universe, atom_pairs):
         """
-        @param universe: the universe for which the subspace is created
-        @type universe: L{MMTK.Universe.Universe}
-        @param atom_pairs: a sequence of atom pairs whose distance-vector
+        :param universe: the universe for which the subspace is created
+        :type universe: :class:`~MMTK.Universe.Universe`
+        :param atom_pairs: a sequence of atom pairs whose distance-vector
                            motion is included in the subspace
         """
         vectors = []
