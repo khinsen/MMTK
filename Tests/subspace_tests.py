@@ -17,25 +17,24 @@ class RigidBodyTest(unittest.TestCase):
     Test rigid-body motion subspace
     """
     
-    def setUp(self):
-        self.universe = MMTK.InfiniteUniverse()
-        self.universe.m1 = MMTK.Molecule('water',
-                                         position=MMTK.Vector(0., 0., 0.))
-        self.universe.m2 = MMTK.Molecule('water',
-                                         position=MMTK.Vector(1., 0., 0.))
-
     def test_projections(self):
-        rbs = [self.universe.m1,
-               MMTK.Collection([self.universe.m2.H1,
-                                self.universe.m2.H2])]
-        s = RigidMotionSubspace(self.universe, rbs)
+        universe = MMTK.InfiniteUniverse()
+        universe.m1 = MMTK.Molecule('water',
+                                         position=MMTK.Vector(0., 0., 0.))
+        universe.m2 = MMTK.Molecule('water',
+                                         position=MMTK.Vector(1., 0., 0.))
+        rbs = [universe.m1,
+               MMTK.Collection([universe.m2.H1,
+                                universe.m2.H2])]
+        s = RigidMotionSubspace(universe, rbs)
+        self.checkOrthonormality(s)
         self.assertEqual(len(s), 11)
         basis = s.getBasis()
         self.assertEqual(len(basis), 11)
         complement = s.complement()
         complement_basis = complement.getBasis()
         self.assertEqual(len(complement_basis),
-                         self.universe.degreesOfFreedom()-11)
+                         universe.degreesOfFreedom()-11)
         for rb in rbs:
             for t in [Translation(MMTK.Vector(0.1, -0.2, 1.5)),
                       Rotation(MMTK.Vector(0.3, 1.2, -2.3), 0.001)]:
@@ -43,7 +42,97 @@ class RigidBodyTest(unittest.TestCase):
                 self.assert_((s.projectionOf(d)-d).norm() < 1.e-7)
                 self.assert_(s.projectionComplementOf(d).norm() < 1.e-7)
 
-class PeptideTest(unittest.TestCase):
+    def test_lrb(self):
+        universe = MMTK.InfiniteUniverse()
+        for p in [MMTK.Vector(0., 0., 0.),
+                  MMTK.Vector(1., 0., 0.),
+                  MMTK.Vector(0., 1., 1.),
+                  MMTK.Vector(0., 1., 0.),
+                  MMTK.Vector(1., 0., 1.),
+                  MMTK.Vector(0., 0., 1.),
+                  MMTK.Vector(1., 1., 0.),
+                  MMTK.Vector(1., 1., 1.)]:
+            universe.addObject(MMTK.Atom('C', position=p))
+        atoms = universe.atomList()
+        # all atoms independent
+        s = RigidMotionSubspace(universe, atoms)
+        self.checkOrthonormality(s)
+        self.assertEqual(len(s.getBasis()), 3*len(atoms))
+        # 1 rb, four free atoms
+        rbs = [MMTK.Collection(atoms[:4])] + atoms[4:]
+        s = RigidMotionSubspace(universe, rbs)
+        self.checkOrthonormality(s)
+        self.assertEqual(len(s.getBasis()), 6+4*3)
+        # 2 independent rbs with > 2 atoms
+        rbs = [MMTK.Collection(atoms[:4]),
+               MMTK.Collection(atoms[4:])]
+        s = RigidMotionSubspace(universe, rbs)
+        self.checkOrthonormality(s)
+        self.assertEqual(len(s.getBasis()), 12)
+        # 2 independent rbs, one 2 atoms, one 6 atoms
+        rbs = [MMTK.Collection(atoms[:6]),
+               MMTK.Collection(atoms[6:])]
+        s = RigidMotionSubspace(universe, rbs)
+        self.checkOrthonormality(s)
+        self.assertEqual(len(s.getBasis()), 11)
+        # 2 rbs > 2 atoms each, one atom in common
+        rbs = [MMTK.Collection(atoms[:5]),
+               MMTK.Collection(atoms[4:])]
+        s = RigidMotionSubspace(universe, rbs)
+        self.checkOrthonormality(s)
+        self.assertEqual(len(s.getBasis()), 9)
+        # 2 rbs > 2 atoms each, two atoms in common
+        rbs = [MMTK.Collection(atoms[:5]),
+               MMTK.Collection(atoms[3:])]
+        s = RigidMotionSubspace(universe, rbs)
+        self.checkOrthonormality(s)
+        self.assertEqual(len(s.getBasis()), 7)
+        # 2 rbs > 2 atoms each, three atoms in common
+        rbs = [MMTK.Collection(atoms[:5]),
+               MMTK.Collection(atoms[2:])]
+        s = RigidMotionSubspace(universe, rbs)
+        self.checkOrthonormality(s)
+        self.assertEqual(len(s.getBasis()), 6)
+        # 2 rbs with 2 and 7 atoms, one atom in common
+        rbs = [MMTK.Collection(atoms[:2]),
+               MMTK.Collection(atoms[1:])]
+        s = RigidMotionSubspace(universe, rbs)
+        self.checkOrthonormality(s)
+        self.assertEqual(len(s.getBasis()), 8)
+        # 3 rbs > 2 atoms each, one atom in common between rb[n] and rb[n+1]
+        rbs = [MMTK.Collection(atoms[:3]),
+               MMTK.Collection(atoms[2:6]),
+               MMTK.Collection(atoms[5:])]
+        s = RigidMotionSubspace(universe, rbs)
+        self.checkOrthonormality(s)
+        self.assertEqual(len(s.getBasis()), 12)
+        # 3 rbs > 2 atoms each, one atom in common for each pair
+        # (chain of 3 rbs)
+        rbs = [MMTK.Collection(atoms[:3]+atoms[7:]),
+               MMTK.Collection(atoms[2:6]),
+               MMTK.Collection(atoms[5:])]
+        s = RigidMotionSubspace(universe, rbs)
+        self.checkOrthonormality(s)
+        self.assertEqual(len(s.getBasis()), 10)
+        # 2 rbs > 2 atoms each, linked by a rigid bond
+        rbs = [MMTK.Collection(atoms[:4]),
+               MMTK.Collection(atoms[3:5]),
+               MMTK.Collection(atoms[4:])]
+        s = RigidMotionSubspace(universe, rbs)
+        self.checkOrthonormality(s)
+        self.assertEqual(len(s.getBasis()), 11)
+
+    def checkOrthonormality(self, subspace):
+        basis = subspace.getBasis()
+        ndim = len(basis)
+        for i in range(ndim):
+            v = basis[i]
+            self.assertAlmostEqual(v.dotProduct(v), 1., 10)
+            for j in range(i+1, ndim):
+                self.assert_(abs(v.dotProduct(basis[j])) < 1.e-10)
+
+
+class PeptideNormalModeTest(unittest.TestCase):
 
     """
     Test mode projections on a subspace
@@ -307,7 +396,8 @@ class PeptideTest(unittest.TestCase):
 def suite():
     loader = unittest.TestLoader()
     s = unittest.TestSuite()
-    s.addTest(loader.loadTestsFromTestCase(PeptideTest))
+    s.addTest(loader.loadTestsFromTestCase(RigidBodyTest))
+    s.addTest(loader.loadTestsFromTestCase(PeptideNormalModeTest))
     return s
 
 
