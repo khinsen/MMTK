@@ -664,6 +664,9 @@ class Atom(ChemicalObject):
             if universe is not None:
                 universe._changed(True)
 
+    def bead(self, i):
+        return Bead(self, i)
+
     def beads(self):
         return [Bead(self, i) for i in range(self.nbeads)]
 
