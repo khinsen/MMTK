@@ -105,7 +105,7 @@ cdef class PINormalModeIntegrator(MMTK_trajectory_generator.EnergyBasedTrajector
 
     default_options = {'first_step': 0, 'steps': 100, 'delta_t': 1.*Units.fs,
                        'background': False, 'threads': None,
-                       'actions': []}
+                       'frozen_subspace': None, 'actions': []}
 
     available_data = ['configuration', 'velocities', 'gradients',
                       'energy', 'thermodynamic', 'time', 'auxiliary']
@@ -284,6 +284,41 @@ cdef class PINormalModeIntegrator(MMTK_trajectory_generator.EnergyBasedTrajector
                         cvirial -= (x[i+k, j]-nmc[j, i]/nb)*g[i+k, j]
         return cvirial
 
+    cdef int centroidDegreesOfFreedom(self, subspace,
+                                      N.ndarray[short, ndim=2] bd):
+        cdef N.ndarray[double, ndim=2] va
+        cdef int i, j, k
+        from MMTK.Subspace import Subspace
+        vectors = []
+        for k in range(3):
+            for i in range(bd.shape[0]):
+                # bd[i, 0] == 0 means "first bead of an atom"
+                if bd[i, 0] == 0:
+                    v = ParticleProperties.ParticleVector(self.universe)
+                    vectors.append(v)
+                    va = v.array
+                    for j in range(bd[i, 1]):
+                        va[i+j, k] = 1.
+        vectors = [subspace.projectionComplementOf(v) for v in vectors]
+        return len(Subspace(self.universe, vectors).getBasis())
+
+    @cython.boundscheck(True)
+    @cython.wraparound(False)
+    @cython.cdivision(True)
+    cdef void freeze(self, N.ndarray[double, ndim=2] d, N.ndarray[double, ndim=3] ss):
+        cdef int ndim = ss.shape[0]
+        cdef int npoints = ss.shape[1]
+        cdef double dp
+        cdef int i, j, k
+        for i in range(ndim):
+            dp = 0.
+            for j in range(npoints):
+                for k in range(3):
+                    dp += d[j, k]*ss[i, j, k]
+            for j in range(npoints):
+                for k in range(3):
+                    d[j, k] -= dp*ss[i, j, k]
+
     cdef void applyThermostat(self, N.ndarray[double, ndim=2] v, N.ndarray[double, ndim=2] nmv,
                               N.ndarray[double, ndim=1] m, N.ndarray[short, ndim=2] bd,
                               double dt, double beta):
@@ -296,10 +331,11 @@ cdef class PINormalModeIntegrator(MMTK_trajectory_generator.EnergyBasedTrajector
         cdef N.ndarray[double, ndim=2] x, v, g, dv
         cdef N.ndarray[double, ndim=1] m
         cdef N.ndarray[short, ndim=2] bd
+        cdef N.ndarray[double, ndim=3] ss
         cdef energy_data energy
         cdef double time, delta_t, ke, ke_nm, se, beta, temperature
         cdef double qe_prim, qe_vir, qe_cvir
-        cdef int natoms, nbeads, nsteps, step
+        cdef int natoms, nbeads, nsteps, step, df, cdf
         cdef Py_ssize_t i, j, k
     
         # Check if velocities have been initialized
@@ -318,6 +354,17 @@ cdef class PINormalModeIntegrator(MMTK_trajectory_generator.EnergyBasedTrajector
         bd = self.evaluator_object.global_data.get('bead_data')
         pi_environment = self.universe.environmentObjectList(Environment.PathIntegrals)[0]
         beta = pi_environment.beta
+
+        # Check if there is a frozen_subspace
+        subspace = self.getOption('frozen_subspace')
+        if subspace is None:
+            ss = N.zeros((0, nbeads, 3), N.float)
+            df = 3*nbeads
+            cdf = 3*natoms
+        else:
+            ss = subspace.getBasis().array
+            df = 3*nbeads-ss.shape[0]
+            cdf = self.centroidDegreesOfFreedom(subspace, bd)
         
         # For efficiency, the Cython code works at the array
         # level rather than at the ParticleProperty level.
@@ -394,25 +441,26 @@ cdef class PINormalModeIntegrator(MMTK_trajectory_generator.EnergyBasedTrajector
         # and run the trajectory actions on the initial state.
         self.foldCoordinatesIntoBox()
         self.calculateEnergies(x, &energy, 0)
-
+        self.freeze(v, ss)
+    
         for i in range(nbeads):
             if bd[i, 0] == 0:
                 self.fixBeadPositions(x, i, bd[i, 1])
                 self.cartesianToNormalMode(x, nmc, i, bd[i, 1])
                 
         se = self.springEnergyNormalModes(nmc, m, bd, beta)
-        qe_prim = energy.energy - se + 1.5*nbeads/beta
+        qe_prim = energy.energy - se + 0.5*df/beta
         qe_vir = energy.energy - 0.5*energy.virial
         qe_cvir = energy.energy \
                   - 0.5*self.centroidVirial(x, nmc, g, bd) \
-                  + 1.5*natoms/beta
+                  + 0.5*cdf/beta
 
         ke = 0.
         for i in range(nbeads):
             for j in range(3):
                 dv[i, j] = -0.5*delta_t*g[i, j]/m[i]
                 ke += 0.5*m[i]*v[i, j]*v[i, j]
-        temperature = 2.*ke/(3.*nbeads*k_B)
+        temperature = 2.*ke/(df*k_B)
         self.trajectoryActions(step)
 
         # Check FFT
@@ -439,6 +487,8 @@ cdef class PINormalModeIntegrator(MMTK_trajectory_generator.EnergyBasedTrajector
             for i in range(nbeads):
                 for j in range(3):
                     v[i, j] += dv[i, j]
+            # Remove frozen subspace
+            self.freeze(v, ss)
             # Conversion to normal mode coordinates
             for i in range(nbeads):
                 # bd[i, 0] == 0 means "first bead of an atom"
@@ -460,11 +510,11 @@ cdef class PINormalModeIntegrator(MMTK_trajectory_generator.EnergyBasedTrajector
             # Mid-step energy calculation
             self.calculateEnergies(x, &energy, 1)
             se = self.springEnergyNormalModes(nmc, m, bd, beta)
-            qe_prim = energy.energy - se + 1.5*nbeads/beta
+            qe_prim = energy.energy - se + 0.5*df/beta
             qe_vir = energy.energy - 0.5*energy.virial
             qe_cvir = energy.energy \
                       - 0.5*self.centroidVirial(x, nmc, g, bd) \
-                      + 1.5*natoms/beta
+                      + 0.5*cdf/beta
             # Second integration half-step
             for i in range(nbeads):
                 for j in range(3):
@@ -472,12 +522,14 @@ cdef class PINormalModeIntegrator(MMTK_trajectory_generator.EnergyBasedTrajector
                     v[i, j] += dv[i, j]
             # Second application of thermostat
             self.applyThermostat(v, nmv, m, bd, delta_t, beta)
+            # Remove frozen subspace
+            self.freeze(v, ss)
             # Calculate kinetic energy
             ke = 0.
             for i in range(nbeads):
                 for j in range(3):
                     ke += 0.5*m[i]*v[i, j]*v[i, j]
-            temperature = 2.*ke/(3.*nbeads*k_B)
+            temperature = 2.*ke/(df*k_B)
             if False:
                 ke_nm = 0.
                 for i in range(nbeads):
