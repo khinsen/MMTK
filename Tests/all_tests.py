@@ -14,6 +14,7 @@ import normal_mode_tests
 import subspace_tests
 import enm_tests
 import ewald_tests
+import pi_energy_trajectory_tests
 
 def suite():
     test_suite = unittest.TestSuite()
@@ -26,6 +27,7 @@ def suite():
     test_suite.addTests(trajectory_tests.suite())
     test_suite.addTests(enm_tests.suite())
     test_suite.addTests(ewald_tests.suite())
+    test_suite.addTests(pi_energy_trajectory_tests.suite())
     return test_suite
 
 if __name__ == '__main__':
