@@ -63,13 +63,10 @@ see paper by Ceriotti et al.
  - [ ] angularMomentum
  - [ ] angularVelocity
  - [ ] booleanMask
-
 *** TODO Energy evaluation
-
 *** TODO Trajectories
-
 *** TODO ParticleProperties
-
+*** TODO Subspace.PairDistanceSubspace
 ** I/O
 
 *** DONE [#A] PDB output
@@ -83,19 +80,15 @@ Add new file type(s) for representing all the beads:
 ** TODO [#C] Make energy gradients available for subsets of the total force field
 
 * Improvements
-
 ** DONE [#A] Alert for data base conflicts
 At every database access, check if there are multiple definitions in
 different directories of the search path and alert the user of the
 possible conflict.
 
-
 ** TODO Documentation in Spinx
-
 ** TODO Check for undefined positions before integration, normal mode analysis etc.
-
+** TODO Merge ForceFields.ForceField.beadOffsetsAndFactor and Subspace.beadSets
 * Bugs
-
 ** TODO [#C] Opening a trajectory written for a universe created from a MoleculeFactory doesn't work.
 
 ** TODO Trajectory test fails for ParallelepipedicPeriodicUniverse in readParticleTrajectory

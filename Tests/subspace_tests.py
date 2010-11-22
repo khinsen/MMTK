@@ -122,6 +122,63 @@ class RigidBodyTest(unittest.TestCase):
         self.checkOrthonormality(s)
         self.assertEqual(len(s.getBasis()), 11)
 
+    def test_projections_pi(self):
+        universe = MMTK.InfiniteUniverse()
+        universe.m1 = MMTK.Molecule('water',
+                                         position=MMTK.Vector(0., 0., 0.))
+        universe.m2 = MMTK.Molecule('water',
+                                         position=MMTK.Vector(1., 0., 0.))
+        nb = 4
+        for atom in universe.atomIterator():
+            atom.setNumberOfBeads(nb)
+        rbs = [universe.m1,
+               MMTK.Collection([universe.m2.H1,
+                                universe.m2.H2])]
+        s = RigidMotionSubspace(universe, rbs)
+        self.checkOrthonormality(s)
+        self.assertEqual(len(s), nb*11)
+        basis = s.getBasis()
+        self.assertEqual(len(basis), nb*11)
+        complement = s.complement()
+        complement_basis = complement.getBasis()
+        self.assertEqual(len(complement_basis),
+                         universe.degreesOfFreedom()-nb*11)
+        for rb in rbs:
+            for t in [Translation(MMTK.Vector(0.1, -0.2, 1.5)),
+                      Rotation(MMTK.Vector(0.3, 1.2, -2.3), 0.0001)]:
+                d = rb.displacementUnderTransformation(t)
+                self.assert_((s.projectionOf(d)-d).norm() < 1.e-7)
+                self.assert_(s.projectionComplementOf(d).norm() < 1.e-7)
+
+    def test_nbeads_1(self):
+        universe = MMTK.InfiniteUniverse()
+        universe.m = MMTK.Molecule('water',
+                                   position=MMTK.Vector(0., 0., 0.))
+        for a in universe.m.atomIterator():
+            a.setNumberOfBeads(2)
+        s = RigidMotionSubspace(universe, [universe.m])
+        self.checkOrthonormality(s)
+        self.assertEqual(len(s.getBasis()), 12)
+
+    def test_nbeads_2(self):
+        universe = MMTK.InfiniteUniverse()
+        universe.m = MMTK.Molecule('water',
+                                   position=MMTK.Vector(0., 0., 0.))
+        for a in [universe.m.H1, universe.m.H2]:
+            a.setNumberOfBeads(2)
+        s = RigidMotionSubspace(universe, [universe.m])
+        self.checkOrthonormality(s)
+        self.assertEqual(len(s.getBasis()), 9)
+
+    def test_nbeads_3(self):
+        universe = MMTK.InfiniteUniverse()
+        universe.m = MMTK.Molecule('water',
+                                   position=MMTK.Vector(0., 0., 0.))
+        universe.m.O.setNumberOfBeads(2)
+        s = RigidMotionSubspace(universe, [universe.m])
+        self.checkOrthonormality(s)
+        self.assertEqual(len(s.getBasis()), 7)
+
     def checkOrthonormality(self, subspace):
         basis = subspace.getBasis()
         ndim = len(basis)

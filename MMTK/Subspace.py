@@ -78,7 +78,7 @@ class ParticleVectorSet(object):
             self.array = data
         else:
             self.n = data
-            self.array = N.zeros((self.n, universe.numberOfAtoms(), 3),
+            self.array = N.zeros((self.n, universe.numberOfPoints(), 3),
                                  N.Float)
 
     def __len__(self):
@@ -89,7 +89,9 @@ class ParticleVectorSet(object):
             raise IndexError
         return ParticleProperties.ParticleVector(self.universe, self.array[i])
 
-
+#
+# Generic subspace defined by a list of motion vectors
+#
 class Subspace(object):
 
     """
@@ -131,37 +133,37 @@ class Subspace(object):
             basis = N.array([v.array for v in self.vectors], N.Float)
             shape = basis.shape
             nvectors = shape[0]
-            natoms = shape[1]
-            basis.shape = (nvectors, 3*natoms)
-            sv = N.zeros((min(nvectors, 3*natoms),), N.Float)
-            min_n_m = min(3*natoms, nvectors)
+            npoints = shape[1]
+            basis.shape = (nvectors, 3*npoints)
+            sv = N.zeros((min(nvectors, 3*npoints),), N.Float)
+            min_n_m = min(3*npoints, nvectors)
             vt = N.zeros((nvectors, min_n_m), N.Float)
             work = N.zeros((1,), N.Float)
             iwork = N.zeros((8*min_n_m,), int_type)
-            if 3*natoms >= nvectors:
-                result = dgesdd('O', 3*natoms, nvectors, basis, 3*natoms,
-                                sv, basis, 3*natoms, vt, min_n_m,
+            if 3*npoints >= nvectors:
+                result = dgesdd('O', 3*npoints, nvectors, basis, 3*npoints,
+                                sv, basis, 3*npoints, vt, min_n_m,
                                 work, -1, iwork, 0)
                 work = N.zeros((int(work[0]),), N.Float)
-                result = dgesdd('O', 3*natoms, nvectors, basis, 3*natoms,
-                                sv, basis, 3*natoms, vt, min_n_m,
+                result = dgesdd('O', 3*npoints, nvectors, basis, 3*npoints,
+                                sv, basis, 3*npoints, vt, min_n_m,
                                 work, work.shape[0], iwork, 0)
                 u = basis
             else:
-                u = N.zeros((min_n_m, 3*natoms), N.Float)
-                result = dgesdd('S', 3*natoms, nvectors, basis, 3*natoms,
-                                sv, u, 3*natoms, vt, min_n_m,
+                u = N.zeros((min_n_m, 3*npoints), N.Float)
+                result = dgesdd('S', 3*npoints, nvectors, basis, 3*npoints,
+                                sv, u, 3*npoints, vt, min_n_m,
                                 work, -1, iwork, 0)
                 work = N.zeros((int(work[0]),), N.Float)
-                result = dgesdd('S', 3*natoms, nvectors, basis, 3*natoms,
-                                sv, u, 3*natoms, vt, min_n_m,
+                result = dgesdd('S', 3*npoints, nvectors, basis, 3*npoints,
+                                sv, u, 3*npoints, vt, min_n_m,
                                 work, work.shape[0], iwork, 0)
             if result['info'] != 0:
                 raise ValueError('Lapack SVD: ' + `result['info']`)
             svmax = N.maximum.reduce(sv)
             nvectors = N.add.reduce(N.greater(sv, 1.e-10*svmax))
             u = u[:nvectors]
-            u.shape = (nvectors, natoms, 3)
+            u.shape = (nvectors, npoints, 3)
             self._basis = ParticleVectorSet(self.universe, u)
         return self._basis
 
@@ -193,13 +195,47 @@ class Subspace(object):
         @rtype: L{MMTK.Subspace.Subspace}
         """
         basis = []
-        for i in range(self.universe.numberOfAtoms()):
+        for i in range(self.universe.numberOfPoints()):
             for e in [ex, ey, ez]:
                 p = ParticleProperties.ParticleVector(self.universe)
                 p[i] = e
                 basis.append(self.projectionComplementOf(p))
         return Subspace(self.universe, basis)
 
+#
+# Rigid bodies and linked rigid bodies
+#
+
+def _rbMotionVectors(universe, beads, center):
+    ex_ey_ez = [Vector(1.,0.,0.), Vector(0.,1.,0.), Vector(0.,0.,1.)]
+    vectors = []
+    for d in ex_ey_ez:
+        v = ParticleProperties.ParticleVector(universe)
+        for b in beads:
+            v[b] = d
+        vectors.append(v/N.sqrt(len(beads)))
+    if len(beads) > 1:
+        centroids = [b.atom.position()-center for b in beads]
+        iv = len(vectors)-3
+        for d in ex_ey_ez:
+            v = ParticleProperties.ParticleVector(universe)
+            for b, rc in zip(beads, centroids):
+                v[b] = d.cross(rc)
+            for vt in vectors[iv:]:
+                v -= v.dotProduct(vt)*vt
+            norm_sq = N.sqrt(v.dotProduct(v))
+            if norm_sq > 0.:
+                vectors.append(v/norm_sq)
+    return vectors
+
+def beadSets(atoms):
+    nb = [a.numberOfBeads() for a in atoms]
+    nbeads = max(nb)
+    assert all(nbeads % n == 0 for n in nb)
+    # Integer division, becomes // in Python 3
+    offsets = N.transpose([N.repeat(N.arange(n), nbeads/n) for n in nb])
+    for o in offsets:
+        yield [a.bead(i) for a, i in zip(atoms, o)]
 
 class LinkedRigidBodyMotionSubspace(Subspace):
     
@@ -213,7 +249,6 @@ class LinkedRigidBodyMotionSubspace(Subspace):
         @param rigid_bodies: a list or set of rigid bodies
                              with some common atoms
         """
-        ex_ey_ez = [Vector(1.,0.,0.), Vector(0.,1.,0.), Vector(0.,0.,1.)]
         # Constructs
         # 1) a list of vectors describing the rigid-body motions of each
         #    rigid body as if it were independent.
@@ -226,29 +261,14 @@ class LinkedRigidBodyMotionSubspace(Subspace):
         c_vectors = []
         for rb in rigid_bodies:
             atoms = rb.atomList()
-            for d in ex_ey_ez:
-                v = ParticleProperties.ParticleVector(universe)
-                for a in atoms:
-                    v[a] = d
-                vectors.append(v)
-            if len(atoms) > 1:
-                center = rb.centerOfMass()
-                iv = len(vectors)-3
-                for d in ex_ey_ez:
+            for beads in beadSets(atoms):
+                vectors.extend(_rbMotionVectors(universe, beads, rb.centerOfMass()))
+                for b1, b2 in Utility.pairs(beads):
+                    distance = universe.distanceVector(b1, b2)
                     v = ParticleProperties.ParticleVector(universe)
-                    for a in atoms:
-                        v[a] = d.cross(a.position()-center)
-                    for vt in vectors[iv:]:
-                        v -= v.dotProduct(vt)*vt
-                    if v.dotProduct(v) > 0.:
-                        vectors.append(v)
-            for a1, a2 in Utility.pairs(atoms):
-                distance = universe.distanceVector(a1.position(),
-                                                   a2.position())
-                v = ParticleProperties.ParticleVector(universe)
-                v[a1] = distance
-                v[a2] = -distance
-                c_vectors.append(v)
+                    v[b1] = distance
+                    v[b2] = -distance
+                    c_vectors.append(v)
         if c_vectors:
             constraints = Subspace(universe, c_vectors)
             vectors = [constraints.projectionComplementOf(v)
@@ -276,6 +296,7 @@ class RigidMotionSubspace(Subspace):
             objects = [objects]
         else:
             objects = copy.copy(objects)
+        universe.configuration()
         # Identify connected sets of linked rigid bodies and remove
         # them from the plain rigid body list.
         atom_map = {}
@@ -302,30 +323,25 @@ class RigidMotionSubspace(Subspace):
                         changed = True
             if not changed:
                 break
-        lrbs = frozenset(rb_map.values())
+        lrbs = set(rb_map.values())
 
+        # Isolated rigid bodies with a non-uniform number of beads are
+        # linked rigid bodies at the bead level.
+        lrb_pi = []
+        for o in objects:
+            nb = [a.numberOfBeads() for a in o.atomIterator()]
+            if len(set(nb)) > 1:
+                lrb_pi.append(o)
+        for o in lrb_pi:
+            lrbs.add(frozenset([o]))
+            objects.remove(o)
+    
         # Generate the subspace vectors for the isolated rigid bodies.
-        ex_ey_ez = [Vector(1.,0.,0.), Vector(0.,1.,0.), Vector(0.,0.,1.)]
         vectors = []
         for o in objects:
             rb_atoms = o.atomList()
-            for d in ex_ey_ez:
-                v = ParticleProperties.ParticleVector(universe)
-                for a in rb_atoms:
-                    v[a] = d
-                vectors.append(v/N.sqrt(len(rb_atoms)))
-            if len(rb_atoms) > 1:
-                center = o.centerOfMass()
-                iv = len(vectors)-3
-                for d in ex_ey_ez:
-                    v = ParticleProperties.ParticleVector(universe)
-                    for a in rb_atoms:
-                        v[a] = d.cross(a.position()-center)
-                    for vt in vectors[iv:]:
-                        v -= v.dotProduct(vt)*vt
-                    norm_sq = N.sqrt(v.dotProduct(v))
-                    if norm_sq > 0.:
-                        vectors.append(v/norm_sq)
+            for beads in beadSets(rb_atoms):
+                vectors.extend(_rbMotionVectors(universe, beads, o.centerOfMass()))
 
         # Generate the subspace vectors for the linked rigid bodies.
         for lrb in lrbs:
@@ -340,7 +356,9 @@ class RigidMotionSubspace(Subspace):
         for i in range(len(vectors)):
             self._basis.array[i] = vectors[i].array
 
-
+#
+# Pairwise relative motion
+#
 class PairDistanceSubspace(Subspace):
 
     """
@@ -360,10 +378,11 @@ class PairDistanceSubspace(Subspace):
                            motion is included in the subspace
         """
         vectors = []
-        for atom1, atom2 in atom_pairs:
-            v = ParticleProperties.ParticleVector(universe)
-            distance = atom1.position()-atom2.position()
-            v[atom1] = distance
-            v[atom2] = -distance
-            vectors.append(v)
+        for pair in atom_pairs:
+            distance = pair[0].position()-pair[1].position()
+            for bead1, bead2 in beadSets(pair):
+                v = ParticleProperties.ParticleVector(universe)
+                v[bead1] = distance
+                v[bead2] = -distance
+                vectors.append(v)
         Subspace.__init__(self, universe, vectors)
