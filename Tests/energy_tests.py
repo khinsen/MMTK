@@ -178,7 +178,7 @@ class LennardJonesTest(unittest.TestCase):
        universe = OrthorhombicPeriodicUniverse((1.,1.,1.),
                                         LennardJonesForceField(0.40))
 
-       universe.addObject(Environment.PathIntegrals(100.*Units.K))
+       universe.addObject(Environment.PathIntegrals(100.*Units.K, include_spring_terms=True))
        for x in range(2):
             universe.addObject(Atom('Ar',nbeads=2))
        universe.atomList()[0].setBeadPositions([Vector(0.0,0.,0.),Vector(0.1,0.,0.)])
@@ -208,7 +208,8 @@ class AmberPathIntegralTest(unittest.TestCase):
     def setUp(self):
         self.universe = InfiniteUniverse(Amber99ForceField())
         self.temperature = 100.*Units.K
-        self.universe.addObject(Environment.PathIntegrals(self.temperature))
+        self.universe.addObject(Environment.PathIntegrals(self.temperature,
+                                                          include_spring_terms=True))
 
     def test_pi_quantum_spring_potential(self):
         self.universe.h = Atom('H',amber_atom_type="CT",amber_charge=0.)

@@ -858,6 +858,8 @@ class Universe(Collections.GroupOfAtoms, Visualization.Viewable):
                   velocities are available, the kinetic energy is C{None}.
         @rtype: (C{float}, C{float}, C{float})
         """
+        from MMTK.Features import PathIntegralsWithSpringTermsFeature
+        assert PathIntegralsWithSpringTermsFeature.isInUniverse(self)
         eval = self.energyEvaluator(subset1, subset2)
         total_potential_energy = eval(0, 0, small_change)
         pi_energy =  eval.lastEnergyTerms().get("path integral spring", 0.)

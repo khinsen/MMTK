@@ -115,7 +115,7 @@ class PathIntegrals(EnvironmentObject):
     as well as the number of beads in the system
     """
 
-    def __init__(self, temperature, include_spring_terms=True):
+    def __init__(self, temperature, include_spring_terms=False):
         """
         @param temperature: the temperature used for path integral interactions
         @type temperature: C{float}

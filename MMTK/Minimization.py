@@ -88,6 +88,7 @@ class SteepestDescentMinimizer(Minimizer):
 	self.features = [Features.FixedParticleFeature,
 			 Features.NoseThermostatFeature,
                          Features.PathIntegralsFeature,
+                         Features.PathIntegralsWithSpringTermsFeature,
                          Features.AndersenBarostatFeature]
 
     def __call__(self, **options):
@@ -164,6 +165,7 @@ class ConjugateGradientMinimizer(Minimizer):
 	Minimizer.__init__(self, universe, options)
 	self.features = [Features.FixedParticleFeature,
                          Features.PathIntegralsFeature,
+                         Features.PathIntegralsWithSpringTermsFeature,
 			 Features.NoseThermostatFeature]
 
     def __call__(self, **options):

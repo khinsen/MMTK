@@ -7,7 +7,7 @@ from MMTK.Dynamics import VelocityVerletIntegrator
 universe = InfiniteUniverse()
 universe.atom1 = Atom('C', position=Vector(0., 0., 1.05), name='C1', nbeads=2)
 universe.atom2 = Atom('C', position=Vector(0., 1.05, 0.), name='C2', nbeads=2)
-universe.path_integrals = PathIntegrals(50.*Units.K)
+universe.path_integrals = PathIntegrals(50.*Units.K, include_spring_terms=True)
 
 ff1 = HarmonicOscillatorForceField(universe.atom1, Vector(0., 0., 1.), 1000.)
 ff2 = HarmonicOscillatorForceField(universe.atom2, Vector(0., 1., 0.), 1000.)

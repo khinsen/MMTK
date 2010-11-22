@@ -9,7 +9,7 @@ universe.atom1.test_charge = 1.
 universe.atom2 = Atom('C', nbeads=4, position=Vector(0., 0., 0.))
 universe.atom2.test_charge = -0.2
 
-universe.pathintegrals = PathIntegrals(100*Units.K)
+universe.pathintegrals = PathIntegrals(100*Units.K, include_spring_terms=True)
 
 
 universe.setForceField(ElectricField(0.5*(Units.V/Units.m)

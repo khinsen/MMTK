@@ -15,7 +15,7 @@ for atom in universe.atomIterator():
     if atom.symbol == 'H':
         atom.setNumberOfBeads(16)
 temperature = 100.*Units.K
-universe.addObject(PathIntegrals(temperature))
+universe.addObject(PathIntegrals(temperature, include_spring_terms=True))
 
 # Initialize velocities
 universe.initializeVelocitiesToTemperature(0.2*temperature)
