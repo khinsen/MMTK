@@ -54,50 +54,6 @@ class EnergeticModes(Core.NormalModes):
     Individual modes (see class :class:`~MMTK.NormalModes.EnergeticModes.EnergeticMode`)
     can be extracted by indexing with an integer. Looping over the modes
     is possible as well.
-
-    :param universe: the system for which the normal modes are calculated;
-                     it must have a force field which provides the second
-                     derivatives of the potential energy
-    :type universe: :class:`~MMTK.Universe.Universe`
-    :param temperature: the temperature for which the amplitudes of the
-                        atomic displacement vectors are calculated. A
-                        value of None can be specified to have no scaling
-                        at all. In that case the mass-weighted norm
-                        of each normal mode is one.
-    :type temperature: float
-    :param subspace: the basis for the subspace in which the normal modes
-                     are calculated (or, more precisely, a set of vectors
-                     spanning the subspace; it does not have to be
-                     orthogonal). This can either be a sequence of
-                     :class:`~MMTK.ParticleProperties.ParticleVector` objects
-                     or a tuple of two such sequences. In the second case,
-                     the subspace is defined by the space spanned by the
-                     second set of vectors projected on the complement of
-                     the space spanned by the first set of vectors.
-                     The first set thus defines directions that are
-                     excluded from the subspace.
-                     The default value of None indicates a standard
-                     normal mode calculation in the 3N-dimensional
-                     configuration space.
-    :param delta: the rms step length for numerical differentiation.
-                  The default value of None indicates analytical
-                  differentiation.
-                  Numerical differentiation is available only when a
-                  subspace basis is used as well. Instead of calculating
-                  the full force constant matrix and then multiplying
-                  with the subspace basis, the subspace force constant
-                  matrix is obtained by numerical differentiation of the
-                  energy gradients along the basis vectors of the subspace.
-                  If the basis is much smaller than the full configuration
-                  space, this approach needs much less memory.
-    :type delta: float
-    :param sparse: a flag that indicates if a sparse representation of
-                   the force constant matrix is to be used. This is of
-                   interest when there are no long-range interactions and
-                   a subspace of smaller size then 3N is specified. In that
-                   case, the calculation will use much less memory with a
-                   sparse representation.
-    :type sparse: bool
     """
 
     features = []
@@ -105,7 +61,51 @@ class EnergeticModes(Core.NormalModes):
     def __init__(self, universe=None, temperature = 300*Units.K,
                  subspace = None, delta = None, sparse = False):
         """
-       """
+        :param universe: the system for which the normal modes are calculated;
+                         it must have a force field which provides the second
+                         derivatives of the potential energy
+        :type universe: :class:`~MMTK.Universe.Universe`
+        :param temperature: the temperature for which the amplitudes of the
+                            atomic displacement vectors are calculated. A
+                            value of None can be specified to have no scaling
+                            at all. In that case the mass-weighted norm
+                            of each normal mode is one.
+        :type temperature: float
+        :param subspace: the basis for the subspace in which the normal modes
+                         are calculated (or, more precisely, a set of vectors
+                         spanning the subspace; it does not have to be
+                         orthogonal). This can either be a sequence of
+                         :class:`~MMTK.ParticleProperties.ParticleVector` objects
+                         or a tuple of two such sequences. In the second case,
+                         the subspace is defined by the space spanned by the
+                         second set of vectors projected on the complement of
+                         the space spanned by the first set of vectors.
+                         The first set thus defines directions that are
+                         excluded from the subspace.
+                         The default value of None indicates a standard
+                         normal mode calculation in the 3N-dimensional
+                         configuration space.
+        :param delta: the rms step length for numerical differentiation.
+                      The default value of None indicates analytical
+                      differentiation.
+                      Numerical differentiation is available only when a
+                      subspace basis is used as well. Instead of calculating
+                      the full force constant matrix and then multiplying
+                      with the subspace basis, the subspace force constant
+                      matrix is obtained by numerical differentiation of the
+                      energy gradients along the basis vectors of the subspace.
+                      If the basis is much smaller than the full configuration
+                      space, this approach needs much less memory.
+        :type delta: float
+        :param sparse: a flag that indicates if a sparse representation of
+                       the force constant matrix is to be used. This is of
+                       interest when there are no long-range interactions and
+                       a subspace of smaller size then 3N is specified. In that
+                       case, the calculation will use much less memory with a
+                       sparse representation.
+        :type sparse: bool
+        """
+
         if universe == None:
             return
         Features.checkFeatures(self, universe)

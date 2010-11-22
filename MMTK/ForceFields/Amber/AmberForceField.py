@@ -167,54 +167,55 @@ def readOPLS(main_file = None, mod_files = None):
 # The total force field
 #
 class Amber94ForceField(MMForceField.MMForceField):
-
     """
     Amber 94 force field
-
-    :param lj_options: parameters for Lennard-Jones
-                       interactions; one of:
-
-                       * a number, specifying the cutoff
-                       * None, meaning the default method
-                         (no cutoff; inclusion of all
-                         pairs, using the minimum-image
-                         conventions for periodic universes)
-                       * a dictionary with an entry "method"
-                         which specifies the calculation
-                         method as either "direct" (all pair
-                         terms) or "cutoff", with the cutoff
-                         specified by the dictionary
-                         entry "cutoff".
-
-    :param es_options: parameters for electrostatic
-                       interactions; one of:
-
-                       * a number, specifying the cutoff
-                       * None, meaning the default method
-                         (all pairs without cutoff for
-                         non-periodic system, Ewald summation
-                         for periodic systems)
-                       * a dictionary with an entry "method"
-                         which specifies the calculation
-                         method as either "direct" (all pair
-                         terms), "cutoff" (with the cutoff
-                         specified by the dictionary
-                         entry "cutoff"), "ewald" (Ewald
-                         summation, only for periodic
-                         universes), "screened" or
-                         "multipole" (fast-multipole method).
-
-    :keyword mod_files: a list of parameter modification files. The file
-                        format is the one defined by AMBER. Each item
-                        in the list can be either a file object
-                        or a filename, filenames are looked up
-                        first relative to the current directory and then
-                        relative to the directory containing MMTK's
-                        AMBER parameter files.
     """
 
     def __init__(self, lj_options = None, es_options = None,
                  bonded_scale_factor = 1., **kwargs):
+        """
+        :param lj_options: parameters for Lennard-Jones
+                           interactions; one of:
+
+                           * a number, specifying the cutoff
+                           * None, meaning the default method
+                             (no cutoff; inclusion of all
+                             pairs, using the minimum-image
+                             conventions for periodic universes)
+                           * a dictionary with an entry "method"
+                             which specifies the calculation
+                             method as either "direct" (all pair
+                             terms) or "cutoff", with the cutoff
+                             specified by the dictionary
+                             entry "cutoff".
+
+        :param es_options: parameters for electrostatic
+                           interactions; one of:
+
+                           * a number, specifying the cutoff
+                           * None, meaning the default method
+                             (all pairs without cutoff for
+                             non-periodic system, Ewald summation
+                             for periodic systems)
+                           * a dictionary with an entry "method"
+                             which specifies the calculation
+                             method as either "direct" (all pair
+                             terms), "cutoff" (with the cutoff
+                             specified by the dictionary
+                             entry "cutoff"), "ewald" (Ewald
+                             summation, only for periodic
+                             universes), "screened" or
+                             "multipole" (fast-multipole method).
+
+        :keyword mod_files: a list of parameter modification files. The file
+                            format is the one defined by AMBER. Each item
+                            in the list can be either a file object
+                            or a filename, filenames are looked up
+                            first relative to the current directory and then
+                            relative to the directory containing MMTK's
+                            AMBER parameter files.
+
+        """
         main_file = kwargs.get('parameter_file', None)
         mod_files = kwargs.get('mod_files', None)
         parameters = readAmber94(main_file, mod_files)
@@ -230,51 +231,53 @@ class Amber99ForceField(MMForceField.MMForceField):
 
     """
     Amber 99 force field
-
-    :param lj_options: parameters for Lennard-Jones
-                       interactions; one of:
-
-                       * a number, specifying the cutoff
-                       * None, meaning the default method
-                         (no cutoff; inclusion of all
-                         pairs, using the minimum-image
-                         conventions for periodic universes)
-                       * a dictionary with an entry "method"
-                         which specifies the calculation
-                         method as either "direct" (all pair
-                         terms) or "cutoff", with the cutoff
-                         specified by the dictionary
-                         entry "cutoff".
-
-    :param es_options: parameters for electrostatic
-                       interactions; one of:
-
-                       * a number, specifying the cutoff
-                       * None, meaning the default method
-                         (all pairs without cutoff for
-                         non-periodic system, Ewald summation
-                         for periodic systems)
-                       * a dictionary with an entry "method"
-                         which specifies the calculation
-                         method as either "direct" (all pair
-                         terms), "cutoff" (with the cutoff
-                         specified by the dictionary
-                         entry "cutoff"), "ewald" (Ewald
-                         summation, only for periodic
-                         universes), "screened" or
-                         "multipole" (fast-multipole method).
-
-    :keyword mod_files: a list of parameter modification files. The file
-                        format is the one defined by AMBER. Each item
-                        in the list can be either a file object
-                        or a filename, filenames are looked up
-                        first relative to the current directory and then
-                        relative to the directory containing MMTK's
-                        AMBER parameter files.
     """
-
     def __init__(self, lj_options = None, es_options = None,
                  bonded_scale_factor = 1., **kwargs):
+ 
+        """
+        :param lj_options: parameters for Lennard-Jones
+                           interactions; one of:
+    
+                           * a number, specifying the cutoff
+                           * None, meaning the default method
+                             (no cutoff; inclusion of all
+                             pairs, using the minimum-image
+                             conventions for periodic universes)
+                           * a dictionary with an entry "method"
+                             which specifies the calculation
+                             method as either "direct" (all pair
+                             terms) or "cutoff", with the cutoff
+                             specified by the dictionary
+                             entry "cutoff".
+    
+        :param es_options: parameters for electrostatic
+                           interactions; one of:
+    
+                           * a number, specifying the cutoff
+                           * None, meaning the default method
+                             (all pairs without cutoff for
+                             non-periodic system, Ewald summation
+                             for periodic systems)
+                           * a dictionary with an entry "method"
+                             which specifies the calculation
+                             method as either "direct" (all pair
+                             terms), "cutoff" (with the cutoff
+                             specified by the dictionary
+                             entry "cutoff"), "ewald" (Ewald
+                             summation, only for periodic
+                             universes), "screened" or
+                             "multipole" (fast-multipole method).
+    
+        :keyword mod_files: a list of parameter modification files. The file
+                            format is the one defined by AMBER. Each item
+                            in the list can be either a file object
+                            or a filename, filenames are looked up
+                            first relative to the current directory and then
+                            relative to the directory containing MMTK's
+                            AMBER parameter files.
+        """
+
         main_file = kwargs.get('parameter_file', None)
         mod_files = kwargs.get('mod_files', None)
         parameters = readAmber99(main_file, mod_files)
