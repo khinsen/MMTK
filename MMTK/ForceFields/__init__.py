@@ -6,13 +6,13 @@
 """
 Force fields
 
-@undocumented: BondedInteractions
-@undocumented: ForceField
-@undocumented: NonBondedInteractions
-@undocumented: MMForceField
+:undocumented: BondedInteractions
+:undocumented: ForceField
+:undocumented: NonBondedInteractions
+:undocumented: MMForceField
 """
 
-__docformat__ = 'epytext'
+__docformat__ = 'restructuredtext'
 
 import os, string, sys
 

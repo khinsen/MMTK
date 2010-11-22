@@ -24,7 +24,7 @@ The charge fitting method is described in:
 See also Examples/Miscellaneous/charge_fit.py.
 """
 
-__docformat__ = 'epytext'
+__docformat__ = 'restructuredtext'
 
 from MMTK import Random, Units, Utility
 from Scientific.Geometry import Vector
@@ -43,17 +43,18 @@ class ChargeFit(object):
 
     def __init__(self, system, points, constraints = None):
         """
-        @param system: any chemical object (usually a molecule)
-        @param points: a list of point/potential pairs (a vector for the
+        :param system: any chemical object (usually a molecule)
+        :param points: a list of point/potential pairs (a vector for the
                        evaluation point, a number for the potential),
                        or a dictionary whose keys are Configuration objects
                        and whose values are lists of point/potential pairs.
                        The latter case permits combined fits for several
                        conformations of the system.
-        @param constraints: an optional list of constraint objects
-                            (L{TotalChargeConstraint} and/or
-                            L{EqualityConstraint} objects). If the
-                            constraints are inconsistent, a warning is
+        :param constraints: an optional list of constraint objects
+                            (:class:`~MMTK.ChargeFit.TotalChargeConstraint`
+                            and/or
+                            :class:`~MMTK.ChargeFit.EqualityConstraint` objects). 
+                            If the constraints are inconsistent, a warning is
                             printed and the result will satisfy the
                             constraints only in a least-squares sense.
         """
@@ -132,15 +133,15 @@ class TotalChargeConstraint(object):
     """
     Constraint on the total system charge
 
-    To be used with L{ChargeFit}
+    To be used with :class:`~MMTK.ChargeFit.ChargeFit`
     """
 
     def __init__(self, system, charge):
         """
-        @param system: any chamical object whose total charge
+        :param system: any chamical object whose total charge
                        is to be constrained
-        @param charge: the total charge value
-        @type charge: number
+        :param charge: the total charge value
+        :type charge: number
         """
         self.atoms = system.atomList()
         self.charge = charge
@@ -160,7 +161,7 @@ class EqualityConstraint(object):
     """
     Constraint forcing two charges to be equal
 
-    To be used with L{ChargeFit}.
+    To be used with :class:`~MMTK.ChargeFit.ChargeFit`
 
     Any atom may occur in more than one EqualityConstraint object,
     in order to keep the charges of more than two atoms equal.
@@ -168,10 +169,10 @@ class EqualityConstraint(object):
 
     def __init__(self, atom1, atom2):
         """
-        @param atom1: the first atom in the equality relation
-        @type atom1: L{MMTK.Atom}
-        @param atom2: the second atom in the equality relation
-        @type atom2: L{MMTK.Atom}
+        :param atom1: the first atom in the equality relation
+        :type atom1: :class:`~MMTK.ChemicalObjects.Atom`
+        :param atom2: the second atom in the equality relation
+        :type atom2: :class:`~MMTK.ChemicalObjects.Atom`
         """
         self.a1 = atom1
         self.a2 = atom2
@@ -220,15 +221,15 @@ def evaluationPoints(system, n, smallest = 0.3, largest = 0.5):
     for potential evaluation in view of a subsequent charge fit.
     The points are chosen at random and uniformly in a shell around the system.
 
-    @param system: the chemical object for which the charges
+    :param system: the chemical object for which the charges
                    will be fitted
-    @param n: the number of evaluation points to be generated
-    @param smallest: the smallest allowed distance of any evaluation
+    :param n: the number of evaluation points to be generated
+    :param smallest: the smallest allowed distance of any evaluation
                      point from any non-hydrogen atom
-    @param largest: the largest allowed value for the distance
+    :param largest: the largest allowed value for the distance
                     from an evaluation point to the nearest atom
-    @returns: a list of evaluation points
-    @rtype: C{list} of C{Scientific.Geometry.Vector}
+    :returns: a list of evaluation points
+    :rtype: list of Scientific.Geometry.Vector
     """
     atoms = system.atomList()
     p1, p2 = system.boundingBox()

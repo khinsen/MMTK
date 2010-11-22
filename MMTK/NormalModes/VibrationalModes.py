@@ -7,7 +7,7 @@
 Vibrational normal modes
 """
 
-__docformat__ = 'epytext'
+__docformat__ = 'restructuredtext'
 
 from MMTK import Features, Units, ParticleProperties
 from Scientific import N
@@ -22,7 +22,8 @@ class VibrationalMode(Core.Mode):
     """
     Single vibrational normal mode
 
-    Mode objects are created by indexing a L{VibrationalModes} object.
+    Mode objects are created by indexing a 
+    :class:`~MMTK.NormalModes.VibrationalModes.VibrationalModes` object.
     They contain the atomic displacements corresponding to a
     single mode. In addition, the frequency corresponding to the mode
     is stored in the attribute "frequency".
@@ -54,9 +55,10 @@ class VibrationalModes(Core.NormalModes):
     of the universe must correspond to a local minimum of the potential
     energy.
 
-    Individual modes (see class L{VibrationalMode})
+    Individual modes (see :class:`~MMTK.NormalModes.VibrationalModes.VibrationalMode`)
     can be extracted by indexing with an integer. Looping over the modes
     is possible as well.
+
     """
 
     features = []
@@ -64,32 +66,32 @@ class VibrationalModes(Core.NormalModes):
     def __init__(self, universe=None, temperature = 300.*Units.K,
                  subspace = None, delta = None, sparse = False):
         """
-        @param universe: the system for which the normal modes are calculated;
+        :param universe: the system for which the normal modes are calculated;
                          it must have a force field which provides the second
                          derivatives of the potential energy
-        @type universe: L{MMTK.Universe.Universe}
-        @param temperature: the temperature for which the amplitudes of the
+        :type universe: :class:`~MMTK.Universe.Universe`
+        :param temperature: the temperature for which the amplitudes of the
                             atomic displacement vectors are calculated. A
-                            value of C{None} can be specified to have no scaling
+                            value of None can be specified to have no scaling
                             at all. In that case the mass-weighted norm
                             of each normal mode is one.
-        @type temperature: C{float}
-        @param subspace: the basis for the subspace in which the normal modes
+        :type temperature: float
+        :param subspace: the basis for the subspace in which the normal modes
                          are calculated (or, more precisely, a set of vectors
                          spanning the subspace; it does not have to be
                          orthogonal). This can either be a sequence of
-                         L{MMTK.ParticleProperties.ParticleVector} objects
+                         :class:`~MMTK.ParticleProperties.ParticleVector` objects
                          or a tuple of two such sequences. In the second case,
                          the subspace is defined by the space spanned by the
                          second set of vectors projected on the complement of
                          the space spanned by the first set of vectors.
                          The first set thus defines directions that are
                          excluded from the subspace.
-                         The default value of C{None} indicates a standard
+                         The default value of None indicates a standard
                          normal mode calculation in the 3N-dimensional
                          configuration space.
-        @param delta: the rms step length for numerical differentiation.
-                      The default value of C{None} indicates analytical
+        :param delta: the rms step length for numerical differentiation.
+                      The default value of None indicates analytical
                       differentiation.
                       Numerical differentiation is available only when a
                       subspace basis is used as well. Instead of calculating
@@ -99,15 +101,16 @@ class VibrationalModes(Core.NormalModes):
                       energy gradients along the basis vectors of the subspace.
                       If the basis is much smaller than the full configuration
                       space, this approach needs much less memory.
-        @type delta: C{float}
-        @param sparse: a flag that indicates if a sparse representation of
+        :type delta: float
+        :param sparse: a flag that indicates if a sparse representation of
                        the force constant matrix is to be used. This is of
                        interest when there are no long-range interactions and
                        a subspace of smaller size then 3N is specified. In that
                        case, the calculation will use much less memory with a
                        sparse representation.
-        @type sparse: C{bool}
+        :type sparse: bool
         """
+
         if universe == None:
             return
         Features.checkFeatures(self, universe)
@@ -163,10 +166,10 @@ class VibrationalModes(Core.NormalModes):
 
     def rawMode(self, item):
         """
-        @param item: the index of a normal mode
-        @type item: C{int}
-        @returns: the unscaled mode vector
-        @rtype: L{VibrationalMode}
+        :param item: the index of a normal mode
+        :type item: int
+        :returns: the unscaled mode vector
+        :rtype: :class:`~MMTK.NormalModes.VibrationalModes.VibrationalMode`
         """
         index = self.sort_index[item]
         f = self.frequencies[index]
@@ -203,30 +206,30 @@ class VibrationalModes(Core.NormalModes):
                                time_range = (0., None, None), tau=None,
                                first_mode = 6):
         """
-        @param subset: the subset of the universe used in the calculation
+        :param subset: the subset of the universe used in the calculation
                        (default: the whole universe)
-        @type subset: L{MMTK.Collections.GroupOfAtoms}
-        @param weights: the weight to be given to each atom in the average
+        :type subset: :class:`~MMTK.Collections.GroupOfAtoms`
+        :param weights: the weight to be given to each atom in the average
                         (default: atomic masses)
-        @type weights: L{MMTK.ParticleVectors.ParticleScalar}
-        @param time_range: the time values at which the mean-square
+        :type weights: :class:`~MMTK.ParticleProperties.ParticleScalar`
+        :param time_range: the time values at which the mean-square
                            displacement is evaluated, specified as a
                            range tuple (first, last, step).
                            The defaults are first=0, last=
                            20 times the longest vibration perdiod,
                            and step defined such that 300 points are
                            used in total.
-        @type time_range: C{tuple}
-        @param tau: the relaxation time of an exponential damping factor
+        :type time_range: tuple
+        :param tau: the relaxation time of an exponential damping factor
                     (default: no damping)
-        @type tau: C{float}
-        @param first_mode: the first mode to be taken into account for
+        :type tau: float
+        :param first_mode: the first mode to be taken into account for
                            the fluctuation calculation. The default value
                            of 6 is right for molecules in vacuum.
-        @type first_mode: C{int}
-        @returns: the averaged mean-square displacement of the
+        :type first_mode: int
+        :returns: the averaged mean-square displacement of the
                   atoms in subset as a function of time
-        @rtype: C{Scientific.Functions.Interpolation.InterpolatingFunction}
+        :rtype: Scientific.Functions.Interpolation.InterpolatingFunction
         """
         if self.temperature is None:
             raise ValueError("no temperature available")
@@ -256,24 +259,24 @@ class VibrationalModes(Core.NormalModes):
     def EISF(self, q_range = (0., 15.), subset=None, weights = None,
              random_vectors = 15, first_mode = 6):
         """
-        @param q_range: the range of angular wavenumber values
-        @type q_range: C{tuple}
-        @param subset: the subset of the universe used in the calculation
+        :param q_range: the range of angular wavenumber values
+        :type q_range: tuple
+        :param subset: the subset of the universe used in the calculation
                        (default: the whole universe)
-        @type subset: L{MMTK.Collections.GroupOfAtoms}
-        @param weights: the weight to be given to each atom in the average
+        :type subset: :class:`~MMTK.Collections.GroupOfAtoms`
+        :param weights: the weight to be given to each atom in the average
                         (default: incoherent scattering lengths)
-        @type weights: L{MMTK.ParticleVectors.ParticleScalar}
-        @param random_vectors: the number of random direction vectors
+        :type weights: :class:`~MMTK.ParticleProperties.ParticleScalar`
+        :param random_vectors: the number of random direction vectors
                                used in the orientational average
-        @type random_vectors: C{int}
-        @param first_mode: the first mode to be taken into account for
+        :type random_vectors: int
+        :param first_mode: the first mode to be taken into account for
                            the fluctuation calculation. The default value
                            of 6 is right for molecules in vacuum.
-        @type first_mode: C{int}
-        @returns: the Elastic Incoherent Structure Factor (EISF) as a
+        :type first_mode: int
+        :returns: the Elastic Incoherent Structure Factor (EISF) as a
                   function of angular wavenumber
-        @rtype: C{Scientific.Functions.Interpolation.InterpolatingFunction}
+        :rtype: Scientific.Functions.Interpolation.InterpolatingFunction
         """
         if self.temperature is None:
             raise ValueError("no temperature available")
@@ -308,34 +311,34 @@ class VibrationalModes(Core.NormalModes):
                                      subset=None, weights=None, tau=None,
                                      random_vectors=15, first_mode = 6):
         """
-        @param q: the angular wavenumber
-        @type q: C{float}
-        @param time_range: the time values at which the mean-square
+        :param q: the angular wavenumber
+        :type q: float
+        :param time_range: the time values at which the mean-square
                            displacement is evaluated, specified as a
                            range tuple (first, last, step).
                            The defaults are first=0, last=
                            20 times the longest vibration perdiod,
                            and step defined such that 300 points are
                            used in total.
-        @type time_range: C{tuple}
-        @param subset: the subset of the universe used in the calculation
+        :type time_range: tuple
+        :param subset: the subset of the universe used in the calculation
                        (default: the whole universe)
-        @type subset: L{MMTK.Collections.GroupOfAtoms}
-        @param weights: the weight to be given to each atom in the average
+        :type subset: :class:`~MMTK.Collections.GroupOfAtoms`
+        :param weights: the weight to be given to each atom in the average
                         (default: incoherent scattering lengths)
-        @type weights: L{MMTK.ParticleVectors.ParticleScalar}
-        @param tau: the relaxation time of an exponential damping factor
+        :type weights: :class:`~MMTK.ParticleProperties.ParticleScalar`
+        :param tau: the relaxation time of an exponential damping factor
                     (default: no damping)
-        @type tau: C{float}
-        @param random_vectors: the number of random direction vectors
+        :type tau: float
+        :param random_vectors: the number of random direction vectors
                                used in the orientational average
-        @type random_vectors: C{int}
-        @param first_mode: the first mode to be taken into account for
+        :type random_vectors: int
+        :param first_mode: the first mode to be taken into account for
                            the fluctuation calculation. The default value
                            of 6 is right for molecules in vacuum.
-        @type first_mode: C{int}
-        @returns: the Incoherent Scattering Function as a function of time
-        @rtype: C{Scientific.Functions.Interpolation.InterpolatingFunction}
+        :type first_mode: int
+        :returns: the Incoherent Scattering Function as a function of time
+        :rtype: Scientific.Functions.Interpolation.InterpolatingFunction
         """
         if self.temperature is None:
             raise ValueError("no temperature available")

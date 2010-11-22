@@ -7,7 +7,7 @@
 Solvation of solute molecules
 """
 
-__docformat__ = 'epytext'
+__docformat__ = 'restructuredtext'
 
 from MMTK import ChemicalObjects, Units, Universe
 from MMTK.MolecularSurface import surfaceAndVolume
@@ -23,16 +23,16 @@ import copy
 #
 def numberOfSolventMolecules(universe, solvent, density):
     """
-    @param universe: a finite universe
-    @type universe: L{MMTK.Universe.Universe}
-    @param solvent: a molecule, or the name of a molecule in the database
-    @type solvent: L{MMTK.ChemicalObject.Molecule} or C{str}
-    @param density: the density of the solvent (amu/nm**3)
-    @type density: C{float}
-    @returns: the number of solvent molecules that must be added to the
+    :param universe: a finite universe
+    :type universe: :class:`~MMTK.Universe.Universe`
+    :param solvent: a molecule, or the name of a molecule in the database
+    :type solvent: :class:`~MMTK.ChemicalObjects.Molecule` or str
+    :param density: the density of the solvent (amu/nm**3)
+    :type density: float
+    :returns: the number of solvent molecules that must be added to the
               universe, in addition to whatever it already contains,
               to obtain the given solvent density.
-    @rtype: C{int}
+    :rtype: int
     """
     if isinstance(solvent, str):
 	solvent = ChemicalObjects.Molecule(solvent)
@@ -56,15 +56,15 @@ def addSolvent(universe, solvent, density, scale_factor=4.):
     in the scaled-up universe, but without overlaps between
     any two molecules.
 
-    @param universe: a finite universe
-    @type universe: L{MMTK.Universe.Universe}
-    @param solvent: a molecule, or the name of a molecule in the database
-    @type solvent: L{MMTK.ChemicalObject.Molecule} or C{str}
-    @param density: the density of the solvent (amu/nm**3)
-    @type density: C{float}
-    @param scale_factor: the factor by which the initial universe is
+    :param universe: a finite universe
+    :type universe: :class:`~MMTK.Universe.Universe`
+    :param solvent: a molecule, or the name of a molecule in the database
+    :type solvent: :class:`~MMTK.ChemicalObjects.Molecule` or str
+    :param density: the density of the solvent (amu/nm**3)
+    :type density: float
+    :param scale_factor: the factor by which the initial universe is
                          expanded before adding the solvent molecules
-    @type scale_factor: C{float}
+    :type scale_factor: float
     """
 
     # Calculate number of solvent molecules and universe size
@@ -111,24 +111,24 @@ def shrinkUniverse(universe, temperature=300.*Units.K, trajectory=None,
                    scale_factor=0.95):
     """
     Shrinks the universe, which must have been scaled up by
-    L{MMTK.Solvation.addSolvent}, back to its original size.
+    :class:`~MMTK.Solvation.addSolvent`, back to its original size.
     The compression is performed in small steps, in between which
     some energy minimization and molecular dynamics steps are executed.
     The molecular dynamics is run at the given temperature, and
     an optional trajectory can be specified in which intermediate
     configurations are stored.
 
-    @param universe: a finite universe
-    @type universe: L{MMTK.Universe.Universe}
-    @param temperature: the temperature at which the Molecular Dynamics
+    :param universe: a finite universe
+    :type universe: :class:`~MMTK.Universe.Universe`
+    :param temperature: the temperature at which the Molecular Dynamics
                         steps are run
-    @type temperature: C{float}
-    @param trajectory: the trajectory in which the progress of the
+    :type temperature: float
+    :param trajectory: the trajectory in which the progress of the
                        shrinking procedure is stored, or a filename
-    @type trajectory: L{MMTK.Trajectory.Trajectory} or C{str}
-    @param scale_factor: the factor by which the universe is scaled
+    :type trajectory: :class:`~MMTK.Trajectory.Trajectory` or str
+    :param scale_factor: the factor by which the universe is scaled
                          at each reduction step
-    @type scale_factor: C{float}
+    :type scale_factor: float
     """
 
     # Set velocities and initialize trajectory output

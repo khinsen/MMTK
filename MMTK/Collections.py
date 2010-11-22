@@ -7,7 +7,7 @@
 Collections of chemical objects
 """
 
-__docformat__ = 'epytext'
+__docformat__ = 'restructuredtext'
 
 from MMTK import Utility, Units, ParticleProperties, Visualization
 from Scientific.Geometry import Vector, Tensor, Objects3D
@@ -34,18 +34,18 @@ class GroupOfAtoms(object):
     
     def numberOfAtoms(self):
         """
-        @returns: the number of atoms
-        @rtype: C{int}
+        :returns: the number of atoms
+        :rtype: int
         """
         return len(self.atomList())
 
     def numberOfPoints(self):
         """
-        @returns: the number of geometrical points that define the
+        :returns: the number of geometrical points that define the
                   object. It is currently equal to the number of atoms,
                   but could be different e.g. for quantum systems, in which
                   each atom is described by a wave function or a path integral.
-        @rtype: C{int}
+        :rtype: int
         """
         return sum([a.numberOfPoints() for a in self.atomIterator()])
 
@@ -53,8 +53,8 @@ class GroupOfAtoms(object):
 
     def numberOfFixedAtoms(self):
         """
-        @returns: the number of atoms that are fixed, i.e. that cannot move
-        @rtype: C{int}
+        :returns: the number of atoms that are fixed, i.e. that cannot move
+        :rtype: int
         """
         n = 0
         for a in self.atomIterator():
@@ -65,23 +65,23 @@ class GroupOfAtoms(object):
 
     def degreesOfFreedom(self):
         """
-        @returns: the number of mechanical degrees of freedom
-        @rtype: C{int}
+        :returns: the number of mechanical degrees of freedom
+        :rtype: int
         """
         return 3*(self.numberOfAtoms()-self.numberOfFixedAtoms())
 
     def atomCollection(self):
         """
-        @returns: a collection containing all atoms in the object
+        :returns: a collection containing all atoms in the object
         """
         return Collection(self.atomList())
 
     def atomsWithDefinedPositions(self, conf = None):
         """
-        @param conf: a configuration object, or C{None} for the
+        :param conf: a configuration object, or None for the
                      current configuration
-        @type conf: L{MMTK.Configuration} or C{NoneType}
-        @returns: a collection of all atoms that have a position in the
+        :type conf: :class:`~MMTK.ParticleProperties.Configuration` or NoneType
+        :returns: a collection of all atoms that have a position in the
                   given configuration
         """
         return Collection([a for a in self.atomIterator()
@@ -89,18 +89,18 @@ class GroupOfAtoms(object):
 
     def mass(self):
         """
-        @returns: the total mass
-        @rtype: C{float}
+        :returns: the total mass
+        :rtype: float
         """
         return sum(a._mass for a in self.atomIterator())
 
     def centerOfMass(self, conf = None):
         """
-        @param conf: a configuration object, or C{None} for the
+        :param conf: a configuration object, or None for the
                      current configuration
-        @type conf: L{MMTK.Configuration} or C{NoneType}
-        @returns: the center of mass in the given configuration
-        @rtype: C{Scientific.Geometry.Vector}
+        :type conf: :class:`~MMTK.ParticleProperties.Configuration` or NoneType
+        :returns: the center of mass in the given configuration
+        :rtype: Scientific.Geometry.Vector
         """
         offset = None
         universe = self.universe()
@@ -122,10 +122,10 @@ class GroupOfAtoms(object):
 
     def centerAndMomentOfInertia(self, conf = None):
         """
-        @param conf: a configuration object, or C{None} for the
+        :param conf: a configuration object, or None for the
                      current configuration
-        @type conf: L{MMTK.Configuration} or C{NoneType}
-        @returns: the center of mass and the moment of inertia tensor
+        :type conf: :class:`~MMTK.ParticleProperties.Configuration` or NoneType
+        :returns: the center of mass and the moment of inertia tensor
                   in the given configuration
         """
         from Scientific.Geometry import delta
@@ -152,10 +152,10 @@ class GroupOfAtoms(object):
 
     def rotationalConstants(self, conf=None):
         """
-        @param conf: a configuration object, or C{None} for the
+        :param conf: a configuration object, or None for the
                      current configuration
-        @type conf: L{MMTK.Configuration} or C{NoneType}
-        @returns: a sorted array of rotational constants A, B, C
+        :type conf: :class:`~MMTK.ParticleProperties.Configuration` or NoneType
+        :returns: a sorted array of rotational constants A, B, C
                   in internal units
         """
         com, i = self.centerAndMomentOfInertia(conf)
@@ -164,13 +164,13 @@ class GroupOfAtoms(object):
 
     def boundingBox(self, conf = None):
         """
-        @param conf: a configuration object, or C{None} for the
+        :param conf: a configuration object, or None for the
                      current configuration
-        @type conf: L{MMTK.Configuration} or C{NoneType}
-        @returns: two opposite corners of a bounding box around the
+        :type conf: :class:`~MMTK.ParticleProperties.Configuration` or NoneType
+        :returns: two opposite corners of a bounding box around the
                   object. The bounding box is the smallest rectangular
                   bounding box with edges parallel to the coordinate axes.
-        @rtype: C{tuple} of two C{Scientific.Geometry.Vector}
+        :rtype: tuple of two Scientific.Geometry.Vector
         """
         atoms = self.atomIterator()
         min = atoms[0].position(conf).array
@@ -183,13 +183,13 @@ class GroupOfAtoms(object):
 
     def boundingSphere(self, conf = None):
         """
-        @param conf: a configuration object, or C{None} for the
+        :param conf: a configuration object, or None for the
                      current configuration
-        @type conf: L{MMTK.Configuration} or C{NoneType}
-        @returns: a sphere that contains all atoms in the object.
+        :type conf: :class:`~MMTK.ParticleProperties.Configuration` or NoneType
+        :returns: a sphere that contains all atoms in the object.
                   This is B{not} the minimal bounding sphere, just B{some}
                   bounding sphere.
-        @rtype: Scientific.Geometry.Objects3D.Sphere
+        :rtype: Scientific.Geometry.Objects3D.Sphere
         """
         atoms = self.atomIterator()
         center = sum((a.position(conf) for a in atoms),
@@ -201,15 +201,15 @@ class GroupOfAtoms(object):
 
     def rmsDifference(self, conf1, conf2 = None):
         """
-        @param conf1: a configuration object
-        @type conf1: L{MMTK.Configuration}
-        @param conf2: a configuration object, or C{None} for the
+        :param conf1: a configuration object
+        :type conf1: :class:`~MMTK.ParticleProperties.Configuration`
+        :param conf2: a configuration object, or None for the
                       current configuration
-        @type conf2: L{MMTK.Configuration} or C{NoneType}
-        @returns: the RMS (root-mean-square) difference between the
+        :type conf2: :class:`~MMTK.ParticleProperties.Configuration` or NoneType
+        :returns: the RMS (root-mean-square) difference between the
                   conformations of the object in two universe configurations,
                   conf1 and conf2
-        @rtype: C{float}
+        :rtype: float
         """
         universe = conf1.universe
         m = 0.
@@ -277,16 +277,16 @@ class GroupOfAtoms(object):
 
     def findTransformation(self, conf1, conf2 = None):
         """
-        @param conf1: a configuration object
-        @type conf1: L{MMTK.Configuration}
-        @param conf2: a configuration object, or C{None} for the
+        :param conf1: a configuration object
+        :type conf1: :class:`~MMTK.ParticleProperties.Configuration`
+        :param conf2: a configuration object, or None for the
                       current configuration
-        @type conf2: L{MMTK.Configuration} or C{NoneType}
-        @returns: the linear transformation that, when applied to
+        :type conf2: :class:`~MMTK.ParticleProperties.Configuration` or NoneType
+        :returns: the linear transformation that, when applied to
                   the object in configuration conf1, minimizes the
                   RMS distance to the conformation in conf2, and the
                   minimal RMS distance.
-                  If conf2 is C{None}, returns the transformation from the
+                  If conf2 is None, returns the transformation from the
                   current configuration to conf1 and the associated
                   RMS distance.
         """
@@ -300,8 +300,8 @@ class GroupOfAtoms(object):
         """
         Translate the object by a displacement vector
         
-        @param vector: the displacement vector
-        @type vector: C{Scientific.Geometry.Vector}
+        :param vector: the displacement vector
+        :type vector: Scientific.Geometry.Vector
         """
         for a in self.atomIterator():
             a.translateBy(vector)
@@ -309,8 +309,8 @@ class GroupOfAtoms(object):
     def translateTo(self, position):
         """
         Translate the object such that its center of mass is at position
-        @param position: the final position
-        @type position: C{Scientific.Geometry.Vector}
+        :param position: the final position
+        :type position: Scientific.Geometry.Vector
         """
         self.translateBy(position-self.centerOfMass())
 
@@ -327,7 +327,7 @@ class GroupOfAtoms(object):
         principal axes of inertia become parallel to the three
         coordinate axes.
 
-        @param repr: the specific representation for axis alignment:
+        :param repr: the specific representation for axis alignment:
           - Ir    : x y z <--> b c a
           - IIr   : x y z <--> c a b
           - IIIr  : x y z <--> a b c
@@ -345,15 +345,15 @@ class GroupOfAtoms(object):
         principal axes of inertia parallel to the three coordinate
         axes.
 
-        @param repr: the specific representation for axis alignment:
+        :param repr: the specific representation for axis alignment:
           Ir    : x y z <--> b c a
           IIr   : x y z <--> c a b
           IIIr  : x y z <--> a b c
           Il    : x y z <--> c b a
           IIl   : x y z <--> a c b
           IIIl  : x y z <--> b a c
-        @returns: the normalizing transformation
-        @rtype: C{Scientific.Geometry.Transformation.RigidBodyTransformation}
+        :returns: the normalizing transformation
+        :rtype: Scientific.Geometry.Transformation.RigidBodyTransformation
         """
         from Scientific.LA import determinant
         cm, inertia = self.centerAndMomentOfInertia()
@@ -381,19 +381,19 @@ class GroupOfAtoms(object):
         """
         Apply a transformation to the object
 
-        @param t: the transformation to be applied
-        @type t: C{Scientific.Geometry.Transformation}
+        :param t: the transformation to be applied
+        :type t: Scientific.Geometry.Transformation
         """
         for a in self.atomIterator():
             a.setPosition(t(a.position()))
 
     def displacementUnderTransformation(self, t):
         """
-        @param t: the transformation to be applied
-        @type t: C{Scientific.Geometry.Transformation}
-        @returns: the displacement vectors for the atoms in the object
-                  that correspond to the transformation |t|.
-        @rtype: L{MMTK.ParticleVector}
+        :param t: the transformation to be applied
+        :type t: Scientific.Geometry.Transformation
+        :returns: the displacement vectors for the atoms in the object
+                  that correspond to the transformation t.
+        :rtype: :class:`~MMTK.ParticleProperties.ParticleVector`
         """
         d = ParticleProperties.ParticleVector(self.universe())
         for a in self.atomIterator():
@@ -406,10 +406,10 @@ class GroupOfAtoms(object):
         Rotate the object around an axis that passes through its center
         of mass.
 
-        @param axis_direction: the direction of the axis of rotation
-        @type axis_direction: C{Scientific.Geometry.Vector}
-        @param angle: the rotation angle (in radians)
-        @type angle: C{float}
+        :param axis_direction: the direction of the axis of rotation
+        :type axis_direction: Scientific.Geometry.Vector
+        :param angle: the rotation angle (in radians)
+        :type angle: float
         """
         cm = self.centerOfMass()
         t = Transformation.Translation(cm) * \
@@ -422,10 +422,10 @@ class GroupOfAtoms(object):
         Rotate the object around an axis that passes through the
         coordinate origin.
 
-        @param axis_direction: the direction of the axis of rotation
-        @type axis_direction: C{Scientific.Geometry.Vector}
-        @param angle: the rotation angle (in radians)
-        @type angle: C{float}
+        :param axis_direction: the direction of the axis of rotation
+        :type axis_direction: Scientific.Geometry.Vector
+        :param angle: the rotation angle (in radians)
+        :type angle: float
         """
         self.applyTransformation(Transformation.Rotation(axis_direction, angle))
 
@@ -433,12 +433,12 @@ class GroupOfAtoms(object):
         """
         Rotate the object arond an axis specified by two points
 
-        @param point1: the first point
-        @type point1: C{Scientific.Geometry.Vector}
-        @param point2: the second point
-        @type point2: C{Scientific.Geometry.Vector}
-        @param angle: the rotation angle (in radians)
-        @type angle: C{float}
+        :param point1: the first point
+        :type point1: Scientific.Geometry.Vector
+        :param point2: the second point
+        :type point2: Scientific.Geometry.Vector
+        :param angle: the rotation angle (in radians)
+        :type angle: float
         """
         tr1 = Transformation.Translation(-point1)
         tr2 = Transformation.Rotation(point2-point1, angle)
@@ -450,12 +450,12 @@ class GroupOfAtoms(object):
         Write a representation of the object in a given
         configuration to a file.
 
-        @param filename: the name of the file
-        @type filename: C{str}
-        @param configuration: a configuration object, or C{None} for the
+        :param filename: the name of the file
+        :type filename: str
+        :param configuration: a configuration object, or None for the
                               current configuration
-        @type configuration: L{MMTK.Configuration} or C{NoneType}
-        @param format: 'pdb' or 'vrml' (default: guess from filename)
+        :type configuration: :class:`~MMTK.ParticleProperties.Configuration` or NoneType
+        :param format: 'pdb' or 'vrml' (default: guess from filename)
                        A subformat specification can be added, separated
                        by a dot. Subformats of 'vrml' are 'wireframe'
                        (default), 'ball_and_stick', 'highlight' (like
@@ -464,7 +464,7 @@ class GroupOfAtoms(object):
                        non-zero value), and 'charge' (wireframe plus small
                        spheres for the atoms whose color indicates the
                        charge on a red-to-green color scale)
-        @type format: C{str}
+        :type format: str
         """
         from MMTK import ConfigIO
         universe = self.universe()
@@ -480,12 +480,12 @@ class GroupOfAtoms(object):
         Start an external viewer for the object in the given
         configuration.
 
-        @param configuration: the configuration to be visualized
-        @type configuration: L{MMTK.Configuration}
-        @param format: 'pdb' (for running $PDBVIEWER) or 'vrml'
+        :param configuration: the configuration to be visualized
+        :type configuration: :class:`~MMTK.ParticleProperties.Configuration`
+        :param format: 'pdb' (for running $PDBVIEWER) or 'vrml'
                        (for running $VRMLVIEWER). An optional
                        subformat specification can be added, see
-                       L{writeToFile} for the details.
+                       :class:`~MMTK.Collections.GroupOfAtoms.writeToFile` for the details.
         """
         universe = self.universe()
         if universe is not None:
@@ -495,11 +495,11 @@ class GroupOfAtoms(object):
 
     def kineticEnergy(self, velocities = None):
         """
-        @param velocities: a set of velocities for all atoms, or
-                           C{None} for the current velocities
-        @type velocities: L{MMTK.ParticleVector}
-        @returns: the kinetic energy
-        @rtype: C{float}
+        :param velocities: a set of velocities for all atoms, or
+                           None for the current velocities
+        :type velocities: :class:`~MMTK.ParticleProperties.ParticleVector`
+        :returns: the kinetic energy
+        :rtype: float
         """
         if velocities is None:
             velocities = self.atomList()[0].universe().velocities()
@@ -511,22 +511,22 @@ class GroupOfAtoms(object):
 
     def temperature(self, velocities = None):
         """
-        @param velocities: a set of velocities for all atoms, or
-                           C{None} for the current velocities
-        @type velocities: L{MMTK.ParticleVector}
-        @returns: the temperature
-        @rtype: C{float}
+        :param velocities: a set of velocities for all atoms, or
+                           None for the current velocities
+        :type velocities: :class:`~MMTK.ParticleProperties.ParticleVector`
+        :returns: the temperature
+        :rtype: float
         """
         energy = self.kineticEnergy(velocities)
         return 2.*energy/(self.degreesOfFreedom()*Units.k_B)
 
     def momentum(self, velocities = None):
         """
-        @param velocities: a set of velocities for all atoms, or
-                           C{None} for the current velocities
-        @type velocities: L{MMTK.ParticleVector}
-        @returns: the momentum
-        @rtype: C{Scientific.Geometry.Vector}
+        :param velocities: a set of velocities for all atoms, or
+                           None for the current velocities
+        :type velocities: :class:`~MMTK.ParticleProperties.ParticleVector`
+        :returns: the momentum
+        :rtype: Scientific.Geometry.Vector
         """
         if velocities is None:
             velocities = self.atomList()[0].universe().velocities()
@@ -535,14 +535,14 @@ class GroupOfAtoms(object):
 
     def angularMomentum(self, velocities = None, conf = None):
         """
-        @param velocities: a set of velocities for all atoms, or
-                           C{None} for the current velocities
-        @type velocities: L{MMTK.ParticleVector}
-        @param conf: a configuration object, or C{None} for the
+        :param velocities: a set of velocities for all atoms, or
+                           None for the current velocities
+        :type velocities: :class:`~MMTK.ParticleProperties.ParticleVector`
+        :param conf: a configuration object, or None for the
                      current configuration
-        @type conf: L{MMTK.Configuration}
-        @returns: the angluar momentum
-        @rtype: C{Scientific.Geometry.Vector}
+        :type conf: :class:`~MMTK.ParticleProperties.Configuration`
+        :returns: the angluar momentum
+        :rtype: Scientific.Geometry.Vector
         """
         if velocities is None:
             velocities = self.atomList()[0].universe().velocities()
@@ -553,14 +553,14 @@ class GroupOfAtoms(object):
 
     def angularVelocity(self, velocities = None, conf = None):
         """
-        @param velocities: a set of velocities for all atoms, or
-                           C{None} for the current velocities
-        @type velocities: L{MMTK.ParticleVector}
-        @param conf: a configuration object, or C{None} for the
+        :param velocities: a set of velocities for all atoms, or
+                           None for the current velocities
+        :type velocities: :class:`~MMTK.ParticleProperties.ParticleVector`
+        :param conf: a configuration object, or None for the
                      current configuration
-        @type conf: L{MMTK.Configuration}
-        @returns: the angluar velocity
-        @rtype: C{Scientific.Geometry.Vector}
+        :type conf: :class:`~MMTK.ParticleProperties.Configuration`
+        :returns: the angluar velocity
+        :rtype: Scientific.Geometry.Vector
         """
         if velocities is None:
             velocities = self.atomList()[0].universe().velocities()
@@ -572,9 +572,9 @@ class GroupOfAtoms(object):
         
     def universe(self):
         """
-        @returns: the universe of which the object is part. For an
+        :returns: the universe of which the object is part. For an
                   object that is not part of a universe, the result is
-                  C{None}
+                  None
         """
         atoms = self.atomList()
         if not atoms:
@@ -587,28 +587,28 @@ class GroupOfAtoms(object):
 
     def charge(self):
         """
-        @returns: the total charge of the object. This is defined only
+        :returns: the total charge of the object. This is defined only
                   for objects that are part of a universe with a force
                   field that defines charges.
-        @rtype: C{float}
+        :rtype: float
         """
         return self.universe().forcefield().charge(self)
 
     def dipole(self, reference = None):
         """
-        @returns: the total dipole moment of the object. This is defined only
+        :returns: the total dipole moment of the object. This is defined only
                   for objects that are part of a universe with a force field
                   that defines charges.
-        @rtype: C{Scientific.Geometry.Vector}
+        :rtype: Scientific.Geometry.Vector
         """
         return self.universe().forcefield().dipole(self, reference)
 
     def booleanMask(self):
         """
-        @returns: a ParticleScalar object that contains a value of 1
+        :returns: a ParticleScalar object that contains a value of 1
                   for each atom that is in the object and a value of 0 for all
                   other atoms in the universe
-        @rtype: L{MMTK.ParticleScalar}
+        :rtype: :class:`~MMTK.ParticleProperties.ParticleScalar`
         """
         universe = self.universe()
         if universe is None:
@@ -640,7 +640,7 @@ class Collection(GroupOfAtoms, Visualization.Viewable):
 
     def __init__(self, *objects):
         """
-        @param objects: a chemical object or a sequence of chemical objects that
+        :param objects: a chemical object or a sequence of chemical objects that
                         define the initial content of the collection.
         """
         self.objects = []
@@ -652,7 +652,7 @@ class Collection(GroupOfAtoms, Visualization.Viewable):
         """
         Add objects to the collection.
 
-        @param object: the object(s) to be added. If it is another collection
+        :param object: the object(s) to be added. If it is another collection
                        or a list, all of its elements are added
         """
         from MMTK.ChemicalObjects import isChemicalObject
@@ -681,9 +681,9 @@ class Collection(GroupOfAtoms, Visualization.Viewable):
         collection. The object(s) to be removed must be elements of the
         collection.
 
-        @param object: the object to be removed, or a list or collection
+        :param object: the object to be removed, or a list or collection
                        of objects whose elements are to be removed
-        @raises ValueError: if the object is not an element of the collection
+        :raises ValueError: if the object is not an element of the collection
         """
         from MMTK.ChemicalObjects import isChemicalObject
         if isChemicalObject(object):
@@ -704,15 +704,15 @@ class Collection(GroupOfAtoms, Visualization.Viewable):
         """
         Select objects in a spherical shell around a central point.
 
-        @param point: the center of the spherical shell
-        @type point: C{Scientific.Geometry.Vector}
-        @param r1: inner or outer radius of the shell
-        @type r1: C{float}
-        @param r2: inner or outer radius of the shell (default: 0.)
-        @type r2: C{float}
-        @returns: a collection of all elements whose
+        :param point: the center of the spherical shell
+        :type point: Scientific.Geometry.Vector
+        :param r1: inner or outer radius of the shell
+        :type r1: float
+        :param r2: inner or outer radius of the shell (default: 0.)
+        :type r2: float
+        :returns: a collection of all elements whose
                   distance from point is between r1 and r2
-        @rtype: L{Collection}
+        :rtype: :class:`~MMTK.Collections.Collection`
         """
         if r1 > r2:
             r1, r2 = r2, r1
@@ -730,13 +730,13 @@ class Collection(GroupOfAtoms, Visualization.Viewable):
         """
         Select objects in a rectangular volume
 
-        @param p1: one corner of the rectangular volume
-        @type p1: C{Scientific.Geometry.Vector}
-        @param p2: the other corner of the rectangular volume
-        @type p2: C{Scientific.Geometry.Vector}
-        @returns: a collection of all elements that lie
+        :param p1: one corner of the rectangular volume
+        :type p1: Scientific.Geometry.Vector
+        :param p2: the other corner of the rectangular volume
+        :type p2: Scientific.Geometry.Vector
+        :returns: a collection of all elements that lie
                   within the rectangular volume
-        @rtype: L{Collection}
+        :rtype: :class:`~MMTK.Collections.Collection`
         """
         x1 = N.minimum(p1.array, p2.array)
         x2 = N.maximum(p1.array, p2.array)
@@ -754,10 +754,10 @@ class Collection(GroupOfAtoms, Visualization.Viewable):
         Make a list of all objects in the collection that are instances
         of a specific type or of one of its subtypes.
 
-        @param type: the type that serves as a filter. If C{None},
+        :param type: the type that serves as a filter. If None,
                      all objects are returned
-        @returns: the objects that match the given type
-        @rtype: C{list}
+        :returns: the objects that match the given type
+        :rtype: list
         """
         if type is None:
             return self.objects
@@ -766,8 +766,8 @@ class Collection(GroupOfAtoms, Visualization.Viewable):
 
     def atomList(self):
         """
-        @returns: a list containing all atoms of all objects in the collection
-        @rtype: C{list}
+        :returns: a list containing all atoms of all objects in the collection
+        :rtype: list
         """
         atoms = []
         for o in self.objectList():
@@ -779,16 +779,16 @@ class Collection(GroupOfAtoms, Visualization.Viewable):
     
     def numberOfAtoms(self):
         """
-        @returns: the total number of atoms in the objects of the collection
-        @rtype: C{int}
+        :returns: the total number of atoms in the objects of the collection
+        :rtype: int
         """
         return sum(o.numberOfAtoms() for o in self.objectList())
     
     def universe(self):
         """
-        @returns: the universe of which all objects in the collection
+        :returns: the universe of which all objects in the collection
                   are part. If no such universe exists, the return value
-                  is C{None}
+                  is None
         """
         if not self.objects:
             return None
@@ -800,16 +800,16 @@ class Collection(GroupOfAtoms, Visualization.Viewable):
 
     def __len__(self):
         """
-        @returns: the number of objects in the collection
-        @rtype: C{int}
+        :returns: the number of objects in the collection
+        :rtype: int
         """
         return len(self.objects)
 
     def __getitem__(self, item):
         """
-        @param item: an index into the object list
-        @type item: C{int}
-        @returns: the object with the given index
+        :param item: an index into the object list
+        :type item: int
+        :returns: the object with the given index
         """
         return self.objects[item]
 
@@ -828,9 +828,9 @@ class Collection(GroupOfAtoms, Visualization.Viewable):
         return the list of the results. If the results are chemical
         objects, a Collection object is returned instead of a list.
 
-        @param function: the function to be applied
-        @type function: callable
-        @returns: the list or collection of the results
+        :param function: the function to be applied
+        :type function: callable
+        :returns: the list or collection of the results
         """
         from MMTK.ChemicalObjects import isChemicalObject
         list = [function(o) for o in self.objectList()]
@@ -851,8 +851,8 @@ class Collection(GroupOfAtoms, Visualization.Viewable):
 
     def distanceConstraintList(self):
         """
-        @returns: the list of distance constraints
-        @rtype: C{list}
+        :returns: the list of distance constraints
+        :rtype: list
         """
         dc = []
         for o in self.objects:
@@ -861,7 +861,7 @@ class Collection(GroupOfAtoms, Visualization.Viewable):
 
     def numberOfDistanceConstraints(self):
         """
-        @returns: the number of distance constraints
+        :returns: the number of distance constraints
         """
         return sum(o.numberOfDistanceConstraints() for o in self.objects)
 
@@ -898,8 +898,8 @@ class Collection(GroupOfAtoms, Visualization.Viewable):
 
 def isCollection(object):
     """
-    @param object: any Python object
-    @returns: C{True} if the object is a L{Collection}
+    :param object: any Python object
+    :returns: True if the object is a :class:`~MMTK.Collections.Collection`
     """
     return hasattr(object, 'is_collection')
 
@@ -922,8 +922,8 @@ class PartitionedCollection(Collection):
 
     def __init__(self, partition_size, *objects):
         """
-        @param partition_size: the edge length of the cubic cells
-        @param objects: a chemical object or a sequence of chemical objects that
+        :param partition_size: the edge length of the cubic cells
+        :param objects: a chemical object or a sequence of chemical objects that
                         define the initial content of the collection.
         """
         self.partition_size = 1.*partition_size
@@ -991,7 +991,7 @@ class PartitionedCollection(Collection):
 
     def partitions(self):
         """
-        @returns: a list of cubic partitions. Each partition is specified
+        :returns: a list of cubic partitions. Each partition is specified
                   by a tuple containing two vectors (describing the diagonally
                   opposite corners) and the list of objects in the partition.
         """
@@ -1039,11 +1039,11 @@ class PartitionedCollection(Collection):
 
     def pairsWithinCutoff(self, cutoff):
         """
-        @param cutoff: a cutoff for pair distances
-        @returns: a list containing all pairs of objects in the
+        :param cutoff: a cutoff for pair distances
+        :returns: a list containing all pairs of objects in the
                   collection whose center-of-mass distance is less than
                   the cutoff
-        @rtype: C{list}
+        :rtype: list
         """
         pairs = []
         positions = {}

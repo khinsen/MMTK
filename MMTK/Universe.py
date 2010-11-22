@@ -10,7 +10,7 @@
 Universes
 """
 
-__docformat__ = 'epytext'
+__docformat__ = 'restructuredtext'
 
 from MMTK import Bonds, ChemicalObjects, Collections, Environment, \
                  Random, Utility, ParticleProperties, Visualization
@@ -43,15 +43,15 @@ class Universe(Collections.GroupOfAtoms, Visualization.Viewable):
     objects, use one of its subclasses.
 
     In addition to the methods listed below, universe objects support
-    the following operations (C{u} is any universe object, C{o} is any
+    the following operations (u is any universe object, o is any
     chemical object):
 
-     - C{len(u)} yields the number of chemical objects in the universe
-     - C{u[i]} returns object number C{i}
-     - C{u.name = o} adds C{o} to the universe and also makes it accessible as
+     * len(u) yields the number of chemical objects in the universe
+     * u[i] returns object number i
+     * u.name = o adds o to the universe and also makes it accessible as
        an attribute
-     - C{del u.name} removes the object that was assigned to C{u.name} from
-        the universe
+     * del u.name removes the object that was assigned to u.name from
+       the universe
     """
 
     def __init__(self, forcefield, properties):
@@ -136,23 +136,23 @@ class Universe(Collections.GroupOfAtoms, Visualization.Viewable):
 
     def objectList(self, klass = None):
         """
-        @param klass: an optional class argument
-        @type klass: C{class}
-        @returns: a list of all chemical objects in the universe.
+        :param klass: an optional class argument
+        :type klass: class
+        :returns: a list of all chemical objects in the universe.
                   If klass is given, only objects that are instances
                   of klass are returned.
-        @rtype: C{list}
+        :rtype: list
         """
         return self._objects.objectList(klass)
 
     def environmentObjectList(self, klass = None):
         """
-        @param klass: an optional class argument
-        @type klass: C{class}
-        @returns: a list of all environment objects in the universe.
+        :param klass: an optional class argument
+        :type klass: class
+        :returns: a list of all environment objects in the universe.
                   If klass is given, only objects that are instances
                   of klass are returned.
-        @rtype: C{list}
+        :rtype: list
         """
         if klass is None:
             return self._environment
@@ -162,8 +162,8 @@ class Universe(Collections.GroupOfAtoms, Visualization.Viewable):
 
     def atomList(self):
         """
-        @returns: a list of all atoms in the universe
-        @rtype: C{list}
+        :returns: a list of all atoms in the universe
+        :rtype: list
         """
         if self._atoms is None:
             self._atoms = self._objects.atomList()
@@ -177,7 +177,7 @@ class Universe(Collections.GroupOfAtoms, Visualization.Viewable):
 
     def universe(self):
         """
-        @returns: the universe itself
+        :returns: the universe itself
         """
         return self
 
@@ -185,11 +185,12 @@ class Universe(Collections.GroupOfAtoms, Visualization.Viewable):
         """
         Adds object to the universe. If object is a Collection,
         all elements of the Collection are added to the universe.
-        @param object: the object (chemical or environment) to be added
-        @param steal: if C{True}, permit stealing the object from another
+
+        :param object: the object (chemical or environment) to be added
+        :param steal: if True, permit stealing the object from another
                       universe, otherwise the object must not yet be
                       attached to any universe.
-        @type steal: C{bool}
+        :type steal: bool
         """
         if ChemicalObjects.isChemicalObject(object):
             if (not steal) and object.parent is not None:
@@ -218,7 +219,8 @@ class Universe(Collections.GroupOfAtoms, Visualization.Viewable):
         Removes object from the universe. If object is a Collection,
         each of its elements is removed. The object to be removed must
         be in the universe.
-        @param object: the object (chemical or environment) to be removed
+
+        :param object: the object (chemical or environment) to be removed
         """
         if ChemicalObjects.isChemicalObject(object):
             if object.parent != self:
@@ -238,24 +240,24 @@ class Universe(Collections.GroupOfAtoms, Visualization.Viewable):
 
     def selectShell(self, point, r1, r2=0.):
         """
-        @param point: a point in space
-        @type point: C{Scientific.Geometry.Vector}
-        @param r1: one of the radii of a spherical shell
-        @type r1: C{float}
-        @param r2: the other of the two radii of a spherical shell
-        @type r2: C{float}
-        @returns: a Collection of all objects in the universe whose
+        :param point: a point in space
+        :type point: Scientific.Geometry.Vector
+        :param r1: one of the radii of a spherical shell
+        :type r1: float
+        :param r2: the other of the two radii of a spherical shell
+        :type r2: float
+        :returns: a Collection of all objects in the universe whose
                   distance from point lies between r1 and r2.
         """
         return self._objects.selectShell(point, r1, r2)
 
     def selectBox(self, p1, p2):
         """
-        @param p1: one corner of a box in space
-        @type p1: C{Scientific.Geometry.Vector}
-        @param p2: the other corner of a box in space
-        @type p2: C{Scientific.Geometry.Vector}
-        @returns: a Collection of all objects in the universe that lie
+        :param p1: one corner of a box in space
+        :type p1: Scientific.Geometry.Vector
+        :param p2: the other corner of a box in space
+        :type p2: Scientific.Geometry.Vector
+        :returns: a Collection of all objects in the universe that lie
                    within the box whose diagonally opposite corners are
                    given by p1 and p2.
         """
@@ -350,14 +352,14 @@ class Universe(Collections.GroupOfAtoms, Visualization.Viewable):
         only immediately before modifying configuration and velocities,
         and releases it immediately afterwards.
 
-        @param waitflag: if true, the method waits until the lock
+        :param waitflag: if true, the method waits until the lock
                          becomes available; this is the most common mode.
                          If false, the method returns immediately even
                          if another thread holds the lock.
-        @type waitflag: C{bool}
-        @returns: a flag indicating if the lock was successfully
+        :type waitflag: bool
+        :returns: a flag indicating if the lock was successfully
                   acquired (1) or not (0).
-        @rtype: C{int}
+        :rtype: int
         """
         if waitflag:
             return self._spec.configurationChangeLock(1)
@@ -372,8 +374,8 @@ class Universe(Collections.GroupOfAtoms, Visualization.Viewable):
 
     def setForceField(self, forcefield):
         """
-        @param forcefield: the new forcefield for this universe
-        @type forcefield: L{MMTK.ForceField.ForceField.ForceField}
+        :param forcefield: the new forcefield for this universe
+        :type forcefield: :class:`~MMTK.ForceFields.ForceField.ForceField`
         """
         self._forcefield = forcefield
         self._evaluator = {}
@@ -399,12 +401,12 @@ class Universe(Collections.GroupOfAtoms, Visualization.Viewable):
 
     def configuration(self):
         """
-        @returns: the configuration object describing the current
+        :returns: the configuration object describing the current
                   configuration of the universe. Note that this is not a
                   copy of the current state, but a reference: the positions
                   in the configuration object will change when coordinate
                   changes are applied to the universe in whatever way.
-        @rtype: L{MMTK.ParticleProperties.Configuration}
+        :rtype: :class:`~MMTK.ParticleProperties.Configuration`
         """
         if self._configuration is None:
             np = self.numberOfAtoms()
@@ -446,8 +448,8 @@ class Universe(Collections.GroupOfAtoms, Visualization.Viewable):
         This operation is thread-safe; it won't return inconsistent
         data even when another thread is modifying the configuration.
 
-        @returns: a copy of the current configuration
-        @rtype: L{MMTK.ParticleProperties.Configuration}
+        :returns: a copy of the current configuration
+        :rtype: :class:`~MMTK.ParticleProperties.Configuration`
         """
         self.acquireReadStateLock()
         try:
@@ -468,13 +470,13 @@ class Universe(Collections.GroupOfAtoms, Visualization.Viewable):
         Update the current configuration of the universe by copying
         the given input configuration.
         
-        @param configuration: the new configuration
-        @type configuration: L{MMTK.ParticleProperties.Configuration}
-        @param block: if C{True}, the operation blocks other threads
+        :param configuration: the new configuration
+        :type configuration: :class:`~MMTK.ParticleProperties.Configuration`
+        :param block: if True, the operation blocks other threads
                       from accessing the configuration before the update
-                      is completed. If C{False}, it is assumed that the
+                      is completed. If False, it is assumed that the
                       caller takes care of locking.
-        @type block: C{bool}
+        :type block: bool
         """
         if not ParticleProperties.isConfiguration(configuration):
             raise TypeError('not a universe configuration')
@@ -493,13 +495,13 @@ class Universe(Collections.GroupOfAtoms, Visualization.Viewable):
         Update the current configuration of the universe by adding
         the given displacement vector.
         
-        @param displacement: the displacement vector for each atom
-        @type displacement: L{MMTK.ParticleProperties.ParticleVector}
-        @param block: if C{True}, the operation blocks other threads
+        :param displacement: the displacement vector for each atom
+        :type displacement: :class:`~MMTK.ParticleProperties.ParticleVector`
+        :param block: if True, the operation blocks other threads
                       from accessing the configuration before the update
-                      is completed. If C{False}, it is assumed that the
+                      is completed. If False, it is assumed that the
                       caller takes care of locking.
-        @type block: C{bool}
+        :type block: bool
         """
         conf = self.configuration()
         if block:
@@ -512,12 +514,12 @@ class Universe(Collections.GroupOfAtoms, Visualization.Viewable):
 
     def getParticleScalar(self, name, datatype = N.Float):
         """
-        @param name: the name of an atom attribute
-        @type name: C{str}
-        @param datatype: the datatype of the array allocated to hold the data
-        @returns: the values of the attribute 'name' for each atom
+        :param name: the name of an atom attribute
+        :type name: str
+        :param datatype: the datatype of the array allocated to hold the data
+        :returns: the values of the attribute 'name' for each atom
                   in the universe.
-        @rtype: L{MMTK.ParticleProperties.ParticleScalar}
+        :rtype: :class:`~MMTK.ParticleProperties.ParticleScalar`
         """
         conf = self.configuration()
         array = N.zeros((len(conf),), datatype)
@@ -528,12 +530,12 @@ class Universe(Collections.GroupOfAtoms, Visualization.Viewable):
 
     def getParticleBoolean(self, name):
         """
-        @param name: the name of an atom attribute
-        @type name: C{str}
-        @returns: the values of the boolean attribute 'name' for each atom
-                  in the universe, or C{False} for atoms that do not have
+        :param name: the name of an atom attribute
+        :type name: str
+        :returns: the values of the boolean attribute 'name' for each atom
+                  in the universe, or False for atoms that do not have
                   the attribute.
-        @rtype: L{MMTK.ParticleProperties.ParticleScalar}
+        :rtype: :class:`~MMTK.ParticleProperties.ParticleScalar`
         """
         conf = self.configuration()
         array = N.zeros((len(conf),), N.Int)
@@ -546,8 +548,8 @@ class Universe(Collections.GroupOfAtoms, Visualization.Viewable):
 
     def masses(self):
         """
-        @returns: the masses of all atoms in the universe
-        @rtype: L{MMTK.ParticleProperties.ParticleScalar}
+        :returns: the masses of all atoms in the universe
+        :rtype: :class:`~MMTK.ParticleProperties.ParticleScalar`
         """
         if self._masses is None:
             self._masses = self.getParticleScalar('_mass')
@@ -557,8 +559,9 @@ class Universe(Collections.GroupOfAtoms, Visualization.Viewable):
         """
         Return the atomic charges defined by the universe's
         force field.
-        @returns: the charges of all atoms in the universe
-        @rtype: L{MMTK.ParticleProperties.ParticleScalar}
+
+        :returns: the charges of all atoms in the universe
+        :rtype: :class:`~MMTK.ParticleProperties.ParticleScalar`
         """
         ff = self._forcefield
         if ff is None:
@@ -567,12 +570,12 @@ class Universe(Collections.GroupOfAtoms, Visualization.Viewable):
 
     def velocities(self):
         """
-        @returns: the current velocities of all atoms, or C{None} if
+        :returns: the current velocities of all atoms, or None if
                   no velocities are defined. Note that this is not a
                   copy of the current state but a reference to it;
                   its data will change whenever any changes are made
                   to the current velocities.
-        @rtype: L{MMTK.ParticleProperties.ParticleVector}
+        :rtype: :class:`~MMTK.ParticleProperties.ParticleVector`
         """
         try:
             return self._atom_properties['velocity']
@@ -584,14 +587,14 @@ class Universe(Collections.GroupOfAtoms, Visualization.Viewable):
         Update the current velocities of the universe by copying
         the given input velocities.
         
-        @param velocities: the new velocities, or C{None} to remove
+        :param velocities: the new velocities, or None to remove
                            the velocity definition from the universe
-        @type velocities: L{MMTK.ParticleProperties.ParticleVector}
-        @param block: if C{True}, the operation blocks other threads
+        :type velocities: :class:`~MMTK.ParticleProperties.ParticleVector`
+        :param block: if True, the operation blocks other threads
                       from accessing the configuration before the update
-                      is completed. If C{False}, it is assumed that the
+                      is completed. If False, it is assumed that the
                       caller takes care of locking.
-        @type block: C{bool}
+        :type block: bool
         """
         if velocities is None:
             try:
@@ -616,9 +619,10 @@ class Universe(Collections.GroupOfAtoms, Visualization.Viewable):
         """
         Generate random velocities for all atoms from a Boltzmann
         distribution.
-        @param temperature: the reference temperature for the Boltzmann
+
+        :param temperature: the reference temperature for the Boltzmann
                             distribution
-        @type temperature: C{float}
+        :type temperature: float
         """
         self.configuration()
         masses = self.masses()
@@ -640,13 +644,14 @@ class Universe(Collections.GroupOfAtoms, Visualization.Viewable):
         """
         Scale all velocities by a common factor in order to obtain
         the specified temperature.
-        @param temperature: the reference temperature
-        @type temperature: C{float}
-        @param block: if C{True}, the operation blocks other threads
+
+        :param temperature: the reference temperature
+        :type temperature: float
+        :param block: if True, the operation blocks other threads
                       from accessing the configuration before the update
-                      is completed. If C{False}, it is assumed that the
+                      is completed. If False, it is assumed that the
                       caller takes care of locking.
-        @type block: C{bool}
+        :type block: bool
         """
         velocities = self.velocities()
         factor = N.sqrt(temperature/self.temperature())
@@ -664,15 +669,15 @@ class Universe(Collections.GroupOfAtoms, Visualization.Viewable):
 
     def distanceConstraintList(self):
         """
-        @returns: the list of distance constraints
-        @rtype: C{list}
+        :returns: the list of distance constraints
+        :rtype: list
         """
         return self._objects.distanceConstraintList()
 
     def numberOfDistanceConstraints(self):
         """
-        @returns: the number of distance constraints
-        @rtype: C{int}
+        :returns: the number of distance constraints
+        :rtype: int
         """
         return self._objects.numberOfDistanceConstraints()
 
@@ -694,14 +699,15 @@ class Universe(Collections.GroupOfAtoms, Visualization.Viewable):
         """
         Enforces the previously defined distance constraints
         by modifying the configuration and velocities.
-        @param configuration: the configuration in which the
+
+        :param configuration: the configuration in which the
                               constraints are enforced
-                              (C{None} for current configuration)
-        @type configuration: L{MMTK.ParticleProperties.Configuration}
-        @param velocities: the velocities in which the
+                              (None for current configuration)
+        :type configuration: :class:`~MMTK.ParticleProperties.Configuration`
+        :param velocities: the velocities in which the
                               constraints are enforced
-                              (C{None} for current velocities)
-        @type velocities: L{MMTK.ParticleProperties.ParticleVector}
+                              (None for current velocities)
+        :type velocities: :class:`~MMTK.ParticleProperties.ParticleVector`
         """
         from MMTK import Dynamics
         Dynamics.enforceConstraints(self, configuration)
@@ -712,15 +718,16 @@ class Universe(Collections.GroupOfAtoms, Visualization.Viewable):
         Modifies the velocities to be compatible with
         the distance constraints, i.e. projects out the velocity
         components along the constrained distances.
-        @param velocities: the velocities in which the
+
+        :param velocities: the velocities in which the
                               constraints are enforced
-                              (C{None} for current velocities)
-        @type velocities: L{MMTK.ParticleProperties.ParticleVector}
-        @param block: if C{True}, the operation blocks other threads
+                              (None for current velocities)
+        :type velocities: :class:`~MMTK.ParticleProperties.ParticleVector`
+        :param block: if True, the operation blocks other threads
                       from accessing the configuration before the update
-                      is completed. If C{False}, it is assumed that the
+                      is completed. If False, it is assumed that the
                       caller takes care of locking.
-        @type block: C{bool}
+        :type block: bool
         """
         from MMTK import Dynamics
         if velocities is None:
@@ -749,8 +756,8 @@ class Universe(Collections.GroupOfAtoms, Visualization.Viewable):
 
     def forcefield(self):
         """
-        @returns: the force field
-        @rtype: L{MMTK.ForceField.ForceField.ForceField}
+        :returns: the force field
+        :rtype: :class:`~MMTK.ForceFields.ForceField.ForceField`
         """
         return self._forcefield
 
@@ -777,20 +784,20 @@ class Universe(Collections.GroupOfAtoms, Visualization.Viewable):
 
     def energy(self, subset1 = None, subset2 = None, small_change=False):
         """
-        @param subset1: a subset of a universe, or C{None}
-        @type subset1: L{MMTK.ChemicalObjects.ChemicalObject}
-        @param subset2: a subset of a universe, or C{None}
-        @type subset2: L{MMTK.ChemicalObjects.ChemicalObject}
-        @param small_change: if C{True}, algorithms optimized for small
+        :param subset1: a subset of a universe, or None
+        :type subset1: :class:`~MMTK.ChemicalObjects.ChemicalObject`
+        :param subset2: a subset of a universe, or None
+        :type subset2: :class:`~MMTK.ChemicalObjects.ChemicalObject`
+        :param small_change: if True, algorithms optimized for small
                              configurational changes relative to the last
                              evaluation may be used.
-        @type small_change: C{bool}
-        @returns: the potential energy of interaction between the atoms
-                  in subset1 and the atoms in subset2. If subset2 is C{None},
+        :type small_change: bool
+        :returns: the potential energy of interaction between the atoms
+                  in subset1 and the atoms in subset2. If subset2 is None,
                   the interactions within subset1 are calculated. It both
-                  subsets are C{None}, the potential energy of the whole
+                  subsets are None, the potential energy of the whole
                   universe is returned.
-        @rtype: C{float}
+        :rtype: float
         """
         eval = self.energyEvaluator(subset1, subset2)
         return eval(0, 0, small_change)
@@ -798,8 +805,8 @@ class Universe(Collections.GroupOfAtoms, Visualization.Viewable):
     def energyAndGradients(self, subset1 = None, subset2 = None,
                            small_change=False):
         """
-        @returns: the energy and the energy gradients
-        @rtype: (C{float}, L{MMTK.ParticleProperties.ParticleVector})
+        :returns: the energy and the energy gradients
+        :rtype: (float, :class:`~MMTK.ParticleProperties.ParticleVector`)
         """
         eval = self.energyEvaluator(subset1, subset2)
         return eval(1, 0, small_change)
@@ -807,8 +814,8 @@ class Universe(Collections.GroupOfAtoms, Visualization.Viewable):
     def energyAndForceConstants(self, subset1 = None, subset2 = None,
                                 small_change=False):
         """
-        @returns: the energy and the force constants
-        @rtype: (C{float}, L{MMTK.ParticleProperties.SymmetricPairTensor})
+        :returns: the energy and the force constants
+        :rtype: (float, :class:`~MMTK.ParticleProperties.SymmetricPairTensor`)
         """
         eval = self.energyEvaluator(subset1, subset2)
         e, g, fc = eval(0, 1, small_change)
@@ -817,19 +824,19 @@ class Universe(Collections.GroupOfAtoms, Visualization.Viewable):
     def energyGradientsAndForceConstants(self, subset1 = None, subset2 = None,
                                          small_change=False):
         """
-        @returns: the energy, its gradients, and the force constants
-        @rtype: (C{float}, L{MMTK.ParticleProperties.ParticleVector},
-                 L{MMTK.ParticleProperties.SymmetricPairTensor})
+        :returns: the energy, its gradients, and the force constants
+        :rtype: (float, :class:`~MMTK.ParticleProperties.ParticleVector`,
+                 :class:`~MMTK.ParticleProperties.SymmetricPairTensor`)
         """
         eval = self.energyEvaluator(subset1, subset2)
         return eval(1, 1, small_change)
 
     def energyTerms(self, subset1 = None, subset2 = None, small_change=False):
         """
-        @returns: a dictionary containing the energy values for each
+        :returns: a dictionary containing the energy values for each
                   energy term separately. The energy terms are defined by the
                   force field.
-        @rtype: C{dict}
+        :rtype: dict
         """
         eval = self.energyEvaluator(subset1, subset2)
         eval(0, 0, small_change)
@@ -837,14 +844,14 @@ class Universe(Collections.GroupOfAtoms, Visualization.Viewable):
 
     def configurationDifference(self, conf1, conf2):
         """
-        @param conf1: a configuration
-        @type conf1: L{MMTK.ParticleProperties.Configuration}
-        @param conf2: a configuration
-        @type conf2: L{MMTK.ParticleProperties.Configuration}
-        @returns: the difference vector between the two configurations
+        :param conf1: a configuration
+        :type conf1: :class:`~MMTK.ParticleProperties.Configuration`
+        :param conf2: a configuration
+        :type conf2: :class:`~MMTK.ParticleProperties.Configuration`
+        :returns: the difference vector between the two configurations
                   for each atom, taking into account the universe
                   topology (e.g. minimum-image convention).
-        @rtype: L{MMTK.ParticleProperties.ParticleVector}
+        :rtype: :class:`~MMTK.ParticleProperties.ParticleVector`
         """
         d = conf2-conf1
         cell = conf1.cell_parameters
@@ -854,10 +861,10 @@ class Universe(Collections.GroupOfAtoms, Visualization.Viewable):
             
     def distanceVector(self, p1, p2, conf=None):
         """
-        @param p1: a vector or a chemical object whose position is taken
-        @param p2: a vector or a chemical object whose position is taken
-        @param conf: a configuration (C{None} for the current configuration)
-        @returns: the distance vector between p1 and p2 (i.e. the
+        :param p1: a vector or a chemical object whose position is taken
+        :param p2: a vector or a chemical object whose position is taken
+        :param conf: a configuration (None for the current configuration)
+        :returns: the distance vector between p1 and p2 (i.e. the
                   vector from p1 to p2) in the configuration conf,
                   taking into account the universe's topology.
         """
@@ -875,23 +882,23 @@ class Universe(Collections.GroupOfAtoms, Visualization.Viewable):
             
     def distance(self, p1, p2, conf = None):
         """
-        @param p1: a vector or a chemical object whose position is taken
-        @param p2: a vector or a chemical object whose position is taken
-        @param conf: a configuration (C{None} for the current configuration)
-        @returns: the distance between p1 and p2, i.e. the length
+        :param p1: a vector or a chemical object whose position is taken
+        :param p2: a vector or a chemical object whose position is taken
+        :param conf: a configuration (None for the current configuration)
+        :returns: the distance between p1 and p2, i.e. the length
                   of the distance vector
-        @rtype: C{float}
+        :rtype: float
         """
         return self.distanceVector(p1, p2, conf).length()
 
     def angle(self, p1, p2, p3, conf = None):
         """
-        @param p1: a vector or a chemical object whose position is taken
-        @param p2: a vector or a chemical object whose position is taken
-        @param p3: a vector or a chemical object whose position is taken
-        @param conf: a configuration (C{None} for the current configuration)
-        @returns: the angle between the distance vectors p1-p2 and p3-p2
-        @rtype: C{float}
+        :param p1: a vector or a chemical object whose position is taken
+        :param p2: a vector or a chemical object whose position is taken
+        :param p3: a vector or a chemical object whose position is taken
+        :param conf: a configuration (None for the current configuration)
+        :returns: the angle between the distance vectors p1-p2 and p3-p2
+        :rtype: float
         """
         v1 = self.distanceVector(p2, p1, conf)
         v2 = self.distanceVector(p2, p3, conf)
@@ -899,15 +906,15 @@ class Universe(Collections.GroupOfAtoms, Visualization.Viewable):
 
     def dihedral(self, p1, p2, p3, p4, conf = None):
         """
-        @param p1: a vector or a chemical object whose position is taken
-        @param p2: a vector or a chemical object whose position is taken
-        @param p3: a vector or a chemical object whose position is taken
-        @param p4: a vector or a chemical object whose position is taken
-        @param conf: a configuration (C{None} for the current configuration)
-        @returns: the dihedral angle between the plane containing the
+        :param p1: a vector or a chemical object whose position is taken
+        :param p2: a vector or a chemical object whose position is taken
+        :param p3: a vector or a chemical object whose position is taken
+        :param p4: a vector or a chemical object whose position is taken
+        :param conf: a configuration (None for the current configuration)
+        :returns: the dihedral angle between the plane containing the
                   distance vectors p1-p2 and p3-p2 and the plane containing
                   the distance vectors p2-p3 and p4-p3
-        @rtype: C{float}
+        :rtype: float
         """
         v1 = self.distanceVector(p2, p1, conf)
         v2 = self.distanceVector(p3, p2, conf)
@@ -923,15 +930,15 @@ class Universe(Collections.GroupOfAtoms, Visualization.Viewable):
 
     def basisVectors(self):
         """
-        @returns: the basis vectors of the elementary cell of a periodic
-                  universe, or C{None} for a non-periodic universe
+        :returns: the basis vectors of the elementary cell of a periodic
+                  universe, or None for a non-periodic universe
         """
         return None
 
     def reciprocalBasisVectors(self):
         """
-        @returns: the reciprocal basis vectors of the elementary cell of
-                  a periodic universe, or C{None} for a non-periodic universe
+        :returns: the reciprocal basis vectors of the elementary cell of
+                  a periodic universe, or None for a non-periodic universe
         """
         return None
 
@@ -947,48 +954,48 @@ class Universe(Collections.GroupOfAtoms, Visualization.Viewable):
 
     def cellVolume(self):
         """
-        @returns: the volume of the elementary cell of a periodic
-                  universe, C{None} for a non-periodic universe
+        :returns: the volume of the elementary cell of a periodic
+                  universe, None for a non-periodic universe
         """
         return None
 
     def largestDistance(self):
         """
-        @returns: the largest possible distance between any two points
+        :returns: the largest possible distance between any two points
                   that can be represented independent of orientation, i.e. the
                   radius of the largest sphere that fits into the simulation
-                  cell. Returns C{None} if no such upper limit exists.
+                  cell. Returns None if no such upper limit exists.
         """
         return None
 
     def contiguousObjectOffset(self, objects = None, conf = None,
                                box_coordinates = False):
         """
-        @param objects: a list of chemical objects, or C{None} for all
+        :param objects: a list of chemical objects, or None for all
                         objects in the universe
-        @type objects: C{list}
-        @param conf: a configuration (C{None} for the current configuration)
-        @param box_coordinates: use box coordinates rather than real ones
-        @type box_coordinates: C{bool}
-        @returns: a set of displacement vectors relative to
+        :type objects: list
+        :param conf: a configuration (None for the current configuration)
+        :param box_coordinates: use box coordinates rather than real ones
+        :type box_coordinates: bool
+        :returns: a set of displacement vectors relative to
                   the conf which, when added to the configuration,
                   create a configuration in which none of the objects
                   is split across the edge of the elementary cell.
-                  For nonperiodic universes the return value is C{None}.
-        @rtype: L{MMTK.ParticleProperties.ParticleVector}
+                  For nonperiodic universes the return value is None.
+        :rtype: :class:`~MMTK.ParticleProperties.ParticleVector`
         """
         return None
 
     def contiguousObjectConfiguration(self, objects = None, conf = None):
         """
-        @param objects: a list of chemical objects, or C{None} for all
+        :param objects: a list of chemical objects, or None for all
                         objects in the universe
-        @type objects: C{list}
-        @param conf: a configuration (C{None} for the current configuration)
-        @returns: configuration conf (default: current configuration)
+        :type objects: list
+        :param conf: a configuration (None for the current configuration)
+        :returns: configuration conf (default: current configuration)
                   corrected by the contiguous object offsets for that
                   configuration.
-        @rtype: L{MMTK.ParticleProperties.Configuration}
+        :rtype: :class:`~MMTK.ParticleProperties.Configuration`
         """
         if conf is None:
             conf = self.configuration()
@@ -1003,18 +1010,19 @@ class Universe(Collections.GroupOfAtoms, Visualization.Viewable):
         Box coordinates are defined only for periodic universes;
         their components have values between -0.5 and 0.5; these
         extreme values correspond to the walls of the simulation box.
-        @param vector: a point in the universe
-        @returns: the box coordinate equivalent of vector, or the original
+
+        :param vector: a point in the universe
+        :returns: the box coordinate equivalent of vector, or the original
                   vector if no box coordinate system exists
-        @rtype: C{Scientific.Geometry.Vector}
+        :rtype: Scientific.Geometry.Vector
         """
         return vector
     
     def boxToRealCoordinates(self, vector):
         """
-        @param vector: a point in the universe expressed in box coordinates
-        @returns: the real-space equivalent of vector
-        @rtype: C{Scientific.Geometry.Vector}
+        :param vector: a point in the universe expressed in box coordinates
+        :returns: the real-space equivalent of vector
+        :rtype: Scientific.Geometry.Vector
         """
         return vector
 
@@ -1029,10 +1037,10 @@ class Universe(Collections.GroupOfAtoms, Visualization.Viewable):
         Fractional coordinates are defined only for periodic universes;
         their components have values between 0. and 1.
 
-        @param vector: a point in the universe
-        @type vector: C{Scientific.Geometry.Vector}
-        @returns: the fractional coordinate equivalent of vector
-        @rtype: C{Scientific.N.array_type}
+        :param vector: a point in the universe
+        :type vector: Scientific.Geometry.Vector
+        :returns: the fractional coordinate equivalent of vector
+        :rtype: Scientific.N.array_type
         """
         raise ValueError("Universe is not periodic")
 
@@ -1044,10 +1052,10 @@ class Universe(Collections.GroupOfAtoms, Visualization.Viewable):
         Fractional coordinates are defined only for periodic universes;
         their components have values between 0. and 1.
 
-        @param array: an array of fractional coordinates
-        @type array: C{Scientific.N.array_type}
-        @returns: the real-space equivalent of vector
-        @rtype: C{Scientific.Geometry.Vector}
+        :param array: an array of fractional coordinates
+        :type array: Scientific.N.array_type
+        :returns: the real-space equivalent of vector
+        :rtype: Scientific.Geometry.Vector
         """
         raise ValueError("Universe is not periodic")
 
@@ -1059,10 +1067,10 @@ class Universe(Collections.GroupOfAtoms, Visualization.Viewable):
 
     def randomPoint(self):
         """
-        @returns: a random point from a uniform distribution within
+        :returns: a random point from a uniform distribution within
                   the universe. This operation is defined only for
                   finite-volume universes, e.g. periodic universes.
-        @rtype: C{Scientific.Geometry.Vector}
+        :rtype: Scientific.Geometry.Vector
         """
         raise TypeError("undefined operation")
 
@@ -1072,9 +1080,9 @@ class Universe(Collections.GroupOfAtoms, Visualization.Viewable):
         return the list of the results. If the results are chemical
         objects, a Collection object is returned instead of a list.
 
-        @param function: the function to be applied
-        @type function: callable
-        @returns: the list or collection of the results
+        :param function: the function to be applied
+        :type function: callable
+        :returns: the list or collection of the results
         """
         return self._objects.map(function)
 
@@ -1119,12 +1127,12 @@ class Universe(Collections.GroupOfAtoms, Visualization.Viewable):
         want to access the configuration or velocities while the data is
         being updated.
 
-        @param trajectory: a trajectory object for this universe
-        @type trajectory: L{MMTK.Trajectory.Trajectory}
-        @param step: a step number, or C{None} for the default step
+        :param trajectory: a trajectory object for this universe
+        :type trajectory: :class:`~MMTK.Trajectory.Trajectory`
+        :param step: a step number, or None for the default step
                      (0 for a standard trajectory, the last written
                      step for a restart trajectory)
-        @type step: C{int}
+        :type step: int
         """
         if step is None:
             step = trajectory.defaultStep()
@@ -1239,8 +1247,8 @@ class InfiniteUniverse(Universe):
 
     def __init__(self, forcefield=None, **properties):
         """
-        @param forcefield: a force field, or C{None} for no force field
-        @type forcefield: L{MMTK.ForceField.ForceField.ForceField}
+        :param forcefield: a force field, or None for no force field
+        :type forcefield: :class:`~MMTK.ForceFields.ForceField.ForceField`
         """
         Universe.__init__(self, forcefield, properties)
         self._createSpec()
@@ -1284,8 +1292,9 @@ class Periodic3DUniverse(Universe):
         """
         Multiplies all edge lengths by the same factor such that the cell
         volume becomes equal to the specified value.
-        @param volume: the desired volume
-        @type volume: C{float}
+
+        :param volume: the desired volume
+        :type volume: float
         """
         factor = (volume/self.cellVolume())**(1./3.)
         self.scaleSize(factor)
@@ -1394,10 +1403,10 @@ class OrthorhombicPeriodicUniverse(Periodic3DUniverse):
 
     def __init__(self, size = None, forcefield = None, **properties):
         """
-        @param size: a sequence of length three specifying the edge
+        :param size: a sequence of length three specifying the edge
                      lengths along the x, y, and z directions
-        @param forcefield: a force field, or C{None} for no force field
-        @type forcefield: L{MMTK.ForceField.ForceField.ForceField}
+        :param forcefield: a force field, or None for no force field
+        :type forcefield: :class:`~MMTK.ForceFields.ForceField.ForceField`
         """
         Universe.__init__(self, forcefield, properties)
         self.data = N.zeros((3,), N.Float)
@@ -1418,8 +1427,9 @@ class OrthorhombicPeriodicUniverse(Periodic3DUniverse):
     def scaleSize(self, factor):
         """
         Multiplies all edge lengths by a factor.
-        @param factor: the scale factor
-        @type factor: C{float}
+
+        :param factor: the scale factor
+        :type factor: float
         """
         self.data[:] = factor*self.data
         self._spec.foldCoordinatesIntoBox(self.configuration().array)
@@ -1512,8 +1522,9 @@ class CubicPeriodicUniverse(OrthorhombicPeriodicUniverse):
     def setSize(self, size):
         """
         Set the edge length to a given value.
-        @param size: the new size
-        @type size: C{float}
+
+        :param size: the new size
+        :type size: float
         """
         OrthorhombicPeriodicUniverse.setSize(self, 3*(size,))
 
@@ -1534,10 +1545,10 @@ class ParallelepipedicPeriodicUniverse(Periodic3DUniverse):
 
     def __init__(self, shape = None, forcefield = None, **properties):
         """
-        @param shape: the basis vectors
-        @type shape: sequence of C{Scientific.Geometry.Vector}
-        @param forcefield: a force field, or C{None} for no force field
-        @type forcefield: L{MMTK.ForceField.ForceField.ForceField}
+        :param shape: the basis vectors
+        :type shape: sequence of Scientific.Geometry.Vector
+        :param forcefield: a force field, or None for no force field
+        :type forcefield: :class:`~MMTK.ForceFields.ForceField.ForceField`
         """
         Universe.__init__(self, forcefield, properties)
         self.data = N.zeros((19,), N.Float)
@@ -1555,8 +1566,9 @@ class ParallelepipedicPeriodicUniverse(Periodic3DUniverse):
     def scaleSize(self, factor):
         """
         Multiplies all edge lengths by a factor.
-        @param factor: the scale factor
-        @type factor: C{float}
+
+        :param factor: the scale factor
+        :type factor: float
         """
         self.data[:9] = factor*self.data[:9]
         from MMTK_universe import parallelepiped_invert
@@ -1657,7 +1669,7 @@ class ParallelepipedicPeriodicUniverse(Periodic3DUniverse):
 #
 def isUniverse(object):
     """
-    @param object: any Python object
-    @returns: C{True} if object is a universe.
+    :param object: any Python object
+    :returns: True if object is a universe.
     """
     return isinstance(object, Universe)

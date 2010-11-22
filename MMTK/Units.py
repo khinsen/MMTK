@@ -11,11 +11,12 @@ units to MMTK's internal unit system. There are also some common
 physical constants.
 
 MMTK's unit system is defined by:
- - nm for length
- - ps for time
- - amu (g/mol) for mass
- - the charge of a proton for charge
- - rad for angles
+
+* nm for length
+* ps for time
+* amu (g/mol) for mass
+* the charge of a proton for charge
+* rad for angles
 
 All formulas that do not contain electrical quantities (charge,
 electric/magnetic field, ...) have the same form in this unit system
@@ -26,43 +27,32 @@ The constants defined in this module are:
 
  * SI Prefixes: ato, femto, pico, nano, micro, milli, centi, deci,
                 deca, hecto, kilo, mega, giga, tera, peta
-
  * Length units: m, cm, mm, nm, pm, fm, Ang, Bohr
-
  * Angle units: rad, deg
-
  * Volume units: l
-
  * Time units: s, ns, ps, fs
-
  * Frequency units: Hz, invcm (wavenumbers)
-
  * Mass units: amu, g, kg
-
  * Quantity-of-matter units: mol
-
  * Energy units: J, kJ, cal (thermochemical), kcal, Hartree, Bohr
-
  * Temperature units: K
-
  * Force units: N, dyn
- 
  * Pressure units: Pa, MPa, GPa, bar, kbar, atm
-
  * Electrostatic units: C, A, V, D, eV, e
-
  * Physical constants:
-   - c (speed of light)
-   - Nav (Avogadro number)
-   - h (Planck constant)
-   - hbar (Planck constant divided by 2*Pi)
-   - k_B (Boltzmann constant)
-   - eps0 (permittivity of vacuum)
-   - me (electron mass)
+
+   * c (speed of light)
+   * Nav (Avogadro number)
+   * h (Planck constant)
+   * hbar (Planck constant divided by 2*Pi)
+   * k_B (Boltzmann constant)
+   * eps0 (permittivity of vacuum)
+   * me (electron mass)
 
  * Other:
-   - akma_time (the time unit in the DCD trajectory format)
-   - electrostatic_energy (the prefactor in Coulomb's law)
+   * akma_time (the time unit in the DCD trajectory format)
+   * electrostatic_energy (the prefactor in Coulomb's law)
+
 """
 
 from Scientific import N as Numeric

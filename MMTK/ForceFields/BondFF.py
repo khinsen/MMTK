@@ -7,7 +7,7 @@
 Simplified harmonic force field for normal mode calculations
 """
 
-__docformat__ = 'epytext'
+__docformat__ = 'restructuredtext'
 
 from MMTK.ForceFields.NonBondedInteractions import NonBondedForceField
 from MMTK.ForceFields.Amber.AmberForceField import AmberBondedForceField

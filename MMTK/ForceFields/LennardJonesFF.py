@@ -7,7 +7,7 @@
 Lennard-Jones force field for simple liquids
 """
 
-__docformat__ = 'epytext'
+__docformat__ = 'restructuredtext'
 
 from MMTK.ForceFields.NonBondedInteractions import LJForceField
 from Scientific.Geometry import Vector
@@ -28,12 +28,12 @@ class LennardJonesForceField(LJForceField):
 
     def __init__(self, cutoff = None):
         """
-        @param cutoff: a cutoff value or C{None}, meaning no cutoff.
+        :param cutoff: a cutoff value or None, meaning no cutoff.
                        Pair interactions in periodic systems are calculated
                        using the minimum-image convention; the cutoff should
                        therefore never be larger than half the smallest edge
                        length of the elementary cell.
-        @type cutoff: C{float}
+        :type cutoff: float
         """
         self.arguments = (cutoff, )
         LJForceField.__init__(self, 'LJ', cutoff)

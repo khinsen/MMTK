@@ -11,7 +11,7 @@ being composed of atoms. Examples are thermostats, barostats, external
 fields, etc.
 """
 
-__docformat__ = 'epytext'
+__docformat__ = 'restructuredtext'
 
 from Scientific import N
 
@@ -49,11 +49,11 @@ class NoseThermostat(EnvironmentObject):
 
     def __init__(self, temperature, relaxation_time = 0.2):
         """
-        @param temperature: the temperature set by the thermostat
-        @type temperature: C{float}
-        @param relaxation_time: the relaxation time of the
+        :param temperature: the temperature set by the thermostat
+        :type temperature: float
+        :param relaxation_time: the relaxation time of the
                                 thermostat coordinate
-        @type relaxation_time: C{float}
+        :type relaxation_time: float
         """
         self.arguments = (temperature, relaxation_time)
         self.parameters = N.array([temperature, relaxation_time])
@@ -84,11 +84,11 @@ class AndersenBarostat(EnvironmentObject):
 
     def __init__(self, pressure, relaxation_time = 1.5):
         """
-        @param pressure: the pressure set by the barostat
-        @type pressure: C{float}
-        @param relaxation_time: the relaxation time of the
+        :param pressure: the pressure set by the barostat
+        :type pressure: float
+        :param relaxation_time: the relaxation time of the
                                 barostat coordinate
-        @type relaxation_time: C{float}
+        :type relaxation_time: float
         """
         self.arguments = (pressure, relaxation_time)
         self.parameters = N.array([pressure, relaxation_time])

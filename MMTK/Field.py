@@ -20,7 +20,7 @@ a coarse regular grid can be added to a picture of a molecular system
 without overloading it.
 """
 
-__docformat__ = 'epytext'
+__docformat__ = 'restructuredtext'
 
 from MMTK import Collections, ParticleProperties, Visualization
 from Scientific.Visualization import Color
@@ -102,8 +102,8 @@ class AtomicField(object):
 
     def particleValues(self):
         """
-        @returns: the values of the field at the positions of the atoms
-        @rtype: L{MMTK.ParticleProperties.ParticleProperty}
+        :returns: the values of the field at the positions of the atoms
+        :rtype: :class:`~MMTK.ParticleProperties.ParticleProperty`
         """
         universe = self.system.universe()
         rank = self.field.rank
@@ -121,12 +121,12 @@ class AtomicField(object):
         """
         Writes a graphical representation of the field to a VRML file.
 
-        @param filename: the name of the destinatin file
-        @type filename: C{str}
-        @param scale: scale factor applied to all field values
-        @type scale: C{float}
-        @param color: the color for all graphics objects
-        @type color: C{Scientific.Visualization.Color}
+        :param filename: the name of the destinatin file
+        :type filename: str
+        :param scale: scale factor applied to all field values
+        :type scale: float
+        :param color: the color for all graphics objects
+        :type color: Scientific.Visualization.Color
         """
         from Scientific.Visualization import VRML
         objects = self.graphicsObjects(scale=scale, color=color,
@@ -137,10 +137,10 @@ class AtomicField(object):
         """
         Shows a graphical representation of the field using a VRML viewer.
 
-        @param scale: scale factor applied to all field values
-        @type scale: C{float}
-        @param color: the color for all graphics objects
-        @type color: C{Scientific.Visualization.Color}
+        :param scale: scale factor applied to all field values
+        :type scale: float
+        :param color: the color for all graphics objects
+        :type color: Scientific.Visualization.Color
         """
         from Scientific.Visualization import VRML
         objects = self.graphicsObjects(scale=scale, color=color,
@@ -165,14 +165,14 @@ class AtomicScalarField(AtomicField, Visualization.Viewable):
 
     def __init__(self, system, grid_size, values):
         """
-        @param system: any subset of a molecular system
-        @param grid_size: the spacing of a cubic grid on which the field
+        :param system: any subset of a molecular system
+        :param grid_size: the spacing of a cubic grid on which the field
                           values are defined. The value for a point is obtained
                           by averaging the atomic quantities over all
                           atoms in a cube centered on the point.
-        @type grid_size: C{float}
-        @param values: the atomic values that define the field
-        @type values: L{MMTK.ParticleProperties.ParticleScalar}
+        :type grid_size: float
+        :param values: the atomic values that define the field
+        :type values: :class:`~MMTK.ParticleProperties.ParticleScalar`
         """
         if values is not None and values.value_rank != 0:
             raise TypeError("data not a vector field")
@@ -181,8 +181,8 @@ class AtomicScalarField(AtomicField, Visualization.Viewable):
 
     def gradient(self):
         """
-        @returns: the gradient of the field
-        @rtype: L{MMTK.Field.AtomicVectorField}
+        :returns: the gradient of the field
+        :rtype: :class:`~MMTK.Field.AtomicVectorField`
         """
         field = self.field.gradient()
         return AtomicVectorField(self.system, (self.box, field,
@@ -190,8 +190,8 @@ class AtomicScalarField(AtomicField, Visualization.Viewable):
 
     def laplacian(self):
         """
-        @returns: the laplacian of the field
-        @rtype: L{MMTK.Field.AtomicScalarField}
+        :returns: the laplacian of the field
+        :rtype: :class:`~MMTK.Field.AtomicScalarField`
         """
         field = self.field.laplacian()
         return AtomicScalarField(self.system, (self.box, field,
@@ -239,14 +239,14 @@ class AtomicVectorField(AtomicField, Visualization.Viewable):
 
     def __init__(self, system, grid_size, values):
         """
-        @param system: any subset of a molecular system
-        @param grid_size: the spacing of a cubic grid on which the field
+        :param system: any subset of a molecular system
+        :param grid_size: the spacing of a cubic grid on which the field
                           values are defined. The value for a point is obtained
                           by averaging the atomic quantities over all
                           atoms in a cube centered on the point.
-        @type grid_size: C{float}
-        @param values: the atomic values that define the field
-        @type values: L{MMTK.ParticleProperties.ParticleVector}
+        :type grid_size: float
+        :param values: the atomic values that define the field
+        :type values: :class:`~MMTK.ParticleProperties.ParticleVector`
         """
         if values is not None and values.value_rank != 1:
             raise TypeError("data not a vector field")
@@ -255,8 +255,8 @@ class AtomicVectorField(AtomicField, Visualization.Viewable):
 
     def length(self):
         """
-        @returns: a field of the length of the field vectors
-        @rtype: L{MMTK.Field.AtomicScalarField}
+        :returns: a field of the length of the field vectors
+        :rtype: :class:`~MMTK.Field.AtomicScalarField`
         """
         field = self.field.length()
         return AtomicScalarField(self.system, (self.box, field,
@@ -264,8 +264,8 @@ class AtomicVectorField(AtomicField, Visualization.Viewable):
 
     def divergence(self):
         """
-        @returns: the divergence of the field
-        @rtype: L{MMTK.Field.AtomicScalarField}
+        :returns: the divergence of the field
+        :rtype: :class:`~MMTK.Field.AtomicScalarField`
         """
         field = self.field.divergence()
         return AtomicScalarField(self.system, (self.box, field,
@@ -273,8 +273,8 @@ class AtomicVectorField(AtomicField, Visualization.Viewable):
 
     def curl(self):
         """
-        @returns: the curl of the field
-        @rtype: L{MMTK.Field.AtomicVectorField}
+        :returns: the curl of the field
+        :rtype: :class:`~MMTK.Field.AtomicVectorField`
         """
         field = self.field.curl()
         return AtomicVectorField(self.system, (self.box, field,
@@ -282,8 +282,8 @@ class AtomicVectorField(AtomicField, Visualization.Viewable):
 
     def laplacian(self):
         """
-        @returns: the laplacian of the field
-        @rtype: L{MMTK.Field.AtomicVectorField}
+        :returns: the laplacian of the field
+        :rtype: :class:`~MMTK.Field.AtomicVectorField`
         """
         field = self.field.curl()
         return AtomicVectorField(self.system, (self.box, field,

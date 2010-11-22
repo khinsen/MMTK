@@ -10,10 +10,11 @@ This module provides a basis that is suitable for the
 calculation of low-frequency normal modes. The basis is
 derived from vector fields whose components are stationary
 waves in a box surrounding the system. For a description
-see
-     K. Hinsen
-     Analysis of domain motions by approximate normal mode calculations
-     Proteins 33 (1998): 417-429
+see, 
+
+K. Hinsen
+Analysis of domain motions by approximate normal mode calculations
+Proteins 33 (1998): 417-429
 """
 
 from MMTK import ParticleProperties
@@ -26,18 +27,18 @@ class FourierBasis(object):
     Collective-motion basis for low-frequency normal mode calculations
 
     A FourierBasis behaves like a sequence of
-    L{MMTK.ParticleProperties.ParticleVector} objects. The vectors are
+    :class:`~MMTK.ParticleProperties.ParticleVector` objects. The vectors are
     B{not} orthonormal, because orthonormalization is handled
     automatically by the normal mode class.
     """
 
     def __init__(self, universe, cutoff):
         """
-        @param universe: the universe for which the basis will be used
-        @type universe: L{MMTK.Universe.Universe}
-        @param cutoff: the wavelength cutoff. A smaller value yields
+        :param universe: the universe for which the basis will be used
+        :type universe: :class:`~MMTK.Universe.Universe`
+        :param cutoff: the wavelength cutoff. A smaller value yields
                        a larger basis.
-        @type cutoff: C{float}
+        :type cutoff: float
         """
         p1, p2 = universe.boundingBox()
         p2 = p2 + Vector(cutoff, cutoff, cutoff)
@@ -96,12 +97,13 @@ class FourierBasis(object):
 def countBasisVectors(universe, cutoff):
     """
     Estimate the number of basis vectors for a given universe and cutoff
-    @param universe: the universe
-    @type universe: L{MMTK.Universe.Universe}
-    @param cutoff: the wavelength cutoff. A smaller value yields a larger basis.
-    @type cutoff: C{float}
-    @returns: the number of basis vectors in a FourierBasis
-    @rtype: C{int}
+
+    :param universe: the universe
+    :type universe: :class:`~MMTK.Universe.Universe`
+    :param cutoff: the wavelength cutoff. A smaller value yields a larger basis.
+    :type cutoff: float
+    :returns: the number of basis vectors in a FourierBasis
+    :rtype: int
     """
     p1, p2 = universe.boundingBox()
     p2 = p2 + Vector(cutoff, cutoff, cutoff)
@@ -122,12 +124,13 @@ def estimateCutoff(universe, nmodes):
     """
     Estimate the cutoff that yields a given number of basis vectors
     for a given universe.
-    @param universe: the universe
-    @type universe: L{MMTK.Universe.Universe}
-    @param nmodes: the number of basis vectors in a FourierBasis
-    @type nmodes: C{int}
-    @returns: the wavelength cutoff and the precise number of basis vectors
-    @rtype: C{tuple} C{(float, int)}
+
+    :param universe: the universe
+    :type universe: :class:`~MMTK.Universe.Universe`
+    :param nmodes: the number of basis vectors in a FourierBasis
+    :type nmodes: int
+    :returns: the wavelength cutoff and the precise number of basis vectors
+    :rtype: tuple (float, int)
     """
     natoms = universe.numberOfCartesianCoordinates()
     if nmodes > natoms:

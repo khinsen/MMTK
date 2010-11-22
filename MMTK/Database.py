@@ -14,7 +14,7 @@ Definitions made in that file will end up as attributes of an object
 that is later used as a blueprint to create chemical objects.
 """
 
-__docformat__ = 'epytext'
+__docformat__ = 'restructuredtext'
 
 from MMTK import Utility
 import copy

@@ -7,7 +7,7 @@
 Random quantities for use in molecular simulations
 """
 
-__docformat__ = 'epytext'
+__docformat__ = 'restructuredtext'
 
 from Scientific.Geometry import Vector
 from Scientific.Geometry.Transformation import Rotation
@@ -92,15 +92,15 @@ del numeric
 #
 def randomPointInBox(a, b = None, c = None):
     """
-    @param a: the edge length of a box along the x axis
-    @type a: C{float}
-    @param b: the edge length of a box along the y axis (default: a)
-    @type b: C{float}
-    @param c: the edge length of a box along the z axis (default: a)
-    @type c: C{float}
-    @returns: a vector drawn from a uniform distribution within a
+    :param a: the edge length of a box along the x axis
+    :type a: float
+    :param b: the edge length of a box along the y axis (default: a)
+    :type b: float
+    :param c: the edge length of a box along the z axis (default: a)
+    :type c: float
+    :returns: a vector drawn from a uniform distribution within a
               rectangular box with edge lengths a, b, c.
-    @rtype: C{Scientific.Geometry.Vector}
+    :rtype: Scientific.Geometry.Vector
     """
     if b is None: b = a
     if c is None: c = a
@@ -114,11 +114,11 @@ def randomPointInBox(a, b = None, c = None):
 #
 def randomPointInSphere(r):
     """
-    @param r: the radius of a sphere
-    @type r: C{float}
-    @returns: a vector drawn from a uniform distribution within
+    :param r: the radius of a sphere
+    :type r: float
+    :returns: a vector drawn from a uniform distribution within
               a sphere of radius r.
-    @rtype: C{Scientific.Geometry.Vector}
+    :rtype: Scientific.Geometry.Vector
     """
     rsq = r*r
     while 1:
@@ -131,21 +131,21 @@ def randomPointInSphere(r):
 #
 def randomDirection():
     """
-    @returns: a vector drawn from a uniform distribution on the surface
+    :returns: a vector drawn from a uniform distribution on the surface
               of a unit sphere.
-    @rtype: C{Scientific.Geometry.Vector}
+    :rtype: Scientific.Geometry.Vector
     """
     r = randomPointInSphere(1.)
     return r.normal()
 
 def randomDirections(n):
     """
-    @param n: the number of direction vectors
-    @returns: a list of n vectors drawn from a uniform distribution on
+    :param n: the number of direction vectors
+    :returns: a list of n vectors drawn from a uniform distribution on
               the surface of a unit sphere. If n is negative, returns
               a deterministic list of not more than -n vectors of unit
               length (useful for testing purposes).
-    @rtype: C{list}
+    :rtype: list
     """
     if n < 0:
         vs = [Vector(1., 0., 0.), Vector(0., -1., 0.), Vector(0., 0., 1.),
@@ -160,12 +160,12 @@ def randomDirections(n):
 #
 def randomRotation(max_angle = N.pi):
     """
-    @param max_angle: the upper limit for the rotation angle
-    @type max_angle: C{float}
-    @returns: a random rotation with a uniform axis distribution
+    :param max_angle: the upper limit for the rotation angle
+    :type max_angle: float
+    :returns: a random rotation with a uniform axis distribution
               and angles drawn from a uniform distribution between
               -max_angle and max_angle.
-    @rtype: C{Scientific.Geometry.Transformations.Rotation}
+    :rtype: Scientific.Geometry.Transformations.Rotation
     """
     return Rotation(randomDirection(), uniform(-max_angle, max_angle))
 
@@ -174,13 +174,13 @@ def randomRotation(max_angle = N.pi):
 #
 def randomVelocity(temperature, mass):
     """
-    @param temperature: the temperature defining a Maxwell distribution
-    @type temperature: C{float}
-    @param mass: the mass of a particle
-    @type mass: C{float}
-    @returns: a random velocity vector for a particle of a given mass
+    :param temperature: the temperature defining a Maxwell distribution
+    :type temperature: float
+    :param mass: the mass of a particle
+    :type mass: float
+    :returns: a random velocity vector for a particle of a given mass
               at a given temperature
-    @rtype: C{Scientific.Geometry.Vector}
+    :rtype: Scientific.Geometry.Vector
     """
     sigma = N.sqrt((temperature*Units.k_B)/(mass*Units.amu))
     return Vector(gaussian(0., sigma, (3,)))
@@ -190,13 +190,13 @@ def randomVelocity(temperature, mass):
 #
 def randomParticleVector(universe, width):
     """
-    @param universe: a universe
-    @type universe: L{MMTK.Universe.Universe}
-    @param width: the width (standard deviation) of a Gaussian distribution
-    @type width: C{float}
-    @returns: a set of vectors drawn from a Gaussian distribution
+    :param universe: a universe
+    :type universe: :class:`~MMTK.Universe.Universe`
+    :param width: the width (standard deviation) of a Gaussian distribution
+    :type width: float
+    :returns: a set of vectors drawn from a Gaussian distribution
               with a given width centered  around zero.
-    @rtype: L{MMTK.ParticleProperties.ParticleVector}
+    :rtype: :class:`~MMTK.ParticleProperties.ParticleVector`
     """
     data = gaussian(0., 0.577350269189*width, (universe.numberOfPoints(), 3))
     return ParticleProperties.ParticleVector(universe, data)

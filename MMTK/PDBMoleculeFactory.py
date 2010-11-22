@@ -15,7 +15,7 @@ systems generated in this way because the molecule factory does not know
 any force field parameters.
 """
 
-__docformat__ = 'epytext'
+__docformat__ = 'restructuredtext'
 
 import MMTK
 from MMTK.MoleculeFactory import MoleculeFactory
@@ -35,18 +35,18 @@ class PDBMoleculeFactory(MoleculeFactory):
 
     def __init__(self, pdb_conf, residue_filter=None, atom_filter=None):
         """
-        @param pdb_conf: a PDBConfiguration
-        @type pdb_conf: L{MMTK.PDB.PDBConfiguration}
-        @param residue_filter: a function taking a residue object
+        :param pdb_conf: a PDBConfiguration
+        :type pdb_conf: :class:`~MMTK.PDB.PDBConfiguration`
+        :param residue_filter: a function taking a residue object
                                (as defined in Scientific.IO.PDB)
                                and returning True if that residue is
                                to be kept in the molecule factory
-        @type residue_filter: callable
-        @param atom_filter: a function taking a residue object and an
+        :type residue_filter: callable
+        :param atom_filter: a function taking a residue object and an
                             atom object (as defined in Scientific.IO.PDB)     
                             and returning True if that atom is 
                             to be kept in the molecule factory
-        @type atom_filter: callable
+        :type atom_filter: callable
         """
         MoleculeFactory.__init__(self)
 
@@ -91,8 +91,8 @@ class PDBMoleculeFactory(MoleculeFactory):
         'temperature_factor'. Atoms for which a ANISOU record exists
         also have an attribute 'u' whose value is a tensor object.
         
-        @returns: a list of Molecule objects
-        @rtype: C{list}
+        :returns: a list of Molecule objects
+        :rtype: list
         """
         objects = [self.retrieveMolecule(o)
                    for o in self.peptide_chains
@@ -109,8 +109,8 @@ class PDBMoleculeFactory(MoleculeFactory):
         unit cell of the crystal. If the PDB file does not define
         a unit cell at all, an InfiniteUniverse is returned.
         
-        @returns: a universe
-        @rtype: L{MMTK.Universe.Universe}
+        :returns: a universe
+        :rtype: :class:`~MMTK.Universe.Universe`
         """
         return self.pdb_conf.createUnitCellUniverse()
 
@@ -121,8 +121,8 @@ class PDBMoleculeFactory(MoleculeFactory):
         unit cell of the crystal and adds the molecules representing
         the asymmetric unit.
         
-        @returns: a universe
-        @rtype: L{MMTK.Universe.Universe}
+        :returns: a universe
+        :rtype: :class:`~MMTK.Universe.Universe`
         """
         universe = self.retrieveUniverse()
         universe.addObject(self.retrieveMolecules())
@@ -137,11 +137,11 @@ class PDBMoleculeFactory(MoleculeFactory):
         its images obtained by applying the crystallographic
         symmetry operations.
 
-        @param compact: if C{True}, the images are shifted such that
+        :param compact: if True, the images are shifted such that
                         their centers of mass lie inside the unit cell.
-        @type compact: C{bool}
-        @returns: a universe
-        @rtype: L{MMTK.Universe.Universe}
+        :type compact: bool
+        :returns: a universe
+        :rtype: :class:`~MMTK.Universe.Universe`
         """
         if not self.pdb_conf.cs_transformations:
             return self.retrieveAsymmetricUnit()
