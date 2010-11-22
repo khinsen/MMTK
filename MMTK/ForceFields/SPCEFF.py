@@ -60,25 +60,28 @@ class SPCEForceField(MMForceField.MMForceField):
         """
         :param lj_options: parameters for Lennard-Jones
                            interactions; one of:
-                            - a number, specifying the cutoff
-                            - None, meaning the default method
+
+                            * a number, specifying the cutoff
+                            * None, meaning the default method
                               (no cutoff; inclusion of all
                               pairs, using the minimum-image
                               conventions for periodic universes)
-                            - a dictionary with an entry "method"
+                            * a dictionary with an entry "method"
                               which specifies the calculation
                               method as either "direct" (all pair
                               terms) or "cutoff", with the cutoff
                               specified by the dictionary
                               entry "cutoff".
+
         :param es_options: parameters for electrostatic
                            interactions; one of:
-                            - a number, specifying the cutoff
-                            - None, meaning the default method
+
+                            * a number, specifying the cutoff
+                            * None, meaning the default method
                               (all pairs without cutoff for
                               non-periodic system, Ewald summation
                               for periodic systems)
-                            - a dictionary with an entry "method"
+                            * a dictionary with an entry "method"
                               which specifies the calculation
                               method as either "direct" (all pair
                               terms), "cutoff" (with the cutoff
@@ -87,6 +90,7 @@ class SPCEForceField(MMForceField.MMForceField):
                               summation, only for periodic
                               universes), "screened" or
                               "multipole" (fast-multipole method).
+
         """
         self.arguments = (lj_options, es_options)
         MMForceField.MMForceField.__init__(self, 'SPCE', SPCEParameters(),

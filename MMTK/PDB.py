@@ -197,16 +197,19 @@ class PDBConfiguration(Scientific.IO.PDB.Structure):
     of the molecules, or to change the configuration of an existing
     system.
 
-    :param file_or_filename: the name of a PDB file, or a file object
-    :param model: the number of the model to be used from a
-                  multiple model file
-    :type model: int
-    :param alternate_code: the alternate code to be used for atoms that
-                           have multiple positions
-    :type alternate_code: str
     """
     
     def __init__(self, file_or_filename, model = 0, alternate_code = 'A'):
+        """
+        :param file_or_filename: the name of a PDB file, or a file object
+        :param model: the number of the model to be used from a
+                      multiple model file
+        :type model: int
+        :param alternate_code: the alternate code to be used for atoms that
+                               have multiple positions
+        :type alternate_code: str
+        """
+
         if isinstance(file_or_filename, str):
             file_or_filename = Database.PDBPath(file_or_filename)
         Scientific.IO.PDB.Structure.__init__(self, file_or_filename,
@@ -576,6 +579,7 @@ class PDBOutputFile(object):
 
     """
     PDB file for output
+
     """
 
     def __init__(self, filename, subformat= None):

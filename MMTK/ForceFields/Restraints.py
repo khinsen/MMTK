@@ -152,7 +152,7 @@ class HarmonicDihedralRestraint(ForceField):
         :type dihedral: float
         :param force_constant: the force constant of the restraint term.
                                The functional form of the restraint is
-                               force_constant*(phi-|dihedral|)**2, where
+                               force_constant*(phi-abs(dihedral))**2, where
                                phi is the dihedral angle
                                atom1-atom2-atom3-atom4.
         """
