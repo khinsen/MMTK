@@ -234,7 +234,7 @@ cdef class PINormalModeIntegrator(MMTK_PIIntegratorSupport.PIIntegrator):
                               double dt, double beta):
         pass
 
-    @cython.boundscheck(True)
+    @cython.boundscheck(False)
     @cython.wraparound(False)
     @cython.cdivision(True)
     cdef start(self):
@@ -478,7 +478,7 @@ cdef class PILangevinNormalModeIntegrator(PINormalModeIntegrator):
 
     cdef N.ndarray gamma
 
-    @cython.boundscheck(True)
+    @cython.boundscheck(False)
     @cython.wraparound(False)
     @cython.cdivision(True)
     cdef void applyThermostat(self, N.ndarray[double, ndim=2] v, N.ndarray[double, ndim=2] nmv,
@@ -513,7 +513,7 @@ cdef class PILangevinNormalModeIntegrator(PINormalModeIntegrator):
                 # Conversion back to Cartesian coordinates
                 self.normalModeToCartesian(v, nmv, i, nb)
 
-    @cython.boundscheck(True)
+    @cython.boundscheck(False)
     @cython.wraparound(False)
     @cython.cdivision(True)
     cdef start(self):
