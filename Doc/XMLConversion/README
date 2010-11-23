@@ -1,3 +1,0 @@
-These are the conversion programs I use to produce HTML and LaTeX
-versions from the original XML files. You need the nsgmls parser
-to generate the file mmtk-user.esis that is used as input.
