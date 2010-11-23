@@ -7,11 +7,12 @@ import numpy as N
 cimport numpy as N
 import cython
 
-cimport MMTK_trajectory_generator
+cimport MMTK_PIIntegratorSupport
 from MMTK import Units, ParticleProperties, Features, Environment
 import MMTK_trajectory
 import MMTK_forcefield
 import MMTK_universe
+import MMTK_PIIntegratorSupport
 import numbers
 
 import mtrand
@@ -47,7 +48,7 @@ cdef double k_B = Units.k_B
 #
 # Velocity Verlet integrator in normal-mode coordinates
 #
-cdef class PINormalModeIntegrator(MMTK_trajectory_generator.EnergyBasedTrajectoryGenerator):
+cdef class PINormalModeIntegrator(MMTK_PIIntegratorSupport.PIIntegrator):
 
     cdef N.ndarray workspace1, workspace2
     cdef double *workspace_ptr_1, *workspace_ptr_2
@@ -98,7 +99,7 @@ cdef class PINormalModeIntegrator(MMTK_trajectory_generator.EnergyBasedTrajector
                              separate thread (default: False)
         @type background: C{bool}
         """
-        MMTK_trajectory_generator.EnergyBasedTrajectoryGenerator.__init__(
+        MMTK_PIIntegratorSupport.PIIntegrator.__init__(
             self, universe, options, "Path integral normal-mode integrator")
         # Supported features: PathIntegrals
         self.features = [Features.PathIntegralsFeature]
@@ -122,24 +123,7 @@ cdef class PINormalModeIntegrator(MMTK_trajectory_generator.EnergyBasedTrajector
     #    nbeads compared to the notation in this paper.
     # 3) Velocities are used instead of momenta in the integrator.
 
-
-    @cython.boundscheck(True)
-    @cython.wraparound(False)
-    @cython.cdivision(True)
-    cdef fixBeadPositions(self, N.ndarray[double, ndim=2] x,
-                               int bead_index, int nb):
-        cdef int i, j
-        cdef vector3 *xv = <vector3 *> x.data
-        cdef vector3 temp
-        if self.universe_spec.is_periodic and nb > 1:
-            for j in range(1, nb):
-                self.universe_spec.distance_function(temp,
-                    xv[bead_index+j-1], xv[bead_index+j],
-                    self.universe_spec.geometry_data)
-                for i in range(3):
-                    xv[bead_index+j][i] = xv[bead_index+j-1][i] + temp[i]
-    
-    @cython.boundscheck(True)
+    @cython.boundscheck(False)
     @cython.wraparound(False)
     @cython.cdivision(True)
     cdef cartesianToNormalMode(self, N.ndarray[double, ndim=2] x, N.ndarray[double, ndim=2] nmc,
@@ -166,7 +150,7 @@ cdef class PINormalModeIntegrator(MMTK_trajectory_generator.EnergyBasedTrajector
                 nmc[i, bead_index+nb/2] = w2[nb]
             fftw_destroy_plan(p)
 
-    @cython.boundscheck(True)
+    @cython.boundscheck(False)
     @cython.wraparound(False)
     @cython.cdivision(True)
     cdef normalModeToCartesian(self, N.ndarray[double, ndim=2] x, N.ndarray[double, ndim=2] nmc,
@@ -196,7 +180,7 @@ cdef class PINormalModeIntegrator(MMTK_trajectory_generator.EnergyBasedTrajector
                     x[bead_index+j, i] = w2[2*j]/nb
             fftw_destroy_plan(p)
 
-    @cython.boundscheck(True)
+    @cython.boundscheck(False)
     @cython.wraparound(False)
     @cython.cdivision(True)
     cdef void propagateOscillators(self, N.ndarray[double, ndim=2] nmc,
@@ -217,27 +201,7 @@ cdef class PINormalModeIntegrator(MMTK_trajectory_generator.EnergyBasedTrajector
                 nmc[i, bead_index+k] = s*nmv[i, bead_index+k]/omega_k + c*nmc[i, bead_index+k]
                 nmv[i, bead_index+k] = temp
 
-    @cython.boundscheck(True)
-    @cython.wraparound(False)
-    @cython.cdivision(True)
-    cdef double springEnergyCartesian(self, N.ndarray[double, ndim=2] x,
-                                      N.ndarray[double, ndim=1] m,
-                                      N.ndarray[short, ndim=2] bd,
-                                      double beta):
-        cdef int i, j, k, nb
-        cdef double sumsq
-        cdef double e = 0.
-        for i in range(x.shape[0]):
-            if bd[i, 0] == 0:
-                nb = bd[i, 1]
-                sumsq = 0.
-                for j in range(nb):
-                    for k in range(3):
-                        sumsq += (x[i+(j+1)%nb, k]-x[i+j, k])**2
-                e += 0.5*nb*nb*m[i]*sumsq/(beta*beta*hbar*hbar)
-        return e
-
-    @cython.boundscheck(True)
+    @cython.boundscheck(False)
     @cython.wraparound(False)
     @cython.cdivision(True)
     cdef double springEnergyNormalModes(self, N.ndarray[double, ndim=2] nmc,
@@ -264,60 +228,6 @@ cdef class PINormalModeIntegrator(MMTK_trajectory_generator.EnergyBasedTrajector
                         sumsq *= 2.
                     e += 0.5*m[i]*sumsq*omega_k*omega_k/nb
         return e
-
-    @cython.boundscheck(True)
-    @cython.wraparound(False)
-    @cython.cdivision(True)
-    cdef double centroidVirial(self,
-                               N.ndarray[double, ndim=2] x,
-                               N.ndarray[double, ndim=2] nmc,
-                               N.ndarray[double, ndim=2] g,
-                               N.ndarray[short, ndim=2] bd):
-        cdef double cvirial = 0.
-        cdef int i, j, k, nb
-        for i in range(x.shape[0]):
-            # bd[i, 0] == 0 means "first bead of an atom"
-            if bd[i, 0] == 0:
-                nb = bd[i, 1]
-                for j in range(3):
-                    for k in range(nb):
-                        cvirial -= (x[i+k, j]-nmc[j, i]/nb)*g[i+k, j]
-        return cvirial
-
-    cdef int centroidDegreesOfFreedom(self, subspace,
-                                      N.ndarray[short, ndim=2] bd):
-        cdef N.ndarray[double, ndim=2] va
-        cdef int i, j, k
-        from MMTK.Subspace import Subspace
-        vectors = []
-        for k in range(3):
-            for i in range(bd.shape[0]):
-                # bd[i, 0] == 0 means "first bead of an atom"
-                if bd[i, 0] == 0:
-                    v = ParticleProperties.ParticleVector(self.universe)
-                    vectors.append(v)
-                    va = v.array
-                    for j in range(bd[i, 1]):
-                        va[i+j, k] = 1.
-        vectors = [subspace.projectionComplementOf(v) for v in vectors]
-        return len(Subspace(self.universe, vectors).getBasis())
-
-    @cython.boundscheck(True)
-    @cython.wraparound(False)
-    @cython.cdivision(True)
-    cdef void freeze(self, N.ndarray[double, ndim=2] d, N.ndarray[double, ndim=3] ss):
-        cdef int ndim = ss.shape[0]
-        cdef int npoints = ss.shape[1]
-        cdef double dp
-        cdef int i, j, k
-        for i in range(ndim):
-            dp = 0.
-            for j in range(npoints):
-                for k in range(3):
-                    dp += d[j, k]*ss[i, j, k]
-            for j in range(npoints):
-                for k in range(3):
-                    d[j, k] -= dp*ss[i, j, k]
 
     cdef void applyThermostat(self, N.ndarray[double, ndim=2] v, N.ndarray[double, ndim=2] nmv,
                               N.ndarray[double, ndim=1] m, N.ndarray[short, ndim=2] bd,
@@ -452,7 +362,7 @@ cdef class PINormalModeIntegrator(MMTK_trajectory_generator.EnergyBasedTrajector
         qe_prim = energy.energy - se + 0.5*df/beta
         qe_vir = energy.energy - 0.5*energy.virial
         qe_cvir = energy.energy \
-                  - 0.5*self.centroidVirial(x, nmc, g, bd) \
+                  - 0.5*self.centroidVirial(x, g, bd) \
                   + 0.5*cdf/beta
 
         ke = 0.
@@ -509,11 +419,12 @@ cdef class PINormalModeIntegrator(MMTK_trajectory_generator.EnergyBasedTrajector
                     self.normalModeToCartesian(v, nmv, i, bd[i, 1])
             # Mid-step energy calculation
             self.calculateEnergies(x, &energy, 1)
+            # Quantum energy estimators
             se = self.springEnergyNormalModes(nmc, m, bd, beta)
             qe_prim = energy.energy - se + 0.5*df/beta
             qe_vir = energy.energy - 0.5*energy.virial
             qe_cvir = energy.energy \
-                      - 0.5*self.centroidVirial(x, nmc, g, bd) \
+                      - 0.5*self.centroidVirial(x, g, bd) \
                       + 0.5*cdf/beta
             # Second integration half-step
             for i in range(nbeads):
