@@ -9,7 +9,7 @@ build
 dist
 Test
 epydoc
-Doc/Reference
+Doc/_build
 MANIFEST
 HG_CHANGESET_ID
 config/erfc_test
@@ -20,7 +20,9 @@ Src/MMTK_energy_term.c
 Src/MMTK_state_accessor.c
 Src/MMTK_trajectory_action.c
 Src/MMTK_trajectory_generator.c
+Src/MMTK_PIIntegratorSupport.c
 Src/MMTK_PINormalModeIntegrator.c
+Src/MMTK_PICartesianIntegrator.c
 Src/mtrand.c
 Examples/Forcefield/*/Cython/*.c
 Examples/MDIntegrator/*.c
