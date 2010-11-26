@@ -76,7 +76,6 @@ Add new file type(s) for representing all the beads:
  - 'pdb.pi_model' model
 
 * New features
-
 ** TODO [#C] Make energy gradients available for subsets of the total force field
 
 * Improvements
@@ -96,3 +95,6 @@ possible conflict.
 needs pseudoinverse instead of regular inverse
 
 ** TODO Method phiAngle() doesn't work for proline
+* Long-term evolution
+** Move to Python 3
+** Trajectory format migration to HDF5
