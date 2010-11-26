@@ -129,6 +129,9 @@ cdef class TrajectoryGenerator(object):
     cdef start(self):
         pass
 
+    cdef double scaleVolume(self, factor):
+        return self.universe_spec.volume_function(factor, self.universe_spec.geometry_data)
+    
     cdef void _addTrajectoryVariable(self, PyTrajectoryVariable v) except *:
         cdef PyTrajectoryVariable *tv
         cdef int i, n

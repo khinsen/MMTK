@@ -60,6 +60,8 @@ cdef class TrajectoryGenerator(object):
 
     cdef start(self)
 
+    cdef double scaleVolume(self, factor)
+
 cdef class EnergyBasedTrajectoryGenerator(TrajectoryGenerator):
 
     cdef evaluator_object
