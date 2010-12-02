@@ -7,6 +7,7 @@ import unittest
 
 import basic_tests
 import universe_tests
+import particleproperty_tests
 import pickle_tests
 import energy_tests
 import trajectory_tests
@@ -20,6 +21,7 @@ def suite():
     test_suite = unittest.TestSuite()
     test_suite.addTests(basic_tests.suite())
     test_suite.addTests(universe_tests.suite())
+    test_suite.addTests(particleproperty_tests.suite())
     test_suite.addTests(pickle_tests.suite())
     test_suite.addTests(energy_tests.suite())
     test_suite.addTests(normal_mode_tests.suite())
