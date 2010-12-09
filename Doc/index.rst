@@ -9,9 +9,9 @@ MMTK User Guide
 .. toctree::
    :maxdepth: 3
 
-   mmtk.rst
-   modules.rst
-   glossary.rst
+   mmtk
+   modules
+   glossary
 
 Indices and tables
 ==================
@@ -19,4 +19,3 @@ Indices and tables
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
-

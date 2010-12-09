@@ -3,55 +3,81 @@
 Module Reference
 ################
 
+.. Undocumented modules
+     __pkginfo__
+     AtomEnvironment
+     CCPNDataModel
+     ComplexEnvironment
+     CrystalEnvironment
+     Database
+     GroupEnvironment
+     Features
+     MoleculeEnvironment
+     PDBML
+     ProteinEnvironment
+     surfm
+     tess
+     Skeleton
+     ThreadManager
+     Utility
+
 MMTK
 =====
 .. automodule:: MMTK
 
-Biopolymers 
+Biopolymers
 =========== 
 .. automodule::  MMTK.Biopolymers 
  
-Bonds 
-========== 
+Bonds
+=====
 .. automodule::  MMTK.Bonds 
  
-ChargeFit 
-============== 
+ChargeFit
+=========
 .. automodule::  MMTK.ChargeFit
 
-ChemicalObjects  
-====================  
+ChemicalObjects
+===============
 .. automodule::  MMTK.ChemicalObjects  
   
-Collections  
-================  
+Collections
+===========
 .. automodule::  MMTK.Collections 
 
-ConfigIO 
-============= 
+ConfigIO
+========
 .. automodule::  MMTK.ConfigIO 
 
 DCD
-========
+===
 .. automodule::  MMTK.DCD 
 
-Features
-=============
-.. automodule::  MMTK.Features
+Deformation
+===========
+.. automodule::  MMTK.Deformation
+
+Dynamics
+========
+.. automodule::  MMTK.Dynamics
+
+Environment
+===========
+.. automodule::  MMTK.Environment
 
 Field
-==========
+=====
 .. automodule::  MMTK.Field
 
 ForceFields
-======================
+===========
 .. automodule::  MMTK.ForceFields.ForceField
 
-Amber.AmberForceField 
+Amber.AmberForceField
 --------------------- 
 .. automodule::  MMTK.ForceFields.Amber.AmberForceField 
  
-Amber.AmberData 
+Amber.AmberData
 --------------- 
 .. automodule::  MMTK.ForceFields.Amber.AmberData 
 
@@ -75,7 +101,7 @@ DeformationFF
 -------------
 .. automodule::  MMTK.ForceFields.DeformationFF
 
-ForceFieldTest 
+ForceFieldTest
 -------------- 
 .. automodule::  MMTK.ForceFields.ForceFieldTest 
  
@@ -99,45 +125,34 @@ SPCEFF
 ------
 .. automodule::  MMTK.ForceFields.SPCEFF
 
-Deformation
-================
-.. automodule::  MMTK.Deformation
-
-Dynamics
-=============
-.. automodule::  MMTK.Dynamics
-
-Environment
-================
-.. automodule::  MMTK.Environment
-
-FourierBasis  
-=================  
+FourierBasis
+============
 .. automodule::  MMTK.FourierBasis  
 
 Geometry
-=============
+========
 .. automodule::  MMTK.Geometry 
 
 InternalCoordinates
-========================
+===================
 .. automodule::  MMTK.InternalCoordinates
+   :show-inheritance:
 
 Minimization
-=================
+============
 .. automodule::  MMTK.Minimization
 
 MolecularSurface
-=====================
+================
 .. automodule::  MMTK.MolecularSurface
 
-MoleculeFactory 
-==================== 
+MoleculeFactory
+===============
 .. automodule::  MMTK.MoleculeFactory 
 
-NormalModes 
-===================== 
-.. automodule::  MMTK.NormalModes.Core 
+NormalModes
+===========
+.. automodule::  MMTK.NormalModes
 
 BrownianModes
 -------------
@@ -151,66 +166,66 @@ VibrationalModes
 ----------------
 .. automodule::  MMTK.NormalModes.VibrationalModes 
 
-ParticleProperties 
-======================= 
-.. automodule::  MMTK.ParticleProperties 
- 
-ProteinFriction 
-==================== 
-.. automodule::  MMTK.ProteinFriction 
- 
-Proteins 
-============= 
-.. automodule::  MMTK.Proteins 
-
-NucleicAcids 
-================= 
+NucleicAcids
+============
 .. automodule::  MMTK.NucleicAcids 
  
-PDB 
-======== 
+PDB
+===
 .. automodule::  MMTK.PDB 
  
-PDBMoleculeFactory 
--------------------- 
+PDBMoleculeFactory
+------------------
 .. automodule::  MMTK.PDBMoleculeFactory 
  
+ParticleProperties
+==================
+.. automodule::  MMTK.ParticleProperties 
+ 
+ProteinFriction
+===============
+.. automodule::  MMTK.ProteinFriction 
+ 
+Proteins
+========
+.. automodule::  MMTK.Proteins 
+
 PyMOL
-==========
+=====
 .. automodule::  MMTK.PyMOL
 
 Random
-===========
+======
 .. automodule::  MMTK.Random
 
 Solvation
-==============
+=========
 .. automodule::  MMTK.Solvation
 
 Subspace
-=============
+========
 .. automodule::  MMTK.Subspace
 
 Tk.ProteinVisualization
-============================
+=======================
 .. automodule::  MMTK.Tk.ProteinVisualization
 
-Trajectory  
-===============  
+Trajectory
+==========
 .. automodule::  MMTK.Trajectory  
 
 Units
-==========
+=====
 .. automodule::  MMTK.Units  
 
-Universe 
-============= 
+Universe
+========
 .. automodule::  MMTK.Universe  
 
 Visualization
-==================
+=============
 .. automodule::  MMTK.Visualization 
  
 XML
-========
+===
 .. automodule::  MMTK.XML
