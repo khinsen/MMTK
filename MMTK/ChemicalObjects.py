@@ -559,6 +559,7 @@ class Atom(ChemicalObject):
     def setPosition(self, position):
         """
         Changes the position of the atom.
+
         :param position: the new position
         :type position: Scientific.Geometry.Vector
         """
@@ -635,6 +636,7 @@ class Atom(ChemicalObject):
     def setMass(self, mass):
         """
         Changes the mass of the atom.
+
         :param mass: the mass
         :type mass: float
         """
