@@ -48,9 +48,13 @@ if not scientific_ok:
 compile_args = []
 include_dirs = ['Include']
 
-if int(scientific_version[1]) >= 8 or \
-       (int(scientific_version[1]) == 7 and int(scientific_version[2]) >= 8):
-    compile_args.append("-DUSE_NETCDF_H_FROM_SCIENTIFIC=1")
+if (int(scientific_version[1]) >= 8 or \
+    (int(scientific_version[1]) == 7 and int(scientific_version[2]) >= 8)):
+    netcdf_h = os.path.join(sys.prefix, 'include',
+                            'python%d.%d' % sys.version_info[:2],
+                            'Scientific', 'netcdf.h')
+    if os.path.exists(netcdf_h):
+        compile_args.append("-DUSE_NETCDF_H_FROM_SCIENTIFIC=1")
 else:
     # Take care of the common problem that netcdf is in /usr/local but
     # /usr/local/include is not on $CPATH.
