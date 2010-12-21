@@ -16,6 +16,7 @@ import subspace_tests
 import enm_tests
 import ewald_tests
 import pi_energy_trajectory_tests
+import internal_coordinate_tests
 
 def suite():
     test_suite = unittest.TestSuite()
@@ -30,6 +31,7 @@ def suite():
     test_suite.addTests(enm_tests.suite())
     test_suite.addTests(ewald_tests.suite())
     test_suite.addTests(pi_energy_trajectory_tests.suite())
+    test_suite.addTests(internal_coordinate_tests.suite())
     return test_suite
 
 if __name__ == '__main__':
