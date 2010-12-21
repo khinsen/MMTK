@@ -13,6 +13,7 @@ import trajectory_tests
 import normal_mode_tests
 import subspace_tests
 import enm_tests
+import internal_coordinate_tests
 
 def suite():
     test_suite = unittest.TestSuite()
@@ -24,6 +25,7 @@ def suite():
     test_suite.addTests(subspace_tests.suite())
     test_suite.addTests(trajectory_tests.suite())
     test_suite.addTests(enm_tests.suite())
+    test_suite.addTests(internal_coordinate_tests.suite())
     return test_suite
 
 if __name__ == '__main__':

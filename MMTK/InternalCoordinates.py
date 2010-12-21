@@ -39,29 +39,33 @@ class InternalCoordinate:
                 raise ValueError("no bond between %s and %s"
                                   % (self.atoms[i], self.atoms[i+1]))
 
-    def findFragments(self, spec1, spec2):
+    def findFragments(self, spec1, spec2, excluded_first_only=False):
         self.fragment1 = MMTK.Collection()
         self.fragment2 = MMTK.Collection()
-        spec1 = (self.fragment1,) + spec1
-        spec2 = (self.fragment2,) + spec2
         self.molecule.setBondAttributes()
         try:
             self.bondTest()
-            for fragment, start, excluded, error_check in [spec1, spec2]:
+            for fragment, (start, excluded, error_check) \
+                    in [(self.fragment1, spec1), (self.fragment2, spec2)]:
                 atoms = set([start])
-                new_atoms = []
-                for a in start.bondedTo():
-                    if a is not excluded and a is not start:
-                        atoms.add(a)
-                        new_atoms.append(a)
+                first = True
+                new_atoms = set([start])
                 while new_atoms:
                     check = new_atoms
-                    new_atoms = []
+                    new_atoms = set()
                     for a in check:
                         for na in a.bondedTo():
-                            if na not in atoms:
+                            if excluded_first_only:
+                                if first:
+                                    add = na not in excluded
+                                else:
+                                    add = True
+                            else:
+                                add = na not in excluded
+                            if add and na not in atoms:
                                 atoms.add(na)
-                                new_atoms.append(na)
+                                new_atoms.add(na)
+                    first = False
                 if error_check in atoms:
                     raise ValueError("cyclic bond structure")
                 for a in atoms:
@@ -102,7 +106,9 @@ class BondLength(InternalCoordinate):
         :type atom2: :class:`~MMTK.ChemicalObjects.Atom`
         """
         InternalCoordinate.__init__(self, [atom1, atom2])
-        self.findFragments((atom1, atom2, atom2), (atom2, atom1, atom1))
+        self.findFragments((atom1, set([atom2]), atom2),
+                           (atom2, set([atom1]), atom1),
+                            True)
 
     def getValue(self, conf = None):
         """
@@ -166,7 +172,8 @@ class BondAngle(InternalCoordinate):
         :type atom3: :class:`~MMTK.ChemicalObjects.Atom`
         """
         InternalCoordinate.__init__(self, [atom1, atom2, atom3])
-        self.findFragments((atom1, atom2, atom3), (atom3, atom2, atom1))
+        excluded = set([atom2])
+        self.findFragments((atom1, excluded, atom3), (atom3, excluded, atom1))
 
     def getValue(self, conf = None):
         """
@@ -248,7 +255,8 @@ class DihedralAngle(InternalCoordinate):
         :type atom4: :class:`~MMTK.ChemicalObjects.Atom`
         """
         InternalCoordinate.__init__(self, [atom1, atom2, atom3, atom4])
-        self.findFragments((atom2, atom3, atom3), (atom3, atom2, atom2))
+        excluded = set([atom2, atom3])
+        self.findFragments((atom1, excluded, atom4), (atom4, excluded, atom1))
 
     def getValue(self, conf = None):
         """
