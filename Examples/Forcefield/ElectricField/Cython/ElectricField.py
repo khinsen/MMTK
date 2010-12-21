@@ -61,7 +61,7 @@ class ElectricField(ForceField):
                 for b in a.beads():
                     charges[b] = c
         # Here we pass all the parameters to
-        # the Pyrex code that handles energy calculations.
+        # the Cython code that handles energy calculations.
         return [ElectricFieldTerm(universe,
                                   charges.array,
                                   self.strength)]

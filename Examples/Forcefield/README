@@ -4,35 +4,34 @@ an individual atom to a specific point in space. The ElectricField example
 implements an external electric field that acts on all charges.
 
 Three implementations are provided for each example, one in Python,
-one in C and one in Pyrex. The Python and Pyrex examples require
-Python 2.2 (or later), Pyrex 0.9.3 (or later), and MMTK 2.5.7 (or
+one in C and one in Cython. The Python and Cython examples require
+Python 2.2 (or later), Cython 0.123 (or later), and MMTK 2.5.7 (or
 later). The C examples require Python 1.5.2 (or later) and MMTK 2.0
 (or later).
 
 The Python versions are the easiest to write, test, and understand,
 but they are also by far the slowest. For simple energy calculations
 like in these two exemples, a Python version may be sufficient. In
-most cases, a Pyrex or C implementation will be necessary, but a
+most cases, a Cython or C implementation will be necessary, but a
 Python version can be very useful in designing, testing, and debugging
-an equivalent Pyrex or C implementation.
+an equivalent Cython or C implementation.
 
-Pyrex is a compiled version of Python that permits adding C type
+Cython is a compiled version of Python that permits adding C type
 declarations for gaining speed. If all variables have C type
-declarations, then Pyrex code is as fast as hand-written C
-code. However, as the examples show, Pyrex code is much more compact,
-mostly because Pyrex handles the bookkeeping behind Python extension
-types automatically. I expect Pyrex to become the tool of choice
+declarations, then Cython code is as fast as hand-written C
+code. However, as the examples show, Cython code is much more compact,
+mostly because Cython handles the bookkeeping behind Python extension
+types automatically. I expect Cython to become the tool of choice
 for writing C extensions in the future, so I do recommend everyone
 to have a look at it.
 
-For more information about Pyrex, and for downloading it, see
-http://nz.cosc.canterbury.ac.nz/~greg/python/Pyrex/
-You can also use Cython (http://www.cython.org/), a derivate of Pyrex.
+For more information about Cython, and for downloading it, see
+http://www.cython.org/.
 
 As the examples make clear, a force field term always consists of two
 parts: the force field term itself, always implemented in Python, and
 a corresponding energy evaluator term, implemented in Python, C, or
-Pyrex. The energy evaluator part is what is called for each energy
+Cython. The energy evaluator part is what is called for each energy
 evaluation. The force field part is only executed once, to prepare the
 parameters. For efficiency reasons, as much work as possible should
 therefore be done in the force field part.

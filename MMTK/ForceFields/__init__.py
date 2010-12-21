@@ -6,10 +6,6 @@
 """
 Force fields
 
-:undocumented: BondedInteractions
-:undocumented: ForceField
-:undocumented: NonBondedInteractions
-:undocumented: MMForceField
 """
 
 __docformat__ = 'restructuredtext'

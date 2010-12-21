@@ -50,6 +50,7 @@ The constants defined in this module are:
    * me (electron mass)
 
  * Other:
+
    * akma_time (the time unit in the DCD trajectory format)
    * electrostatic_energy (the prefactor in Coulomb's law)
 

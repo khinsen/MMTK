@@ -3,8 +3,6 @@
 # Written by Konrad Hinsen
 #
 
-_undocumented = 1
-
 try:
     import threading
     if not hasattr(threading, 'Thread'):

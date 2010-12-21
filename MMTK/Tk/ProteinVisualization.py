@@ -1,7 +1,5 @@
 # Display proteins on a TkVisualizationCanvas
 
-_undocumented = 1
-
 from Scientific import N as Numeric
 
 class ProteinBackboneGraphics:

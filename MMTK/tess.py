@@ -3,7 +3,6 @@
 # You may do anything you want with it, provided this notice is kept intact.
 #
 
-_undocumented = 1
 
 """
 tesselate(num_points)

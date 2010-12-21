@@ -13,8 +13,6 @@ and NAMD. It can be read by various visualization programs.
 The DCD format is defined as a binary (unformatted) Fortran
 format and is therefore platform-dependent.
 
-:undocumented: writePDB
-:undocumented: writeDCD
 """
 
 __docformat__ = 'restructuredtext'
@@ -27,7 +25,7 @@ from Scientific import N
 class DCDReader(Trajectory.TrajectoryGenerator):
 
     """
-    Reader for DCD trajectories (CHARMM/X-Plor)
+    Reader for DCD trajectories (CHARMM/X-Plor/NAMD)
 
     A DCDReader reads a DCD trajectory and "plays back" the
     data as if it were generated directly by an integrator.

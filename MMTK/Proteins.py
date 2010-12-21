@@ -29,7 +29,7 @@ class Residue(Biopolymers.Residue):
     residues to form a peptide chain. The database contains three
     variants of each residue (N-terminal, C-terminal,
     non-terminal) and various models (all-atom, united-atom,
-    C_alpha).
+    |C_alpha|).
     """
 
     def __init__(self, name = None, model = 'all'):
@@ -44,7 +44,7 @@ class Residue(Biopolymers.Residue):
                       polar hydrogens like in the CHARMM force field),
                       "polar_opls" (like "polar", but defining
                       polar hydrogens like in the latest OPLS force field),
-                      "calpha" (only the C_alpha atom).
+                      "calpha" (only the |C_alpha| atom).
         :type model: str
         """
         if name is not None:
@@ -242,7 +242,7 @@ class PeptideChain(Biopolymers.ResidueChain):
                     polar hydrogens like in the CHARMM force field),
                     "polar_opls" (like "polar", but defining
                     polar hydrogens like in the latest OPLS force field),
-                    "calpha" (only the C_alpha atom of each residue).
+                    "calpha" (only the |C_alpha| atom of each residue).
                     Default is "all".
     :type model: str
     :keyword n_terminus: if True, the first residue is constructed
@@ -663,7 +663,7 @@ class Protein(ChemicalObjects.Complex):
                         polar hydrogens like in the CHARMM force field),
                         "polar_opls" (like "polar", but defining
                         polar hydrogens like in the latest OPLS force field),
-                        "calpha" (only the C_alpha atom of each residue).
+                        "calpha" (only the |C_alpha| atom of each residue).
                         Default is "all".
         :type model: str
         :keyword position: the center-of-mass position of the protein

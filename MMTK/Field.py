@@ -121,7 +121,7 @@ class AtomicField(object):
         """
         Writes a graphical representation of the field to a VRML file.
 
-        :param filename: the name of the destinatin file
+        :param filename: the name of the destination file
         :type filename: str
         :param scale: scale factor applied to all field values
         :type scale: float
@@ -161,6 +161,7 @@ class AtomicScalarField(AtomicField, Visualization.Viewable):
       - scale=factor, to multiply all field values by a factor
       - range=(min, max), to eliminate graphics objects for values
         that are smaller than min or larger than max
+
     """
 
     def __init__(self, system, grid_size, values):
@@ -231,10 +232,11 @@ class AtomicVectorField(AtomicField, Visualization.Viewable):
     Additional keyword options exist for graphics object generation:
       - scale=factor, to multiply all field values by a factor
       - diameter=number, to define the diameter of the arrow objects
-                         (default: 1.)
+        (default: 1.)
       - range=(min, max), to eliminate graphics objects for values
         that are smaller than min or larger than max
       - color=string, to define the color of the arrows by a color name
+
     """
 
     def __init__(self, system, grid_size, values):

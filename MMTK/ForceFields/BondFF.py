@@ -203,9 +203,9 @@ class HarmonicForceField(MMAtomParameters, CompoundForceField):
     deformation term.
 
     For a description of this force field, see:
-     - Hinsen & Kneller, J. Chem. Phys. 24, 10766 (1999)
+     | Hinsen & Kneller, J. Chem. Phys. 24, 10766 (1999)
     For an application to DNA, see:
-     - Viduna, Hinsen & Kneller, Phys. Rev. E 3, 3986 (2000)
+     | Viduna, Hinsen & Kneller, Phys. Rev. E 3, 3986 (2000)
     """
 
     def __init__(self, fc_length = 0.45, cutoff = 0.6, factor = 400.):

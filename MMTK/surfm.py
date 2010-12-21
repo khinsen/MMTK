@@ -3,7 +3,6 @@
 # You may do anything you want with it, provided this notice is kept intact.
 #
 
-_undocumented = 1
 
 """
 surface_atoms(atoms, solvent_radius = 0., point_density = 258, ret_fmt = 0)

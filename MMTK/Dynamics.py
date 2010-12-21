@@ -71,6 +71,7 @@ class VelocityVerletIntegrator(Integrator):
 
      - category "auxiliary": extended-system coordinates if a thermostat
        and/or barostat are used
+
     """
 
     def __init__(self, universe, **options):

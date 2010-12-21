@@ -10,9 +10,9 @@ This module implements subspaces for infinitesimal (or finite
 small-amplitude) atomic motions. They can be used in normal mode
 calculations or for analyzing complex motions. For an explanation, see:
 
- -  K. Hinsen and G.R. Kneller
-    Projection methods for the analysis of complex motions in macromolecules
-    Mol. Sim. 23:275-292 (2000)
+  |  K. Hinsen and G.R. Kneller
+  |  Projection methods for the analysis of complex motions in macromolecules
+  |  Mol. Sim. 23:275-292 (2000)
 """
 
 __docformat__ = 'restructuredtext'
@@ -241,6 +241,10 @@ class LinkedRigidBodyMotionSubspace(Subspace):
     
     """
     Subspace for the motion of linked rigid bodies
+
+    This class describes the same subspace as RigidBodyMotionSubspace,
+    and is used by the latter. For collections of several chains of
+    linked rigid bodies, RigidBodyMotionSubspace is more efficient.
     """
     def __init__(self, universe, rigid_bodies):
         """
