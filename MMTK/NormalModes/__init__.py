@@ -3,7 +3,6 @@
 """
 Normal modes
 
-:undocumented: Core
 """
 
 __docformat__ = 'restructuredtext'

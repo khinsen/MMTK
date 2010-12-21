@@ -51,7 +51,7 @@ class HarmonicOscillatorForceField(ForceField):
         # uses it by accident.
         if subset1 is not None or subset2 is not None:
             raise ValueError("sorry, no subsets here")
-        # Here we pass all the parameters to the Pyrex code
+        # Here we pass all the parameters to the Cython code
         # that handles energy calculations.
         return [HarmonicOscillatorTerm(universe,
                                        self.atom_index,

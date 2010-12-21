@@ -9,12 +9,12 @@ Fourier basis for low-frequency normal mode calculations
 This module provides a basis that is suitable for the
 calculation of low-frequency normal modes. The basis is
 derived from vector fields whose components are stationary
-waves in a box surrounding the system. For a description
-see, 
+waves in a box surrounding the system. For a description,
+see
 
-K. Hinsen
-Analysis of domain motions by approximate normal mode calculations
-Proteins 33 (1998): 417-429
+  | K. Hinsen
+  | Analysis of domain motions by approximate normal mode calculations
+  | Proteins 33 (1998): 417-429
 """
 
 from MMTK import ParticleProperties

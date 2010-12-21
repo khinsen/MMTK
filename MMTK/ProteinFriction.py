@@ -4,7 +4,7 @@
 #
 
 """
-A friction constant model for C-alpha models of proteins
+A friction constant model for |C_alpha| models of proteins
 """
 
 __docformat__ = 'restructuredtext'
@@ -14,7 +14,7 @@ from Scientific import N
 
 def calphaFrictionConstants(protein, set=2):
     """
-    :param protein: a c_alpha model protein
+    :param protein: a |C_alpha| model protein
     :type protein: :class:`~MMTK.Proteins.Protein`
     :param set: the number of a friction constant set (1, 2, 3, or 4)
     :return: the estimated friction constants for the atoms in the protein

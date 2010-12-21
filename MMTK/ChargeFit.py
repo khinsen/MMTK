@@ -17,9 +17,9 @@ potential evaluation itself, some quantum chemistry program is needed.
 
 The charge fitting method is described in:
 
-  - K. Hinsen and B. Roux,
-    An accurate potential for simulating proton transfer in acetylacetone,
-    J. Comp. Chem. 18, 1997: 368
+  | K. Hinsen and B. Roux,
+  | An accurate potential for simulating proton transfer in acetylacetone,
+  | J. Comp. Chem. 18, 1997: 368
 
 See also Examples/Miscellaneous/charge_fit.py.
 """

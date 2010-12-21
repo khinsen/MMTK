@@ -49,7 +49,7 @@ def numberOfSolventMolecules(universe, solvent, density):
 #
 def addSolvent(universe, solvent, density, scale_factor=4.):
     """
-    Scales up the universeand adds as many solvent molecules
+    Scales up the universe and adds as many solvent molecules
     as are necessary to obtain the specified solvent density,
     taking account of the solute molecules that are already present
     in the universe. The molecules are placed at random positions

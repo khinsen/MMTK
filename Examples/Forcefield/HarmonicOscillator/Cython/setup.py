@@ -1,4 +1,4 @@
-# Use this script to compile the Pyrex module by running
+# Use this script to compile the Cython module by running
 #
 #         python setup.py build_ext --inplace
 #

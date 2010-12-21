@@ -1,7 +1,10 @@
 MMTK User's Guide
 #################
-for MMTK 2.4
-Konrad Hinsen
+for MMTK |version|
+
+by Konrad Hinsen
+
+.. |C_alpha| replace:: C\ :sub:`α`
 
 Introduction
 ############
@@ -17,24 +20,25 @@ offers three important advantages:
 - Application programs can use the full power of a general and well-designed
   programming language.
 
-- Application programs can profit from the large set of other libraries
-  that are available for Python. These may be scientific or
+- Application programs can profit from the large set of other
+  libraries that are available for Python. These may be scientific or
   non-scientific; for example, it is very easy to write simulation or
-  analysis programs with graphical user interfaces (using the moduleTkinter in the Python standard library),
-  or couple scientific calculations with a Web server.
+  analysis programs with graphical user interfaces (using the
+  module Tkinter in the Python standard library), or couple scientific
+  calculations with a Web server.
 
 - Any user can provide useful additions in separate modules, whereas adding
   features to a monolithic program requires at least the cooperation of
   the original author.
 
 To further encourage collaborative code development, MMTK uses a very
-unrestrictive licensing policy, just like Python. Although MMTK is
-copyrighted, anyone is allowed to use it for any purpose, including
-commercial ones, as well as to modify and redistribute it (a more
-precise description is given in the copyright statement that comes
-with the code).
+unrestrictive licensing policy. MMTK is free software, just like
+Python. Although MMTK is copyrighted, anyone is allowed to use it for
+any purpose, including commercial ones, as well as to modify and
+redistribute it (a more precise description is given in the copyright
+statement that comes with the code).
 
-This manual describes version 2.4 of MMTK. The 2.x versions contain
+This manual describes version |version| of MMTK. The 2.x versions contain
 some incompatible changes with respect to earlier versions (1.x), most
 importantly a package structure that reduces the risk of name
 conflicts with other Python packages, and facilitates future
@@ -43,22 +47,25 @@ existing functions.
 
 Using MMTK requires a basic knowledge of object-oriented programming
 and Python. Newcomers to this subject should have a look at the
-introductory section in this manual and at the `Python tutorial <http://www.python.org/doc/tut/tut.html>`_ (which also comes
-with the Python interpreter). There are also numerous `books on Python <http://www.python.org/doc/Books.html>`_
-that are useful in getting started. Even without MMTK, Python is a very
-useful programming language for scientific use, allowing rapid development
-and testing and easy interfacing to code written in low-level languages such
-as Fortran or C.
+introductory section in this manual and at the `Python tutorial
+<http://www.python.org/doc/tut/tut.html>`_ (which also comes with the
+Python interpreter). There are also numerous `books on Python
+<http://www.python.org/doc/Books.html>`_ that are useful in getting
+started. Even without MMTK, Python is a very useful programming
+language for scientific use, allowing rapid development and testing
+and easy interfacing to code written in low-level languages such as
+Fortran or C.
 
-This manual consists of several introductory chapters and a :ref:`module_reference`. The introductory chapters explain how
-common tasks are handled with MMTK, but they do not describe
-all of its features, nor do they contain a full documentation of
-functions or classes. This information can be found in
-the :ref:`module_reference`, which describes all classes
-and functions intended for end-user applications module by module,
-using documentation extracted directly from the source code.
-References from the introductory sections to the module reference
-facilitate finding the relevant documentation.
+This manual consists of several introductory chapters and a
+:ref:`module reference <Reference>`. The introductory chapters explain
+how common tasks are handled with MMTK, but they do not describe all
+of its features, nor do they contain a full documentation of functions
+or classes. This information can be found in the
+:ref:`module -reference <Reference>`, which describes all classes and functions
+intended for end-user applications module by module, using
+documentation extracted directly from the source code.  References
+from the introductory sections to the module reference facilitate
+finding the relevant documentation.
 
 Overview
 ########
@@ -71,9 +78,8 @@ Using MMTK
 
 MMTK applications are ordinary Python programs, and can be written
 using any standard text editor. For interactive use it is recommended
-to use either the special Python mode for the Emacs editor, or one of the
-Tk-based graphical user interfaces for Python, IDLE (comes with the
-Python interpreter from version 1.5.2) or `PTUI <http://starship.skyport.net/crew/zack/ptui/>`_.
+to use one of the many tools available for interactive Python
+programming.
 
 MMTK tries to be as user-friendly as possible for interactive use. For
 example, lengthy calculations can usually be interrupted by typing
@@ -88,33 +94,28 @@ Modules
 
 MMTK is a package consisting of various modules, most of them written
 in Python, and some in C for efficiency. The individual modules are
-described in the :ref:`module_reference`. The basic
+described in the :ref:`module -reference <Reference>`. The basic
 definitions that almost every application needs are collected in the
 top-level module, MMTK. The first line of most applications is
-therefore
-::
+therefore::
 
     from MMTK import *
 
 The definitions that are specific to particular applications reside in
 submodules within the package MMTK. For example, force fields are
-defined in :mod:`MMTK.ForceFields.ForceField`, and peptide
+defined in :mod:`MMTK.ForceFields`, and peptide
 chain and protein objects are defined in :mod:`MMTK.Proteins`.
 
 Python provides two ways to access objects in modules and submodules.
 The first one is importing a module and referring to objects in it,
-e.g.:
-
-::
+e.g.::
 
     import MMTK
     import MMTK.ForceFields
     universe = MMTK.InfiniteUniverse(MMTK.ForceFields.Amber94ForceField())
 
 The second method is importing all or some objects *from*
-a module:
-
-::
+a module::
 
     from MMTK import InfiniteUniverse
     from MMTK.ForceFields import Amber94ForceField
@@ -123,7 +124,7 @@ a module:
 These two import styles can also be mixed according to convience.
 In order to prevent any confusion, all objects are referred to by
 their full names in this manual. The Amber force field object
-is thus called :class:`MMTK.ForceFields.Amber.Amber94ForceField`.
+is thus called :class:`MMTK.ForceFields.Amber94ForceField`.
 Of course the user is free to use selective imports in order to
 be able to use such objects with shorter names.
 
@@ -144,11 +145,8 @@ Chemical objects
 These are the objects that represent the parts of a molecular system:
 
 - atoms
-
 - groups
-
 - molecules
-
 - molecular complexes
 
 These objects form a simple hierarchy: complexes consist of
@@ -227,7 +225,25 @@ Normal modes
 ------------
 
 Normal mode objects contain normal mode frequencies and atomic
-displacements for a given universe.
+displacements for a given universe. MMTK provides three kinds of
+normal modes which correspond to three different physical situations:
+
+- Energetic modes represent the principal axes of the potential
+  energy surface. They each have a force constant that is smallest
+  for the most collective motions and highest for the most localized
+  motions. Energetic modes are appropriate for describing the
+  potential energy surface without reference to any particular
+  dynamics, e.g. in flexibility analysis or Monte-Carlo sampling.
+
+- Vibrational modes represent the vibrational motions of a system
+  that have well-defined frequencies. Their use implies that the
+  system follows Newtonian dynamics or quantum dynamics. This is
+  appropriate for small molecules, and for the most localized motions
+  of macromolecules.
+
+- Brownian modes represent diffusional motions of an overdamped
+  system. They describe systems with Brownian dynamics and are
+  appropriate for describing the slow motions of macromolecules.
 
 Non-MMTK objects
 ----------------
@@ -266,7 +282,7 @@ information force fields might need about the objects.
 
 MMTK comes with database entries for many common objects (water,
 amino acids, etc.). For other objects you will have to write the definitions
-yourself. as described in the section on the :ref:`database`.
+yourself. as described in the section :ref:`database`.
 
 Force fields
 ============
@@ -281,8 +297,9 @@ field for normal mode calculations on large proteins.
 
 MMTK was designed to make the addition of force field terms and the
 implementation of other force fields as easy as possible. Force field
-terms can be defined in Python (for ease of implementation) or in C or
-Fortran (for efficiency). This is described in the developer's guide.
+terms can be defined in Python (for ease of implementation) or in
+Cython, C, or Fortran (for efficiency). This is described in the
+developer's guide.
 
 Units
 =====
@@ -319,9 +336,8 @@ Charge          e
 The module :mod:`MMTK.Units` contains convenient
 conversion constants for the units commonly used in computational
 chemistry. For example, a length of 2 Ångström can be
-written as 2*Units.Ang, and a frequency can be
-printed in wavenumbers with print
-frequency/Units.invcm.
+written as ``2*Units.Ang``, and a frequency can be
+printed in wavenumbers with ``print frequency/Units.invcm``.
 
 A simple example
 ================
@@ -336,7 +352,7 @@ are explained in the remaining chapters of the manual.
 
     # Import the necessary MMTK definitions.
     from MMTK import *
-    from MMTK.ForceFields import Amber94ForceField
+    from MMTK.ForceFields import Amber99ForceField
     from MMTK.Trajectory import Trajectory, TrajectoryOutput, StandardLogOutput
     from MMTK.Dynamics import VelocityVerletIntegrator
     # Create an infinite universe (i.e. no boundaries, non-periodic).
@@ -406,9 +422,9 @@ parameters can be used for all object types:
 
 Some examples with additional explanations for specific types:
 
-- Atom('C') creates a carbon atom.
+- ``Atom('C')`` creates a carbon atom.
 
-- Molecule('water', position=Vector(0.,0.,1.))
+- ``Molecule('water', position=Vector(0.,0.,1.))``
   creates a water molecule using configuration 'default' and moves the
   center of mass to the indicated position.
 
@@ -416,10 +432,11 @@ Proteins, peptide chains, and nucleotide chains
 -----------------------------------------------
 
 MMTK contains special support for working with proteins, peptide
-chains, and nucleotide chains. As described in the chapter on the :ref:`database`, proteins can be described by a special
-database definition file. However, it is often simpler to create
-protein objects directly in an application program. The classes
-are :class:`MMTK.Proteins.PeptideChain`,:ref:`Class:MMTK.Proteins.Protein`,
+chains, and nucleotide chains. As described in the chapter
+:ref:`database`, proteins can be described by a special database
+definition file. However, it is often simpler to create macromolecular
+objects directly in an application program. The classes are
+:class:`MMTK.Proteins.PeptideChain`, :ref:`Class:MMTK.Proteins.Protein`,
 and :class:`MMTK.NucleicAcids.NucleotideChain`.
 
 Proteins can be created from definition files in the database,
@@ -442,17 +459,18 @@ last two cases the atomic positions are not defined. MMTK provides
 several models for the residues which provide different levels of
 detail: an all-atom model, a model without hydrogen atoms, two models
 containing only polar hydrogens (using different definitions of polar
-hydrogens), and a model containing only the C-alpha atoms, with each
-C-alpha atom having the mass of the entire residue. The last model
+hydrogens), and a model containing only the |C_alpha| atoms, with each
+|C_alpha| atom having the mass of the entire residue. The last model
 is useful for conformational analyses in which only the backbone
 conformations are important.
 
 The construction of nucleotide chains is very similar. The residue
-list can be either a :class:`MMTK.PDB.PDBNucleotideChain` object or a list of
-two-letter residue names. The first letter of a residue name indicates
-the sugar type ('R' for ribose and'D' for desoxyribose), and the second letter
-defines the base ('A', 'C', and'G', plus 'T' for DNA and'U' for RNA). The models are the same as for
-peptide chains, except that the C-alpha model does not exist.
+list can be either a :class:`MMTK.PDB.PDBNucleotideChain` object or a
+list of two-letter residue names. The first letter of a residue name
+indicates the sugar type ('R' for ribose and'D' for desoxyribose), and
+the second letter defines the base ('A', 'C', and'G', plus 'T' for DNA
+and'U' for RNA). The models are the same as for peptide chains, except
+that the |C_alpha| model does not exist.
 
 Most frequently proteins and nucleotide chains are created from a PDB
 file. The PDB files often contain solvent (water) as well, and perhaps
@@ -530,9 +548,13 @@ MMTK:
 - :class:`MMTK.Universe.InfiniteUniverse` represents an infinite universe,
   without any boundary or periodic boundary conditions.
 
+- :class:`MMTK.Universe.ParallelepipedicPeriodicUniverse` represents
+  a general periodic universe defined by three basis vectors.
+
 - :class:`MMTK.Universe.OrthorhombicPeriodicUniverse` represents a periodic
   universe with an orthorhombic elementary cell, whose size is defined
-  by the three edge lengths.
+  by the three edge lengths. The edges are oriented along the axes of
+  the coordinate system.
 
 - :class:`MMTK.Universe.CubicPeriodicUniverse` is a special case
   of :class:`MMTK.Universe.OrthorhombicPeriodicUniverse` in which the
@@ -548,18 +570,20 @@ Force fields
 ------------
 
 MMTK comes with several force fields, and permits the definition of
-additional force fields. Force fields are defined in 
-module :class:`MMTK.ForceFields.ForceField`. The most import built-in force
-field is the `Amber 94 force field <http://www.amber.ucsf.edu/amber/amber.html>`_,
-represented by the class 
-:class:`MMTK.ForceFields.Amber.AmberForceField.Amber94ForceField`. It offers
-several strategies for electrostatic interactions, including Ewald
-summation, a fast multipole method [Rankin2002]_,
-and cutoff with charge neutralization and optional screening [Wolf1999]_.
+additional force fields. Force fields are defined in module
+:class:`MMTK.ForceFields.ForceField`. The most import built-in force
+field is the `Amber 94 force field
+<http://www.amber.ucsf.edu/amber/amber.html>`_, represented by the
+class
+:class:`MMTK.ForceFields.Amber.AmberForceField.Amber94ForceField`. It
+offers several strategies for electrostatic interactions, including
+Ewald summation, a fast multipole method :ref:`[Rankin2002] <Rankin2002>`, and cutoff
+with charge neutralization and optional screening :ref:`[Wolf1999] <Wolf1999>`..
 
 In addition to the Amber 94 force field, there is a Lennard-Jones
-force field for noble gases (Class :class:`MMTK.ForceFields.LennardJonesFF`) and a
-deformation force field for protein normal mode calculations 
+force field for noble gases (Class
+:class:`MMTK.ForceFields.LennardJonesFF`) and a deformation force
+field for protein normal mode calculations
 (:class:`MMTK.ForceFields.DeformationFF.DeformationForceField`).
 
 Referring to objects and parts of objects
@@ -571,34 +595,33 @@ necessary to access specific parts in this hierarchy.
 
 In most cases, parts are attributes with a specific name. For example,
 the oxygen atom in every water molecule is an attribute with the name
-"O". Therefore if w refers to a water
-molecule, then w.O refers to its oxygen
-atom. For a more complicated example, if m
-refers to a molecule that has a methyl group called "M1", then m.M1.C
-refers to the carbon atom of that methyl group. The names of attributes
-are defined in the database.
+"O". Therefore if ``w`` refers to a water molecule, then ``w.O``
+refers to its oxygen atom. For a more complicated example, if ``m``
+refers to a molecule that has a methyl group called "M1", then
+``m.M1.C`` refers to the carbon atom of that methyl group. The names
+of attributes are defined in the database.
 
 Some objects consist of parts that need not have unique names, for
 example the elements of a collection, the residues in a peptide chain,
 or the chains in a protein. Such parts are accessed by indices; the
 objects that contain them are Python sequence types. Some examples:
 
-- Asking for the number of items: if c
-  refers to a collection, then len(c) is
+- Asking for the number of items: if ``c``
+  refers to a collection, then ``len(c)`` is
   the number of its elements.
 
-- Extracting an item: if p refers to a
-  protein, then p[0] is its first peptide
+- Extracting an item: if ``p`` refers to a
+  protein, then ``p[0]`` is its first peptide
   chain.
 
-- Iterating over items: if p refers to a
-  peptide chain, then for residue in p: print
-  residue.position() will print the center of mass positions of
+- Iterating over items: if ``p`` refers to a
+  peptide chain, then ``for residue in p: print
+  residue.position()`` will print the center of mass positions of
   all its residues.
 
-Peptide and nucleotide chains also allow the operation of slicing: if p
-refers to a peptide chain, then p[1:-1]
-is a subchain extending from the second to the next-to-last residue.
+Peptide and nucleotide chains also allow the operation of slicing: if
+``p`` refers to a peptide chain, then ``p[1:-1]`` is a subchain
+extending from the second to the next-to-last residue.
 
 The structure of peptide and nucleotide chains
 ----------------------------------------------
@@ -613,11 +636,11 @@ database and can be freely inspected and even modified or overriden by
 an entry in a database that is listed earlier in MMTKDATABASE.
 
 Peptide chains are made up of amino acid residues, each of which is a
-group consisting of two other groups, one being called "peptide" and the
-other "sidechain". The first group contains the peptide group and the C
-and H atoms; everything else is contained in the sidechain. The C atom
-of the fifth residue of peptide chain p
-is therefore referred to as p[4].peptide.C_alpha.
+group consisting of two other groups, one being called "peptide" and
+the other "sidechain". The first group contains the peptide group and
+the C and H atoms; everything else is contained in the sidechain. The
+C atom of the fifth residue of peptide chain ``p`` is therefore
+referred to as ``p[4].peptide.C_alpha``.
 
 Nucleotide chains are made up of nucleotide residues, each of which is
 a group consisting of two or three other groups. One group is called
@@ -632,16 +655,16 @@ Analyzing and modifying atom properties
 General operations
 ------------------
 
-Many inquiry and modification operations act at the atom level and
-can equally well be applied to any object that is made up of
-atoms, i.e. atoms, molecules, collections, universes, etc.
-These operations are defined once in a :term:`Mix-in class`
-called :class:`MMTK.Collections.GroupOfAtoms`, but are available
-for all objects for which they make sense. They include inquiry-type
-functions (total mass, center of mass, moment of inertia, bounding box,
-total kinetic energy etc.), coordinate modifications (translation, rotation,
-application of :ref:`transformation` objects) and coordinate
-comparisons (RMS difference, optimal fits).
+Many inquiry and modification operations act at the atom level and can
+equally well be applied to any object that is made up of atoms,
+i.e. atoms, molecules, collections, universes, etc.  These operations
+are defined once in a :term:`Mix-in class` called
+:class:`MMTK.Collections.GroupOfAtoms`, but are available for all
+objects for which they make sense. They include inquiry-type functions
+(total mass, center of mass, moment of inertia, bounding box, total
+kinetic energy etc.), coordinate modifications (translation, rotation,
+application of :ref:`transformation`) and coordinate comparisons (RMS
+difference, optimal fits).
 
 .. _transformation:
 
@@ -656,57 +679,58 @@ to atomic positions.
 
 Transformation objects specify a general displacement consisting of a
 rotation around the origin of the coordinate system followed by a
-translation. They are defined in the module Scientific.Geometry, but
-for convenience the module MMTK contains a reference to them as well.
-Transformation objects corresponding to pure translations can be
-created with Translation(*displacement*); transformation objects 
-describing pure rotations withRotation(*axis*, *angle*) or 
-Rotation(*rotation_matrix*).  Multiplication of transformation 
+translation. They are defined in the module ``Scientific.Geometry``,
+but for convenience the module ``MMTK`` contains a reference to them
+as well.  Transformation objects corresponding to pure translations
+can be created with ``Translation(displacement)``; transformation
+objects describing pure rotations with ``Rotation(axis, angle)`` or
+``Rotation(rotation_matrix)``.  Multiplication of transformation
 objects returns a composite transformation.
 
 The translational component of any transformation can be obtained by
-calling the method translation(); the
-rotational component is obtained analogously with rotation().
-The displacement vector for a pure translation can be extracted with the
-method displacement(), a tuple of axis
-and angle can be extracted from a pure rotation by calling axisAndAngle().
+calling the method ``translation()``; the rotational component is
+obtained analogously with ``rotation()``.  The displacement vector for
+a pure translation can be extracted with the method
+``displacement()``, a tuple of axis and angle can be extracted from a
+pure rotation by calling ``axisAndAngle()``.
 
 .. _atom_property:
 
 Atomic property objects
 -----------------------
 
-Many properties in a molecular system are defined for each individual atom:
-position, velocity, mass, etc. Such properties are represented in special
-objects, defined in module MMTK: :class:`MMTK.ParticleProperties.ParticleScalar`
-for scalar quantities, :class:`MMTK.ParticleProperties.ParticleVector` for vector
-quantities, and :class:`MMTK.ParticleProperties.ParticleTensor` for rank-2 tensors.
-All these objects can be indexed with an atom object to retrieve or change
-the corresponding value. Standard arithmetic operations are also defined,
-as well as some useful methods.
+Many properties in a molecular system are defined for each individual
+atom: position, velocity, mass, etc. Such properties are represented
+in special objects, defined in module MMTK:
+:class:`MMTK.ParticleProperties.ParticleScalar` for scalar quantities,
+:class:`MMTK.ParticleProperties.ParticleVector` for vector quantities,
+and :class:`MMTK.ParticleProperties.ParticleTensor` for rank-2
+tensors.  All these objects can be indexed with an atom object to
+retrieve or change the corresponding value. Standard arithmetic
+operations are also defined, as well as some useful methods.
 
 Configurations
 --------------
 
 A configuration object, represented by the class
-:class:`MMTK.ParticlePropertiesConfiguration` is a special 
-variant of a :class:`MMTK.ParticleProperties.ParticleVector` object. 
-In addition to the atomic coordinates of a universe, it stores 
-geometric parameters of a universe that are subject to change, 
-e.g. the edge lengths of the elementary cell of a periodic universe.
-Every universe has a current configuration, which is what all operations
-act on by default. It is also the configuration that is updated by
-minimizations, molecular dynamics, etc. The current configuration can be
-obtained by calling the method configuration().
+:class:`MMTK.ParticleProperties.Configuration` is a special variant of
+a :class:`MMTK.ParticleProperties.ParticleVector` object.  In addition
+to the atomic coordinates of a universe, it stores geometric
+parameters of a universe that are subject to change, e.g. the edge
+lengths of the elementary cell of a periodic universe.  Every universe
+has a current configuration, which is what all operations act on by
+default. It is also the configuration that is updated by
+minimizations, molecular dynamics, etc. The current configuration can
+be obtained by calling the method ``configuration()``.
 
 There are two ways to create configuration objects: by making a copy
-of the current configuration (withcopy(universe.configuration()), or by reading a
-configuration from a :ref:`trajectory` file.
+of the current configuration (with ``universe.copyConfiguration()``,
+or by reading a configuration from a :ref:`trajectory <Trajectories>`.
 
 Minimization and Molecular Dynamics
 ###################################
 
-.. _trajectory:
+.. _Trajectories:
 
 Trajectories
 ============
@@ -725,15 +749,17 @@ contain all the information needed to interpret their contents.
 An MMTK trajectory file can thus be inspected and processed without
 requiring any further information.
 
-For illustrations of trajectory operations, see the :ref:`examples <Example-Trajectories>`.
+For illustrations of trajectory operations, see the :ref:`examples
+<Example-Trajectories>`.
 
-Trajectory file objects are represented by the class :class:`MMTK.Trajectory.Trajectory`. They can be opened for
-reading, writing, or modification. The data in trajectory files can be
-stored in single precision or double precision; single-precision is
-usually sufficient, but double-precision files are required to
-reproduce a given state of the system exactly.
+Trajectory file objects are represented by the class
+:class:`MMTK.Trajectory.Trajectory`. They can be opened for reading,
+writing, or modification. The data in trajectory files can be stored
+in single precision or double precision; single-precision is usually
+sufficient, but double-precision files are required to reproduce a
+given state of the system exactly.
 
-A trajectory is closed by calling the method close().
+A trajectory is closed by calling the method ``close()``.
 If anything has been written to a trajectory, closing it is required to
 guarantee that all data has been written to the file. Closing a
 trajectory after reading is recommended in order to prevent memory
@@ -744,7 +770,7 @@ objects in a universe or any subset; this is useful for limiting the
 amount of disk space occupied by the file by not storing uninteresting
 parts of the system, e.g. the solvent surrounding a protein. It is
 even possible to create a trajectory for a subset of the atoms in a
-molecule, e.g. for only the C-alpha atoms of a protein. The universe
+molecule, e.g. for only the |C_alpha| atoms of a protein. The universe
 description that is stored in the trajectory file contains all
 chemical objects of which at least one atom is represented.
 
@@ -763,7 +789,7 @@ reading data from it will set the data for the missing parts to
 "undefined". Analysis operations on such systems must be done very
 carefully. In most cases, the trajectory data will contain the atomic
 configurations, and in that case the "defined" atoms can be extracted
-with the method atomsWithDefinedPositions().
+with the method ``atomsWithDefinedPositions()``.
 
 MMTK trajectory files can store various data: atomic positions,
 velocities, energies, energy gradients etc. Each trajectory-producing
@@ -801,50 +827,49 @@ Minimizers and dynamics integrators accept various optional parameter
 specifications. All of them are selected by keywords, have reasonable
 default values, and can be specified when the minimizer or integrator
 is created or when it is called. In addition to parameters that are
-specific to each algorithm, there is a general parameter *actions* that specifies actions that are
-executed periodically, including trajectory and console output.
+specific to each algorithm, there is a general parameter ``actions``
+that specifies actions that are executed periodically, including
+trajectory and console output.
 
 Periodic actions
 ----------------
 
-Periodic actions are specified by the keyword parameter *actions* 
-whose value is a list of periodic
-actions, which defaults to an empty list. Some of these actions are
-applicable to any trajectory-generating algorithm, especially the
-output actions. Others make sense only for specific algorithms or
-specific universes, e.g. the periodic rescaling of velocities during a
-Molecular Dynamics simulation.
+Periodic actions are specified by the keyword parameter ``actions``
+whose value is a list of periodic actions, which defaults to an empty
+list. Some of these actions are applicable to any
+trajectory-generating algorithm, especially the output actions. Others
+make sense only for specific algorithms or specific universes,
+e.g. the periodic rescaling of velocities during a Molecular Dynamics
+simulation.
 
-Each action is described by an action object. The step numbers for which
-an action is executed are specified by three parameters. The
-parameter *first* indicates the number of the
-first step for which the action is executed, and defaults to 0. The
-parameter *last* indicates the last step for
-which the action is executed, and default to None,
-meaning that the action is executed indefinitely. The parameter
-*skip* speficies how many steps are skipped
-between two executions of the action. The default value of 1 means
-that the action is executed at each step. Of course an action object
-may have additional parameters that are specific to its action.
+Each action is described by an action object. The step numbers for
+which an action is executed are specified by three parameters. The
+parameter ``first`` indicates the number of the first step for which
+the action is executed, and defaults to 0. The parameter ``last``
+indicates the last step for which the action is executed, and default
+to ``None``, meaning that the action is executed indefinitely. The
+parameter ``skip`` speficies how many steps are skipped between two
+executions of the action. The default value of 1 means that the action
+is executed at each step. Of course an action object may have
+additional parameters that are specific to its action.
 
-The output actions are defined in the module :mod:`MMTK.Trajectory` and can be used with any
-trajectory-generating algorithm. They are:
+The output actions are defined in the module :mod:`MMTK.Trajectory`
+and can be used with any trajectory-generating algorithm. They are:
 
-- :class:`MMTK.Trajectory.TrajectoryOutput` for writing
-  data to a trajectory. Note that it is possible to use
-  several trajectory output actions simultaneously to write to multiple
-  trajectories. It is thus possible, for example, to write a short
-  dense trajectory during a dynamics run for analyzing short-time
-  dynamics, and simultaneously a long-time trajectory with a larger
-  step spacing, for analyzing long-time dynamics.
+- :class:`MMTK.Trajectory.TrajectoryOutput` for writing data to a
+  trajectory. Note that it is possible to use several trajectory
+  output actions simultaneously to write to multiple trajectories. It
+  is thus possible, for example, to write a short dense trajectory
+  during a dynamics run for analyzing short-time dynamics, and
+  simultaneously a long-time trajectory with a larger step spacing,
+  for analyzing long-time dynamics.
 
-- :class:`MMTK.Trajectory.RestartTrajectoryOutput`,
-  which is a specialized version of :class:`MMTK.Trajectory.TrajectoryOutput`.
-  It writes the data that the
-  algorithm needs in order to be restarted to a restart trajectory file.
-  A restart trajectory is a trajectory that stores a fixed
-  number of steps which are reused cyclically, such that it always
-  contain the last few steps of a trajectory.
+- :class:`MMTK.Trajectory.RestartTrajectoryOutput`, which is a
+  specialized version of :class:`MMTK.Trajectory.TrajectoryOutput`.
+  It writes the data that the algorithm needs in order to be restarted
+  to a restart trajectory file.  A restart trajectory is a trajectory
+  that stores a fixed number of steps which are reused cyclically,
+  such that it always contain the last few steps of a trajectory.
 
 - :class:`MMTK.Trajectory.LogOutput` for text output
   of data to a file.
@@ -886,14 +911,14 @@ simulations:
 Fixed atoms
 -----------
 
-During the course of a minimization or molecular dynamics algorithm, the
-atoms move to different positions. It is possible to exclude specific
-atoms from this movement, i.e. fixing them at their initial positions.
-This has no influence whatsoever on energy or force calculations; the
-only effect is that the atoms' positions never change. Fixed atoms are
-specified by giving them an attribute fixed
-with a value of one. Atoms that do not have an attributefixed, or one with a value of zero, move according
-to the selected algorithm.
+During the course of a minimization or molecular dynamics algorithm,
+the atoms move to different positions. It is possible to exclude
+specific atoms from this movement, i.e. fixing them at their initial
+positions.  This has no influence whatsoever on energy or force
+calculations; the only effect is that the atoms' positions never
+change. Fixed atoms are specified by giving them an attribute fixed
+with a value of one. Atoms that do not have an attributefixed, or one
+with a value of zero, move according to the selected algorithm.
 
 .. _energy_minimization:
 
@@ -912,14 +937,14 @@ conjugate gradient algorithm should be used.
 
 Both minimizers accept three specific optional parameters:
 
-- *steps* (an integer) to specify the maximum number of
+- ``steps`` (an integer) to specify the maximum number of
   steps (default is 100)
 
-- *step_size* (a number)
+- ``step_size`` (a number)
   to specify an initial step length used in the search for a minimum
   (default is 2 pm)
 
-- *convergence* (a number)
+- ``convergence`` (a number)
   to specify the gradient norm (more precisely the root-mean-square
   length) at which the minimization should stop (default is 0.01
   kJ/mol/nm)
@@ -946,7 +971,8 @@ See also the example file :ref:`modes.py <Example-NormalModes>`.
 Molecular dynamics
 ==================
 
-The techniques described in this section are illustrated by several :ref:`examples <Example-MolecularDynamics>`. 
+The techniques described in this section are illustrated by several
+:ref:`examples <Example-MolecularDynamics>`.
 
 Velocities
 ----------
@@ -976,7 +1002,8 @@ is the use of distance constraints on some or all chemical bonds.
 MMTK allows the use of distance constraints on any pair of
 atoms, even though constraining anything but chemical bonds
 is not recommended due to considerable modifications of the
-dynamics of the system [vanGunsteren1982]_, [Hinsen1995]_.
+dynamics of the system :ref:`[vanGunsteren1982] <vanGunsteren1982>`,
+:ref:`[Hinsen1995] <Hinsen1995>`.
 
 MMTK permits the definition of distance constraints on all atom pairs
 in an object that are connected by a chemical bond by calling the
@@ -1014,16 +1041,16 @@ Integration
 -----------
 
 A Molecular Dynamics integrator based on the "Velocity Verlet"
-algorithm [Swope1982]_, which was extended
+algorithm :ref:`[Swope1982] <Swope1982>`, which was extended
 to handle distance constraints as well as thermostats and
-barostats [Kneller1996]_, is implemented by the
+barostats :ref:`[Kneller1996] <Kneller1996>`, is implemented by the
 class :class:`MMTK.Dynamics.VelocityVerletIntegrator`.
 It has two optional keyword parameters:
 
-- *steps* (an integer) to specify the number
+- ``steps`` (an integer) to specify the number
   of steps (default is 100)
 
-- *delta_t* (a number) to specify the time step
+- ``delta_t`` (a number) to specify the time step
   (default 1 fs)
 
 There are three classes of trajectory data: "energy" includes the
@@ -1072,35 +1099,37 @@ Normal modes
 Normal mode analysis provides an analytic description of the dynamics
 of a system near a minimum using an harmonic approximation to the
 potential. Before a normal mode analysis can be started, the system
-must be brought to a local minimum of the potential energy by :ref:`energy_minimization`, except when special force fields
-designed only for normal mode analysis are used 
-(e.g. :class:`MMTK.ForceFields.DeformationFF.DeformationForceField`). See also
-the :ref:`Normal Modes <Example-NormalModes>` examples.
+must be brought to a local minimum of the potential energy by
+:ref:`energy minimization <energy_minimization>`, except when special
+force fields designed only for normal mode analysis are used
+(e.g. :class:`MMTK.ForceFields.CalphaFF.CalphaForceField`). See
+also the :ref:`Normal Modes <Example-NormalModes>` examples.
 
-A standard normal mode analysis is performed by creating a normal mode
-object, implemented in class :class:`MMTK.NormalModes.Core.NormalModes`. A normal mode object
-behaves like a sequence of :class:`MMTK.NormalModes.Core.Mode`
-objects which store the atomic displacement vectors corresponding
-to each mode and its vibrational frequency.
+A standard normal mode analysis is performed by creating a normal
+modes object, implemented in the classes
+:class:`MMTK.NormalModes.EnergeticModes.EnergeticModes`,
+:class:`MMTK.NormalModes.VibrationalModes.VibrationalModes`, and
+:class:`MMTK.NormalModes.BrownianModes.BrownianModes`. A normal
+mode object behaves like a sequence of mode objects, which store the
+atomic displacement vectors corresponding to each mode and the
+associated force constant, vibrational frequency, or inverse
+relaxation time.
 
 For short-ranged potentials, it is advantageous to store the second
 derivatives of the potential in a sparse-matrix form and to use
 an iterative method to determine some or all modes. This permits
-the treatments of larger systems that would normally require huge
-amounts of memory. A sparse-matrix method is implemented in class 
-:class:`MMTK.NormalModes.SparseMatrixNormalModes`.
+the treatment of larger systems that would normally require huge
+amounts of memory. 
 
 Another approach to deal with large systems is the restriction to
 low-frequency modes which are supposed to be well representable by
 linear combinations of a given set of basis vectors. The basis vectors
 can be obtained from a basis for the full Cartesian space by
-elimination of known fast degrees of freedom (e.g. bonds); the module:mod:`MMTK.Subspace` contains support classes for
-this approach. It is also possible to construct a suitable basis
-vector set from small-deformation vector fields (e.g. :class:`MMTK.FourierBasis.FourierBasis`). The normal mode
-analysis for a given set of basis vectors is performed by the class:class:`MMTK.NormalModes.SubspaceNormalModes`. There is
-also a variant using finite difference differentiation (:class:`MMTK.NormalModes.FiniteDifferenceSubspaceNormalModes`)
-and another one using a sparse-matrix representation of the second
-derivatives (:class:`MMTK.NormalModes.SparseMatrixSubspaceNormalModes`).
+elimination of known fast degrees of freedom (e.g. bonds); the
+module :mod:`MMTK.Subspace` contains support classes for this
+approach. It is also possible to construct a suitable basis vector set
+from small-deformation vector fields
+(e.g. :class:`MMTK.FourierBasis.FourierBasis`).
 
 Analysis operations
 ###################
@@ -1137,23 +1166,23 @@ methods in class :class:`MMTK.Universe.Universe`
 and its subclasses. Of course they are available for non-periodic
 universes as well.
 
-Universes also provide methods for obtaining :ref:`atom_property`
-objects that describe the state of the system (configurations, velocities,
-masses), and for restoring the system state from a :ref:`trajectory`
-file.
+Universes also provide methods for obtaining :ref:`atom property
+<atom_property>` objects that describe the state of the system
+(configurations, velocities, masses), and for restoring the system
+state from a :ref:`trajectory` file.
 
 Energy evaluation
 =================
 
 Energy evaluation requires a force field, and therefore all the
 methods in this section are defined only for universe objects, i.e. in
-class :class:`MMTK.Universe.Universe`.  However, they
-all take an optional arguments (anything that can be broken down into
-atoms) that indicates for which subset of the universe the energy is
-to be evaluated. In addition to the potential energy, energy gradients
-and second derivatives (force constants) can be obtained, if the
-force field implements them. There is also a method that returns
-a dictionary containing the values for all the individual force field
+class :class:`MMTK.Universe.Universe`.  However, they all take an
+optional arguments (anything that can be broken down into atoms) that
+indicates for which subset of the universe the energy is to be
+evaluated. In addition to the potential energy, energy gradients and
+second derivatives (force constants) can be obtained, if the force
+field implements them. There is also a method that returns a
+dictionary containing the values for all the individual force field
 terms, which is often useful for analysis.
 
 Surfaces and volumes
@@ -1165,9 +1194,9 @@ the surface of the resulting conglomerate of overlapping spheres is
 taken to be the surface of the atom group. Atom radii for surface
 determination are usually called "van der Waals radii", but there is
 no unique method for determining them. MMTK uses the values from
-[Bondi1964]_. However,
-users can change these values for each individual atom by assigning a
-new value to the attribute "vdW_radius".
+:ref:`[Bondi1964] <Bondi1964>`. However, users can change these values for each
+individual atom by assigning a new value to the attribute
+``vdW_radius``.
 
 The operations provided in :mod:`MMTK.MolecularSurface`
 include basic surface and volume calculation, determination of
@@ -1187,11 +1216,10 @@ Python objects such as numbers, lists, dictionaries etc., as well as
 practically any user-defined objects. Storage is based on the standard
 Python module pickle.
 
-Objects are saved with :func:`MMTK.save` and
-restored with :func:`MMTK.load`.  If several
-objects are to be stored in a single file, use tuples: 
-save((object1, object2), filename) and object1, object2 = load(filename) to retrieve the
-objects.
+Objects are saved with :func:`MMTK.save` and restored with
+:func:`MMTK.load`.  If several objects are to be stored in a single
+file, use tuples: ``save((object1, object2), filename)`` and
+``object1, object2 = load(filename)`` to retrieve the objects.
 
 Note that storing an object in a file implies storing all objects
 referenced by it as well, such that the size of the file can become
@@ -1202,24 +1230,15 @@ as well. However, nothing is ever written twice to the same
 file. If you store a list or a tuple containing a universe and
 a configuration for it, the universe is written only once.
 
-It should be noted that when saving an object, all objects that this
-object refers to are also saved in the same file (otherwise the restored
-object would be missing some references). In practice this means that
-saving any chemical object, even a single atom, involves saving the
-whole universe that this object is part of. However, when saving several
-objects in one file, objects referenced several times are saved only
-once.
-
 Frequently it is also useful to copy an object, such as a molecule or
 a configuration. There are two functions (which are actually taken
-from the Python standard library module copy) for
-this purpose, which have a somewhat different behaviour for
-container-type objects (lists, dictionaries, collections
-etc.). :func:`MMTK.copy` returns a copy of the given
-object. For a container object, it returns a new container object
-which contains the same objects as the original one. If the intention
-is to get a container object which contains copies of the original
-contents, then MMTK.deepcopy(object) should be used. For
+from the Python standard library module copy) for this purpose, which
+have a somewhat different behaviour for container-type objects (lists,
+dictionaries, collections etc.). :func:`MMTK.copy` returns a copy of
+the given object. For a container object, it returns a new container
+object which contains the same objects as the original one. If the
+intention is to get a container object which contains copies of the
+original contents, then ``MMTK.deepcopy(object)`` should be used. For
 objects that are not container-type objects, there is no difference
 between the two functions.
 
@@ -1229,9 +1248,9 @@ Exporting to specific file formats and visualization
 MMTK can write objects in specific file formats that can be used by
 other programs. Three file formats are supported: the PDB format,
 widely used in computational chemistry, the DCD format for
-trajectories, written by the programs CHARMM and X-Plor and read by
-many visualization programs, and the VRML format, understood by VRML
-browsers as a representation of a three-dimensional scene for
+trajectories, written by the programs CHARMM, X-Plor, and NAMDm, and
+read by many visualization programs, and the VRML format, understood
+by VRML browsers as a representation of a three-dimensional scene for
 visualization. MMTK also provides a more general interface that can
 generate graphics objects in any representation if a special module
 for that representation exists. In addition to facilitating the
@@ -1243,13 +1262,13 @@ PDB, VRML, and DCD files
 ------------------------
 
 Any chemical object, collection, or universe can be written to a PDB
-or VRML file by calling the method writeToFile,
-defined in class :class:`MMTK.Collections.GroupOfAtoms`.  PDB
-files are read via the class :class:`MMTK.PDB.PDBConfiguration`.  
-DCD files can be read by a :class:`MMTK.DCD.DCDReader` object.  For writing DCD files,
-there is the function :func:`MMTK.DCD.writeDCDPDB`, which
-also creates a compatible PDB file without which the DCD file could
-not be interpreted.
+or VRML file by calling the method ``writeToFile``, defined in class
+:class:`MMTK.Collections.GroupOfAtoms`.  PDB files are read via the
+class :class:`MMTK.PDB.PDBConfiguration`.  DCD files can be read by a
+:class:`MMTK.DCD.DCDReader` object.  For writing DCD files, there is
+the function :func:`MMTK.DCD.writeDCDPDB`, which also creates a
+compatible PDB file without which the DCD file could not be
+interpreted.
 
 Special care must be taken to ensure a correct mapping of atom numbers
 when reading from a DCD file. In MMTK, each atom object has a unique
@@ -1352,15 +1371,14 @@ consist of any number of subdatabases, each of which can be a
 directory or a URL. Typically the database consists of at least two
 parts: MMTK's standard definitions and a user's personal definitions.
 When looking up an object type in the database, MMTK checks the value
-of the environment variable MMTKDATABASE. The value
-of this variable must be a list of subdatabase locations seperated by
-white space. If the variable MMTKDATABASE is not
-defined, MMTK uses a default value that contains the path
-".mmtk/Database" in the user's home directory followed by MMTK's
-standard database, which resides in the directoryDatabase within the MMTK package directory (on many
-Unix systems this is /usr/local/lib/python2.2/site-packages/MMTK).
-MMTK checks the subdatabases in the order in which they are mentioned
-in MMTKDATABASE.
+of the environment variable MMTKDATABASE. The value of this variable
+must be a list of subdatabase locations seperated by white space. If
+the variable MMTKDATABASE is not defined, MMTK uses a default value
+that contains the path ".mmtk/Database" in the user's home directory
+followed by MMTK's standard database, which resides in the directory
+Database within the MMTK package directory (on many Unix systems this
+is ``/usr/local/lib/python2.x/site-packages/MMTK``).  MMTK checks the
+subdatabases in the order in which they are mentioned in MMTKDATABASE.
 
 Each subdatabase contains directories corresponding to the object
 classes, i.e. Atoms (atom definitions), Groups (group definitions),
@@ -1368,7 +1386,7 @@ Molecules (molecule definitions), Complexes (complex definitions),
 Proteins (protein definitions), and PDB (Protein Data Bank files).
 These directories contain the definition files, whose names may
 not contain any upper-case letters. These file names correspond
-to the object types, e.g. the call MMTK.Molecule('Water')
+to the object types, e.g. the call ``MMTK.Molecule('Water')``
 will cause MMTK to look for the file Molecules/water in the database
 (note that the names are converted to lower case).
 
@@ -1405,11 +1423,12 @@ its mass and its percentage of occurrence; the percentages must add up
 to 100. The color is used for VRML output and must equal one of the
 color names defined in the module VRML. The van der Waals radius is used
 for the calculation of molecular volumes and surfaces; the values are
-taken from [Bondi1964]_.
+taken from :ref:`[Bondi1964] <Bondi1964>`.
 
-An application program can create an isolated atom withAtom('c') or, specifying an initial position, withAtom('c', position=Vector(0.,1.,0.)). The element
-name can use any combination of upper and lower case letters, which
-are considered equivalent.
+An application program can create an isolated atom with ``Atom('c')``
+or, specifying an initial position, with ``Atom('c',
+position=Vector(0.,1.,0.))``. The element name can use any combination
+of upper and lower case letters, which are considered equivalent.
 
 Group definitions
 =================
@@ -1439,24 +1458,25 @@ The name should be meaningful to users, but is not used by MMTK
 itself. The following lines create the atoms in the group and assign
 them to variables. These variables become attributes of whatever
 object uses this group; their names can be anything that is a legal
-Python name. The list of bonds, however, must be assigned to the
-variable "bonds". The bond list is used by force fields and for
+Python name. The list of bonds, however, must be assigned to the name
+``bonds``. The bond list is used by force fields and for
 visualization.
 
-The variable "pdbmap" is used for reading and writing PDB files. Its
+The name ``pdbmap`` is used for reading and writing PDB files. Its
 value must be a list of tuples, where each tuple defines one PDB
 residue. The first element of the tuple is the residue name, which is
 used only for output. The second element is a dictionary that maps PDB
-atom names to the actual atoms. The pdbmap entry of any object can be
+atom names to the actual atoms. The ``pdbmap`` entry of any object can be
 overridden by an entry in a higher-level object. Therefore the entry for
 a group is only used for atoms that do not occur in the entry for a
 molecule that contains this group.
 
-The remaining lines in the definition file contain information specific
-to force fields, in this case the Amber force field. The dictionary
-"amber_atom_type" defines the atom type for each atom; the dictionary
-"amber_charge" defines the partial charges. As for pdbmap entries, these
-definitions can be overridden by higher-level definitions.
+The remaining lines in the definition file contain information
+specific to force fields, in this case the Amber force field. The
+dictionary ``amber_atom_type`` defines the atom type for each atom;
+the dictionary ``amber_charge`` defines the partial charges. As for
+``pdbmap`` entries, these definitions can be overridden by
+higher-level definitions.
 
 Molecule definitions
 ====================
@@ -1491,36 +1511,35 @@ This is the definition of a water molecule:
 The name should be meaningful to users, but is not used by MMTK
 itself. The structure is optional and not used by MMTK either. The
 following lines create the atoms in the group and assign them to
-variables. These variables become attributes
-of the molecule, i.e. when a water molecule is created in an application
-program by w = Molecule('water'), then w.H1
-will refer to its first hydrogen atom. The names of these variables can
-be any legal Python names. The list of bonds, however, must be assigned to the
-variable "bonds". The bond list is used by force fields and for
-visualization.
+variables. These variables become attributes of the molecule,
+i.e. when a water molecule is created in an application program by ``w
+= Molecule('water')``, then ``w.H1`` will refer to its first hydrogen
+atom. The names of these variables can be any legal Python names. The
+list of bonds, however, must be assigned to the name ``bonds``. The
+bond list is used by force fields and for visualization.
 
-The variable "pdbmap" is used for reading and writing PDB files. Its
+The name ``pdbmap`` is used for reading and writing PDB files. Its
 value must be a list of tuples, where each tuple defines one PDB
 residue. The first element of the tuple is the residue name, which is
 used only for output. The second element is a dictionary that maps PDB
-atom names to the actual atoms. The pdbmap entry of any object can be
+atom names to the actual atoms. The ``pdbmap`` entry of any object can be
 overridden by an entry in a higher-level object, i.e. in the case of a
-molecule a complex containing it. The variable "pdb_alternative" allows
+molecule a complex containing it. The name ``pdb_alternative`` allows
 to read PDB files that use non-standard names. When a
-PDB atom name is not found in the pdbmap, an attempt is made to
-translate it to another name using pdb_alternative.
+PDB atom name is not found in the ``pdbmap``, an attempt is made to
+translate it to another name using ``pdb_alternative``.
 
 The two following lines in the definition file contain information
 specific to force fields, in this case the Amber force field. The
-dictionary "amber_atom_type" defines the atom type for each atom; the
-dictionary "amber_charge" defines the partial charges. As for pdbmap
+dictionary ``amber_atom_type`` defines the atom type for each atom; the
+dictionary ``amber_charge`` defines the partial charges. As for pdbmap
 entries, these definitions can be overridden by higher-level
 definitions.
 
-The variable "configurations" can be defined to be a dictionary of
+The name ``configurations`` can be defined to be a dictionary of
 configurations for the molecule. During the construction of a molecule,
-a configuration can be specified via an optional parameter, e.g. w
-= Molecule('water', configuration='default'). The names of the
+a configuration can be specified via an optional parameter, e.g.
+``w = Molecule('water', configuration='default')``. The names of the
 configurations can be arbitrary; only the name "default" has a special
 meaning; it is applied by default if no other configuration is specified
 when constructing the molecule. If there is no default configuration,
@@ -1593,11 +1612,11 @@ it would remain in memory forever.
 The net result of a protein definition file is the assignment of a list
 of molecules (usually PeptideChain objects) to the variable "chains".
 MMTK then constructs a protein object from it. To use the above example,
-an application program would use the command p =
-Protein('insulin'). The construction of the protein involves
+an application program would use the command
+``p = Protein('insulin')``. The construction of the protein involves
 one nontrivial (but automatic) step: the construction of disulfide
 bridges for pairs of cystein residues whose sulfur atoms have a distance
-of less then 2.5 Angstrom.
+of less then 2.5 Ångström.
 
 Threads and parallelization
 ###########################
@@ -1644,11 +1663,11 @@ there are conflicts, for example due to the use of the same signal in
 both libraries. Refer to your system documentation for details.
 
 The use of threads for parallelization on shared-memory systems is
-very simple: Just set the environment variableMMTK_ENERGY_THREADS to the desired value.  If this
-variable is not defined, the default value is 1, i.e. energy
-evaluations are performed serially. For choosing an appropriate
-value for this environment variable, the following points should
-be considered:
+very simple: Just set the environment variable MMTK_ENERGY_THREADS to
+the desired value.  If this variable is not defined, the default value
+is 1, i.e. energy evaluations are performed serially. For choosing an
+appropriate value for this environment variable, the following points
+should be considered:
 
 - The number of energy evaluation threads should not be larger than the
   number of processors that are fully dedicated to the MMTK application.
@@ -1661,7 +1680,7 @@ be considered:
   larger than without threads.
 
 - The use of threads incurs some computational overhead. For very small
-  systems, it might be faster not to use threads.
+  systems, it is usually faster not to use threads.
 
 - Not all energy terms necessarily support threads. Of the force field
   terms that part of MMTK, only the multipole algorithms for
@@ -1735,207 +1754,164 @@ manipulation of the state lock. The configuration change lock is less
 critical; it is used only by the molecular dynamics and energy
 minimization algorithms in MMTK.
 
-.. _Examples:
-
-Code Examples
-#############
-
-One of the best ways to learn how to use a new tool is to look at
-examples. The examples given in this manual were adapted from
-real-life MMTK applications. They are also contained in the
-MMTK distribution (directory "Examples") for direct use and modification.
-
-The example molecules, system sizes, parameters, etc.,
-were chosen to reduce execution time as much as possible, in order to
-enable you to run the examples interactively step by step to see how
-they work. If you plan to modify an example program for your own use,
-don't forget to check all parameters carefully to make sure that you
-obtain reasonable results.
-
-
-.. _Example-MolecularDynamics: 
-
-- Molecular Dynamics examples
-
-  - The file
-    :doc:`argon.py <Examples/MolecularDynamics/argon.py>`
-    contains a simulation of liquid argon at constant temperature and
-    pressure.
-  - The file
-    :doc:`protein.py <Examples/MolecularDynamics/protein.py>`
-    contains a simulation of a small (very small) protein in vacuum.
-  - The file
-    :doc:`restart.py <Examples/MolecularDynamics/restart.py>`
-    shows how the simulation started in
-    :doc:`protein.py <Examples/MolecularDynamics/protein.py>`
-    can be continued.
-  - The file
-    :doc:`solvation.py <Examples/MolecularDynamics/solvation.py>`
-    contains the solvation of a protein by water molecules.
-
-.. _Example-MonteCarlo:
-
-- Monte-Carlo examples
-
-  - The program
-    :doc:`backbone.py <../Examples/MonteCarlo/backbone.py>`
-    generates an ensemble of backbone configuration (C-alpha atoms only)
-    for a protein.
-
-.. _Example-Trajectories:
-
-- Trajectory examples
-
-  - The file
-    :doc:`snapshot.py <../Examples/Trajectories/snapshot.py>`
-    shows how a trajectory can be built up step by step from arbitrary
-    data.
-  - The file
-    :doc:`dcd_import.py <../Examples/Trajectories/dcd_import.py>`
-    converts a trajectory in DCD format (used by the programs CHARMM and
-    X-Plor) to MMTK's format.
-  - The file
-    :doc:`dcd_export.py <../Examples/Trajectories/dcd_export.py>`
-    converts an MMTK trajectory to DCD format (used by the programs CHARMM and
-    X-Plor).
-  - The file
-    :doc:`trajectory_average.py <../Examples/Trajectories/trajectory_average.py>`
-    calculates an average structure from a trajectory.
-  - The file
-    :doc:`trajectory_extraction.py <../Examples/Trajectories/trajectory_extraction.py>`
-    reads a trajectory and writes a new one containing only a subset of the
-    original universe.
-  - The file
-    :doc:`view_trajectory.py <../Examples/Trajectories/view_trajectory.py>`
-    shows an animation of a trajectory, provided that an external molecule
-    viewer with animation is available.
-  - The file
-    :doc:`calpha_trajectory.py <../Examples/Trajectories/calpha_trajectory.py>`
-    shows how a much smaller C_alpha-only trajectory can be extracted from
-    a trajectory containing one or more proteins.
-
-.. _Example-NormalModes:
-
--  Normal mode examples
-
-  - The file
-    :doc:`modes.py <../Examples/NormalModes/modes.py>`
-    contains a standard normal mode calculation for a small protein.
-  - The file
-    :doc:`constrained_modes.py <../Examples/NormalModes/constrained_modes.py>`
-    contains a normal mode calculation for a small protein using a model
-    in which each amino acid residue is rigid.
-  - The file
-    :doc:`deformation_modes.py <../Examples/NormalModes/deformation_modes.py>`
-    contains a normal mode calculation for a mid-size protein using a
-    simplified model and a deformation force field.
-  - The file
-    :doc:`harmonic_force_field.py <../Examples/NormalModes/harmonic_force_field.py>`
-    contains a normal mode calculation for a protein using a detailed
-    but still simple harmonic force field.
-
-.. _Example-Proteins:
-
-- Protein examples
-
-  - The file
-    :doc:`construction.py <../Examples/Proteins/construction.py>`
-    shows some more complex examples of protein construction from PDB files.
-  - The file
-    :doc:`analysis.py <../Examples/Proteins/analysis.py>`
-    demonstrates a few analysis techniques for comparing protein
-    conformations.
-
-.. _Example-DNA:
-
-- DNA examples
-
-  - The file
-    :doc:`construction.py <../Examples/DNA/construction.py>`
-    contains the construction of a DNA strand with a ligand.
-
-.. _Example-MPI:
-
-- MPI examples (parallelization)
-
-  - The file :doc:`md.py <../Examples/MPI/md.py>`
-    contains a parallelized version of :doc:`solvation.py <../Examples/MolecularDynamics/solvation.py>`.
-
-.. _Example-LangevinDynamics:
-
-- Langevin dynamics integrator
-
-  - The files 
-    :doc:`LangevinDynamics.py <../Examples/LangevinDynamics/LangevinDynamics.py>`
-    and :doc:`MMTK_langevinmodule.c <../Examples/LangevinDynamics/MMTK_langevinmodule.c>`
-    implement a simple integrator for Langevin dynamics. It is meant as an 
-    example of how to write integrators etc. in C, 
-    but of course it can also be used directly.
-
-.. _Example-Visualization:
-
--  Visualization examples
-
-  - The file 
-    :doc:`additional_objects.py <../Examples/Visualization/additional_objects.py>`
-    describes the addition of custom graphics objects to the representation
-    of a molecular system.
-
-.. _Example-Miscellaneous:
-
-- Micellaneous examples
-
-  - The example
-    :doc:`charge_fit.py <../Examples/Miscellaneous/charge_fit.py>`
-    demonstrates fitting point charges to an electrostatic potential
-    energy surface.
-  - The file
-    :doc:`construct_from_pdb.py <../Examples/Miscellaneous/construct_from_pdb.py>`
-    shows how a universe can be built from a PDB file in such a way that
-    the internal atom ordering is compatible. This is important for exchanging
-    data with other programs.
-  - The file
-    :doc:`lattice.py <../Examples/Miscellaneous/lattice.py>`
-    constructs molecules placed on a lattice.
-  - The file
-    :doc:`vector_field.py <../Examples/Miscellaneous/vector_field.py>`
-    shows how vector fields can be used in the analysis and visualization
-    of collective motions.
-
 Bibliography
 ############
 
-.. [Bondi1964] A. Bondi. `van der Waals Volumes and Radii <http://dx.doi.org/10.1021/j100785a001>`_. 1964.
+.. _Bondi1964:
 
-.. [Rankin2002] William T. Rankin. `DPMTA - A Distributed Implementation of the Parallel Multipole Tree
-  Algorithm - Version 3.0 <http://people.ee.duke.edu/~wrankin/Dpmta/users_guide/dpmta.html>`_.
+[Bondi1964]
 
-.. [Eisenhaber1993] F. Eisenhaber, P. Argos. `Improved Strategy in Analytic Surface Calculation for Molecular Systems: Handling of Singularities and Computational Efficiency <http://dx.doi.org/10.1002/jcc.540141103>`_. 1993.
+  | A. Bondi
+  | `van der Waals Volumes and Radii <http://dx.doi.org/10.1021/j100785a001>`_
+  | 1964
 
-.. [Eisenhaber1995] F. Eisenhaber, P. Lijnzaad, P. Argos, M. Scharf. `The Double Cubic Lattice Method: Efficient Approaches to Numerical Integration of Surface Area and Volume and to Dot Surface Contouring of Molecular Assemblies <http://dx.doi.org/10.1002/jcc.540160303(YoYo)>`_. 1995.
+.. _Rankin2002:
 
-.. [Hinsen1995] Konrad Hinsen, Gerald R. Kneller. `Influence of constraints on the dynamics of polypeptide chains <http://dx.doi.org/10.1103/PhysRevE.52.6868>`_. 1995.
+[Rankin2002]
 
-.. [Hinsen1997] Konrad Hinsen, Benoit Roux. `An accurate potential for simulating proton transfer in acetylacetone <http://dx.doi.org/10.1002/(SICI)1096-987X(199702)18:3%3C368::AID-JCC7%3E3.0.CO;2-S>`_. 1997.
+  | William T. Rankin
+  | `DPMTA - A Distrbuted Implementation of the Parallel Multipole Tree Algorithm - Version 3.0 <http://people.ee.duke.edu/~wrankin/Dpmta/users_guide/dpmta.html>`_
 
-.. [Hinsen1998] Konrad Hinsen. `Analysis of domain motions by approximate normal mode calculations <http://dx.doi.org/10.1002/(SICI)1097-0134(19981115)33:3%3C417::AID-PROT10%3E3.0.CO;2-8>`_. 1998.
+.. _Eisenhaber1993:
 
-.. [Hinsen1999] Konrad Hinsen, Aline Thomas, Martin J. Field. `Analysis of domain motions in large proteins <http://dx.doi.org/10.1002/(SICI)1097-0134(19990215)34:3%3C369::AID-PROT9%3E3.0.CO;2-F>`_. 1999.
+[Eisenhaber1993]
 
-.. [Hinsen1999a] Konrad Hinsen, Gerald R. Kneller. `Projection methods for the analysis of complex motions in macromolecules <http://dx.doi.org/10.1080/08927020008025373>`_. 1999.
+  | F. Eisenhaber, P. Argos
+  | `Improved Strategy in Analytic Surface Calculation for Molecular
+    Systems: Handling of Singularities and Computational Efficiency
+    <http://dx.doi.org/10.1002/jcc.540141103>`_
+  | 1993
 
-.. [Hinsen1999b] Konrad Hinsen, Gerald R. Kneller. `A simplified force field for describing vibrational protein dynamics over the whole frequency range <http://dx.doi.org/10.1063/1.480441>`_. 1999.
+.. _Eisenhaber1995:
 
-.. [Hinsen2000] Konrad Hinsen, Andrei J. Petrescu, Serge Dellerue, Marie-Claire Bellissent-Funel, Gerald R. Kneller. `Harmonicity in slow protein dynamics <http://dx.doi.org/10.1016/S0301-0104(00)00222-6>`_. 2000.
+[Eisenhaber1995]
 
-.. [Kneller1990] Gerald R. Kneller. `Superposition of molecular structures using quaternions <http://dx.doi.org/10.1080/08927029108022453>`_. 1990.
+ | F. Eisenhaber, P. Lijnzaad, P. Argos, M. Scharf
+ | `The Double Cubic Lattice Method: Efficient Approaches to Numerical
+    Integration of Surface Area and Volume and to Dot Surface
+    Contouring of Molecular Assemblies
+    <http://dx.doi.org/10.1002/jcc.540160303(YoYo)>`_
+ | 1995
 
-.. [Kneller1996] Gerald R. Kneller, Thomas Mülders. `Nosé-Andersen dynamics of partially rigid molecules: Coupling of all degrees of freedom to heat and pressure baths <http://dx.doi.org/10.1103/PhysRevE.54.6825>`_. 1996.
+.. _Hinsen1995:
 
-.. [Swope1982] W.C. Swope, H.C. Andersen, P.H. Berens, K.R. Wilson. `A computer simulation method for the calculation of equilibrium constants for the formation of physical clusters of molecules: application to small water clusters <http://dx.doi.org/10.1063/1.442716>`_. 1982.
+[Hinsen1995]
 
-.. [vanGunsteren1982] Wilfred F. van Gunsteren, Martin Karplus. `Effect of Constraints on the Dynamics of Macromolecules <http://dx.doi.org/10.1021/ma00234a015>`_. 1982.
+ | Konrad Hinsen, Gerald R. Kneller
+ | `Influence of constraints on the dynamics of polypeptide chains
+    <http://dx.doi.org/10.1103/PhysRevE.52.6868>`_
+ | 1995
 
-.. [Viduna2000] David Viduna, Konrad Hinsen, Gerald R. Kneller. `The influence of molecular flexibility on DNA radiosensitivity: A simulation study <http://dx.doi.org/10.1103/PhysRevE.62.3986>`_. 2000.
+.. _Hinsen1997:
 
-.. [Wolf1999] D. Wolf, P. Keblinski, S.R. Philpot, J. Eggebrecht. `Exact method for the simulation of Coulombic systems by spherically truncated, pairwise r^(-1) summation <http://dx.doi.org/10.1063/1.478738>`_. 1999.
+[Hinsen1997]
+
+ | Konrad Hinsen, Benoit Roux
+ | `An accurate potential for simulating proton transfer in acetylacetone
+    <http://dx.doi.org/10.1002/(SICI)1096-987X(199702)18:3%3C368::AID-JCC7%3E3.0.CO;2-S>`_
+ | 1997
+
+.. _Hinsen1998:
+
+[Hinsen1998]
+
+ | Konrad Hinsen
+ | `Analysis of domain motions by approximate normal mode calculations
+    <http://dx.doi.org/10.1002/(SICI)1097-0134(19981115)33:3%3C417::AID-PROT10%3E3.0.CO;2-8>`_
+ | 1998
+
+.. _Hinsen1999:
+
+[Hinsen1999]
+
+ | Konrad Hinsen, Aline Thomas, Martin J. Field
+ | `Analysis of domain motions in large proteins
+    <http://dx.doi.org/10.1002/(SICI)1097-0134(19990215)34:3%3C369::AID-PROT9%3E3.0.CO;2-F>`_
+ | 1999
+
+.. _Hinsen1999a:
+
+[Hinsen1999a]
+
+ | Konrad Hinsen, Gerald R. Kneller
+ | `Projection methods for the analysis of complex motions in macromolecules
+    <http://dx.doi.org/10.1080/08927020008025373>`_
+ | 1999
+
+.. _Hinsen1999b:
+
+[Hinsen1999b]
+
+ | Konrad Hinsen, Gerald R. Kneller
+ | `A simplified force field for describing vibrational protein
+    dynamics over the whole frequency range
+    <http://dx.doi.org/10.1063/1.480441>`_
+ | 1999
+
+.. _Hinsen2000:
+
+[Hinsen2000]
+
+ | Konrad Hinsen, Andrei J. Petrescu, Serge Dellerue,
+   Marie-Claire Bellissent-Funel, Gerald R. Kneller.
+ |  `Harmonicity in slow protein dynamics
+     <http://dx.doi.org/10.1016/S0301-0104(00)00222-6>`_
+ | 2000
+
+.. _Kneller1990:
+
+[Kneller1990]
+
+ | Gerald R. Kneller
+ | `Superposition of molecular structures using quaternions
+    <http://dx.doi.org/10.1080/08927029108022453>`_
+ | 1990
+
+.. _Kneller1996:
+
+[Kneller1996]
+
+ | Gerald R. Kneller, Thomas Mülders
+ | `Nosé-Andersen dynamics of partially rigid molecules:
+    Coupling of all degrees of freedom to heat and pressure baths
+    <http://dx.doi.org/10.1103/PhysRevE.54.6825>`_
+ | 1996
+
+.. _Swope1982:
+
+[Swope1982]
+
+ | W.C. Swope, H.C. Andersen, P.H. Berens, K.R. Wilson
+ | `A computer simulation method for the calculation of equilibrium 
+    constants for the formation of physical clusters of molecules:
+    application to small water clusters
+    <http://dx.doi.org/10.1063/1.442716>`_
+ | 1982
+
+.. _vanGunsteren1982:
+
+[vanGunsteren1982]
+
+ | Wilfred F. van Gunsteren, Martin Karplus
+ | `Effect of Constraints on the Dynamics of Macromolecules
+    <http://dx.doi.org/10.1021/ma00234a015>`_
+ | 1982
+
+.. _Viduna2000:
+
+[Viduna2000]
+
+ | David Viduna, Konrad Hinsen, Gerald R. Kneller
+ |  `The influence of molecular flexibility on DNA radiosensitivity:
+     A simulation study <http://dx.doi.org/10.1103/PhysRevE.62.3986>`_
+ | 2000
+
+.. _Wolf1999:
+
+[Wolf1999]
+
+ | D. Wolf, P. Keblinski, S.R. Philpot, J. Eggebrecht
+ | `Exact method for the simulation of Coulombic systems by spherically
+    truncated, pairwise r\ :sup:`-1` summation
+    <http://dx.doi.org/10.1063/1.478738>`_
+ | 1999

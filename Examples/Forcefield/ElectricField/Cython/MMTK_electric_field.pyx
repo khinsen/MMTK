@@ -1,5 +1,4 @@
-# Example for a forcefield implementation in Pyrex.
-# Use Pyrex 0.9.3 or later.
+# Example for a forcefield implementation in Cython.
 
 
 #

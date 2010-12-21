@@ -10,8 +10,23 @@ MMTK User Guide
    :maxdepth: 3
 
    mmtk
-   modules
    glossary
+
+Code examples
+=============
+
+.. toctree::
+   :maxdepth: 3
+
+   examples
+
+Module reference
+================
+
+.. toctree::
+   :maxdepth: 3
+
+   modules
 
 Indices and tables
 ==================

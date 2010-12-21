@@ -10,13 +10,13 @@ This module implements deformational energies for use in the analysis
 of motions and conformational changes in macromolecules. A description
 of the techniques can be found in the following articles:
 
- 1. K. Hinsen
-    Analysis of domain motions by approximate normal mode calculations
-    Proteins 33 (1998): 417-429
+  |  K. Hinsen
+  |  Analysis of domain motions by approximate normal mode calculations
+  |  Proteins 33 (1998): 417-429
 
- 2. K. Hinsen, A. Thomas, M.J. Field
-    Analysis of domain motions in large proteins
-    Proteins 34 (1999): 369-382
+  |  K. Hinsen, A. Thomas, M.J. Field
+  |  Analysis of domain motions in large proteins
+  |  Proteins 34 (1999): 369-382
 """
 
 __docformat__ = 'restructuredtext'
@@ -63,7 +63,7 @@ class DeformationFunction(DeformationEvaluationFunction):
     """
     Infinite-displacement deformation function
 
-    The default values are appropriate for a C_alpha model of a protein
+    The default values are appropriate for a |C_alpha| model of a protein
     with the global scaling described in the reference cited above.
 
     A DeformationFunction object must be called with a single parameter,
@@ -105,7 +105,7 @@ class NormalizedDeformationFunction(DeformationFunction):
     """
     Normalized infinite-displacement deformation function
 
-    The default values are appropriate for a C_alpha model of a protein
+    The default values are appropriate for a |C_alpha| model of a protein
     with the global scaling described in the reference cited above.
     The normalization is defined by equation 10 of reference 1 (see above).
     
@@ -144,7 +144,7 @@ class FiniteDeformationFunction(DeformationEvaluationFunction):
     """
     Finite-displacement deformation function
 
-    The default values are appropriate for a C_alpha model of a protein
+    The default values are appropriate for a |C_alpha| model of a protein
     with the global scaling described in the reference cited above.
 
     A FiniteDeformationFunction object must be called with a single parameter,
@@ -190,7 +190,7 @@ class DeformationEnergyFunction(DeformationEvaluationFunction):
     The deformation energy is the sum of the deformation values over
     all atoms of a system.
 
-    The default values are appropriate for a C_alpha model of a protein
+    The default values are appropriate for a |C_alpha| model of a protein
     with the global scaling described in the reference cited above.
 
     A DeformationEnergyFunction is called with one or two parameters.
@@ -252,7 +252,7 @@ class NormalizedDeformationEnergyFunction(DeformationEnergyFunction):
     The normalized deformation energy is the sum of the normalized
     deformation values over all atoms of a system.
 
-    The default values are appropriate for a C_alpha model of a protein
+    The default values are appropriate for a |C_alpha| model of a protein
     with the global scaling described in the reference cited above.
     The normalization is defined by equation 10 of reference 1.
 
@@ -294,7 +294,7 @@ class FiniteDeformationEnergyFunction(DeformationEvaluationFunction):
     The deformation energy is the sum of the
     deformation values over all atoms of a system.
 
-    The default values are appropriate for a C_alpha model of a protein
+    The default values are appropriate for a |C_alpha| model of a protein
     with the global scaling described in the reference cited above.
 
     A FiniteDeformationEnergyFunction is called with one or two parameters.
@@ -355,7 +355,7 @@ class DeformationReducer(DeformationEvaluationFunction):
     """
     Iterative reduction of the deformation energy
 
-    The default values are appropriate for a C_alpha model of a protein
+    The default values are appropriate for a |C_alpha| model of a protein
     with the global scaling described in the reference cited above.
 
     A DeformationReducer is called with two arguments. The first
@@ -395,7 +395,7 @@ class FiniteDeformationReducer(DeformationEvaluationFunction):
     """
     Iterative reduction of the finite-displacement deformation energy
 
-    The default values are appropriate for a C_alpha model of a protein
+    The default values are appropriate for a |C_alpha| model of a protein
     with the global scaling described in the reference cited above.
 
     A FiniteDeformationReducer is called with two arguments. The first

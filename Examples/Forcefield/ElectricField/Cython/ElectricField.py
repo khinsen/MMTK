@@ -53,7 +53,7 @@ class ElectricField(ForceField):
             for a in o.atomList():
                 charges[a] = o.getAtomProperty(a, self.charge_property)
         # Here we pass all the parameters to
-        # the Pyrex code that handles energy calculations.
+        # the Cython code that handles energy calculations.
         return [ElectricFieldTerm(universe,
                                   charges.array,
                                   self.strength)]
