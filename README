@@ -1,7 +1,7 @@
 The Molecular Modelling Toolkit
 ===============================
 
-This is release 2.5 of MMTK, the Molecular Modelling Toolkit. For more
+This is release 2.7 of MMTK, the Molecular Modelling Toolkit. For more
 information about MMTK, look at the manual (in the directories
 Doc/HTML and Doc/PDF) and at the examples in the directory Examples.
 
@@ -23,8 +23,8 @@ Prerequisites: Python 2.5 or higher, ScientificPython 2.6 or higher,
                Numerical Python 22.x or 23.x (various problems have been
                reported with 24.x) or NumPy 1.x.
 
-Note: MMTK is developed and tested using Python 2.5. It should work
-with earlier Python releases, at least back to 2.3.
+Note: MMTK is developed and tested using Python 2.6. It should work
+with Python 2.5 as well.
 
 On most Unix systems, installation requires two commands:
 
@@ -64,7 +64,9 @@ be maintained and further developed.
 MMTK was originally written for Numeric, but recent releases are also
 compatible with NumPy. When MMTK is installed, it checks whether
 ScientificPython was compiled for Numeric or for NumPy, and uses the
-same package.
+same package. MMTK development is done with NumPy, and Numeric support
+will be removed in a future version. Unless you have a good reason to
+use Numeric, please use NumPy!
 
 MMTK does not support numarray at all. Since numarray development has
 stopped, this is not likely to change in the future.
@@ -144,27 +146,6 @@ xterm -e '/Applications/VMD 1.8.2.app/Contents/Resources/VMD.app/Contents/MacOS/
    with the "hide" option selected.
 
 
-Mac OS X compilation hint:
---------------------------
-
-(You can disregard this if you use the fink version.)
-
-Under at least some releases, the file /usr/include/pthread.h
-must be modified to make MMTK compile (probably this affects all
-Python extension modules that use threads). Search for the
-following two lines (around 239)
-
-   int       pthread_key_create __P((pthread_key_t *key,
-                                    void (*destructor)(void *)));
-
-and modify the second one to read
-
-                                    void (*)(void *)));
-
-(i.e. remove the word "destructor"). This *should* have no adverse
-effects on anything.
-
-
 External programs
 =================
 
@@ -189,9 +170,9 @@ in order to have access to animation functions.
 Documentation
 =============
 
-The MMTK manual is included in HTML (Doc/HTML) and PDF (Doc/PDF)
-formats. A list of changes along MMTK development versions can
-be found in Doc/CHANGELOG.
+The MMTK manual is included in HTML (Doc/HTML) format. The source code
+for the Spinx documentation tool is also included. A list of changes
+along MMTK development versions can be found in Doc/CHANGELOG.
 
 
 Useful tools
@@ -209,10 +190,6 @@ Web site
 The MMTK home page can be found at
 
    http://dirac.cnrs-orleans.fr/MMTK/
-
-or at
-
-   http://starship.python.net/crew/hinsen/MMTK/
 
 
 Mailing list
@@ -259,6 +236,9 @@ Patches to make MMTK work under Windows were provided by Jon Michelsen.
 
 Peter Cook contributed Windows code, examples, code improvements, and
 good suggestions.
+
+Chris Ing translated the documentation to Sphinx, wrote test cases,
+and made lots of good suggestions.
 
 Routines for matrix diagonalization were taken from LAPACK, and
 for the erfc function from the CEPHES library.

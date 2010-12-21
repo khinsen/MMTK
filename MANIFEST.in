@@ -21,14 +21,16 @@ prune Src/dpmta/doc
 prune Src/dpmta/fortran
 prune Src/dpmta/test
 recursive-include Include *.h
+exclude Test/*
 include Tests/*.py
 include config/*.c
 include Doc/CHANGELOG
-include Doc/XML/mmtk-user.xml
-include Doc/PDF/*.pdf
-include Doc/HTML/*.html
-include Doc/Reference/*.html
-include Doc/XMLConversion/*
+include Doc/*.rst
+include Doc/Makefile
+include Doc/conf.py
+include Doc/make_example_template.py
+recursive-include Doc/Examples *
+recursive-include Doc/HTML *
 recursive-include Examples *.py
 recursive-include Examples *.c
 recursive-include Examples *.pyx
