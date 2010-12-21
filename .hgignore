@@ -7,8 +7,8 @@ syntax: glob
 build
 dist
 Test
-epydoc
-Doc/Reference
+Doc/HTML
+Doc/_build
 MANIFEST
 HG_CHANGESET_ID
 config/erfc_test
