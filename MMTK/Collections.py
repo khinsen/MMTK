@@ -10,8 +10,9 @@ Collections of chemical objects
 __docformat__ = 'restructuredtext'
 
 from MMTK import Utility, Units, ParticleProperties, Visualization
+from MMTK.Geometry import superpositionFit
 from Scientific.Geometry import Vector, Tensor, Objects3D
-from Scientific.Geometry import Quaternion, Transformation
+from Scientific.Geometry import Transformation
 from Scientific import N
 import copy, itertools
 
@@ -223,57 +224,20 @@ class GroupOfAtoms(object):
 
     def findTransformationAsQuaternion(self, conf1, conf2 = None):
         universe = self.universe()
+        if universe.is_periodic:
+            raise ValueError("superposition in periodic universe "
+                             "is not defined")
         if conf1.universe != universe:
             raise ValueError("conformation is for a different universe")
         if conf2 is None:
-            conf1, conf2 = conf2, conf1
+            conf2 = conf1
+            conf1 = universe.configuration()
         else:
             if conf2.universe != universe:
                 raise ValueError("conformation is for a different universe")
-        ref = conf1
-        conf = conf2
         weights = universe.masses()
-        weights = weights/self.mass()
-        ref_cms = self.centerOfMass(ref).array
-        pos = N.zeros((3,), N.Float)
-        possq = 0.
-        cross = N.zeros((3, 3), N.Float)
-        for a in self.atomIterator():
-            r = a.position(conf).array
-            r_ref = a.position(ref).array-ref_cms
-            w = weights[a]
-            pos = pos + w*r
-            possq = possq + w*N.add.reduce(r*r) \
-                          + w*N.add.reduce(r_ref*r_ref)
-            cross = cross + w*r[:, N.NewAxis]*r_ref[N.NewAxis, :]
-        k = N.zeros((4, 4), N.Float)
-        k[0, 0] = -cross[0, 0]-cross[1, 1]-cross[2, 2]
-        k[0, 1] = cross[1, 2]-cross[2, 1]
-        k[0, 2] = cross[2, 0]-cross[0, 2]
-        k[0, 3] = cross[0, 1]-cross[1, 0]
-        k[1, 1] = -cross[0, 0]+cross[1, 1]+cross[2, 2]
-        k[1, 2] = -cross[0, 1]-cross[1, 0]
-        k[1, 3] = -cross[0, 2]-cross[2, 0]
-        k[2, 2] = cross[0, 0]-cross[1, 1]+cross[2, 2]
-        k[2, 3] = -cross[1, 2]-cross[2, 1]
-        k[3, 3] = cross[0, 0]+cross[1, 1]-cross[2, 2]
-        for i in range(1, 4):
-            for j in range(i):
-                k[i, j] = k[j, i]
-        k = 2.*k
-        for i in range(4):
-            k[i, i] = k[i, i] + possq - N.add.reduce(pos*pos)
-        from Scientific import LA
-        e, v = LA.eigenvectors(k)
-        i = N.argmin(e)
-        v = v[i]
-        if v[0] < 0: v = -v
-        if e[i] <= 0.:
-            rms = 0.
-        else:
-            rms = N.sqrt(e[i])
-        return Quaternion.Quaternion(v), Vector(ref_cms), \
-               Vector(pos), rms
+        return superpositionFit([(weights[a], conf1[a], conf2[a])
+                                 for a in self.atomIterator()])
 
     def findTransformation(self, conf1, conf2 = None):
         """

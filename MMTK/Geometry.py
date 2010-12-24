@@ -4,7 +4,7 @@
 #
 
 """
-Elementary geometrical objects
+Elementary geometrical objects and operations
 
 There are essentially two kinds of geometrical objects: shape objects
 (spheres, planes, etc.), from which intersections can be calculated,
@@ -740,3 +740,64 @@ class FCCLattice(RhombicLattice):
 	    cells = 3*(cells,)
 	RhombicLattice.__init__(self, cell, lattice_vectors, cells,
                                 function, base)
+
+#
+# Optimal superposition of a molecule in two configurations
+#
+def superpositionFit(confs):
+    """
+    :param confs: the weight, reference position, and alternate
+                  position for each atom
+    :type confs: sequence of (float, Vector, Vector)
+    :returns: the quaternion representing the rotation,
+              the center of mass in the alternate configuraton,
+              the center of mass in the reference configuration,
+              and the RMS distance after the optimal superposition
+    """
+    w_sum = 0.
+    wr_sum = N.zeros((3,), N.Float)
+    for w, r_ref, r in confs:
+        w_sum += w
+        wr_sum += w*r_ref.array
+    ref_cms = wr_sum/w_sum
+    pos = N.zeros((3,), N.Float)
+    possq = 0.
+    cross = N.zeros((3, 3), N.Float)
+    for w, r_ref, r in confs:
+        w = w/w_sum
+        r_ref = r_ref.array-ref_cms
+        r = r.array
+        pos = pos + w*r
+        possq = possq + w*N.add.reduce(r*r) \
+                      + w*N.add.reduce(r_ref*r_ref)
+        cross = cross + w*r[:, N.NewAxis]*r_ref[N.NewAxis, :]
+    k = N.zeros((4, 4), N.Float)
+    k[0, 0] = -cross[0, 0]-cross[1, 1]-cross[2, 2]
+    k[0, 1] = cross[1, 2]-cross[2, 1]
+    k[0, 2] = cross[2, 0]-cross[0, 2]
+    k[0, 3] = cross[0, 1]-cross[1, 0]
+    k[1, 1] = -cross[0, 0]+cross[1, 1]+cross[2, 2]
+    k[1, 2] = -cross[0, 1]-cross[1, 0]
+    k[1, 3] = -cross[0, 2]-cross[2, 0]
+    k[2, 2] = cross[0, 0]-cross[1, 1]+cross[2, 2]
+    k[2, 3] = -cross[1, 2]-cross[2, 1]
+    k[3, 3] = cross[0, 0]+cross[1, 1]-cross[2, 2]
+    for i in range(1, 4):
+        for j in range(i):
+            k[i, j] = k[j, i]
+    k = 2.*k
+    for i in range(4):
+        k[i, i] = k[i, i] + possq - N.add.reduce(pos*pos)
+    from Scientific import LA
+    e, v = LA.eigenvectors(k)
+    i = N.argmin(e)
+    v = v[i]
+    if v[0] < 0: v = -v
+    if e[i] <= 0.:
+        rms = 0.
+    else:
+        rms = N.sqrt(e[i])
+    from Scientific.Geometry import Quaternion
+    return Quaternion.Quaternion(v), Vector(ref_cms), \
+           Vector(pos), rms
+
