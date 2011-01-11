@@ -367,7 +367,7 @@ class SubTrajectory(object):
 
     def __getitem__(self, item):
         if isinstance(item, int):
-            return self.trajectory[self.indices[item]]
+            return self.trajectory[int(self.indices[item])]
         else:
             return SubTrajectory(self.trajectory, self.indices[item])
 
