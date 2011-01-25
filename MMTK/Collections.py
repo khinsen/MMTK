@@ -173,7 +173,7 @@ class GroupOfAtoms(object):
                   bounding box with edges parallel to the coordinate axes.
         :rtype: tuple of two Scientific.Geometry.Vector
         """
-        atoms = self.atomIterator()
+        atoms = self.atomList()
         min = atoms[0].position(conf).array
         max = min
         for a in atoms[1:]:
