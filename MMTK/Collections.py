@@ -192,7 +192,7 @@ class GroupOfAtoms(object):
                   bounding sphere.
         :rtype: Scientific.Geometry.Objects3D.Sphere
         """
-        atoms = self.atomIterator()
+        atoms = self.atomList()
         center = sum((a.position(conf) for a in atoms),
                      Vector(0., 0., 0.)) / len(atoms)
         r = 0.
