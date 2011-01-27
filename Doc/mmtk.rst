@@ -112,19 +112,19 @@ e.g.::
 
     import MMTK
     import MMTK.ForceFields
-    universe = MMTK.InfiniteUniverse(MMTK.ForceFields.Amber94ForceField())
+    universe = MMTK.InfiniteUniverse(MMTK.ForceFields.Amber99ForceField())
 
 The second method is importing all or some objects *from*
 a module::
 
     from MMTK import InfiniteUniverse
-    from MMTK.ForceFields import Amber94ForceField
-    universe = InfiniteUniverse(Amber94ForceField())
+    from MMTK.ForceFields import Amber99ForceField
+    universe = InfiniteUniverse(Amber99ForceField())
 
 These two import styles can also be mixed according to convience.
 In order to prevent any confusion, all objects are referred to by
 their full names in this manual. The Amber force field object
-is thus called :class:`MMTK.ForceFields.Amber94ForceField`.
+is thus called :class:`MMTK.ForceFields.Amber99ForceField`.
 Of course the user is free to use selective imports in order to
 be able to use such objects with shorter names.
 
@@ -288,7 +288,7 @@ Force fields
 ============
 
 MMTK contains everything necessary to use the 
-`Amber 94 force field <http://www.amber.ucsf.edu/amber/amber.html>`_ 
+`Amber 99 force field <http://ambermd.org/#ff>`_ 
 on proteins, DNA, and
 water molecules. It uses the standard Amber parameter and modification
 file format. In addition to the Amber force field, there is a simple
@@ -356,7 +356,7 @@ are explained in the remaining chapters of the manual.
     from MMTK.Trajectory import Trajectory, TrajectoryOutput, StandardLogOutput
     from MMTK.Dynamics import VelocityVerletIntegrator
     # Create an infinite universe (i.e. no boundaries, non-periodic).
-    universe = InfiniteUniverse(Amber94ForceField())
+    universe = InfiniteUniverse(Amber99ForceField())
     # Create a water molecule in the universe.
     # Water is defined in the database.
     universe.molecule = Molecule('water')
@@ -572,19 +572,19 @@ Force fields
 MMTK comes with several force fields, and permits the definition of
 additional force fields. Force fields are defined in module
 :class:`MMTK.ForceFields.ForceField`. The most import built-in force
-field is the `Amber 94 force field
-<http://www.amber.ucsf.edu/amber/amber.html>`_, represented by the
+field is the `Amber 99 force field
+<http://ambermd.org/#ff>`_, represented by the
 class
-:class:`MMTK.ForceFields.Amber.AmberForceField.Amber94ForceField`. It
+:class:`MMTK.ForceFields.Amber.AmberForceField.Amber99ForceField`. It
 offers several strategies for electrostatic interactions, including
 Ewald summation, a fast multipole method :ref:`[Rankin2002] <Rankin2002>`, and cutoff
 with charge neutralization and optional screening :ref:`[Wolf1999] <Wolf1999>`..
 
-In addition to the Amber 94 force field, there is a Lennard-Jones
-force field for noble gases (Class
-:class:`MMTK.ForceFields.LennardJonesFF`) and a deformation force
-field for protein normal mode calculations
-(:class:`MMTK.ForceFields.DeformationFF.DeformationForceField`).
+In addition to the Amber 99 force field, there is the older Amber 94
+forcefield, a Lennard-Jones force field for noble gases (Class
+:class:`MMTK.ForceFields.LennardJonesFF`) and an Elastic Network Model
+force field for protein normal mode calculations
+(:class:`MMTK.ForceFields.DeformationFF.CalphaForceField`).
 
 Referring to objects and parts of objects
 =========================================
@@ -959,9 +959,9 @@ minimization without producing any trajectory or printed output:
 ::
 
     from MMTK import *
-    from MMTK.ForceFields import Amber94ForceField
+    from MMTK.ForceFields import Amber99ForceField
     from MMTK.Minimization import SteepestDescentMinimizer
-    universe = InfiniteUniverse(Amber94ForceField())
+    universe = InfiniteUniverse(Amber99ForceField())
     universe.protein = Protein('insulin')
     minimizer = SteepestDescentMinimizer(universe)
     minimizer(steps = 100)
@@ -1067,12 +1067,12 @@ and rotation every 50th step:
 ::
 
     from MMTK import *
-    from MMTK.ForceFields import Amber94ForceField
+    from MMTK.ForceFields import Amber99ForceField
     from MMTK.Dynamics import VelocityVerletIntegrator, \
                               TranslationRemover, \
                               RotationRemover
     from MMTK.Trajectory import TrajectoryOutput
-    universe = InfiniteUniverse(Amber94ForceField())
+    universe = InfiniteUniverse(Amber99ForceField())
     universe.protein = Protein('insulin')
     universe.initializeVelocitiesToTemperature(300.*Units.K)
     actions = [TranslationRemover(0, None, 50), \
