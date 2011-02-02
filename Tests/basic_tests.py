@@ -47,8 +47,11 @@ class SuperpositionTest(unittest.TestCase):
                          < 1.e-5)
 
 def suite():
-    return unittest.TestLoader().loadTestsFromTestCase(GroupOfAtomTest)
-    return unittest.TestLoader().loadTestsFromTestCase(SuperpositionTest)
+    loader = unittest.TestLoader()
+    s = unittest.TestSuite()
+    s.addTest(loader.loadTestsFromTestCase(GroupOfAtomTest))
+    s.addTest(loader.loadTestsFromTestCase(SuperpositionTest))
+    return s
 
 if __name__ == '__main__':
     unittest.main()
