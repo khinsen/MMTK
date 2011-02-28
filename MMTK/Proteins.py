@@ -528,11 +528,11 @@ class SubChain(PeptideChain):
             self.bonds.remove(b)
         n = self.groups.index(r_old)
         if n > 0:
-            peptide_old = self.bonds.bondsOf(r_old.peptide.N)
-            self.bonds.remove(peptide_old[0])
+            for b in self.bonds.bondsOf(r_old.peptide.N):
+                self.bonds.remove(b)
         if n < len(self.groups)-1:
-            peptide_old = self.bonds.bondsOf(r_old.peptide.C)
-            self.bonds.remove(peptide_old[0])
+            for b in self.bonds.bondsOf(r_old.peptide.C):
+                self.bonds.remove(b)
         PeptideChain.replaceResidue(self.part_of, r_old, r_new)
         self.groups[n] = r_new
         self.atoms.extend(r_new.atoms)
