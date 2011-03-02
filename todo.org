@@ -84,6 +84,8 @@ At every database access, check if there are multiple definitions in
 different directories of the search path and alert the user of the
 possible conflict.
 
+** TODO Force fields in trajectories
+Add mod_file=... to the force field description in a trajectory file. If upon opening of the trajectory the mod_files exist, use them, otherwise don't raise an exception.
 ** TODO Documentation in Spinx
 ** TODO Check for undefined positions before integration, normal mode analysis etc.
 ** TODO Merge ForceFields.ForceField.beadOffsetsAndFactor and Subspace.beadSets
