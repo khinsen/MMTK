@@ -1174,7 +1174,8 @@ heat(PyTrajectoryVariable *dynamic_data, PyObject *parameters,
     double k_energy = 0.;
     double t, f;
     int j;
-    if (temperature > temp2)
+    if ((gradient > 0. && temperature > temp2)
+	|| (gradient < 0. && temperature < temp2))
       temperature = temp2;
     for (j = 0; j < atoms; j++)
       k_energy += m[j]*(v[j][0]*v[j][0]+v[j][1]*v[j][1]+v[j][2]*v[j][2]);
