@@ -371,7 +371,6 @@ cdef class PINormalModeIntegrator(MMTK_PIIntegratorSupport.PIIntegrator):
                 dv[i, j] = -0.5*delta_t*g[i, j]/m[i]
                 ke += 0.5*m[i]*v[i, j]*v[i, j]
         temperature = 2.*ke/(df*k_B)
-        self.trajectoryActions(step)
 
         # Check FFT
         if False:
@@ -390,6 +389,7 @@ cdef class PINormalModeIntegrator(MMTK_PIIntegratorSupport.PIIntegrator):
         
         # Main integration loop
         time = 0.
+        self.trajectoryActions(0)
         for step in range(nsteps):
             # First application of thermostat
             self.applyThermostat(v, nmv, m, bd, delta_t, beta)
@@ -455,7 +455,7 @@ cdef class PINormalModeIntegrator(MMTK_PIIntegratorSupport.PIIntegrator):
             # End of time step
             time += delta_t
             self.foldCoordinatesIntoBox()
-            self.trajectoryActions(step)
+            self.trajectoryActions(step+1)
 
         # Release the write lock.
         self.releaseWriteLock()
