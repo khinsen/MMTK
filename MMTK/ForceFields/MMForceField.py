@@ -281,7 +281,7 @@ class MMNonbondedForceField(MMAtomParameters, NonBondedForceField):
         for a in atoms.atomList():
             charge = a.topLevelChemicalObject() \
                      .getAtomProperty(a, self.dataset.charge_property)
-            total = total + charge*a.position()-reference
+            total = total + charge*(a.position()-reference)
         return total
 
     def _getLJForceField(self, universe):
