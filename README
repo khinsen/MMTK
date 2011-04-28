@@ -20,11 +20,15 @@ Installation
 ============
 
 Prerequisites: Python 2.5 or higher, ScientificPython 2.6 or higher,
-               Numerical Python 22.x or 23.x (various problems have been
-               reported with 24.x) or NumPy 1.x.
+               NumPy 1.x.
 
-Note: MMTK is developed and tested using Python 2.6. It should work
-with Python 2.5 as well.
+It should still be possible to use Numerical Python 22.x or 23.x with
+this release of MMTK, but migration to NumPy is strongly encouraged.
+MMTK is NOT compatible with Numerical Python 24.x.
+
+Note: MMTK is developed and tested using Python 2.6 and NumPy
+1.5. However, it should work with Python 2.5 and 2.7 as well.
+
 
 On most Unix systems, installation requires two commands:
 
@@ -61,8 +65,8 @@ a later rewrite called numarray, and an evolution of Numeric that integrates
 features from numarray, called NumPy. In the long run, only NumPy will
 be maintained and further developed.
 
-MMTK was originally written for Numeric, but recent releases are also
-compatible with NumPy. When MMTK is installed, it checks whether
+MMTK was originally written for Numeric, but has supported NumPy as
+well for quite a while. When MMTK is installed, it checks whether
 ScientificPython was compiled for Numeric or for NumPy, and uses the
 same package. MMTK development is done with NumPy, and Numeric support
 will be removed in a future version. Unless you have a good reason to
@@ -104,11 +108,11 @@ Mac OS X:
 ---------
 
 The most convenient way to use MMTK with MacOS X is through the
-fink project, which is located at
+MacPorts project, which is located at
 
-   http://fink.sourceforge.net/
+   http://www.macports.org/
 
-Fink provides an install-and-build system for Unix software on the
+MacPorts provides an install-and-build system for Unix software on the
 Mac. You will find many other goodies there, including Python
 and many Python packages.
 
