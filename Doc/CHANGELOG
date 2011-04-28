@@ -1,3 +1,28 @@
+2.7.3 --> 2.7.4
+===============
+
+Improvements:
+
+- MMTK.Dynamics.Heater now accepts negative temperature gradients.
+
+- More comprehensive test suite.
+
+- New example script Visualization/vector_field_chimera.py
+
+Bug fixes:
+
+- Dipole calculation (method dipole) used to crash.
+
+- Methods boundingBox and boundingSphere used to crash.
+
+- Indexing a subset of a trajectory crashed with NumPy.
+  (I hope this is the last NumPy-related bug!)
+
+- Replacing residues in a peptide chain could crash.
+
+- Corrections in the manual.
+
+
 2.7.2 --> 2.7.3
 ===============
 
