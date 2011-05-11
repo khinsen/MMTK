@@ -41,6 +41,11 @@ class VibrationalMode(Core.Mode):
 
     __repr__ = __str__
 
+    def effectiveMassAndForceConstant(self):
+        m = self.massWeightedDotProduct(self)/self.dotProduct(self)
+        k = m*(2.*N.pi*self.frequency)**2
+        return m, k
+
 #
 # Class for a full set of normal modes
 #
