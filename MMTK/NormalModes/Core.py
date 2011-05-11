@@ -82,11 +82,6 @@ class Mode(ParticleProperties.ParticleVector):
 
     return_class = ParticleProperties.ParticleVector
 
-    def effectiveMassAndForceConstant(self):
-        m = self.massWeightedProjection(self)/self.projection(self)
-        k = m*(2.*N.pi*self.frequency)**2
-        return m, k
-
     def view(self, factor=1., subset=None):
         """
         Start an animation of the mode. See :class:`~MMTK.Visualization` for
