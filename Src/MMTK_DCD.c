@@ -228,8 +228,7 @@ writeOpenDCD(PyObject *dummy, PyObject *args)
   dcdErrcode = write_dcdheader(fd , dcdFileName, dcdAtoms, dcdNFrames, 
 			       dcdFrameStart,  dcdNSavc,
 			       time/akma_time_factor);
-  return (PyObject*)PyInt_FromLong((long) fd);
-
+  return (PyObject*)PyCObject_FromVoidPtr((void *) fd, NULL);
 }
 
 static  PyObject *
@@ -241,15 +240,18 @@ writeDCDStep(PyObject *dummy, PyObject *args)
   float *dcdZ = NULL;
   int err;
   FILE * fd;
+  PyObject *fd_cobj;
   PyArrayObject *xconfig, *yconfig, *zconfig;
 
   /* Parse and check arguments */
-  if (!PyArg_ParseTuple(args, "iO!O!O!", &fd,
+  if (!PyArg_ParseTuple(args, "O!O!O!O!",
+                        &PyCObject_Type, &fd_cobj,
 			&PyArray_Type, &xconfig,
 			&PyArray_Type, &yconfig,
 			&PyArray_Type, &zconfig))
     return NULL;
-  
+
+  fd = PyCObject_AsVoidPtr(fd_cobj);
   dcdAtoms = xconfig->dimensions[0];
   dcdX = (float *)xconfig->data;
   dcdY = (float *)yconfig->data;
@@ -268,12 +270,15 @@ writeDCDStep(PyObject *dummy, PyObject *args)
 static  PyObject *
 writeCloseDCD(PyObject *dummy, PyObject *args)
 {
+  PyObject *fd_cobj;
   FILE * fd;
 
   /* Parse and check arguments */
-  if (!PyArg_ParseTuple(args, "i", &fd))
+  if (!PyArg_ParseTuple(args, "O!",
+                        &PyCObject_Type, &fd_cobj))
     return NULL;
 
+  fd = PyCObject_AsVoidPtr(fd_cobj);
   close_dcd_read(fd, 0, NULL);
 
   Py_INCREF(Py_None);
