@@ -428,7 +428,7 @@ class CompositeChemicalObject(object):
             d = bond_database.bondLength(bond)
             if d is None:
                 d = universe.distance(bond.a1, bond.a2)
-            self.distance_constraints.append((bond.a1, bond.a2, d))
+            self.addDistanceConstraint(bond.a1, bond.a2, d)
 
     def addDistanceConstraint(self, atom1, atom2, distance):
         try:

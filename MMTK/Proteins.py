@@ -544,6 +544,21 @@ class SubChain(PeptideChain):
             self.bonds.append(Bonds.Bond((self.groups[n].peptide.C,
                                           self.groups[n+1].peptide.N)))
 
+    def _distanceConstraintList(self):
+        atoms = self.atomList()
+        return [(a1, a2, d)
+                for a1, a2, d in self.part_of._distanceConstraintList()
+                if a1 in atoms and a2 in atoms]
+
+    def addDistanceConstraint(self, atom1, atom2, distance):
+        try:
+            self.part_of.distance_constraints.append((atom1, atom2, distance))
+        except AttributeError:
+            self.part_of.distance_constraints = [(atom1, atom2, distance)]
+
+    def removeDistanceConstraints(self, universe=None):
+        raise NotImplementedError
+
 #
 # Connected chains are collections of peptide chains connected by s-s bridges.
 #
