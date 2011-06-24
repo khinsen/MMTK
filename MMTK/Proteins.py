@@ -551,10 +551,16 @@ class SubChain(PeptideChain):
                 if a1 in atoms and a2 in atoms]
 
     def addDistanceConstraint(self, atom1, atom2, distance):
+        chain = self
+        while True:
+            try:
+                chain = chain.part_of
+            except AttributeError:
+                break
         try:
-            self.part_of.distance_constraints.append((atom1, atom2, distance))
+            chain.distance_constraints.append((atom1, atom2, distance))
         except AttributeError:
-            self.part_of.distance_constraints = [(atom1, atom2, distance)]
+            chain.distance_constraints = [(atom1, atom2, distance)]
 
     def removeDistanceConstraints(self, universe=None):
         raise NotImplementedError
