@@ -268,11 +268,12 @@ class Universe(Collections.GroupOfAtoms, Visualization.Viewable):
         self._bond_database = None
         self._version += 1
         if system_size_changed:
-            for a in self.atomList():
-                a.unsetArray()
-            self._configuration = None
-            self._masses = None
-            self._atom_properties = {}
+            if self._configuration is not None:
+                for a in self.atomList():
+                    a.unsetArray()
+                self._configuration = None
+                self._masses = None
+                self._atom_properties = {}
             self._atoms = None
             self._np = None
             self._bond_pairs = None
