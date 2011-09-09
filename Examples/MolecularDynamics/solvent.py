@@ -36,15 +36,15 @@ excluded_regions = []
 for i in range(n_molecules):
     m = Molecule('water', position = randomPointInBox(current_size))
     while 1:
-	s = m.boundingSphere()
-	collision = 0
-	for region in excluded_regions:
-	    if s.intersectWith(region) is not None:
-		collision = 1
-		break
-	if not collision:
-	    break
-	m.translateTo(randomPointInBox(current_size))
+        s = m.boundingSphere()
+        collision = 0
+        for region in excluded_regions:
+            if s.intersectWith(region) is not None:
+                collision = 1
+                break
+        if not collision:
+            break
+        m.translateTo(randomPointInBox(current_size))
     world.addObject(m)
     excluded_regions.append(s)
 
@@ -64,7 +64,7 @@ while current_size > real_size:
 
     scale_factor = max(0.95, real_size/current_size)
     for object in world:
-	object.translateTo(scale_factor*object.position())
+        object.translateTo(scale_factor*object.position())
     current_size = scale_factor*current_size
     world.setSize(current_size)
 
