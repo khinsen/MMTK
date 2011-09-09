@@ -92,6 +92,6 @@ class SPCEForceField(MMForceField.MMForceField):
                               "multipole" (fast-multipole method).
 
         """
-        self.arguments = (lj_options, es_options)
         MMForceField.MMForceField.__init__(self, 'SPCE', SPCEParameters(),
                                            lj_options, es_options)
+        self.arguments = (lj_options, es_options)
