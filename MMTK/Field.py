@@ -117,7 +117,7 @@ class AtomicField(object):
             v[a] = self.field(a.position())
         return v
 
-    def writeToFile(self, filename, scale = 1., color = None):
+    def writeToFile(self, filename, scale = 1., length_scale=1., color = None):
         """
         Writes a graphical representation of the field to a VRML file.
 
@@ -128,12 +128,14 @@ class AtomicField(object):
         :param color: the color for all graphics objects
         :type color: Scientific.Visualization.Color
         """
-        from Scientific.Visualization import VRML
-        objects = self.graphicsObjects(scale=scale, color=color,
-                                       graphics_module=VRML)
-        VRML.Scene(objects).writeToFile(filename)
+        from Scientific.Visualization import VRML2
+        objects = self.graphicsObjects(scale=scale,
+                                       length_scale=length_scale,
+                                       color=color,
+                                       graphics_module=VRML2)
+        VRML2.Scene(objects).writeToFile(filename)
 
-    def view(self, scale = 1., color = None):
+    def view(self, scale = 1., length_scale = 1., color = None):
         """
         Shows a graphical representation of the field using a VRML viewer.
 
@@ -142,10 +144,12 @@ class AtomicField(object):
         :param color: the color for all graphics objects
         :type color: Scientific.Visualization.Color
         """
-        from Scientific.Visualization import VRML
-        objects = self.graphicsObjects(scale=scale, color=color,
-                                       graphics_module=VRML)
-        VRML.Scene(objects).view()
+        from Scientific.Visualization import VRML2
+        objects = self.graphicsObjects(scale=scale,
+                                       length_scale=length_scale,
+                                       color=color,
+                                       graphics_module=VRML2)
+        VRML2.Scene(objects).view()
 
 
 class AtomicScalarField(AtomicField, Visualization.Viewable):
@@ -201,6 +205,7 @@ class AtomicScalarField(AtomicField, Visualization.Viewable):
     def _graphics(self, conf, distance_fn, model, module, options):
         scale = options.get('scale', 1.)
         range = options.get('range', (None, None))
+        length_scale = options.get('length_scale', 1.)
 
         lower, upper = range
         size = self.box.partition_size/10.
@@ -216,7 +221,9 @@ class AtomicScalarField(AtomicField, Visualization.Viewable):
                     m = module.DiffuseMaterial('black')
                 else:
                     m = module.Material(diffuse_color = color_scale(scale*v))
-                objects.append(module.Cube(p, size, material = m))
+                objects.append(module.Cube(length_scale*p,
+                                           length_scale*size,
+                                           material = m))
         return objects
 
 
@@ -296,6 +303,7 @@ class AtomicVectorField(AtomicField, Visualization.Viewable):
         diameter = options.get('diameter', 1.)
         color = options.get('color', None)
         range = options.get('range', (None, None))
+        length_scale = options.get('length_scale', 1.)
 
         lower, upper = range
         size = diameter*self.box.partition_size/50.
@@ -314,5 +322,8 @@ class AtomicVectorField(AtomicField, Visualization.Viewable):
                 try: m = materials[c]
                 except KeyError: m = module.Material(diffuse_color = c)
                 materials[c] = m
-                objects.append(module.Arrow(p, p+scale*v, size, material = m))
+                objects.append(module.Arrow(length_scale*p,
+                                            length_scale*(p+scale*v),
+                                            length_scale*size,
+                                            material = m))
         return objects
