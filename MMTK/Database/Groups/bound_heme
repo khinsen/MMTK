@@ -95,12 +95,12 @@ bonds = [Bond(NA, FE), Bond(C1A, NA), Bond(C2A, C1A), Bond(CAA, C2A),
          Bond(NB, C4B), Bond(NC, C4C), Bond(ND, C4D), Bond(C1A, CHA)]
 
 pdbmap = [('HEM', {'FE': FE, 'CHA': CHA, 'CHB': CHB, 'CHC': CHC, 'CHD': CHD,
-                   'N A': NA, 'C1A': C1A, 'C2A': C2A, 'C3A': C3A, 'C4A': C4A,
+                   'NA': NA, 'C1A': C1A, 'C2A': C2A, 'C3A': C3A, 'C4A': C4A,
                    'CMA': CMA, 'CAA': CAA, 'CBA': CBA, 'CGA': CGA, 'O1A': O1A,
-                   'O2A': O2A, 'N B': NB, 'C1B': C1B, 'C2B': C2B, 'C3B': C3B,
-                   'C4B': C4B, 'CMB': CMB, 'CAB': CAB, 'CBB': CBB, 'N C': NC,
+                   'O2A': O2A, 'NB': NB, 'C1B': C1B, 'C2B': C2B, 'C3B': C3B,
+                   'C4B': C4B, 'CMB': CMB, 'CAB': CAB, 'CBB': CBB, 'NC': NC,
                    'C1C': C1C, 'C2C': C2C, 'C3C': C3C, 'C4C': C4C, 'CMC': CMC,
-                   'CAC': CAC, 'CBC': CBC, 'N D': ND, 'C1D': C1D, 'C2D': C2D,
+                   'CAC': CAC, 'CBC': CBC, 'ND': ND, 'C1D': C1D, 'C2D': C2D,
                    'C3D': C3D, 'C4D': C4D, 'CMD': CMD, 'CAD': CAD, 'CBD': CBD,
                    'CGD': CGD, 'O1D': O1D, 'O2D': O2D, '1HP7': HP71,
                    '2HP7': HP72, '3HP7': HP73, '4HP7': HP74, '1HM8': HM81,
@@ -202,3 +202,4 @@ amber_charge = {
     O1D:     -0.5000,
     O2D:     -0.5000,
     }
+
