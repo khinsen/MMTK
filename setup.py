@@ -3,6 +3,7 @@
 package_name = "MMTK"
 
 from distutils.core import setup, Extension
+from distutils.command.build import build
 from distutils.command.sdist import sdist
 from distutils.command.install_data import install_data
 from distutils import dir_util
@@ -11,6 +12,7 @@ import distutils.sysconfig
 sysconfig = distutils.sysconfig.get_config_vars()
 
 import os, sys, types
+import ctypes, ctypes.util
 from glob import glob
 
 class Dummy:
@@ -117,6 +119,16 @@ class ModifiedFileList(FileList):
         self.allfiles = list
 
 
+class modified_build(build):
+
+    def has_sphinx(self):
+        if sphinx is None:
+            return False
+        setup_dir = os.path.dirname(os.path.abspath(__file__))
+        return os.path.isdir(os.path.join(setup_dir, 'Doc'))
+
+    sub_commands = build.sub_commands + [('build_sphinx', has_sphinx)]
+
 class modified_sdist(sdist):
 
     def run (self):
@@ -159,15 +171,43 @@ class modified_install_data(install_data):
         self.install_dir = getattr(install_cmd, 'install_lib')
         return install_data.run(self)
 
+cmdclass = {
+    'build' : modified_build,
+    'sdist': modified_sdist,
+    'install_data': modified_install_data,
+    'build_ext': build_ext
+}
+
+# Build the sphinx documentation if Sphinx is available
+try:
+    import sphinx
+except ImportError:
+    sphinx = None
+
+if sphinx:
+    from sphinx.setup_command import BuildDoc as _BuildDoc
+
+    class BuildDoc(_BuildDoc):
+        def run(self):
+            # make sure the python path is pointing to the newly built
+            # code so that the documentation is built on this and not a
+            # previously installed version
+            build = self.get_finalized_command('build')
+            sys.path.insert(0, os.path.abspath(build.build_lib))
+            try:
+                sphinx.setup_command.BuildDoc.run(self)
+            except UnicodeDecodeError:
+                print >>sys.stderr, "ERROR: unable to build documentation because Sphinx do not handle source path with non-ASCII characters. Please try to move the source package to another location (path with *only* ASCII characters)."            
+            sys.path.pop(0)
+
+    cmdclass['build_sphinx'] = BuildDoc
+
 #################################################################
 # Check various compiler/library properties
 
 libraries = []
-if sys.platform != 'win32':
-    return_code = os.system(('%s config/libm_test.c -o' % sysconfig['CC']) +
-                            ' config/libm_test >/dev/null 2>1')
-    if return_code != 0:
-        libraries.append('m')
+if sysconfig['LIBM'] != '':
+    libraries.append('m')
 
 macros = []
 try:
@@ -180,20 +220,11 @@ if world is not None:
 if world is not None:
     macros.append(('WITH_MPI', None))
 
-if sys.platform != 'win32':
-    command = '%s config/erfc_test.c ' % sysconfig['CC']
-    for lib in libraries:
-        command = command + '-l'+lib+' '
-    command = command + '-o config/erfc_test >/dev/null 2>1'
-    return_code = os.system(command)
-    if return_code == 0:
-        macros.append(('LIBM_HAS_ERFC', None))
+if hasattr(ctypes.CDLL(ctypes.util.find_library('m')), 'erfc'):
+    macros.append(('LIBM_HAS_ERFC', None))
 
 if sys.platform != 'win32':
-    command = '%s config/intlen.c -o config/intlen' % sysconfig['CC']
-    os.system(command)
-    result = os.popen('config/intlen', 'r').read().strip()
-    if result == '8':
+    if ctypes.sizeof(ctypes.c_long) == 8:
         macros.append(('_LONG64_', None))
 
 if sys.version_info[0] == 2 and sys.version_info[1] >= 2:
@@ -346,7 +377,5 @@ standard and non-standard problems in molecular simulations.
        data_files = data_files,
        scripts = ['tviewer'],
 
-       cmdclass = {'sdist': modified_sdist,
-                   'install_data': modified_install_data,
-                   'build_ext': build_ext},
+       cmdclass = cmdclass,
        )
