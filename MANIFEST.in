@@ -21,6 +21,7 @@ prune Src/dpmta/doc
 prune Src/dpmta/fortran
 prune Src/dpmta/test
 recursive-include Include *.h
+exclude test/*
 exclude Test/*
 include Tests/*.py
 include config/*.c
