@@ -7,7 +7,7 @@ from Scientific import N, LA
 
 # Import the graphics module. Substitute any other graphics
 # module name to make the example use that module.
-from Scientific.Visualization import VRML; module = VRML
+from Scientific.Visualization import VRML2; module = VRML2
 
 # Create the protein and find its center of mass and tensor of inertia.
 protein = Protein('insulin')
@@ -35,5 +35,5 @@ for length, axis in map(None, diagonal, directions):
                                  material=module.EmissiveMaterial('green')))
 
 # Display everything using a VRML browser.
-scene = VRML.Scene(graphics)
+scene = module.Scene(graphics)
 scene.view()
