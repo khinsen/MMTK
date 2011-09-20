@@ -873,11 +873,11 @@ class Collection(GroupOfAtoms, Visualization.Viewable):
             o.removeDistanceConstraints(universe)
 
     def _graphics(self, conf, distance_fn, model, module, options):
-        lists = []
+        gobs = []
         for o in self.objects:
-            lists.append(o._graphics(conf, distance_fn, model,
-                                     module, options))
-        return sum(lists)
+            gobs.extend(o._graphics(conf, distance_fn, model,
+                                    module, options))
+        return gobs
 
     def __copy__(self):
         return self.__class__(copy.copy(self.objects))
