@@ -30,6 +30,7 @@ include Doc/*.rst
 include Doc/Makefile
 include Doc/conf.py
 include Doc/make_example_template.py
+include Doc/tviewer.1
 recursive-include Doc/Examples *
 recursive-include Doc/HTML *
 recursive-include Examples *.py
