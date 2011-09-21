@@ -12,10 +12,10 @@ class SubsetTest(object):
         e, fc = self.universe.energyAndForceConstants(self.subset1)
         for a1 in outside:
             for a2 in outside:
-                self.assert_((N.fabs(fc[a1,a2].array) < 1.e-14).all())
+                self.assert_((N.fabs(fc[a1,a2].array) < 1.e-11).all())
         for a1 in self.subset1.atomList():
             for a2 in self.subset1.atomList():
-                self.assert_((N.fabs(fc[a1,a2].array) > 1.e-14).any())
+                self.assert_((N.fabs(fc[a1,a2].array) > 1.e-11).any())
 
     def test_twoSubsets(self):
         inside = set(self.subset1.atomList()) | set(self.subset2.atomList())
@@ -24,15 +24,15 @@ class SubsetTest(object):
         for a1 in self.subset1.atomList():
             for a2 in self.subset1.atomList():
                 if a1 != a2:
-                    self.assert_((N.fabs(fc[a1,a2].array) < 1.e-14).all())
+                    self.assert_((N.fabs(fc[a1,a2].array) < 1.e-11).all())
         for a1 in self.subset2.atomList():
             for a2 in self.subset2.atomList():
                 if a1 != a2:
-                    self.assert_((N.fabs(fc[a1,a2].array) < 1.e-14).all())
+                    self.assert_((N.fabs(fc[a1,a2].array) < 1.e-11).all())
         for a1 in self.subset1.atomList():
             for a2 in self.subset2.atomList():
-                self.assert_((N.fabs(fc[a1,a2].array) > 1.e-14).any())
+                self.assert_((N.fabs(fc[a1,a2].array) > 1.e-11).any())
         for a1 in outside:
             for a2 in outside:
-                self.assert_((N.fabs(fc[a1,a2].array) < 1.e-14).all())
+                self.assert_((N.fabs(fc[a1,a2].array) < 1.e-11).all())
 
