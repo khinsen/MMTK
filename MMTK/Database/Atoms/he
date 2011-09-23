@@ -1,0 +1,13 @@
+name = 'helium'
+symbol = 'He'
+
+mass = 4.0026
+
+color = 'white'
+
+vdW_radius = 0.14
+
+b_coherent = -3.741*fm
+b_incoherent = 25.217*fm
+b_coherent_deut = 6.674*fm
+b_incoherent_deut = 4.022*fm
