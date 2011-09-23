@@ -2,7 +2,7 @@
 
 package_name = "MMTK"
 
-from distutils.core import setup, Extension
+from distutils.core import setup, Command, Extension
 from distutils.command.build import build
 from distutils.command.sdist import sdist
 from distutils.command.install_data import install_data
@@ -171,11 +171,34 @@ class modified_install_data(install_data):
         self.install_dir = getattr(install_cmd, 'install_lib')
         return install_data.run(self)
 
+class test(Command):
+
+    user_options = []
+    def initialize_options(self):
+        self.build_lib = None
+    def finalize_options(self):
+        self.set_undefined_options('build',
+                                   ('build_lib', 'build_lib'))
+
+    def run(self):
+        import sys, subprocess
+        self.run_command('build_py')
+        self.run_command('build_ext')
+        ff = sum((fns for dir, fns in data_files if 'ForceFields' in dir), [])
+        for fn in ff:
+            self.copy_file(fn,
+                           os.path.join(self.build_lib, fn),
+                           preserve_mode=False)
+        subprocess.call([sys.executable, 'Tests/all_tests.py'],
+                        env={'PYTHONPATH': self.build_lib,
+                             'MMTKDATABASE': 'MMTK/Database'})
+
 cmdclass = {
     'build' : modified_build,
     'sdist': modified_sdist,
     'install_data': modified_install_data,
-    'build_ext': build_ext
+    'build_ext': build_ext,
+    'test': test
 }
 
 # Build the sphinx documentation if Sphinx is available
@@ -259,10 +282,13 @@ setup (name = package_name,
        long_description=
 """
 The Molecular Modelling Toolkit (MMTK) is an Open Source program
-library for molecular simulation applications. In addition to providing
-ready-to-use implementations of standard algorithms, MMTK serves as a
-code basis that can be easily extended and modified to deal with
-standard and non-standard problems in molecular simulations.
+library for molecular simulation applications. It provides the most
+common methods in molecular simulations (molecular dynamics, energy
+minimization, normal mode analysis) and several force fields used for
+biomolecules (Amber 94, Amber 99, several elastic network
+models). MMTK also serves as a code basis that can be easily extended
+and modified to deal with non-standard situations in molecular
+simulations.
 """,
        author = "Konrad Hinsen",
        author_email = "hinsen@cnrs-orleans.fr",
@@ -378,4 +404,9 @@ standard and non-standard problems in molecular simulations.
        scripts = ['tviewer'],
 
        cmdclass = cmdclass,
+
+       command_options = {
+           'build_sphinx': {
+               'source_dir' : ('setup.py', 'Doc')}
+           },   
        )
