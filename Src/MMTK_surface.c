@@ -127,7 +127,6 @@ nbor_data_1_atom(PyObject *nbors, int i, PyObject *atom_data,
   double max_dist_2;
   PyObject *boxes;
   PyObject *bsize;
-  Py_ssize_t n_atoms;
   int j;
   double box_size;
   int n_nbors1 = 0;
@@ -136,7 +135,6 @@ nbor_data_1_atom(PyObject *nbors, int i, PyObject *atom_data,
   bsize = PyObject_GetAttrString(nbors, "box_size");
   box_size = PyFloat_AsDouble(bsize);
   Py_DECREF(bsize);
-  n_atoms = PyObject_Length(atom_data);
   max_dist_2 = box_size*box_size;
   {
     PyObject *pos1 = PyList_GetItem(atom_data, (Py_ssize_t)i);
@@ -405,7 +403,6 @@ FindNeighbors(PyObject *dummy, PyObject *args)
   double max_dist_2;
   PyObject *nbors, *boxes;
   Py_ssize_t n_atoms;
-  int num_nbors;
   int i, j;
   double box_size;
   PyObject **nlist3, *nlist;
@@ -416,7 +413,6 @@ FindNeighbors(PyObject *dummy, PyObject *args)
   n_atoms = PyObject_Length(atoms);
   nbors = PyTuple_New(n_atoms);
   nlist3 = (PyObject **)malloc(n_atoms*sizeof(PyObject*));
-  num_nbors = 0;
   boxes = PyDict_New();
   box_size = 2*(max_rad + radius);
   printf("box_size %.2f %.2f %.2f\n", box_size*10, max_rad*10, radius*10);
@@ -657,11 +653,9 @@ __declspec(dllexport)
 #endif
 initMMTK_surface(void)
 {
-  PyObject *m;
-
   /* Create the module and add the functions */
-  m = Py_InitModule("MMTK_surface", surface_methods);
-  
+  Py_InitModule("MMTK_surface", surface_methods);
+
   /* Check for errors */
   if (PyErr_Occurred())
     Py_FatalError("can't initialize module MMTK_surface");

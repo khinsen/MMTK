@@ -559,10 +559,8 @@ static PyMethodDef minimization_methods[] = {
 DL_EXPORT(void)
 initMMTK_minimization(void)
 {
-  PyObject *m;
-
   /* Create the module and add the functions */
-  m = Py_InitModule("MMTK_minimization", minimization_methods);
+  Py_InitModule("MMTK_minimization", minimization_methods);
   
   /* Import the array module */
 #ifdef import_array
