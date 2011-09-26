@@ -521,11 +521,10 @@ PyUniverseSpec_StateLock(PyUniverseSpecObject *universe, int action)
 #ifdef WITH_THREAD
   int error;
   int i;
-#ifdef THREAD_DEBUG
-  int id;
+#if THREAD_DEBUG
+  int id = PyThread_get_thread_ident();
 #endif
 
-  id = PyThread_get_thread_ident();
   PyThread_acquire_lock(universe->main_state_lock, 1);
 #if THREAD_DEBUG
   printf("thread %d entering; state is %d, %d threads waiting\n",

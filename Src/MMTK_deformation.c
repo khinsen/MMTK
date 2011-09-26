@@ -693,10 +693,8 @@ static PyMethodDef deformation_methods[] = {
 DL_EXPORT(void)
 initMMTK_deformation(void)
 {
-  PyObject *m;
-
   /* Create the module and add the functions */
-  m = Py_InitModule("MMTK_deformation", deformation_methods);
+  Py_InitModule("MMTK_deformation", deformation_methods);
 
   /* Import the array module */
 #ifdef import_array

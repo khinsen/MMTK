@@ -1399,7 +1399,6 @@ enforceConstraints(PyObject *dummy, PyObject *args)
   PyArrayObject *masses;
   PyArrayObject *constraints, *constraint_distances_squared, *c_blocks;
 
-  int atoms;
   vector3 *x;
   double *m;
   int n_const, n_const_blocks;
@@ -1417,7 +1416,6 @@ enforceConstraints(PyObject *dummy, PyObject *args)
 			&PyArray_Type, &c_blocks))
     return NULL;
 
-  atoms = configuration->dimensions[0];
   n_const = constraints->dimensions[0];
   n_const_blocks = c_blocks->dimensions[0]-1;
   x = (vector3 *)configuration->data;
@@ -1462,8 +1460,8 @@ projectVelocities(PyObject *dummy, PyObject *args)
   int atoms;
   vector3 *x, *v;
   double *m;
-  int n_const, n_const_blocks;
-  long *const_pairs, *const_blocks;
+  int n_const;
+  long *const_pairs;
   double *const_dist;
   vector3 *const_vect = NULL;
   vector3 *vc = NULL;
@@ -1482,13 +1480,11 @@ projectVelocities(PyObject *dummy, PyObject *args)
 
   atoms = configuration->dimensions[0];
   n_const = constraints->dimensions[0];
-  n_const_blocks = c_blocks->dimensions[0]-1;
   x = (vector3 *)configuration->data;
   v = (vector3 *)velocities->data;
   m = (double *)masses->data;
   const_pairs = (long *)constraints->data;
   const_dist = (double *)constraint_distances_squared->data;
-  const_blocks = (long *)c_blocks->data;
 
   pdata = (projection_data *)malloc(n_const*sizeof(projection_data));
   const_vect = (vector3 *)malloc(n_const*sizeof(vector3));
