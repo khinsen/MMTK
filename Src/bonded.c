@@ -428,6 +428,9 @@ cosine_dihedral_evaluator(PyFFEnergyTermObject *self,
       if (dphi > M_PI)
 	dphi -= 2*M_PI;
       e += param[3]*sqr(dphi);
+      /* initialize some variables used only for n > 0, to make gc happy */
+      sin_phase = cos_phase = sin_n_phi_ratio = 
+        sin_phi = cos_n_phi = sqr_cos_phi = 0.;
     }
     else {
       cos_phase = param[1];
@@ -480,6 +483,7 @@ cosine_dihedral_evaluator(PyFFEnergyTermObject *self,
 	e += param[3]*(1.+cos_n_phi*cos_phase
 		       + sin_n_phi_ratio*sin_phi*sin_phase);
       }
+      dphi = 0.; /* initialize to make gcc happy */
     }
     if (energy->gradients != NULL || energy->force_constants != NULL) {
       double deriv;

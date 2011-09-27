@@ -264,7 +264,7 @@ reduce_deformation(vector3 *x, vector3 *v, vector3 *g, int natoms, int niter,
   }
   if (version == 0)
     max_k = factor * exp((0.01-min_dist_sq)/sqr(fc_length));
-  else if (version == 1) {
+  else /* version == 1 */ {
     if (min_dist_sq < 0.16) {
       double r = sqrt(min_dist_sq);
       max_k = (860000.*r-239000.)*factor;
@@ -554,7 +554,7 @@ calpha_evaluator(PyFFEnergyTermObject *self,
       (*d_fn)(rij, x[iterator.a2], x[iterator.a1], distance_data);
       r_sq = vector_length_sq(rij);
       if (cutoff_sq == 0. || r_sq <= cutoff_sq) {
-        double deriv2;
+        double deriv2 = 0.;
         switch (version) {
         case 0:
           /* fitted from CPC trajectory (CHARMM) */

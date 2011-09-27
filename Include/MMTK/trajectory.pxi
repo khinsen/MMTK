@@ -1,3 +1,7 @@
+cdef extern from "Python.h":
+
+    ctypedef PyObject PyListObject
+
 cdef extern from "MMTK/trajectory.h":
 
     void import_MMTK_trajectory()
@@ -49,7 +53,7 @@ cdef extern from "MMTK/trajectory.h":
     ctypedef struct PyTrajectoryOutputSpec
 
     cdef PyTrajectoryOutputSpec *PyTrajectory_OutputSpecification(object universe,
-                                                                  object spec_list,
+                                                                  PyListObject *spec_list,
                                                                   char *description,
                                                                   PyTrajectoryVariable *data)
     cdef void PyTrajectory_OutputFinish(PyTrajectoryOutputSpec *spec, int step, int error_flag,

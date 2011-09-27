@@ -15,7 +15,7 @@
 
 /*
  * Utility functions
- * /
+ */
 
 /* Calculate determinant and inverse of the coordinate transformation
  * matrix for parallelepipedic universes.
@@ -693,6 +693,7 @@ configuration_change_lock_py(PyObject *object, PyObject *args)
   */
 #ifdef WITH_THREAD
   Py_BEGIN_ALLOW_THREADS;
+  success = 0;  /* initialize to make gcc happy */
   switch(action) {
   case 0:
     success = PyThread_acquire_lock(self->configuration_change_lock, 0);

@@ -196,6 +196,9 @@ cdef class TrajectoryGenerator(object):
             v.type = PyTrajectory_ParticleScalar
         elif array.ndim == 2:
             v.type = PyTrajectory_ParticleVector
+        else:
+            v.type = 0   # suppress warning from gcc
+            assert ValueError("array must be 1D or 2D")
         self._addTrajectoryVariable(v)
 
     cdef void declareTrajectoryVariable_box(self, double * var, int l) except *:
@@ -210,8 +213,9 @@ cdef class TrajectoryGenerator(object):
         self._addTrajectoryVariable(v)
 
     cdef void initializeTrajectoryActions(self) except *:
+        actions = self.getActions()
         self.tspec = PyTrajectory_OutputSpecification(self.universe,
-                                                      self.getActions(),
+                                                      <PyListObject *>actions,
                                                       self.name, self.tvars);
         if self.tspec == NULL:
             raise MemoryError

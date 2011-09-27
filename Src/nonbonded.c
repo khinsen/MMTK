@@ -388,6 +388,8 @@ nblist_iterate(PyNonbondedListObject *nblist, struct nblist_iterator *iterator)
     break;
 
   }
+  /* we never get here, but a return makes gcc happy */
+  return 0;
 }
 
 /* Evaluator for all non-bonded interactions */
@@ -396,7 +398,7 @@ nblist_iterate(PyNonbondedListObject *nblist, struct nblist_iterator *iterator)
 #define pair_term(ljfactor, esfactor, ewaldfactor) \
 { \
   vector3 rij; \
-  double r_sq, r; \
+  double r_sq = 0., r = 0.; \
   double deriv = 0., deriv2 = 0.; \
   (*d_fn)(rij, x[a2], x[a1], distance_data); \
   r_sq = vector_length_sq(rij); \
@@ -483,7 +485,7 @@ nblist_iterate(PyNonbondedListObject *nblist, struct nblist_iterator *iterator)
 #define pair_term(ljfactor, esfactor, ewaldfactor) \
 { \
   vector3 rij; \
-  double r_sq, r; \
+  double r_sq = 0., r = 0.; \
   double deriv = 0., deriv2 = 0.; \
   (*d_fn)(rij, x[a2], x[a1], distance_data); \
   r_sq = vector_length_sq(rij); \
@@ -620,6 +622,16 @@ nonbonded_evaluator(PyFFEnergyTermObject *self,
   lj_energy1 = lj_energy2 = lj_virial1 = lj_virial2 = 0.;
   es_energy = 0.;
   ewald_energy = 0.;
+
+  /* Initialize a couple of variables to make gcc happy. They will
+     get their correct versions in the sections below. */
+  lj_cutoff_sq = es_cutoff_sq = erfc_cutoff = ewald_cutoff_sq = 0.;
+  es_inv_cutoff = ewald_inv_cutoff = 0.;
+  lj_one_four = es_one_four = ewald_one_four = 0.;
+  beta = 0.;
+  eps_sigma = charge = NULL;
+  lj_type = NULL;
+  ntypes = 0;
 
   if (lj_flag) {
     eps_sigma = (double *)((PyArrayObject *)lj_ev->data[1])->data;

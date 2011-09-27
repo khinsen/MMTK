@@ -350,6 +350,7 @@ PySparseFC_VectorSolve(PySparseFCObject *fc, double *result, double *vector,
     result[i] = 0.;
   }
   iter = 0;
+  rho = 0.;  /* initialize to make gcc happy */
   while (1) {
     for (i = 0; i < natoms; i++) {
 #if 1

@@ -217,11 +217,11 @@ reciprocal_sum(energy_spec *input, energy_data *energy,
         }
       }
       if (energy->force_constants != NULL) {
+#if 0
         tensor3 fij;
         int j;
         tensor_product(fij, k, k,
                        4.*M_PI*expfactor*electrostatic_energy_factor/volume);
-#if 0
         for (i = 0; i < input->natoms; i++)
           for (j = i; j < input->natoms; j++) {
             double f = charge[i]*charge[j];
