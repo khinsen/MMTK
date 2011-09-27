@@ -503,6 +503,8 @@ integrateVV(PyObject *dummy, PyObject *args)
   else {
     t_mass = 0.;
     t_energy = 0.;
+    t_temp = 0.; /* unused, initialize just to make gcc happy */
+    t_mass = 0;  /* unused, initialize just to make gcc happy */
   }
   t_xi = (double *)t_coordinates->data;
   t_lns = t_xi + 1;
@@ -513,10 +515,12 @@ integrateVV(PyObject *dummy, PyObject *args)
   else {
     b_mass = 0.;
     b_press = 0.;
+    b_tau = 0.; /* unused, initialize just to make gcc happy */
   }
   b_alpha = (double *)b_coordinates->data;
 
   /* Allocate arrays for temporary data */
+  pdata = NULL;
   if (n_const > 0) {
     scratch = (vector3 *)malloc((5*atoms+n_const)*sizeof(vector3));
     if (scratch == NULL) {
@@ -538,13 +542,13 @@ integrateVV(PyObject *dummy, PyObject *args)
     }
   }
   else {
-    pdata = NULL;
     scratch = NULL;
     v1 = v2 = NULL;
     xp = xph = x;
     vh = v;
     xold = NULL;
     temp = NULL;
+    const_vect = NULL;  /* unused, initialize just to make gcc happy */
   }
 
   /* Enforce constraints and initialize constraint data */
@@ -751,8 +755,10 @@ integrateVV(PyObject *dummy, PyObject *args)
       factor1 = (*b_alpha) + dth*dalpha;
       factor2 = dth*(*b_alpha)*(*b_alpha);
     }
-    else
+    else {
       factor1 = factor2 = 0.;
+      dalpha = 0.; /* unused, initialize just to make gcc happy */
+    }
     for (j = 0; j < atoms; j++)
       if (!fix[j]) {
 	vector3 dv;

@@ -37,7 +37,9 @@ distance_fn *distance_vector_pointer;
 distance_fn *orthorhombic_distance_vector_pointer;
 distance_fn *parallelepipedic_distance_vector_pointer;
 
+#ifdef WITH_MPI
 static PyObject *PyExc_MPIError;
+#endif
 
 staticforward ff_eval_function evaluator;
 
@@ -660,9 +662,6 @@ evaluator(PyFFEvaluatorObject *self,
   PyFFEnergyTermObject *term;
   energy_spec input;
   int i;
-#ifdef WITH_THREAD
-  int done;
-#endif
 
   input.coordinates = coordinates;
   input.natoms = natoms;
@@ -1956,7 +1955,10 @@ static PyMethodDef forcefield_methods[] = {
 PyMODINIT_FUNC
 initMMTK_forcefield(void)
 {
-  PyObject *m, *d, *module, *mpi_module;
+  PyObject *m, *d, *module;
+#ifdef WITH_MPI
+  PyObject *mpi_module;
+#endif
   static void *PyFF_API[PyFF_API_pointers];
 
   /* Create the module and add the functions */

@@ -185,6 +185,8 @@ steepestDescent(PyObject *dummy, PyObject *args)
   p_energy.gradient_fn = NULL;
   p_energy.force_constants = NULL;
   p_energy.fc_fn = NULL;
+  min_energy = 0.; /* initialize to make gcc happy */
+  min_norm = 0.;   /* initialize to make gcc happy */
   for (i = 0; i < steps; i++) {
     PyUniverseSpec_StateLock(universe_spec, -2);
     PyUniverseSpec_StateLock(universe_spec, 1);
@@ -390,6 +392,7 @@ conjugateGradient(PyObject *dummy, PyObject *args)
 #ifdef WITH_THREAD
     PyEval_RestoreThread(evaluator->tstate_save);
 #endif
+    i = 0;
     goto error;
   }
 
