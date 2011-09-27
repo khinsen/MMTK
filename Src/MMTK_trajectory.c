@@ -1461,8 +1461,11 @@ PyTrajectory_Output(PyTrajectoryOutputSpec *spec, int step,
 	if (step >= 0) {
 	  if (thread != NULL)
 	    PyEval_RestoreThread(*thread);
-	  if (PyTrajectory_Step(trajectory, step) == -1)
+	  if (PyTrajectory_Step(trajectory, step) == -1) {
+            if (thread != NULL)
+              *thread = PyEval_SaveThread();
 	    return -1;
+          }
 	  for (var = data, tvar = spec->variables; var->name != NULL;
 	       var++, tvar++)
 	    if (spec->what & var->class) {
@@ -1470,8 +1473,11 @@ PyTrajectory_Output(PyTrajectoryOutputSpec *spec, int step,
 	      switch (var->type) {
 	      case PyTrajectory_Scalar:
 		if (PyTrajectory_WriteFloats(trajectory, *tvar,
-					     var->value.dp, 1) == -1)
+					     var->value.dp, 1) == -1) {
+                  if (thread != NULL)
+                    *thread = PyEval_SaveThread();
 		  return -1;
+                }
 		break;
 	      case PyTrajectory_ParticleScalar:
 		if (trajectory->index_map != NULL) {
@@ -1503,8 +1509,11 @@ PyTrajectory_Output(PyTrajectoryOutputSpec *spec, int step,
 		    array = trajectory->sbuffer;
 		  }
 		}
-		if (PyTrajectory_WriteArray(trajectory, *tvar, array) == -1)
+		if (PyTrajectory_WriteArray(trajectory, *tvar, array) == -1) {
+                  if (thread != NULL)
+                    *thread = PyEval_SaveThread();
 		  return -1;
+                }
 		break;
 	      case PyTrajectory_ParticleVector:
 		if (trajectory->index_map != NULL) {
@@ -1545,13 +1554,19 @@ PyTrajectory_Output(PyTrajectoryOutputSpec *spec, int step,
 		    array = trajectory->vbuffer;
 		  }
 		}
-		if (PyTrajectory_WriteArray(trajectory, *tvar, array) == -1)
+		if (PyTrajectory_WriteArray(trajectory, *tvar, array) == -1) {
+                  if (thread != NULL)
+                    *thread = PyEval_SaveThread();
 		  return -1;
+                }
 		break;
 	      case PyTrajectory_BoxSize:
 		if (PyTrajectory_WriteFloats(trajectory, *tvar,
-					     var->value.dp, var->length) == -1)
+					     var->value.dp, var->length) == -1) {
+                  if (thread != NULL)
+                    *thread = PyEval_SaveThread();
 		  return -1;
+                }
 		break;
 	      }
 	    }
@@ -1559,14 +1574,23 @@ PyTrajectory_Output(PyTrajectoryOutputSpec *spec, int step,
 	  if (trajectory->cycle > 0) {
 	    if (PyTrajectory_SetAttribute(trajectory, "last_step",
 					  PyInt_FromLong(trajectory->steps-1))
-		== -1)
+		== -1) {
+              if (thread != NULL)
+                *thread = PyEval_SaveThread();
 	      return -1;
-	    if (PyTrajectory_Flush(trajectory) == -1)
+            }
+	    if (PyTrajectory_Flush(trajectory) == -1) {
+              if (thread != NULL)
+                *thread = PyEval_SaveThread();
 	      return -1;
+            }
 	  }
 	  else if (cpu_time-trajectory->last_flush > 900*CLOCKS_PER_SEC) {
-	    if (PyTrajectory_Flush(trajectory) == -1)
+	    if (PyTrajectory_Flush(trajectory) == -1) {
+              if (thread != NULL)
+                *thread = PyEval_SaveThread();
 	      return -1;
+            }
 	    trajectory->last_flush = cpu_time;
 	  }
 	  if (PyErr_CheckSignals())
