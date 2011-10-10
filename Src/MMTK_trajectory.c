@@ -769,7 +769,7 @@ PyTrajectory_TimeStamp(PyTrajectoryObject *self, char *text)
 {
   time_t now = time(NULL);
   static char time_stamp[200];
-  sprintf(time_stamp, text, ctime(&now));
+  snprintf(time_stamp, sizeof(time_stamp), text, ctime(&now));
   time_stamp[strlen(time_stamp)-1] = '\0';
   return PyNetCDFFile_AddHistoryLine(self->file, time_stamp);
 }
@@ -1397,47 +1397,48 @@ PyTrajectory_Output(PyTrajectoryOutputSpec *spec, int step,
 	  PyEval_RestoreThread(*thread);
 	if (step > 0)
 	  PyFile_WriteString("\n", spec->destination);
-	sprintf(buffer, "Step %d\n", step);
+	snprintf(buffer, sizeof(buffer), "Step %d\n", step);
 	PyFile_WriteString(buffer, spec->destination);
 
 	for (var = data; var->name != NULL; var++)
 	  if (spec->what & var->class) {
 	    switch (var->type) {
 	    case PyTrajectory_Scalar:
-	      sprintf(buffer, var->text, *var->value.dp);
+	      snprintf(buffer, sizeof(buffer), var->text, *var->value.dp);
 	      PyFile_WriteString(buffer, spec->destination);
 	      break;
 	    case PyTrajectory_ParticleScalar:
-	      sprintf(buffer, var->text);
+              strcpy(buffer, var->text);
 	      PyFile_WriteString(buffer, spec->destination);
 	      array_data = (double *)var->value.array->data;
 	      for (i = 0; i < var->value.array->dimensions[0]; i++) {
-		sprintf(buffer, "  %5d: %g\n", i, *array_data++);
+		snprintf(buffer, sizeof(buffer),
+                         "  %5d: %g\n", i, *array_data++);
 		PyFile_WriteString(buffer, spec->destination);
 	      }
 	      break;
 	    case PyTrajectory_ParticleVector:
-	      sprintf(buffer, var->text);
+	      strcpy(buffer, var->text);
 	      PyFile_WriteString(buffer, spec->destination);
 	      array_data = (double *)var->value.array->data;
 	      for (i = 0; i < var->value.array->dimensions[0]; i++) {
-		sprintf(buffer, "  %5d: %g, %g, %g\n", i,
-			array_data[0], array_data[1], array_data[2]);
+		snprintf(buffer, sizeof(buffer),"  %5d: %g, %g, %g\n", i,
+                         array_data[0], array_data[1], array_data[2]);
 		PyFile_WriteString(buffer, spec->destination);
 		array_data += 3;
 	      }
 	      break;
 	    case PyTrajectory_BoxSize:
-	      sprintf(buffer, var->text);
+	      strcpy(buffer, var->text);
 	      PyFile_WriteString(buffer, spec->destination);
 	      array_data = var->value.dp;
 	      for (i = 0; i < var->length; i++) {
-		sprintf(buffer, " %g", *array_data++);
+		snprintf(buffer, sizeof(buffer), " %g", *array_data++);
 		PyFile_WriteString(buffer, spec->destination);
 		if (i == var->length-1)
-		  sprintf(buffer, "\n");
+		  snprintf(buffer, sizeof(buffer), "\n");
 		else
-		  sprintf(buffer, ",");
+		  snprintf(buffer, sizeof(buffer), ",");
 		PyFile_WriteString(buffer, spec->destination);
 	      }
 	      break;
