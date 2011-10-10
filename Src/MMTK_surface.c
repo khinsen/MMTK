@@ -29,7 +29,7 @@ add_point(const TPoint p, TPoint *r, int r_index, PyObject *pt_dict)
 {
   PyObject *p_orig;
   char key[512];
-  sprintf(key, "%.6f,%.6f,%.6f", p[0], p[1], p[2]);
+  snprintf(key, sizeof(key), "%.6f,%.6f,%.6f", p[0], p[1], p[2]);
   p_orig = PyDict_GetItemString(pt_dict, key);
   if(p_orig)
     Py_DECREF(p_orig);
@@ -178,8 +178,8 @@ nbor_data_1_atom(PyObject *nbors, int i, PyObject *atom_data,
     {
       char key[128];
       PyObject *alist;
-      sprintf(key, "%d %d %d", key0+nbor_boxes[boxn][0],
-	      key1+nbor_boxes[boxn][1], key2+nbor_boxes[boxn][2]);
+      snprintf(key, sizeof(key), "%d %d %d", key0+nbor_boxes[boxn][0],
+               key1+nbor_boxes[boxn][1], key2+nbor_boxes[boxn][2]);
       alist = PyDict_GetItemString(boxes, key);
       if(!alist && i == -1) printf("none in list at %s, atom %d\n", key, i);
       if(alist)
@@ -421,12 +421,12 @@ FindNeighbors(PyObject *dummy, PyObject *args)
     PyObject *v, *tmp;
     char key[128];
     PyObject *pos = PyList_GetItem(atom_data, (Py_ssize_t)i);
-    sprintf(key, "%d %d %d",
-	    (int)floor(PyFloat_AsDouble(PyTuple_GetItem(pos,
+    snprintf(key, sizeof(key), "%d %d %d",
+             (int)floor(PyFloat_AsDouble(PyTuple_GetItem(pos,
 						     (Py_ssize_t)0))/box_size),
-	    (int)floor(PyFloat_AsDouble(PyTuple_GetItem(pos,
+             (int)floor(PyFloat_AsDouble(PyTuple_GetItem(pos,
 						     (Py_ssize_t)1))/box_size),
-	    (int)floor(PyFloat_AsDouble(PyTuple_GetItem(pos,
+             (int)floor(PyFloat_AsDouble(PyTuple_GetItem(pos,
 						     (Py_ssize_t)2))/box_size));
     v = PyDict_GetItemString(boxes, key);
     if(!v)
@@ -484,8 +484,8 @@ FindNeighbors(PyObject *dummy, PyObject *args)
     {
       char key[128];
       PyObject *alist;
-      sprintf(key, "%d %d %d", key0+nbor_boxes[boxn][0],
-	      key1+nbor_boxes[boxn][1], key2+nbor_boxes[boxn][2]);
+      snprintf(key, sizeof(key), "%d %d %d", key0+nbor_boxes[boxn][0],
+               key1+nbor_boxes[boxn][1], key2+nbor_boxes[boxn][2]);
       alist = PyDict_GetItemString(boxes, key);
       if(!alist && i == -1) printf("none in list at %s\n", key);
       if(alist)
@@ -590,8 +590,9 @@ FindNeighborsOfAtom(PyObject *dummy, PyObject *args)
     {
       char key[128];
       PyObject *alist;
-      sprintf(key, "%d %d %d", key0+nbor_boxes[boxn][0],
-	      key1+nbor_boxes[boxn][1], key2+nbor_boxes[boxn][2]);
+      snprintf(key, sizeof(key),
+               "%d %d %d", key0+nbor_boxes[boxn][0],
+               key1+nbor_boxes[boxn][1], key2+nbor_boxes[boxn][2]);
       alist = PyDict_GetItemString(boxes, key);
       if(!alist && i == -1) printf("none in list at %s\n", key);
       if(alist)

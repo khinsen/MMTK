@@ -131,7 +131,8 @@ readDCD(PyObject *dummy, PyObject *args)
     goto error;
   }
   if( atoms != dcdAtoms ){
-    sprintf(buffer, "number of atoms in DCD file (%d) doesn't "
+    snprintf(buffer, sizeof(buffer),
+             "number of atoms in DCD file (%d) doesn't "
 	    "match universe (%d)", dcdAtoms, atoms);
     PyErr_SetString(PyExc_ValueError, buffer);
     goto error;

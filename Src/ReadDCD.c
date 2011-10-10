@@ -607,7 +607,8 @@ int write_dcdheader(FILE *fd, char *filename, int N, int NSET, int ISTART,
 	out_integer = 2;
 	fwrite((char *) & out_integer, sizeof(int), 1, fd);
 
-	sprintf(title_string, "REMARKS FILENAME=%s CREATED BY VMD", filename);
+	snprintf(title_string, sizeof(title_string),
+                 "REMARKS FILENAME=%s CREATED BY VMD", filename);
 	pad(title_string, 80);
 	fwrite(title_string, sizeof(char), 80, fd);
 
@@ -615,7 +616,8 @@ int write_dcdheader(FILE *fd, char *filename, int N, int NSET, int ISTART,
 	tmbuf=localtime(&cur_time);
 	strftime(time_str, 10, "%m/%d/%y", tmbuf);
 
-	sprintf(title_string, "REMARKS DATE: %s CREATED BY MMTK.", time_str);
+	snprintf(title_string, sizeof(title_string),
+                 "REMARKS DATE: %s CREATED BY MMTK.", time_str);
 	pad(title_string, 80);
 	fwrite(title_string, sizeof(char), 80, fd);
 	out_integer = 164;
