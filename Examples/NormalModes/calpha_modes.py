@@ -19,6 +19,7 @@ from MMTK.ForceFields import CalphaForceField
 from MMTK.FourierBasis import FourierBasis, estimateCutoff
 from MMTK.NormalModes import EnergeticModes
 from MMTK.Visualization import view
+import pylab
 
 # Construct system
 universe = InfiniteUniverse(CalphaForceField(2.5))
@@ -36,6 +37,15 @@ else:
     # Do subspace mode calculation with Fourier basis
     subspace = FourierBasis(universe, cutoff)
     modes = EnergeticModes(universe, 300.*Units.K, subspace)
+
+# Plot the atomic fluctuations in the first three non-zero modes
+# for chain A
+chain = universe.protein[0]
+pylab.xticks(range(len(chain)),
+             [r.name for r in chain])
+for i in range(6, 9):
+    f = modes[i]*modes[i]
+    pylab.plot([f[residue.peptide.C_alpha] for residue in chain])
 
 # Show animation of the first non-trivial mode
 view(modes[6], 15.)
