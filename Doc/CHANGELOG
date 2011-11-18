@@ -1,3 +1,47 @@
+2.7.4 --> 2.7.5
+===============
+
+Improvements:
+
+- Adding items to a universe became significantly faster. This is most
+  noticeable when opening a trajectory file for a big system.
+
+- New example script NormalModes/conformational_change_analysis.py
+
+- Added plotting to the example script NormalModes/calpha_modes.py
+
+- New subcommand "test" for setup.py runs all the test cases and works
+  before installation.
+
+- The default visulization module was changed from VRML to VRML2.
+
+- General cleanup of the code and the installation process. There are many
+  fewer warnings now.
+
+- Definition for He added to the database.
+
+Bug fixes:
+
+- NormalModes.effectiveMassAndForceConstant crashed due to a forgotten
+  name change in a method call.
+
+- Writing DCD trajectories could crash on 64-bit machines.
+
+- Distance constraints were handled incorrectly in peptide chains
+  connected by disulfide bridges.
+
+- Universes using the SPCE forcefield could not be read back from a
+  trajectory file.
+
+- Creation of graphics representatios of Collection objects crashed.
+
+- Interators and minimizers could hang if an error occured during
+  trajectory output.
+
+- Energy calculations on configurations containing NaN values crashed
+  Python with a segment fault.
+
+
 2.7.3 --> 2.7.4
 ===============
 
