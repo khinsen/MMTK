@@ -194,12 +194,19 @@ nblist_update(PyNonbondedListObject *nblist, int natoms,
     n = (int)((x[ai][2]-box1[2])/box_size[2]);
     if (n == nblist->box_count[2]) n--;
     box += nblist->box_count[0]*nblist->box_count[1]*n;
+    if (box < 0 || box > nblist->nboxes) {
+      /* Prevent a crash due to an invalid box number.
+         Unfortunately we can't raise a Python execption here
+         because the code is called in a no-GIL setting,
+         but silent failure is still better than a segment fault. */
+      return 0;
+    }
     nblist->box_number[ai] = box;
+    nblist->boxes[box].n++;
 #if 0
     printf("Atom %d in box %d (%d/%d/%d)\n", ai, box,
 	   nblist->boxes[box].ix, nblist->boxes[box].iy, nblist->boxes[box].iz);
 #endif 
-    nblist->boxes[box].n++;
   }
   p = nblist->box_atoms;
   for (i = 0; i < nblist->nboxes; i++) {
