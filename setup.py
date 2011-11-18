@@ -257,14 +257,15 @@ if sys.version_info[0] == 2 and sys.version_info[1] >= 2:
 # System-specific optimization options
 
 low_opt = []
-if sys.platform != 'win32' and sysconfig['CC'][:3] == 'gcc':
+if sys.platform != 'win32' and 'gcc' in sysconfig['CC']:
     low_opt = ['-O0']
+low_opt.append('-g')
 
 high_opt = []
-if sys.platform[:5] == 'linux' and sysconfig['CC'][:3] == 'gcc':
+if sys.platform[:5] == 'linux' and 'gcc' in sysconfig['CC']:
     high_opt = ['-O3', '-ffast-math', '-fomit-frame-pointer',
                 '-fkeep-inline-functions']
-if sys.platform == 'darwin' and sysconfig['CC'][:3] == 'gcc':
+if sys.platform == 'darwin' and 'gcc' in sysconfig['CC']:
     high_opt = ['-O3', '-ffast-math', '-fomit-frame-pointer',
                 '-fkeep-inline-functions', '-falign-loops=16']
 if sys.platform == 'aix4':
