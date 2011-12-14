@@ -239,6 +239,13 @@ class Trajectory(object):
             raise AttributeError("no variable named " + name)
         if 'atom_number' in var.dimensions:
             return TrajectoryVariable(self.universe, self, name)
+        elif 'box_size_length' in var.dimensions:
+            if 'minor_step_number' in var.dimensions:
+                bs = N.transpose(var[:], [0, 2, 1])
+                bs = N.reshape(bs, (bs.shape[0]*bs.shape[1], bs.shape[2]))
+                return bs[:len(self)]
+            else:
+                return var[:]
         else:
             return N.ravel(N.array(var))[:len(self)]
 
