@@ -110,7 +110,7 @@ class c:
         collection = _evalString(self.creation)
         attr = None
         for o in self.objects:
-            if isinstance(o, str):
+            if isinstance(o, basestring):
                 attr = o
             elif attr:
                 setattr(collection, attr, o.make(info, conf))

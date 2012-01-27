@@ -66,7 +66,7 @@ class AtomicField(object):
                 c = default_color
                 try: c = a.color
                 except AttributeError: pass
-                if isinstance(c, str):
+                if isinstance(c, basestring):
                     c = Color.ColorByName(c)
                 color = color + c
             values.append(v/total_weight)

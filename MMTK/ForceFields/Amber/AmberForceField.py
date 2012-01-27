@@ -72,7 +72,7 @@ OPLS = None
 this_directory = os.path.split(__file__)[0]
 
 def fullModFilePath(modfile):
-    if not isinstance(modfile, str):
+    if not isinstance(modfile, basestring):
         return modfile
     if os.path.exists(modfile):
         return modfile

@@ -419,7 +419,7 @@ protein_types = Database('Proteins', ProteinType)
 class BlueprintObject(object):
 
     def __init__(self, original, database, memo):
-        if isinstance(original, str):
+        if isinstance(original, basestring):
             original = database.findType(original)
             self.type = original
         elif hasattr(original, 'is_blueprint'):
@@ -474,7 +474,7 @@ class BlueprintComplex(BlueprintObject):
 class ReferenceBlueprint(object):
 
     def __init__(self, original, database):
-        if isinstance(original, str):
+        if isinstance(original, basestring):
             self.type = database.findType(original)
         elif hasattr(original, 'is_blueprint'):
             self.type = original.type

@@ -19,7 +19,7 @@ amber_fc_angle_unit = Units.rad
 class AmberParameters(object):
 
     def __init__(self, file, modifications=[]):
-        if isinstance(file, str):
+        if isinstance(file, basestring):
             file = TextFile(file)
         title = file.readline()[:-1]
 
@@ -79,7 +79,7 @@ class AmberParameters(object):
         file.close()
 
         for mod, ljname in modifications:
-            if isinstance(mod, str):
+            if isinstance(mod, basestring):
                 file = TextFile(mod)
             else:
                 file = mod

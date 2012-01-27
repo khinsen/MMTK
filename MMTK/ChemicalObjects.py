@@ -30,7 +30,7 @@ class ChemicalObject(Collections.GroupOfAtoms, Visualization.Viewable):
     """
 
     def __init__(self, blueprint, memo):
-        if isinstance(blueprint, str):
+        if isinstance(blueprint, basestring):
             blueprint = self.blueprintclass(blueprint)
         self.type = blueprint.type
         if hasattr(blueprint, 'name'):

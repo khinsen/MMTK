@@ -162,7 +162,7 @@ class NucleotideChain(Biopolymers.ResidueChain):
 				 'terminus_3': term3,
 				 'model': model,
                                  'circular': circular}
-            if isinstance(sequence[0], str):
+            if isinstance(sequence[0], basestring):
 		conf = None
 	    else:
 		conf = sequence
