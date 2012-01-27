@@ -210,7 +210,7 @@ class PDBConfiguration(Scientific.IO.PDB.Structure):
         :type alternate_code: str
         """
 
-        if isinstance(file_or_filename, str):
+        if isinstance(file_or_filename, basestring):
             file_or_filename = Database.PDBPath(file_or_filename)
         Scientific.IO.PDB.Structure.__init__(self, file_or_filename,
                                              model, alternate_code)

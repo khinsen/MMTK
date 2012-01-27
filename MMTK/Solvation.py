@@ -34,7 +34,7 @@ def numberOfSolventMolecules(universe, solvent, density):
               to obtain the given solvent density.
     :rtype: int
     """
-    if isinstance(solvent, str):
+    if isinstance(solvent, basestring):
 	solvent = ChemicalObjects.Molecule(solvent)
     cell_volume = universe.cellVolume()
     if cell_volume is None:
@@ -68,7 +68,7 @@ def addSolvent(universe, solvent, density, scale_factor=4.):
     """
 
     # Calculate number of solvent molecules and universe size
-    if isinstance(solvent, str):
+    if isinstance(solvent, basestring):
 	solvent = ChemicalObjects.Molecule(solvent)
     cell_volume = universe.cellVolume()
     if cell_volume is None:
@@ -134,7 +134,7 @@ def shrinkUniverse(universe, temperature=300.*Units.K, trajectory=None,
     # Set velocities and initialize trajectory output
     universe.initializeVelocitiesToTemperature(temperature)
     if trajectory is not None:
-        if isinstance(trajectory, str):
+        if isinstance(trajectory, basestring):
             trajectory = Trajectory(universe, trajectory, "w",
                                     "solvation protocol")
             close_trajectory = True
