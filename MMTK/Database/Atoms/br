@@ -1,0 +1,5 @@
+name = 'bromine'
+symbol = 'Br'
+mass = [(78.9183, 50.69), (80.9163, 49.31)]
+color = 'brown'
+vdW_radius = 0.185
