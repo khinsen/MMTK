@@ -1,0 +1,5 @@
+name = 'iodine'
+symbol = 'I'
+mass = [(126.90447, 100.00),]
+color = 'purple'
+vdW_radius = 0.198
