@@ -375,11 +375,11 @@ class PDBConfiguration(Scientific.IO.PDB.Structure):
                             while aname[0] in string.digits:
                                 aname = aname[1:] + aname[0]
                             try:
-                                element = atom['element']
+                                element = atom['element'].strip()
                                 a = ChemicalObjects.Atom(element, name = aname)
                             except KeyError:
                                 try:
-                                    a = ChemicalObjects.Atom(aname[:2],
+                                    a = ChemicalObjects.Atom(aname[:2].strip(),
                                                              name = aname)
                                 except IOError:
                                     a = ChemicalObjects.Atom(aname[:1],
