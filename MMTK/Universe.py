@@ -229,7 +229,11 @@ class Universe(Collections.GroupOfAtoms, Visualization.Viewable):
             self._objects.removeObject(object)
             self._changed(True)
         elif Collections.isCollection(object) \
-                 or Utility.isSequenceObject(object):
+                 or (Utility.isSequenceObject(object)
+                     # Strings are nasty because their elements are strings
+                     # as well. This creates infinite recursion without
+                     # this special-case handling.
+                     and not isinstance(object, basestring)):
             for o in object:
                 self.removeObject(o)
         elif Environment.isEnvironmentObject(object):
