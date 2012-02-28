@@ -21,11 +21,19 @@ try:
 except ImportError:
     raise Utility.MMTKError("Trajectories are not available " +
                              "because the netCDF module is missing.")
-
 #
 # Trajectory class
 #
 class Trajectory(object):
+
+    #
+    # Trajectory cache
+    #
+    # This cache is maintained for better efficiency in parallel
+    # processing. The cache contains all trajectories currently open
+    # for reading. When a trajectory object is unpickled, a trajectory
+    # from the cache is reused if possible. This means that 
+
 
     """
     Trajectory file
@@ -97,6 +105,7 @@ class Trajectory(object):
         """
         filename = os.path.expanduser(filename)
         self.filename = filename
+        self.mode = mode
         if object is None and mode == 'r':
             file = NetCDF.NetCDFFile(filename, 'r')
             description = file.variables['description'][:].tostring()
@@ -173,6 +182,14 @@ class Trajectory(object):
         if initialize and conf is not None:
             self.universe.setFromTrajectory(self)
         self.particle_trajectory_reader = ParticleTrajectoryReader(self)
+
+    def __getstate__(self):
+        if self.mode != 'r':
+            raise ValueError("Cannot copy or pickle write-mode trajectories")
+        return self.filename
+
+    def __setstate__(self, state):
+        self.__init__(None, state)
 
     def flush(self):
         """
