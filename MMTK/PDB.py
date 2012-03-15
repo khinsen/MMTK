@@ -140,6 +140,8 @@ class PDBNucleotideChain(Scientific.IO.PDB.NucleotideChain, PDBChain):
         properties = {'model': model}
         if self.segment_id != '':
             properties['name'] = self.segment_id
+        elif self.chain_id != '':
+            properties['name'] = self.chain_id
         if self[0].hasPhosphate():
             properties['terminus_5'] = 0
         chain = apply(NucleicAcids.NucleotideChain, (self,), properties)
