@@ -45,6 +45,34 @@ class Residue(ChemicalObjects.Group):
                         alt_dict[key] = value
             setattr(type, 'pdb_alternative', alt_dict)
 
+    def _residueThroughLinkAtom(self, link_atom):
+        if link_atom is None:
+            return None
+        levels = 0
+        obj = link_atom
+        while obj is not None and obj != self:
+            obj = obj.parent
+            levels += 1
+        for atom in link_atom.bondedTo():
+            if atom.parent is not link_atom.parent:
+                obj = atom
+                while levels > 0:
+                    obj = obj.parent
+                    levels -= 1
+                return obj
+        return None
+
+    def precedingResidue(self):
+        """
+        :returns the preceding residue in the chain
+        """
+        return self._residueThroughLinkAtom(self.chain_links[0])
+
+    def nextResidue(self):
+        """
+        :returns the next residue in the chain
+        """
+        return self._residueThroughLinkAtom(self.chain_links[1])
 
 class ResidueChain(ChemicalObjects.Molecule):
 
