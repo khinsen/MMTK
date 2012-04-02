@@ -17,7 +17,7 @@ try:
 except AttributeError:
     array_package = "Numeric"
 
-symeig = None
+eigh = None
 if array_package == "NumPy":
     # Use symeig (http://mdp-toolkit.sourceforge.net/symeig.html)
     # if it is installed and if NumPy is used (symeig works only
@@ -25,7 +25,7 @@ if array_package == "NumPy":
     # uses less memory than dsyevd. It is also said to be faster,
     # but in my tests on the Mac it turned out to be slightly slower.
     try:
-        from symeig import symeig
+        from scipy.linalg import eigh
     except ImportError:
         pass
 
@@ -257,9 +257,9 @@ class NormalModes(object):
             return eigenvalues
 
         # Calculate eigenvalues and eigenvectors of self.array
-        if symeig is not None:
+        if eigh is not None:
             _symmetrize(self.array)
-            ev, modes = symeig(self.array, overwrite=True)
+            ev, modes = eigh(self.array, overwrite_a=True)
             self.array = N.transpose(modes)
         elif dsyevd is None:
             ev, modes = Heigenvectors(self.array)
