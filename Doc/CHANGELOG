@@ -1,3 +1,35 @@
+2.7.5 --> 2.7.6
+===============
+
+Improvements:
+
+- Allow unicode strings in filenames.
+
+- New methods precedingResidue() and nextResidue() for peptide and
+  nucleotide chains.
+
+- NormalModes: use scipy.linalg if available, don't use symeig
+  which is no longer maintained.
+
+- Use PDB chain_id as name for nucleotide chains (just like for peptide
+  chains) if segment_id is missing.
+
+- Make read-only trajectories picklable (the pickle contains just the
+  file name).
+
+- Added database files for bromine and iodine.
+
+Bug fixes:
+
+- Strip spaces from chemical element names determined from a PDB file.
+
+- Universe attributes of type string could cause MMTK to hang when
+  updated or removed.
+
+- Reading the trajectory variable box_size yielded a wrong result
+  for trajectories with block_size > 1.
+
+
 2.7.4 --> 2.7.5
 ===============
 
