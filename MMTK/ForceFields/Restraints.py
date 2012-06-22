@@ -26,6 +26,7 @@ __docformat__ = 'restructuredtext'
 from MMTK.ForceFields.ForceField import ForceField
 from MMTK_forcefield import HarmonicDistanceTerm, HarmonicAngleTerm, \
                             CosineDihedralTerm
+from MMTK_restraints import HarmonicTrapTerm
 from Scientific import N
 
 class HarmonicDistanceRestraint(ForceField):
@@ -185,3 +186,37 @@ class HarmonicDihedralRestraint(ForceField):
         parameters = N.array([params[0][4:]])
         return [CosineDihedralTerm(universe._spec, indices, parameters,
                                    self.name)]
+
+class HarmonicTrapForceField(ForceField):
+
+    """
+    Harmonic potential with respect to a fixed point in space
+    """
+
+    def __init__(self, atom, center, force_constant):
+        """
+        @param atom: the atom on which the force field acts
+        @type atom: L{MMTK.ChemicalObjects.Atom}
+        @param center: the point to which the atom is attached by
+                       the harmonic potential
+        @type center: L{Scientific.Geometry.Vector}
+        @param force_constant: the force constant of the harmonic potential
+        @type force_constant: C{float}
+        """
+        self.atom_index = self.getAtomParameterIndices([atom])[0]
+        self.arguments = (self.atom_index, center, force_constant)
+        ForceField.__init__(self, 'harmonic_trap')
+        self.center = center
+        self.force_constant = force_constant
+
+    def ready(self, global_data):
+        return True
+
+    def evaluatorTerms(self, universe, subset1, subset2, global_data):
+        # Subsets are not implemented for now
+        if subset1 is not None or subset2 is not None:
+            raise ValueError("sorry, no subsets here")
+        return [HarmonicTrapTerm(universe,
+                                 self.atom_index,
+                                 self.center,
+                                 self.force_constant)]
