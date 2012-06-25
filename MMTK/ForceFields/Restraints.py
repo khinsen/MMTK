@@ -193,18 +193,18 @@ class HarmonicTrapForceField(ForceField):
     Harmonic potential with respect to a fixed point in space
     """
 
-    def __init__(self, atom, center, force_constant):
+    def __init__(self, obj, center, force_constant):
         """
-        @param atom: the atom on which the force field acts
-        @type atom: L{MMTK.ChemicalObjects.Atom}
-        @param center: the point to which the atom is attached by
-                       the harmonic potential
-        @type center: L{Scientific.Geometry.Vector}
-        @param force_constant: the force constant of the harmonic potential
-        @type force_constant: C{float}
+        :param obj: the object on whose center of mass the force field acts
+        :type obj: :class:`~MMTK.Collections.GroupOfAtoms`
+        :param center: the point to which the atom is attached by
+                        the harmonic potential
+        :type center: Scientific.Geometry.Vector
+        :param force_constant: the force constant of the harmonic potential
+        :type force_constant: float
         """
-        self.atom_index = self.getAtomParameterIndices([atom])[0]
-        self.arguments = (self.atom_index, center, force_constant)
+        self.atom_indices = self.getAtomParameterIndices(obj.atomList())
+        self.arguments = (self.atom_indices, center, force_constant)
         ForceField.__init__(self, 'harmonic_trap')
         self.center = center
         self.force_constant = force_constant
@@ -217,6 +217,7 @@ class HarmonicTrapForceField(ForceField):
         if subset1 is not None or subset2 is not None:
             raise ValueError("sorry, no subsets here")
         return [HarmonicTrapTerm(universe,
-                                 self.atom_index,
+                                 N.array(self.atom_indices),
+                                 universe.masses().array,
                                  self.center,
                                  self.force_constant)]
