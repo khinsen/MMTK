@@ -88,6 +88,19 @@ class TrapTest(unittest.TestCase):
                         else:
                             self.assertEqual(fc12[i,j], 0.)
 
+    def test_subsets(self):
+        H1 = self.universe3[0].H1
+        H2 = self.universe3[0].H2
+        O = self.universe3[0].O
+        subset = Collection([H1, H2, O])
+        e = self.universe3.energy(subset)
+        self.assertAlmostEqual(e, 0.5, 7)
+        subset = Collection()
+        e = self.universe3.energy(subset)
+        self.assertAlmostEqual(e, 0., 7)
+        subset = Collection([H1, H2])
+        self.assertRaises(ValueError, self.universe3.energy, subset)
+        
 def suite():
     loader = unittest.TestLoader()
     s = unittest.TestSuite()
