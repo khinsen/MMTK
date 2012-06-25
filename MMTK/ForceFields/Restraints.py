@@ -212,10 +212,23 @@ class HarmonicTrapForceField(ForceField):
     def ready(self, global_data):
         return True
 
+    def evaluatorParameters(self, universe, subset1, subset2, global_data):
+        raise NotImplementedError
+
     def evaluatorTerms(self, universe, subset1, subset2, global_data):
-        # Subsets are not implemented for now
-        if subset1 is not None or subset2 is not None:
-            raise ValueError("sorry, no subsets here")
+        for subset in [subset1, subset2]:
+            if subset is not None:
+                subset = set(a.index for a in subset.atomIterator())
+                diff = set(self.atom_indices).difference(subset)
+                if diff:
+                    if len(diff) == len(self.atom_indices):
+                        # The subset doesn't contain the restrained atoms.
+                        return []
+                    else:
+                        # The subset contains some but not all of the
+                        # restrained atoms.
+                        raise ValueError("Restrained atoms partially "
+                                         "in a subset")
         return [HarmonicTrapTerm(universe,
                                  N.array(self.atom_indices),
                                  universe.masses().array,
