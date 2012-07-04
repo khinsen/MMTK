@@ -67,12 +67,13 @@ cdef class HarmonicCMTrapTerm(EnergyTerm):
         dy = cy - self.ref_y
         dz = cz - self.ref_z
 
-        energy.energy_terms[self.index] = 0.5*self.k*(dx*dx + dy*dy + dz*dz)
-        energy.energy_terms[self.virial_index] -= self.k*(dx*dx + dy*dy + dz*dz)
+        energy.energy_terms[self.index] = self.k*(dx*dx + dy*dy + dz*dz)
+        energy.energy_terms[self.virial_index] -= 2.*self.k * \
+                                                       (dx*dx + dy*dy + dz*dz)
 
         if energy.gradients != NULL:
             gradients = <vector3 *>(<PyArrayObject *> energy.gradients).data
-            kw = self.k/tweight
+            kw = 2.*self.k/tweight
             for i in atom_indices:
                 gradients[i][0] += kw*dx*weights[i]
                 gradients[i][1] += kw*dy*weights[i]
@@ -80,7 +81,7 @@ cdef class HarmonicCMTrapTerm(EnergyTerm):
 
         if energy.force_constants != NULL:
             fc = <object>energy.force_constants
-            kw = self.k/tweight/tweight
+            kw = 2.*self.k/tweight/tweight
             for i in atom_indices:
                 for j in atom_indices:
                     fc [i, 0, j, 0] += kw*weights[i]*weights[j]
