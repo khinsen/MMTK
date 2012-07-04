@@ -26,7 +26,7 @@ __docformat__ = 'restructuredtext'
 from MMTK.ForceFields.ForceField import ForceField
 from MMTK_forcefield import HarmonicDistanceTerm, HarmonicAngleTerm, \
                             CosineDihedralTerm
-from MMTK_restraints import HarmonicTrapTerm
+from MMTK_restraints import HarmonicCMTrapTerm, HarmonicCMDistanceTerm
 from Scientific import N
 
 class HarmonicDistanceRestraint(ForceField):
@@ -35,22 +35,31 @@ class HarmonicDistanceRestraint(ForceField):
     Harmonic distance restraint between two atoms
     """
 
-    def __init__(self, atom1, atom2, distance, force_constant):
+    def __init__(self, obj1, obj2, distance, force_constant):
         """
-        :param atom1: first atom
-        :type atom1: :class:`~MMTK.ChemicalObjects.Atom`
-        :param atom2: second atom
-        :type atom2: :class:`~MMTK.ChemicalObjects.Atom`
-        :param distance: the distance at which the restraint is zero
+        :param obj1: the object defining center-of-mass 1
+        :type obj1: :class:`~MMTK.Collections.GroupOfAtoms`
+        :param obj2: the object defining center-of-mass 2
+        :type obj2: :class:`~MMTK.Collections.GroupOfAtoms`
+        :param distance: the distance between cm 1 and cm2 at which
+                         the restraint is zero
         :type distance: float
         :param force_constant: the force constant of the restraint term.
                                The functional form of the restraint is
-                               force_constant*((r1-r2).length()-distance)**2,
-                               where r1 and r2 are the positions of the
-                               two atoms.
+                               force_constant*((cm1-cm2).length()-distance)**2,
+                               where cm1 and cm2 are the centrer-of-mass
+                               positions of the two objects.
         """
-        self.index1, self.index2 = self.getAtomParameterIndices((atom1, atom2))
-        self.arguments = (self.index1, self.index2, distance, force_constant) 
+        if isinstance(obj1, int) and isinstance(obj2, int):
+            # Older MMTK versions admitted only single atoms and
+            # stored single indices. Support this mode for opening
+            # trajectories made with those versions
+            self.atom_indices_1 = [obj1]
+            self.atom_indices_2 = [obj2]
+        self.atom_indices_1 = self.getAtomParameterIndices(obj1.atomList())
+        self.atom_indices_2 = self.getAtomParameterIndices(obj2.atomList())
+        self.arguments = (self.atom_indices_1, self.atom_indices_2,
+                          distance, force_constant) 
         self.distance = distance
         self.force_constant = force_constant
         ForceField.__init__(self, 'harmonic distance restraint')
@@ -59,26 +68,73 @@ class HarmonicDistanceRestraint(ForceField):
         return True
 
     def evaluatorParameters(self, universe, subset1, subset2, global_data):
-        if subset1 is not None:
-            s1 = subset1.atomList()
-            s2 = subset2.atomList()
-            if not ((self.atom1 in s1 and self.atom2 in s2) or \
-                    (self.atom1 in s2 and self.atom2 in s1)):
-                raise ValueError("restraint outside subset")
-        f, offsets = self.beadOffsetsAndFactor([self.index1, self.index2],
-                                               global_data)
-        return {'harmonic_distance_term':
-                [(self.index1+o1, self.index2+o2,
-                  self.distance, f*self.force_constant)
-                 for o1, o2 in offsets]}
+        if universe.is_periodic and \
+                (len(self.atom_indices_1) > 1 or len(self.atom_indices_1) > 1):
+            raise ValueError("Center-of-mass restraints not implemented"
+                             " for periodic universes")
+        ok = False
+        for s1, s2 in [(subset1, subset2), (subset2, subset1)]:
+            if s1 is None and s1 is None:
+                ok = True
+                break
+            s1 = set(a.index for a in s1.atomIterator())
+            diff1 = set(self.atom_indices_1).difference(s1)
+            s2 = set(a.index for a in s2.atomIterator())
+            diff2 = set(self.atom_indices_2).difference(s2)
+            if not diff1 and not diff2:
+                # Each object is in one of the subsets
+                ok = True
+                break
+            if (diff1 and len(diff1) != len(self.atom_indices_1)) \
+                    or (diff2 and len(diff2) != len(self.atom_indices_2)):
+                # The subset contains some but not all of the
+                # restrained atoms.
+                raise ValueError("Restrained atoms partially "
+                                 "in a subset")
+        if not ok:
+            # The objects are not in the subsets, so there is no
+            # contribution to the total energy.
+            return {'harmonic_distance_cm': []}
+        if len(self.atom_indices_1) == 1 and len(self.atom_indices_2) == 1:
+            # Keep the old format for the single-atom case for best
+            # compatibility with older MMTK versions.
+            f, offsets = self.beadOffsetsAndFactor([self.atom_indices_1[0],
+                                                    self.atom_indices_2[0]],
+                                                   global_data)
+            return {'harmonic_distance_term':
+                    [(self.atom_indices_1[0]+o1, self.atom_indices_2[0]+o2,
+                      self.distance, f*self.force_constant)
+                     for o1, o2 in offsets]}
+        else:
+            f, offsets = self.beadOffsetsAndFactor(list(self.atom_indices_1)+
+                                                   list(self.atom_indices_2),
+                                                   global_data)
+            n1 = len(self.atom_indices_1)
+            offsets = [(o[:n1], o[n1:]) for o in offsets]
+            return {'harmonic_distance_cm':
+                    [(self.atom_indices_1+o1, self.atom_indices_2+o2,
+                      self.distance, f*self.force_constant)
+                     for o1, o2 in offsets]}
 
     def evaluatorTerms(self, universe, subset1, subset2, global_data):
         params = self.evaluatorParameters(universe, subset1, subset2,
-                                          global_data)['harmonic_distance_term']
-        indices = N.array([params[0][:2]])
-        parameters = N.array([params[0][2:]])
-        return [HarmonicDistanceTerm(universe._spec, indices, parameters,
-                                     self.name)]
+                                          global_data)
+        if params.has_key('harmonic_distance_term'):
+            params = params['harmonic_distance_term']
+            return [HarmonicDistanceTerm(universe._spec,
+                                         N.array([p[:2]]),
+                                         N.array([p[2:]]),
+                                         self.name)
+                    for p in params]
+        else:
+            params = params['harmonic_distance_cm']
+            return [HarmonicCMDistanceTerm(universe,
+                                           N.array(p[0]),
+                                           N.array(p[1]),
+                                           universe.masses().array,
+                                           p[2],
+                                           p[3])
+                    for p in params]
 
     def description(self):
         return 'ForceFields.Restraints.' + self.__class__.__name__ + \
@@ -213,6 +269,9 @@ class HarmonicTrapForceField(ForceField):
         return True
 
     def evaluatorParameters(self, universe, subset1, subset2, global_data):
+        if universe.is_periodic and len(self.atom_indices) > 1:
+            raise ValueError("Center-of-mass restraints not implemented"
+                             " for periodic universes")
         for subset in [subset1, subset2]:
             if subset is not None:
                 subset = set(a.index for a in subset.atomIterator())
@@ -232,9 +291,9 @@ class HarmonicTrapForceField(ForceField):
     def evaluatorTerms(self, universe, subset1, subset2, global_data):
         params = self.evaluatorParameters(universe, subset1, subset2,
                                           global_data)['harmonic_trap_cm']
-        assert len(params) == 1
-        return [HarmonicTrapTerm(universe,
-                                 N.array(params[0][0]),
-                                 universe.masses().array,
-                                 params[0][1],
-                                 params[0][2])]
+        return [HarmonicCMTrapTerm(universe,
+                                   N.array(p[0]),
+                                   universe.masses().array,
+                                   p[1],
+                                   p[2])
+                for p in params]
