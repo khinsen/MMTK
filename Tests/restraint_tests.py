@@ -41,28 +41,28 @@ class TrapTest(unittest.TestCase):
 
     def test_energy_one_atom(self):
         e, g, fc = self.universe1.energyGradientsAndForceConstants()
-        self.assertAlmostEqual(e, 0.5, 7)
-        self.assert_((g[0]-Vector(1., 0., 0.)).length() < 1.e-5)
+        self.assertAlmostEqual(e, 1., 7)
+        self.assert_((g[0]-Vector(2., 0., 0.)).length() < 1.e-5)
         fc = fc[0, 0]
         for i in range(3):
             for j in range(3):
                 if i == j:
-                    self.assertAlmostEqual(fc[i, j], 1., 7)
+                    self.assertAlmostEqual(fc[i, j], 2., 7)
                 else:
                     self.assertEqual(fc[i,j], 0.)
 
     def test_energy_two_atoms(self):
         e, g, fc = self.universe2.energyGradientsAndForceConstants()
-        self.assertAlmostEqual(e, 0.5, 7)
-        self.assert_((g[0]-Vector(0.5, 0., 0.)).length() < 1.e-5)
-        self.assert_((g[1]-Vector(0.5, 0., 0.)).length() < 1.e-5)
+        self.assertAlmostEqual(e, 1., 7)
+        self.assert_((g[0]-Vector(1., 0., 0.)).length() < 1.e-5)
+        self.assert_((g[1]-Vector(1., 0., 0.)).length() < 1.e-5)
         for a1 in [0, 1]:
             for a2 in [0, 1]:
                 fc12 = fc[a1, a2]
                 for i in range(3):
                     for j in range(3):
                         if i == j:
-                            self.assertAlmostEqual(fc12[i, j], 0.25, 7)
+                            self.assertAlmostEqual(fc12[i, j], 0.5, 7)
                         else:
                             self.assertEqual(fc12[i,j], 0.)
 
@@ -72,7 +72,7 @@ class TrapTest(unittest.TestCase):
         H2 = self.universe3[0].H2
         O = self.universe3[0].O
         e, g, fc = self.universe3.energyGradientsAndForceConstants()
-        self.assertAlmostEqual(e, 0.5, 7)
+        self.assertAlmostEqual(e, 1., 7)
         self.assert_((g[H1]-g[H2]).length() < 1.e-5)
         self.assert_((g[H1]-g[O]*H1.mass()/O.mass()).length() < 1.e-5)
 
@@ -80,7 +80,7 @@ class TrapTest(unittest.TestCase):
         for a1 in [H1, H2, O]:
             for a2 in [H1, H2, O]:
                 fc12 = fc[a1, a2]
-                f = a1.mass()*a2.mass()/(m*m)
+                f = 2.*a1.mass()*a2.mass()/(m*m)
                 for i in range(3):
                     for j in range(3):
                         if i == j:
@@ -94,7 +94,7 @@ class TrapTest(unittest.TestCase):
         O = self.universe3[0].O
         subset = Collection([H1, H2, O])
         e = self.universe3.energy(subset)
-        self.assertAlmostEqual(e, 0.5, 7)
+        self.assertAlmostEqual(e, 1., 7)
         subset = Collection()
         e = self.universe3.energy(subset)
         self.assertAlmostEqual(e, 0., 7)
