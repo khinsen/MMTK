@@ -19,74 +19,71 @@ cimport numpy as N
 #
 cdef class HarmonicCMTrapTerm(EnergyTerm):
 
-    cdef N.ndarray atom_indices, weights
-    cdef double ref_x, ref_y, ref_z
+    cdef N.ndarray atom_indices, masses
+    cdef vector3 ref
     cdef double k
 
     def __init__(self, universe,
                  N.ndarray[N.int_t] atom_indices,
-                 N.ndarray[N.float64_t] weights,
+                 N.ndarray[N.float64_t] masses,
                  reference, force_constant):
         cdef N.ndarray[N.float64_t] ref_array
         EnergyTerm.__init__(self, universe,
                             "harmonic_cm_trap", ("harmonic_cm_trap",))
         self.eval_func = <void *>HarmonicCMTrapTerm.evaluate
         self.atom_indices = atom_indices
-        self.weights = weights
+        self.masses = masses
         ref_array = reference.array
-        self.ref_x = (<double *>ref_array.data)[0]
-        self.ref_y = (<double *>ref_array.data)[1]
-        self.ref_z = (<double *>ref_array.data)[2]
+        for i in range(3):
+            self.ref[i] = (<double *>ref_array.data)[i]
         self.k = force_constant
 
     cdef void evaluate(self, PyFFEvaluatorObject *eval,
                        energy_spec *input, energy_data *energy):
         cdef vector3 *coordinates, *gradients
         cdef N.ndarray[N.int_t] atom_indices
-        cdef N.ndarray[N.float_t] weights
+        cdef N.ndarray[N.float_t] masses
         cdef N.ndarray[N.float_t, ndim=4] fc
-        cdef double cx, cy, cz, dx, dy, dz, tweight, kw
+        cdef vector3 cm, d
+        cdef double m, lsq, kw
         cdef int i, j, n, offset
 
         coordinates = <vector3 *>input.coordinates.data
         atom_indices = self.atom_indices
-        weights = self.weights
+        masses = self.masses
 
-        tweight = 0.
-        cx = cy = cz = 0.
+        # This code will never be run for a periodic universe, so
+        # it's safe to ignore periodic boundary conditions.
+        m = 0.
+        cm[0] = cm[1] = cm[2] = 0.
         for i in atom_indices:
-            tweight += weights[i]
-            cx += weights[i]*coordinates[i][0]
-            cy += weights[i]*coordinates[i][1]
-            cz += weights[i]*coordinates[i][2]
-        cx /= tweight
-        cy /= tweight
-        cz /= tweight
+            m += masses[i]
+            for j in range(3):
+                cm[j] += masses[i]*coordinates[i][j]
+        for j in range(3):
+            cm[j] /= m
 
-        dx = cx - self.ref_x
-        dy = cy - self.ref_y
-        dz = cz - self.ref_z
+        for j in range(3):
+            d[j] = cm[j]-self.ref[j]
+        lsq = d[0]*d[0]+d[1]*d[1]+d[2]*d[2]
 
-        energy.energy_terms[self.index] = self.k*(dx*dx + dy*dy + dz*dz)
-        energy.energy_terms[self.virial_index] -= 2.*self.k * \
-                                                       (dx*dx + dy*dy + dz*dz)
+        energy.energy_terms[self.index] = self.k*lsq
+        energy.energy_terms[self.virial_index] -= 2.*self.k*lsq
 
         if energy.gradients != NULL:
             gradients = <vector3 *>(<PyArrayObject *> energy.gradients).data
-            kw = 2.*self.k/tweight
+            kw = 2.*self.k/m
             for i in atom_indices:
-                gradients[i][0] += kw*dx*weights[i]
-                gradients[i][1] += kw*dy*weights[i]
-                gradients[i][2] += kw*dz*weights[i]
+                for j in range(3):
+                    gradients[i][j] += kw*d[j]*masses[i]
 
         if energy.force_constants != NULL:
             fc = <object>energy.force_constants
-            kw = 2.*self.k/tweight/tweight
+            kw = 2.*self.k/(m*m)
             for i in atom_indices:
                 for j in atom_indices:
-                    fc [i, 0, j, 0] += kw*weights[i]*weights[j]
-                    fc [i, 1, j, 1] += kw*weights[i]*weights[j]
-                    fc [i, 2, j, 2] += kw*weights[i]*weights[j]
+                    for n in range(3):
+                        fc [i, n, j, n] += kw*masses[i]*masses[j]
 
 
 #
@@ -94,13 +91,13 @@ cdef class HarmonicCMTrapTerm(EnergyTerm):
 #
 cdef class HarmonicCMDistanceTerm(EnergyTerm):
 
-    cdef N.ndarray atom_indices_1, atom_indices_2, weights
+    cdef N.ndarray atom_indices_1, atom_indices_2, masses
     cdef double k, l0
 
     def __init__(self, universe,
                  N.ndarray[N.int_t] atom_indices_1,
                  N.ndarray[N.int_t] atom_indices_2,
-                 N.ndarray[N.float64_t] weights,
+                 N.ndarray[N.float64_t] masses,
                  distance,
                  force_constant):
         EnergyTerm.__init__(self, universe,
@@ -108,7 +105,7 @@ cdef class HarmonicCMDistanceTerm(EnergyTerm):
         self.eval_func = <void *>HarmonicCMDistanceTerm.evaluate
         self.atom_indices_1 = atom_indices_1
         self.atom_indices_2 = atom_indices_2
-        self.weights = weights
+        self.masses = masses
         self.l0 = distance
         self.k = force_constant
 
@@ -117,7 +114,7 @@ cdef class HarmonicCMDistanceTerm(EnergyTerm):
         cdef vector3 *coordinates, *gradients
         cdef N.ndarray[N.int_t] atom_indices_1
         cdef N.ndarray[N.int_t] atom_indices_2
-        cdef N.ndarray[N.float_t] weights
+        cdef N.ndarray[N.float_t] masses
         cdef N.ndarray[N.float_t, ndim=4] fc
         cdef tensor3 fcij
         cdef vector3 cm1, cm2, d
@@ -127,25 +124,25 @@ cdef class HarmonicCMDistanceTerm(EnergyTerm):
         coordinates = <vector3 *>input.coordinates.data
         atom_indices_1 = self.atom_indices_1
         atom_indices_2 = self.atom_indices_2
-        weights = self.weights
+        masses = self.masses
 
         # This code will never be run for a periodic universe, so
         # it's safe to ignore periodic boundary conditions.
         m1 = 0.
         cm1[0] = cm1[1] = cm1[2] = 0.
         for i in atom_indices_1:
-            m1 += weights[i]
+            m1 += masses[i]
             for j in range(3):
-                cm1[j] += weights[i]*coordinates[i][j]
+                cm1[j] += masses[i]*coordinates[i][j]
         for j in range(3):
             cm1[j] /= m1
 
         m2 = 0.
         cm2[0] = cm2[1] = cm2[2] = 0.
         for i in atom_indices_2:
-            m2 += weights[i]
+            m2 += masses[i]
             for j in range(3):
-                cm2[j] += weights[i]*coordinates[i][j]
+                cm2[j] += masses[i]*coordinates[i][j]
         for j in range(3):
             cm2[j] /= m2
 
@@ -167,10 +164,10 @@ cdef class HarmonicCMDistanceTerm(EnergyTerm):
             f2 = self.k*deriv/m2
             for i in atom_indices_1:
                 for j in range(3):
-                    gradients[i][j] -= f1*d[j]*weights[i]
+                    gradients[i][j] -= f1*d[j]*masses[i]
             for i in atom_indices_2:
                 for j in range(3):
-                    gradients[i][j] += f2*d[j]*weights[i]
+                    gradients[i][j] += f2*d[j]*masses[i]
 
         if energy.force_constants != NULL:
             fc = <object>energy.force_constants
@@ -180,19 +177,19 @@ cdef class HarmonicCMDistanceTerm(EnergyTerm):
                 fcij[m][m] += deriv
             for i in atom_indices_1:
                 for j in atom_indices_1:
-                    w = weights[i]*weights[j]/(m1*m1)
+                    w = masses[i]*masses[j]/(m1*m1)
                     for m in range(3):
                         for n in range(3):
                             fc [i, m, j, n] += w*fcij[m][n]
             for i in atom_indices_2:
                 for j in atom_indices_2:
-                    w = weights[i]*weights[j]/(m2*m2)
+                    w = masses[i]*masses[j]/(m2*m2)
                     for m in range(3):
                         for n in range(3):
                             fc [i, m, j, n] += w*fcij[m][n]
             for i in atom_indices_1:
                 for j in atom_indices_2:
-                    w = weights[i]*weights[j]/(m1*m2)
+                    w = masses[i]*masses[j]/(m1*m2)
                     for m in range(3):
                         for n in range(3):
                             if i < j:
