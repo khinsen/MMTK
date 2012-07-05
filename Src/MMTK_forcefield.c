@@ -1677,26 +1677,6 @@ NonbondedListTerm(PyObject *dummy, PyObject *args)
   return (PyObject *)self;
 }
 
-#if 0
-static PyObject *
-PythonTerm(PyObject *dummy, PyObject *args)
-{
-  PyFFEnergyTermObject *self = PyFFEnergyTerm_New();
-  if (self == NULL)
-    return NULL;
-  if (!PyArg_ParseTuple(args, "O", &self->data[0]))
-    return NULL;
-  Py_INCREF(self->data[0]);  /* Python energy term object */
-  self->eval_func = python_evaluator;
-  self->evaluator_name = "Python";
-  self->term_names[0] = allocstring("unknown");
-  if (self->term_names[0] == NULL)
-    return PyErr_NoMemory();
-  self->nterms = 1;
-  return (PyObject *)self;
-}
-#endif
-
 /* Energy evaluator with thread support */
 
 static PyObject *
@@ -1937,9 +1917,6 @@ static PyMethodDef forcefield_methods[] = {
 #endif
   {"EsEwaldTerm",  EsEwaldTerm, 1},
   {"NonbondedListTerm", NonbondedListTerm, 1},
-#if 0
-  {"PythonTerm", PythonTerm, 1},
-#endif
   {"Evaluator", Evaluator, 1},
   {"NonbondedList", NonbondedList, 1},
   {"SparseForceConstants", SparseForceConstants, 1},
