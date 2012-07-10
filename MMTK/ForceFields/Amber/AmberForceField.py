@@ -44,15 +44,6 @@ with a charge-neutralizing surface charge density around the
 cutoff sphere, and no reciprocal sum (see article cited above).
 It requires the specification of the dictionary entries "cutoff"
 and "beta".
-
-The fast-multipole method uses the DPMTA library. Note that this
-method provides only energy and forces, but no second-derivative
-matrix. There are several optional dictionary entries for this method,
-all of which are set to reasonable default values. The entries are
-"spatial_decomposition_levels", "multipole_expansion_terms", "use_fft",
-"fft_blocking_factor", "macroscopic_expansion_terms", and
-"multipole_acceptance". For an explanation of these options, refer
-to the DPMTA manual.
 """
 
 __docformat__ = 'restructuredtext'
@@ -204,8 +195,7 @@ class Amber94ForceField(MMForceField.MMForceField):
                              specified by the dictionary
                              entry "cutoff"), "ewald" (Ewald
                              summation, only for periodic
-                             universes), "screened" or
-                             "multipole" (fast-multipole method).
+                             universes), or "screened".
 
         :keyword mod_files: a list of parameter modification files. The file
                             format is the one defined by AMBER. Each item
@@ -266,8 +256,7 @@ class Amber99ForceField(MMForceField.MMForceField):
                              specified by the dictionary
                              entry "cutoff"), "ewald" (Ewald
                              summation, only for periodic
-                             universes), "screened" or
-                             "multipole" (fast-multipole method).
+                             universes), or "screened".
     
         :keyword mod_files: a list of parameter modification files. The file
                             format is the one defined by AMBER. Each item
@@ -348,14 +337,6 @@ class AmberEwaldESForceField(MMForceField.MMEwaldESForceField):
         readAmber94()
         MMForceField.MMEwaldForceESField.__init__(self, 'Amber_ES',
                                                   Amber94, options)
-        self.arguments = (options,)
-
-class AmberMPESForceField(MMForceField.MMMPESForceField):
-
-    def __init__(self, options = {}):
-        readAmber94()
-        MMForceField.MMMPESForceField.__init__(self, 'Amber_ES',
-                                               Amber94, options)
         self.arguments = (options,)
 
 class AmberNonbondedForceField(MMForceField.MMNonbondedForceField):

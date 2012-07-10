@@ -1765,13 +1765,6 @@ Bibliography
   | `van der Waals Volumes and Radii <http://dx.doi.org/10.1021/j100785a001>`_
   | 1964
 
-.. _Rankin2002:
-
-[Rankin2002]
-
-  | William T. Rankin
-  | `DPMTA - A Distrbuted Implementation of the Parallel Multipole Tree Algorithm - Version 3.0 <http://people.ee.duke.edu/~wrankin/Dpmta/users_guide/dpmta.html>`_
-
 .. _Eisenhaber1993:
 
 [Eisenhaber1993]
