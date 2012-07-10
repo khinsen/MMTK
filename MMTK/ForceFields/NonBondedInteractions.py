@@ -376,6 +376,7 @@ class ESMPForceField(NonBondedForceField):
         pn = params['nonbonded']
         excluded_pairs = N.array(pn['excluded_pairs'])
         one_four_pairs = N.array(pn['one_four_pairs'])
+        atom_subset = pn['atom_subset']
         if atom_subset is None:
             atom_subset = N.array([], N.Int)
         else:
