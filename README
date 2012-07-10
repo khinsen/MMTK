@@ -26,8 +26,8 @@ It should still be possible to use Numerical Python 22.x or 23.x with
 this release of MMTK, but migration to NumPy is strongly encouraged.
 MMTK is NOT compatible with Numerical Python 24.x.
 
-Note: MMTK is developed and tested using Python 2.6 and NumPy
-1.5. However, it should work with Python 2.5 and 2.7 as well.
+Note: MMTK is developed and tested using Python 2.6/2.7and NumPy
+1.6. However, it should work with Python 2.5 as well.
 
 
 On most Unix systems, installation requires two commands:
@@ -212,9 +212,7 @@ License
 =======
 
 MMTK is licensed under the CeCILL-C license. See the file LICENSE for
-the text of this license. The DPMTA library (everything in the
-directory Src/dpmta-2.7) is not part of MMTK and therefore not subject
-to this license.
+the text of this license.
 
 
 Acknowledgements
@@ -225,16 +223,6 @@ for reading DCD files (files Src/ReadDCD.c and Src/ReadDCD.h) which
 was written by Mark Nelson at the University of Illinois.
 
 The MolecularSurface module was contributed by Peter McCluskey.
-
-The DPMTA library used for electrostatic multipole calculations
-(everything in the directory Src/dpmta-2.7) was written by William T.
-Rankin at Duke University. Check the file dpmta-2.7/README and the Web
-page http://www.ee.duke.edu/Research/SciComp/Docs/Dpmta/dpmta.html for
-more information about this library. Note that MMTK does not contain
-the whole DPMTA distribution; the documentation, Fortran interface,
-and test code were left out to reduce the size of the MMTK
-distribution. You can obtain the full DPMTA distribution at the Web
-address given above.
 
 Patches to make MMTK work under Windows were provided by Jon Michelsen.
 

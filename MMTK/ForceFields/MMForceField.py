@@ -26,7 +26,7 @@
 from MMTK.ForceFields.BondedInteractions import BondedForceField
 from MMTK.ForceFields.NonBondedInteractions import \
      NonBondedForceField, LJForceField, ElectrostaticForceField, \
-     ESMPForceField, ESEwaldForceField
+     ESEwaldForceField
 from MMTK.ForceFields.ForceField import ForceField, CompoundForceField, \
                                         ForceFieldData
 from MMTK import ParticleProperties, Utility
@@ -240,20 +240,6 @@ class MMEwaldESForceField(MMAtomParameters, ESEwaldForceField):
                                                      global_data)
 
     
-class MMMPESForceField(MMAtomParameters, ESMPForceField):
-
-    def __init__(self, name, parameters, options):
-        self.dataset = parameters
-        ESMPForceField.__init__(self, name, options)
-        self.es_14_factor = self.dataset.electrostatic_1_4
-
-    def evaluatorParameters(self, universe, subset1, subset2, global_data):
-        self.collectCharges(universe, global_data)
-        return ESMPForceField.evaluatorParameters(self, universe,
-                                                  subset1, subset2,
-                                                  global_data)
-
-
 class MMNonbondedForceField(MMAtomParameters, NonBondedForceField):
 
     def __init__(self, name, parameters, lj_options, es_options):

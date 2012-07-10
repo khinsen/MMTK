@@ -15,11 +15,6 @@ include Src/*.i
 include Src/*.h
 include Src/*.pyx
 include Src/*opt
-recursive-include Src/dpmta *
-prune Src/dpmta/data
-prune Src/dpmta/doc
-prune Src/dpmta/fortran
-prune Src/dpmta/test
 recursive-include Include *.h
 exclude test/*
 exclude Test/*

@@ -16,12 +16,6 @@
 #define THREAD_DEBUG 0
 #define MPI_DEBUG 0
 
-/* PMTA definitions */
-
-#ifdef WITH_DPMTA
-#include "dpmta.h"
-#endif
-
 /* Windows header that defines Sleep() */
 
 #ifdef WITH_THREAD
@@ -1541,85 +1535,6 @@ ElectrostaticTerm(PyObject *dummy, PyObject *args)
   return (PyObject *)self;
 }
 
-#ifdef WITH_DPMTA
-static PyObject *
-EsMultipoleTerm(PyObject *dummy, PyObject *args)
-{
-  PyFFEnergyTermObject *self = PyFFEnergyTerm_New();
-  PyArrayObject *array_subset, *box_shape;
-  PmtaInitData *initdata;
-  int nlevels, mp, fft, fftblock, kterm;
-  double theta;
-  int natoms;
-  size_t scratch_size;
-  if (self == NULL)
-    return NULL;
-  if (!PyArg_ParseTuple(args, "O!O!O!O!diiiiid",
-			&PyUniverseSpec_Type, &self->universe_spec,
-			&PyArray_Type, &box_shape,
-			&PyList_Type, &self->data[0],
-			&PyArray_Type, &self->data[1],
-			&self->param[0],
-			&nlevels, &mp, &fft, &fftblock, &kterm, &theta))
-    return NULL;
-
-  array_subset = (PyArrayObject *)PyList_GetItem(self->data[0], (Py_ssize_t)2);
-  natoms = array_subset->dimensions[0];
-  if (natoms == 0)
-    natoms = ((PyArrayObject *)self->data[1])->dimensions[0];
-  scratch_size = sizeof(PmtaInitData) + 
-                 natoms*(sizeof(PmtaParticle)+sizeof(PmtaPartInfo));
-  self->scratch = malloc(scratch_size);
-  if (self->scratch == NULL) {
-    PyErr_NoMemory();
-    return NULL;
-  }
-  initdata = (PmtaInitData *)self->scratch;
-  initdata->nlevels = nlevels;
-  initdata->mp = mp;
-  initdata->fft = fft;
-  initdata->fftblock = fftblock;
-  initdata->kterm = kterm;
-  initdata->theta = theta;
-  if (box_shape->nd == 0) {
-    initdata->pbc = 0;
-    self->param[1] = 0.;
-  }
-  else {
-    double *data = (double *)box_shape->data;
-    initdata->pbc = 1;
-    self->param[1] = 1.;
-    initdata->v1.x = *data++;
-    initdata->v1.y = *data++;
-    initdata->v1.z = *data++;
-    initdata->v2.x = *data++;
-    initdata->v2.y = *data++;
-    initdata->v2.z = *data++;
-    initdata->v3.x = *data++;
-    initdata->v3.y = *data++;
-    initdata->v3.z = *data++;
-    initdata->cellctr.x = 0.;
-    initdata->cellctr.y = 0.;
-    initdata->cellctr.z = 0.;
-  }
-  initdata->nprocs = 1;
-  initdata->calling_num = 0;
-  initdata->calling_tids = NULL;
-
-  Py_INCREF(self->universe_spec);
-  Py_INCREF(self->data[0]);
-  Py_INCREF(self->data[1]);
-  self->eval_func = es_mp_evaluator;
-  self->evaluator_name = "electrostatic multipole";
-  self->term_names[0] = allocstring("electrostatic/multipole");
-  if (self->term_names[0] == NULL)
-    return PyErr_NoMemory();
-  self->nterms = 1;
-  self->thread_safe = 1;
-  return (PyObject *)self;
-}
-#endif
-
 static PyObject *
 EsEwaldTerm(PyObject *dummy, PyObject *args)
 {
@@ -1958,9 +1873,6 @@ static PyMethodDef forcefield_methods[] = {
   {"CosineDihedralTerm", CosineDihedralTerm, 1},
   {"LennardJonesTerm", LennardJonesTerm, 1},
   {"ElectrostaticTerm", ElectrostaticTerm, 1},
-#ifdef WITH_DPMTA
-  {"EsMPTerm",  EsMultipoleTerm, 1},
-#endif
   {"EsEwaldTerm",  EsEwaldTerm, 1},
   {"NonbondedListTerm", NonbondedListTerm, 1},
   {"Evaluator", Evaluator, 1},
