@@ -141,30 +141,33 @@ class AmberParameters(object):
                                             l[3], l[4])
 
     def _readDihedralParameters(self, file):
-        format = FortranFormat('A2,1X,A2,1X,A2,1X,A2,I4,3F15.2')
         append = None
         while True:
-            l = FortranLine(file.readline()[:-1], format)
-            if l.isBlank(): break
-            name1 = _normalizeName(l[0])
-            name2 = _normalizeName(l[1])
-            name3 = _normalizeName(l[2])
-            name4 = _normalizeName(l[3])
+            line = file.readline().rstrip()
+            if not line: break
+            names, params = line[:11], line[11:]
+            name1, name2, name3, name4 = [_normalizeName(n)
+                                          for n in names.split('-')]
             name1, name2, name3, name4 = _sort4(name1, name2, name3, name4)
+            params = params.strip().split()[:4]
+            divf = int(params[0])
+            k = float(params[1])
+            delta = float(params[2])
+            n = float(params[3])
             if append is not None:
-                append.addTerm(l[4], l[5], l[6], l[7])
-                if l[7] >= 0: append = None
+                append.addTerm(divf, k, delta, n)
+                if n >= 0: append = None
             else:
                 p = AmberDihedralParameters(self.atom_types[name1],
                                             self.atom_types[name2],
                                             self.atom_types[name3],
                                             self.atom_types[name4],
-                                            l[4], l[5], l[6], l[7])
+                                            divf, k, delta, n)
                 if name1 == 'X' and name4 == 'X':
                     self.dihedrals_2[(name2, name3)] = p
                 else:
                     self.dihedrals[(name1, name2, name3, name4)] = p
-                if l[7] < 0: append = p
+                if n < 0: append = p
 
     def _readImproperParameters(self, file):
         format = FortranFormat('A2,1X,A2,1X,A2,1X,A2,I4,3F15.2')
