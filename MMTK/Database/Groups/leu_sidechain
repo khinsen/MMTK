@@ -16,3 +16,4 @@ name = 'leu_sidechain'
 pdbmap = [('LEU', {'HG': H_gamma, '2HB': H_beta_2, 'CD2': C_delta_2, 'CD1': C_delta_1, '3HD2': H_delta_2_3, '3HB': H_beta_3, '3HD1': H_delta_1_3, '2HD1': H_delta_1_2, 'CG': C_gamma, '1HD1': H_delta_1_1, 'CB': C_beta, '2HD2': H_delta_2_2, '1HD2': H_delta_2_1, }, ), ]
 pdb_alternative = {'1HB': '3HB', 'HB2': '2HB', 'HB3': '3HB', 'HB1': '3HB', 'HD11': '1HD1', 'HD12': '2HD1', 'HD13': '3HD1', 'HD21': '1HD2', 'HD23': '3HD2', 'HD22': '2HD2', }
 amber_atom_type = {H_delta_1_1: 'HC', H_delta_1_3: 'HC', H_gamma: 'HC', C_delta_1: 'CT', H_beta_2: 'HC', C_beta: 'CT', C_delta_2: 'CT', H_delta_1_2: 'HC', H_delta_2_1: 'HC', H_beta_3: 'HC', C_gamma: 'CT', H_delta_2_3: 'HC', H_delta_2_2: 'HC', }
+amber12_atom_type = {H_delta_1_1: 'HC', H_delta_1_3: 'HC', H_gamma: 'HC', C_delta_1: 'CT', H_beta_2: 'HC', C_beta: '2C', C_delta_2: 'CT', H_delta_1_2: 'HC', H_delta_2_1: 'HC', H_beta_3: 'HC', C_gamma: '3C', H_delta_2_3: 'HC', H_delta_2_2: 'HC', }
