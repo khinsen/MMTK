@@ -22,3 +22,4 @@ pdbmap = [('G', {"N2": N_2, "C8": C_8, "C6": C_6, "C4": C_4, "C5": C_5, "C2": C_
 
 amber_atom_type = {N_2: 'N2', C_8: 'CK', C_6: 'C', C_4: 'CB', C_5: 'CB', C_2: 'CA', N_3: 'NC', H_8: 'H5', N_1: 'NA', N_7: 'NB', H_22: 'H', H_1: 'H', N_9: 'N*', O_6: 'O', H_21: 'H', }
 
+amber12_atom_type = amber_atom_type

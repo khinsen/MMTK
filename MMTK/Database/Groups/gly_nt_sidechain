@@ -3,3 +3,4 @@ pdbmap = [('GLY', {'3HA': H_alpha_3, }, ), ]
 pdb_alternative = {'1HA': '3HA', 'HA3': '3HA', 'HA1': '3HA', }
 amber_atom_type = {H_alpha_3: 'HP', }
 name = 'gly_nt_sidechain'
+amber12_atom_type = amber_atom_type

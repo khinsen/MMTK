@@ -10,3 +10,4 @@ pdb_alternative = {'O1P': 'OP1', 'O2P': 'OP2'}
 
 amber_atom_type = {O_2: 'O2', P: 'P', O_1: 'O2', }
 
+amber12_atom_type = amber_atom_type

@@ -22,3 +22,4 @@ amber_charge = {CH3: -0.3662, HH31: 0.1123, HH32: 0.1123, HH33: 0.1123,
 pdbmap = [('ACE', {'CH3': CH3, '1HH3': HH31, '2HH3': HH32, '3HH3': HH33,
 		   'C': CBond, 'O': O})]
 pdb_alternative = {'HH31': '1HH3', 'HH32': '2HH3', 'HH33': '3HH3'}
+amber12_atom_type = amber_atom_type
