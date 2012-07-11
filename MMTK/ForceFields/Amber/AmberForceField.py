@@ -73,8 +73,8 @@ def readAmber94(main_file = None, mod_files = None):
     global Amber94
     if main_file is None and mod_files is None:
         if Amber94 is None:
-            paramfile = os.path.join(this_directory, "amber_parm94")
-            modfile = os.path.join(this_directory, "amber_parm94.heme")
+            paramfile = os.path.join(this_directory, "parm94.dat")
+            modfile = os.path.join(this_directory, "frcmod.heme_ff94")
             Amber94 = AmberData.AmberParameters(paramfile, [(modfile, 'MOD4')])
             Amber94.lennard_jones_1_4 = 0.5
             Amber94.electrostatic_1_4 = 1./1.2
@@ -84,7 +84,7 @@ def readAmber94(main_file = None, mod_files = None):
         return Amber94
     else:
         if main_file is None:
-            main_file = os.path.join(this_directory, "amber_parm94")
+            main_file = os.path.join(this_directory, "parm94.dat")
         if mod_files is None:
             mod_files = []
         else:
@@ -101,7 +101,7 @@ def readAmber99(main_file = None, mod_files = None):
     global Amber99
     if main_file is None and mod_files is None:
         if Amber99 is None:
-            paramfile = os.path.join(this_directory, "amber_parm99")
+            paramfile = os.path.join(this_directory, "parm99.dat")
             Amber99 = AmberData.AmberParameters(paramfile)
             Amber99.lennard_jones_1_4 = 0.5
             Amber99.electrostatic_1_4 = 1./1.2
@@ -111,7 +111,7 @@ def readAmber99(main_file = None, mod_files = None):
         return Amber99
     else:
         if main_file is None:
-            main_file = os.path.join(this_directory, "amber_parm99")
+            main_file = os.path.join(this_directory, "parm99.dat")
         if mod_files is None:
             mod_files = []
         else:
@@ -129,7 +129,7 @@ def readAmber91():
     global Amber91
     if Amber91 is None:
         Amber91 = AmberData.AmberParameters(os.path.join(this_directory,
-                                                         "amber_parm91"))
+                                                         "parm91.dat"))
         Amber91.lennard_jones_1_4 = 0.5
         Amber91.electrostatic_1_4 = 0.5
         Amber91.default_ljpar_set = Amber91.ljpar_sets['STDA']
