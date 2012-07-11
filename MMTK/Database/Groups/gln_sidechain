@@ -14,3 +14,4 @@ name = 'gln_sidechain'
 pdbmap = [('GLN', {'2HG': H_gamma_2, 'NE2': N_epsilon_2, '2HB': H_beta_2, '3HG': H_gamma_3, '3HB': H_beta_3, 'CD': C_delta, 'CG': C_gamma, '2HE2': H_epsilon_2_2, 'OE1': O_epsilon_1, 'CB': C_beta, '1HE2': H_epsilon_2_1, }, ), ]
 pdb_alternative = {'1HB': '3HB', '1HG': '3HG', 'HG1': '3HG', 'HB3': '3HB', 'HG3': '3HG', 'HB1': '3HB', 'HE21': '1HE2', 'HE22': '2HE2', 'HG2': '2HG', 'HB2': '2HB', }
 amber_atom_type = {H_gamma_3: 'HC', H_epsilon_2_1: 'H', C_gamma: 'CT', C_delta: 'C', C_beta: 'CT', H_beta_3: 'HC', H_epsilon_2_2: 'H', N_epsilon_2: 'N', O_epsilon_1: 'O', H_gamma_2: 'HC', H_beta_2: 'HC', }
+amber12_atom_type = {H_gamma_3: 'HC', H_epsilon_2_1: 'H', C_gamma: '2C', C_delta: 'C', C_beta: '2C', H_beta_3: 'HC', H_epsilon_2_2: 'H', N_epsilon_2: 'N', O_epsilon_1: 'O', H_gamma_2: 'HC', H_beta_2: 'HC', }

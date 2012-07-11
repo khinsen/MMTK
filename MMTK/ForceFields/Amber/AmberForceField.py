@@ -55,6 +55,7 @@ import os
 #
 # Read parameter files
 #
+Amber12SB = None
 Amber99 = None
 Amber94 = None
 Amber91 = None
@@ -68,6 +69,33 @@ def fullModFilePath(modfile):
     if os.path.exists(modfile):
         return modfile
     return os.path.join(this_directory, os.path.basename(modfile))
+
+def readAmber12SB(main_file = None, mod_files = None):
+    global Amber12SB
+    if main_file is None and mod_files is None:
+        if Amber12SB is None:
+            paramfile = os.path.join(this_directory, "parm10.dat")
+            modfile = os.path.join(this_directory, "frcmod.ff12SB")
+            Amber12SB = AmberData.AmberParameters(paramfile)
+            Amber12SB.lennard_jones_1_4 = 0.5
+            Amber12SB.electrostatic_1_4 = 1./1.2
+            Amber12SB.default_ljpar_set = Amber12SB.ljpar_sets['MOD4']
+            Amber12SB.atom_type_property = 'amber12_atom_type'
+            Amber12SB.charge_property = 'amber_charge'
+        return Amber12SB
+    else:
+        if main_file is None:
+            main_file = os.path.join(this_directory, "parm10.dat")
+        mod_files = map(lambda mf: (fullModFilePath(mf), 'MOD4'), mod_files)
+        mod_files.insert(0, (os.path.join(this_directory, "frcmod.ff12SB"))
+        params = AmberData.AmberParameters(main_file, mod_files)
+        params.lennard_jones_1_4 = 0.5
+        params.electrostatic_1_4 = 1./1.2
+        params.default_ljpar_set = params.ljpar_sets['MOD4']
+        params.atom_type_property = 'amber12_atom_type'
+        params.charge_property = 'amber_charge'
+        return params
+
 
 def readAmber94(main_file = None, mod_files = None):
     global Amber94

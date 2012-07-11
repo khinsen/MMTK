@@ -8,3 +8,4 @@ pdbmap = [('', {'N': N, 'O': O, 'HA': H_alpha, 'CA': C_alpha, 'C': C, }, ), ]
 pdb_alternative = {'HN': 'H', }
 name = 'peptide in proline'
 amber_atom_type = {N: 'N', H_alpha: 'H1', O: 'O', C: 'C', C_alpha: 'CT', }
+amber12_atom_type = {N: 'N', H_alpha: 'H1', O: 'O', C: 'C', C_alpha: 'CX', }
