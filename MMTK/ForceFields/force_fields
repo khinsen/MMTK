@@ -1,5 +1,6 @@
 Amber94ForceField             Amber          Amber94ForceField
 Amber99ForceField             Amber          Amber99ForceField
+Amber12SBForceField           Amber          Amber12SBForceField
 OPLSForceField                Amber          OPLSForceField
 LennardJonesForceField        LennardJonesFF LennardJonesForceField
 DeformationForceField         DeformationFF  DeformationForceField

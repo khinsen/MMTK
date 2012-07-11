@@ -10,5 +10,5 @@ Amber force fields
 
 __docformat__ = 'restructuredtext'
 
-from AmberForceField import Amber99ForceField, Amber94ForceField, \
-                             Amber91ForceField, OPLSForceField
+from AmberForceField import Amber12SBForceField, Amber99ForceField, \
+                            Amber94ForceField, Amber91ForceField, OPLSForceField
