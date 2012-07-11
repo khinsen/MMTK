@@ -140,7 +140,7 @@ def readOPLS(main_file = None, mod_files = None):
     global OPLS
     if main_file is None and mod_files is None:
         if OPLS is None:
-            paramfile = os.path.join(this_directory, "opls_parm")
+            paramfile = os.path.join(this_directory, "opls_parm.dat")
             OPLS = AmberData.AmberParameters(paramfile)
             OPLS.lennard_jones_1_4 = 0.125
             OPLS.electrostatic_1_4 = 0.5
@@ -150,7 +150,7 @@ def readOPLS(main_file = None, mod_files = None):
         return OPLS
     else:
         if main_file is None:
-            main_file = os.path.join(this_directory, "opls_parm")
+            main_file = os.path.join(this_directory, "opls_parm.dat")
         if mod_files is None:
             mod_files = []
         else:
