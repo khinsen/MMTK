@@ -87,7 +87,7 @@ def readAmber12SB(main_file = None, mod_files = None):
         if main_file is None:
             main_file = os.path.join(this_directory, "parm10.dat")
         mod_files = map(lambda mf: (fullModFilePath(mf), 'MOD4'), mod_files)
-        mod_files.insert(0, (os.path.join(this_directory, "frcmod.ff12SB"))
+        mod_files.insert(0, os.path.join(this_directory, "frcmod.ff12SB"))
         params = AmberData.AmberParameters(main_file, mod_files)
         params.lennard_jones_1_4 = 0.5
         params.electrostatic_1_4 = 1./1.2
