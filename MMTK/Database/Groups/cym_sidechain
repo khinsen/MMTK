@@ -12,3 +12,4 @@ pdb_alternative = {'1HB': '3HB', 'HB3': '3HB', 'HB2': '2HB'}
 
 amber_atom_type = {C_beta: 'CT', H_beta_3: 'H1', H_beta_2: 'H1', S_gamma: 'SH', }
 
+amber12_atom_type = amber_atom_type
