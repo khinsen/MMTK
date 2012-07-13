@@ -75,12 +75,14 @@ class ParticleProperty(object):
         """
         :returns: an object of the element type (scalar, vector, etc.)
                   with the value 0.
+        :rtype: element type
         """
         pass
 
     def sumOverParticles(self):
         """
         :returns: the sum of the values for all particles.
+        :rtype: element type
         """
         pass
 

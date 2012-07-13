@@ -1,3 +1,5 @@
+:orphan:
+
 Convert a trajectory to DCD format
 ##################################
 

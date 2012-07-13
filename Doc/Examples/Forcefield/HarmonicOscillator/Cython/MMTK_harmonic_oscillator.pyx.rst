@@ -1,3 +1,5 @@
+:orphan:
+
 An efficient harmonic oscillator term (Cython part)
 ###################################################
 

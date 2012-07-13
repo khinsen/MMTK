@@ -436,7 +436,7 @@ chains, and nucleotide chains. As described in the chapter
 :ref:`database`, proteins can be described by a special database
 definition file. However, it is often simpler to create macromolecular
 objects directly in an application program. The classes are
-:class:`MMTK.Proteins.PeptideChain`, :ref:`Class:MMTK.Proteins.Protein`,
+:class:`MMTK.Proteins.PeptideChain`, :class:`MMTK.Proteins.Protein`,
 and :class:`MMTK.NucleicAcids.NucleotideChain`.
 
 Proteins can be created from definition files in the database,
@@ -571,13 +571,13 @@ Force fields
 
 MMTK comes with several force fields, and permits the definition of
 additional force fields. Force fields are defined in module
-:class:`MMTK.ForceFields.ForceField`. The most import built-in force
+:class:`MMTK.ForceFields.ForceField`. The most important built-in force
 field is the `Amber 99 force field
 <http://ambermd.org/#ff>`_, represented by the
 class
 :class:`MMTK.ForceFields.Amber.AmberForceField.Amber99ForceField`. It
 offers several strategies for electrostatic interactions, including
-Ewald summation, a fast multipole method :ref:`[Rankin2002] <Rankin2002>`, and cutoff
+Ewald summation and cutoff
 with charge neutralization and optional screening :ref:`[Wolf1999] <Wolf1999>`..
 
 In addition to the Amber 99 force field, there is the older Amber 94
@@ -1139,7 +1139,7 @@ The quantities that must be calculated depend strongly on the
 system and the problem under study. MMTK provides a wide range
 of elementary operations that inquire the state of the system,
 as well as several more complex analysis tools. Some of them are
-demonstrated in the :ref:`examples` section.
+demonstrated in the :ref:`example <Examples>` section.
 
 Properties of chemical objects and universes
 ============================================
@@ -1169,7 +1169,7 @@ universes as well.
 Universes also provide methods for obtaining :ref:`atom property
 <atom_property>` objects that describe the state of the system
 (configurations, velocities, masses), and for restoring the system
-state from a :ref:`trajectory` file.
+state from a :ref:`trajectory <Trajectories>` file.
 
 Energy evaluation
 =================
@@ -1323,7 +1323,7 @@ as well as the combination of MMTK-generated graphics objects with
 arbitrary other graphics objects, such as lines, arrows, or spheres.
 All graphics objects are finally combined into a scene object (also
 defined in the various graphics modules) in order to be displayed.
-See also the :ref:`Example-Visualization` examples.
+See also the :ref:`visualization <Example-Visualization>` examples.
 
 Fields
 ======

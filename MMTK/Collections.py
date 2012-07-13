@@ -555,6 +555,7 @@ class GroupOfAtoms(object):
         :returns: the universe of which the object is part. For an
                   object that is not part of a universe, the result is
                   None
+        :rtype: :class:`~MMTK.Universe.Universe`
         """
         atoms = self.atomList()
         if not atoms:
@@ -778,6 +779,7 @@ class Collection(GroupOfAtoms, Visualization.Viewable):
         :returns: the universe of which all objects in the collection
                   are part. If no such universe exists, the return value
                   is None
+        :rtype: :class:`~MMTK.Universe.Universe`
         """
         if not self.objects:
             return None
@@ -983,6 +985,7 @@ class PartitionedCollection(Collection):
         :returns: a list of cubic partitions. Each partition is specified
                   by a tuple containing two vectors (describing the diagonally
                   opposite corners) and the list of objects in the partition.
+        :rtype: list
         """
         list = []
         for index, objects in self.partition.items():

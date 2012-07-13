@@ -1,3 +1,5 @@
+:orphan:
+
 Show an animation of a trajectory
 #################################
 

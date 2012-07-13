@@ -1,3 +1,5 @@
+:orphan:
+
 An electric field term implemented in pure Python
 #################################################
 

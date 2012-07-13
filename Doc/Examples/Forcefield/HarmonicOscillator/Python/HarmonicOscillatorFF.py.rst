@@ -1,3 +1,5 @@
+:orphan:
+
 A harmonic oscillator term in pure Python
 #########################################
 

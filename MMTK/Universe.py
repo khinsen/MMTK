@@ -967,6 +967,7 @@ class Universe(Collections.GroupOfAtoms, Visualization.Viewable):
         """
         :returns: the basis vectors of the elementary cell of a periodic
                   universe, or None for a non-periodic universe
+        :rtype: NoneType or list
         """
         return None
 
@@ -974,6 +975,7 @@ class Universe(Collections.GroupOfAtoms, Visualization.Viewable):
         """
         :returns: the reciprocal basis vectors of the elementary cell of
                   a periodic universe, or None for a non-periodic universe
+        :rtype: NoneType or list
         """
         return None
 
@@ -991,6 +993,7 @@ class Universe(Collections.GroupOfAtoms, Visualization.Viewable):
         """
         :returns: the volume of the elementary cell of a periodic
                   universe, None for a non-periodic universe
+        :rtype: NoneType or float
         """
         return None
 
@@ -1000,6 +1003,7 @@ class Universe(Collections.GroupOfAtoms, Visualization.Viewable):
                   that can be represented independent of orientation, i.e. the
                   radius of the largest sphere that fits into the simulation
                   cell. Returns None if no such upper limit exists.
+        :rtype: NoneType or float
         """
         return None
 
