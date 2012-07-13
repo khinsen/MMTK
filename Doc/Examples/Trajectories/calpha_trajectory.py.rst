@@ -1,3 +1,5 @@
+:orphan:
+
 Extract a C-alpha trajectory from an all-atom trajectory
 ########################################################
 

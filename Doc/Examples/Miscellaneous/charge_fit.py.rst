@@ -1,3 +1,5 @@
+:orphan:
+
 Fitting point charges to an electrostatic potential surface
 ###########################################################
 

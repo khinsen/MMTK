@@ -1,3 +1,5 @@
+:orphan:
+
 Adding custom graphics to a molecular system visualization
 ##########################################################
 

@@ -1,3 +1,5 @@
+:orphan:
+
 Place molecules on a lattice
 ############################
 

@@ -1,3 +1,5 @@
+:orphan:
+
 Importing a trajectory in DCD format
 ####################################
 

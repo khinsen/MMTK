@@ -580,6 +580,7 @@ class Atom(ChemicalObject):
         :returns: the position in configuration conf. If conf is 
                   'None', use the current configuration. If the atom has
                   not been assigned a position, the return value is None.
+        :rtype: Scientific.Geometry.Vector
         """
         if conf is None:
             if self.array is None:

@@ -317,6 +317,7 @@ class PDBConfiguration(Scientific.IO.PDB.Structure):
         :returns: a list of :class:`~MMTK.Proteins.PeptideChain` objects, one for each
                   peptide chain in the PDB file. The parameter model
                   has the same meaning as for the PeptideChain constructor.
+        :rtype: list
         """
         return [chain.createPeptideChain(model)
                 for chain in self.peptide_chains]
@@ -326,6 +327,7 @@ class PDBConfiguration(Scientific.IO.PDB.Structure):
         :returns: a list of :class:`~MMTK.NucleicAcids.NucleotideChain` objects, one for each
                   nucleotide chain in the PDB file. The parameter model
                   has the same meaning as for the NucleotideChain constructor.
+        :rtype: list
         """
         return [chain.createNucleotideChain(model)
                 for chain in self.nucleotide_chains]
@@ -419,6 +421,7 @@ class PDBConfiguration(Scientific.IO.PDB.Structure):
                   and :func:`~MMTK.PDB.PDBConfiguration.createMolecules`.
                   The parameters have the same meaning as for
                   :func:`~MMTK.PDB.PDBConfiguration.createMolecules`.
+        :rtype: :class:`~MMTK.Collectionc.Collection`
         """
         collection = Collections.Collection()
         peptide_chains = self.createPeptideChains()

@@ -1,3 +1,5 @@
+:orphan:
+
 Comparing protein configurations
 ################################
 

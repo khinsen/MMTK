@@ -1,3 +1,5 @@
+:orphan:
+
 Normal modes of a protein using a rigid-residue model
 #####################################################
 

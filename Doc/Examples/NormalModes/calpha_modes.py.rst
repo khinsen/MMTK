@@ -1,3 +1,5 @@
+:orphan:
+
 Slow normal modes of a protein using a C-alpha model
 ####################################################
 
