@@ -209,7 +209,6 @@ writeOpenDCD(PyObject *dummy, PyObject *args)
   int    dcdNFrames=0;
   int    dcdFrameStart=0;
   int    dcdNSavc;
-  int    dcdErrcode;
   double time;
   FILE * fd;
 
@@ -226,9 +225,9 @@ writeOpenDCD(PyObject *dummy, PyObject *args)
   }
 
   /* write header */
-  dcdErrcode = write_dcdheader(fd , dcdFileName, dcdAtoms, dcdNFrames, 
-			       dcdFrameStart,  dcdNSavc,
-			       time/akma_time_factor);
+  write_dcdheader(fd , dcdFileName, dcdAtoms, dcdNFrames, 
+                  dcdFrameStart,  dcdNSavc,
+                  time/akma_time_factor);
   return (PyObject*)PyCObject_FromVoidPtr((void *) fd, NULL);
 }
 
@@ -302,11 +301,10 @@ static PyMethodDef DCD_methods[] = {
 DL_EXPORT(void)
 initMMTK_DCD(void)
 {
-  PyObject *m;
   PyObject *units;
 
   /* Create the module and add the functions */
-  m = Py_InitModule("MMTK_DCD", DCD_methods);
+  Py_InitModule("MMTK_DCD", DCD_methods);
 
   /* Import the array module */
 #ifdef import_array
