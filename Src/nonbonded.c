@@ -606,7 +606,7 @@ nonbonded_evaluator(PyFFEnergyTermObject *self,
   double ewald_cutoff_sq, ewald_inv_cutoff, beta, erfc_cutoff, ewald_one_four;
   double lj_energy1, lj_energy2, lj_virial1, lj_virial2;
   double es_energy, ewald_energy;
-  int lj_flag, es_flag, ewald_flag, ewald_recip_flag;
+  int lj_flag, es_flag, ewald_flag;
   int ibox, jbox, slicecounter, k;
 #if THREAD_DEBUG
   int paircount = 0;
@@ -659,7 +659,6 @@ nonbonded_evaluator(PyFFEnergyTermObject *self,
       ewald_inv_cutoff = 0.;
     beta = ewald_ev->param[2];
     erfc_cutoff = erfc(beta*ewald_ev->param[0]);
-    ewald_recip_flag = (ewald_ev->param[3] > 0.);
     ewald_one_four = ewald_ev->param[1]-1.;
   }
 
