@@ -18,3 +18,4 @@ name = 'tyr_sidechain'
 pdbmap = [('TYR', {'2HD': H_delta_2, '2HE': H_epsilon_2, '2HB': H_beta_2, '1HD': H_delta_1, '1HE': H_epsilon_1, 'CE2': C_epsilon_2, 'CE1': C_epsilon_1, 'CD1': C_delta_1, 'HH': H_eta, 'CZ': C_zeta, 'CG': C_gamma, '3HB': H_beta_3, 'CB': C_beta, 'OH': O_eta, 'CD2': C_delta_2, }, ), ]
 pdb_alternative = {'1HB': '3HB', 'HB2': '2HB', 'HB3': '3HB', 'HB1': '3HB', 'HD1': '1HD', 'HD2': '2HD', 'HE1': '1HE', 'HE2': '2HE', }
 amber_atom_type = {H_delta_1: 'HA', H_beta_2: 'HC', C_epsilon_1: 'CA', H_beta_3: 'HC', H_delta_2: 'HA', O_eta: 'OH', C_gamma: 'CA', H_eta: 'HO', C_delta_2: 'CA', C_zeta: 'C', C_epsilon_2: 'CA', C_delta_1: 'CA', H_epsilon_2: 'HA', C_beta: 'CT', H_epsilon_1: 'HA', }
+amber12_atom_type = amber_atom_type

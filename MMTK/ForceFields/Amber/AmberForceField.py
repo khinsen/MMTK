@@ -55,6 +55,7 @@ import os
 #
 # Read parameter files
 #
+Amber12SB = None
 Amber99 = None
 Amber94 = None
 Amber91 = None
@@ -69,12 +70,41 @@ def fullModFilePath(modfile):
         return modfile
     return os.path.join(this_directory, os.path.basename(modfile))
 
+def readAmber12SB(main_file = None, mod_files = None):
+    global Amber12SB
+    if main_file is None and mod_files is None:
+        if Amber12SB is None:
+            paramfile = os.path.join(this_directory, "parm10.dat")
+            modfile = os.path.join(this_directory, "frcmod.ff12SB")
+            Amber12SB = AmberData.AmberParameters(paramfile,
+                                                  [(modfile, 'MOD4')])
+            Amber12SB.lennard_jones_1_4 = 0.5
+            Amber12SB.electrostatic_1_4 = 1./1.2
+            Amber12SB.default_ljpar_set = Amber12SB.ljpar_sets['MOD4']
+            Amber12SB.atom_type_property = 'amber12_atom_type'
+            Amber12SB.charge_property = 'amber_charge'
+        return Amber12SB
+    else:
+        if main_file is None:
+            main_file = os.path.join(this_directory, "parm10.dat")
+        mod_files = [(fullModFilePath(mf), 'MOD4') for mf in mod_files]
+        mod_files.insert(0, (os.path.join(this_directory, "frcmod.ff12SB"),
+                             'MOD4'))
+        params = AmberData.AmberParameters(main_file, mod_files)
+        params.lennard_jones_1_4 = 0.5
+        params.electrostatic_1_4 = 1./1.2
+        params.default_ljpar_set = params.ljpar_sets['MOD4']
+        params.atom_type_property = 'amber12_atom_type'
+        params.charge_property = 'amber_charge'
+        return params
+
+
 def readAmber94(main_file = None, mod_files = None):
     global Amber94
     if main_file is None and mod_files is None:
         if Amber94 is None:
-            paramfile = os.path.join(this_directory, "amber_parm94")
-            modfile = os.path.join(this_directory, "amber_parm94.heme")
+            paramfile = os.path.join(this_directory, "parm94.dat")
+            modfile = os.path.join(this_directory, "frcmod.heme_ff94")
             Amber94 = AmberData.AmberParameters(paramfile, [(modfile, 'MOD4')])
             Amber94.lennard_jones_1_4 = 0.5
             Amber94.electrostatic_1_4 = 1./1.2
@@ -84,7 +114,7 @@ def readAmber94(main_file = None, mod_files = None):
         return Amber94
     else:
         if main_file is None:
-            main_file = os.path.join(this_directory, "amber_parm94")
+            main_file = os.path.join(this_directory, "parm94.dat")
         mod_files = map(lambda mf: (fullModFilePath(mf), 'MOD4'), mod_files)
         params = AmberData.AmberParameters(main_file, mod_files)
         params.lennard_jones_1_4 = 0.5
@@ -98,7 +128,7 @@ def readAmber99(main_file = None, mod_files = None):
     global Amber99
     if main_file is None and mod_files is None:
         if Amber99 is None:
-            paramfile = os.path.join(this_directory, "amber_parm99")
+            paramfile = os.path.join(this_directory, "parm99.dat")
             Amber99 = AmberData.AmberParameters(paramfile)
             Amber99.lennard_jones_1_4 = 0.5
             Amber99.electrostatic_1_4 = 1./1.2
@@ -108,7 +138,7 @@ def readAmber99(main_file = None, mod_files = None):
         return Amber99
     else:
         if main_file is None:
-            main_file = os.path.join(this_directory, "amber_parm99")
+            main_file = os.path.join(this_directory, "parm99.dat")
         mod_files = map(lambda mf: (fullModFilePath(mf), 'MOD4'), mod_files)
         params = AmberData.AmberParameters(main_file, mod_files)
         params.lennard_jones_1_4 = 0.5
@@ -123,7 +153,7 @@ def readAmber91():
     global Amber91
     if Amber91 is None:
         Amber91 = AmberData.AmberParameters(os.path.join(this_directory,
-                                                         "amber_parm91"))
+                                                         "parm91.dat"))
         Amber91.lennard_jones_1_4 = 0.5
         Amber91.electrostatic_1_4 = 0.5
         Amber91.default_ljpar_set = Amber91.ljpar_sets['STDA']
@@ -134,7 +164,7 @@ def readOPLS(main_file = None, mod_files = None):
     global OPLS
     if main_file is None and mod_files is None:
         if OPLS is None:
-            paramfile = os.path.join(this_directory, "opls_parm")
+            paramfile = os.path.join(this_directory, "opls_parm.dat")
             OPLS = AmberData.AmberParameters(paramfile)
             OPLS.lennard_jones_1_4 = 0.125
             OPLS.electrostatic_1_4 = 0.5
@@ -144,7 +174,7 @@ def readOPLS(main_file = None, mod_files = None):
         return OPLS
     else:
         if main_file is None:
-            main_file = os.path.join(this_directory, "opls_parm")
+            main_file = os.path.join(this_directory, "opls_parm.dat")
         mod_files = map(lambda mf: (fullModFilePath(mf), 'OPLS'), mod_files)
         params = AmberData.AmberParameters(main_file, mod_files)
         params.lennard_jones_1_4 = 0.125
@@ -271,6 +301,65 @@ class Amber99ForceField(MMForceField.MMForceField):
         mod_files = kwargs.get('mod_files', None)
         parameters = readAmber99(main_file, mod_files)
         MMForceField.MMForceField.__init__(self, 'Amber99', parameters,
+                                           lj_options, es_options,
+                                           bonded_scale_factor)
+        self.arguments = (lj_options, es_options, bonded_scale_factor)
+
+
+class Amber12SBForceField(MMForceField.MMForceField):
+
+    """
+    Amber force field ff12SB
+    """
+    def __init__(self, lj_options = None, es_options = None,
+                 bonded_scale_factor = 1., **kwargs):
+ 
+        """
+        :param lj_options: parameters for Lennard-Jones
+                           interactions; one of:
+    
+                           * a number, specifying the cutoff
+                           * None, meaning the default method
+                             (no cutoff; inclusion of all
+                             pairs, using the minimum-image
+                             conventions for periodic universes)
+                           * a dictionary with an entry "method"
+                             which specifies the calculation
+                             method as either "direct" (all pair
+                             terms) or "cutoff", with the cutoff
+                             specified by the dictionary
+                             entry "cutoff".
+    
+        :param es_options: parameters for electrostatic
+                           interactions; one of:
+    
+                           * a number, specifying the cutoff
+                           * None, meaning the default method
+                             (all pairs without cutoff for
+                             non-periodic system, Ewald summation
+                             for periodic systems)
+                           * a dictionary with an entry "method"
+                             which specifies the calculation
+                             method as either "direct" (all pair
+                             terms), "cutoff" (with the cutoff
+                             specified by the dictionary
+                             entry "cutoff"), "ewald" (Ewald
+                             summation, only for periodic
+                             universes), or "screened".
+    
+        :keyword mod_files: a list of parameter modification files. The file
+                            format is the one defined by AMBER. Each item
+                            in the list can be either a file object
+                            or a filename, filenames are looked up
+                            first relative to the current directory and then
+                            relative to the directory containing MMTK's
+                            AMBER parameter files.
+        """
+
+        main_file = kwargs.get('parameter_file', None)
+        mod_files = kwargs.get('mod_files', None)
+        parameters = readAmber12SB(main_file, mod_files)
+        MMForceField.MMForceField.__init__(self, 'Amber12SB', parameters,
                                            lj_options, es_options,
                                            bonded_scale_factor)
         self.arguments = (lj_options, es_options, bonded_scale_factor)

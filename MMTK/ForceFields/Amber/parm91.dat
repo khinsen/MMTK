@@ -40,6 +40,7 @@ H4 1.008
 I  126.9
 IM 35.45                 ASSUMED TO BE CL-
 IP 22.99                 ASSUMED TO BE NA+
+IB 131.0                 'big ion w/ waters' for vacuum (Na+, 6H2O)
 M1 999.                  UNDEFINED
 M2 999.                  UNDEFINED
 MG 24.305                magnesium
@@ -74,7 +75,6 @@ S* 32.06
 CU 63.55
 FE 55.0
 LP  3.0
-IB 131.0                'big ion w/ waters'
 
 C   H   HO  H2  H3  N   NA  NB  NC  N2  NT  N2  N3  N*  O   OH  OS  P   O2  MG
 
@@ -128,6 +128,7 @@ C3-S  222.       1.81         MET(OL)
 C3-SH 222.       1.81         CYS(OL)
 CA-CA 469.       1.40         TRP,TYR,PHE
 CA-CB 469.       1.404        ADE
+CQ-CB 469.       1.404        2-amino purine
 CA-CD 469.       1.40         PHE,TYR
 CA-CJ 427.       1.433        CYT
 CA-CM 427.       1.433
@@ -286,8 +287,10 @@ CA-CA-CN    85.        120.     TRP(OL)
 CA-CA-CT    70.        120.     PHE(OL)
 CA-CA-HC     35.       120.0
 CB-CA-HC     35.       120.0
+CB-CQ-HC     35.       120.0   2-amino purine
 CB-CA-N2    70.        123.5    ADE
 CB-CA-NC    70.        117.3    ADE
+CB-CQ-NC    70.        117.3    2-amino purine
 CD-CA-CD    85.        120.     PHE(OL)
 CJ-CA-N2    70.        120.1    CYT
 CJ-CA-NC    70.        121.5    CYT
@@ -304,8 +307,10 @@ C*-CB-CA    85.        134.9     TRP(OL)
 C*-CB-CD    85.        134.9     TRP(OL)
 C*-CB-CN    85.        108.8     TRP(OL)
 CA-CB-CB    85.        117.3    ADE
+CQ-CB-CB    85.        117.3    2-amino purine
 CA-CB-CN    85.        116.2     TRP
 CA-CB-NB    70.        132.4    ADE
+CQ-CB-NB    70.        132.4    2-amino purine
 CB-CB-N*    70.        106.2    GUA,ADE
 CB-CB-NB    70.        110.4    GUA,ADE
 CB-CB-NC    70.        127.7    GUA,ADE
@@ -392,6 +397,7 @@ NA-CP-NA    70.        110.75    HISP(OL)
 NA-CP-NB    70.        111.6    HIS(OL)
 HC-CQ-NC     35.       115.45
 NC-CQ-NC    70.        129.1
+NC-CA-NC    70.        129.1    2-amino purine
 HC-CR-NA     35.       120.0
 HC-CR-NB     35.       120.0
 NA-CR-NA    70.        120.00    HISP(OL)
@@ -528,7 +534,6 @@ C2-OH-HO    55.0      108.5      SUG,SER(OL,mod)
 C3-OH-HO    55.0      108.5      SUG,SER(OL,mod)
 CH-OH-HO    55.0      108.5      THR(OL),SUG
 CT-OH-HO     55.       108.5               ! End of SJW input for CT types
-CT-OS-HO     55.       108.5               ! same as CT-OH-HO for nucleic acid
 HO-OH-HO    47.       104.5
 HO-OH-P     45.0      108.5      SUG(OL)
 C2-OS-C2    100.0     111.8       DME based
@@ -601,6 +606,7 @@ X -C2-S -X    1    1.0          0.               3.
 X -C2-SH-X    1    0.75         0.               3.
 X -CA-CA-X    4    5.3        180.               2.
 X -CA-CB-X    4    10.2       180.               2.
+X -CQ-CB-X    4    10.2       180.               2.
 X -CA-CD-X    2    5.3        180.               2.
 X -CA-CJ-X    2    3.7        180.               2.
 X -CA-CM-X    4    3.7        180.               2.
@@ -752,51 +758,35 @@ HC-CM-CM-CT   1     1.71        180.              2.
 N*-CM-CM-CA   1     9.51        180.              2.
 CA-CM-CM-HC   1     6.59        180.              2.
 
-C3-CH-CH-C3         14.0         180.          3.                 !uni
-C3-CH-CH-OH         14.0         180.          3.                 !uni
-C3-C2-CH-C3         14.0         180.          3.                 !uni
-C -C2-N -H          1.0          180.          2.
-C -C3-N -H          1.0          180.          2.
-C -CH-N -H          1.0          180.          2.
-C -CT-N -H          1.0          180.          2.
-C -H -N -H          1.0          180.          2.
-CA-H3-N2-H3         1.0          180.          2.
-CT-CA-N2-H3         1.0          180.          2.
-CC-CR-NA-H          1.0          180.          2.
-CR-CW-NA-H          1.0          180.          2.
-CW-CN-NA-H          1.0          180.          2.
-C2-N -C -O          10.5         180.          2.
-C3-N -C -O          10.5         180.          2.
-CH-N -C -O          10.5         180.          2.
-CT-N -C -O          10.5         180.          2.
-C2-O2-C -O2         10.5         180.          2.
-CT-O2-C -O2         10.5         180.          2.
-N2-N2-CA-N2         10.5         180.          2.
-C3-CH-N -C          14.          180.          3.                 !uni
-C -N -CH-C2         14.          180.          3.                 !uni
-CH-CH-N -C          14.          180.          3.                 !uni
-C -CH-N -C2         1.0          180.          2.                 !uni
-C -CT-N -CT         1.0          180.          2.
-CA-CA-CA-HC         2.           180.          2.
-CA-HC-CA-CA         2.           180.          2.
-CA-CB-CA-HC         2.           180.          2.
-CN-CA-CA-HC         2.           180.          2.
-CA-H2-N2-H2         1.0          180.          2.                 !nuc
-C -C -NA-H          1.0          180.          2.                 !nuc
-C -CA-NA-H          1.0          180.          2.                 !nuc
-CH-O2-C -O2         10.5         180.          2.                 !uni cterm
-N*-NC-C -O          10.5         180.          2.                 !nuc
-N*-NA-C -O          10.5         180.          2.                 !nuc
-CM-NA-C -O          10.5         180.          2.                 !nuc
-CB-NA-C -O          10.5         180.          2.                 !nuc
-CJ-NA-C -O          10.5         180.          2.                 !nuc
-C2-CH-CH-C3         14.0         180.          3.                 !nuc
-CH-CH-CH-OS         14.0         180.          3.                 !nuc
-CH-CH-CH-OH         14.0         180.          3.                 !nuc
-CH-C2-CH-OS         14.0         180.          3.                 !nuc
-CH-C2-CH-OH         14.0         180.          3.                 !nuc
-OS-CH-CH-N*         14.0         180.          3.                 !nuc
-OS-C2-CH-N*         14.0         180.          3.                 !nuc
+X -C2-CH-X          14.0         180.          3.
+X -CH-CH-X          14.0         180.          3.
+X -X -N -H          1.0          180.          2.
+X -X -N2-H3         1.0          180.          2.
+X -X -N2-H2         1.0          180.          2.
+X -X -NA-H          1.0          180.          2.
+X -X -C -O          10.5         180.          2.
+X -O2-C -O2         10.5         180.          2.
+X -CH-N -C          14.          180.          3.
+X -CH-N3-C          14.          180.          3.
+X -H2-N -H2         1.0          180.          2.
+X -N2-CA-N2         10.5         180.          2.
+X -CH-N -C2         1.0          180.          2.
+X -CT-N -CT         1.0          180.          2.
+X -X -CA-HC         2.           180.          2.
+X -X -C*-HC         0.           180.          2.
+X -X -CW-HC         0.           180.          2.
+X -X -CN-CB         0.           180.          2.
+X -X -CB-CN         0.           180.          2.
+X -X -CB-C*         0.           180.          2.
+X -X -CB-CA         0.           180.          2.
+X -X -CN-CA         0.           180.          2.
+X -X -CN-NA         0.           180.          2.
+H2-CH-N2-H2         0.0          180.          3.
+C3-CH-NT-C          14.0         180.          3.
+CH-CH-C -N3         7.0          180.          3.
+C2-CH-C -N3         7.0          180.          3.
+C3-CH-CA-C3         7.0          180.          3.
+C*-NA-CA-CA          0.          180.          2.
 
   H   NB  7557.     2385.                                4.
   H   NC  10238.    3071.                                4.
@@ -887,12 +877,12 @@ STDA      RE
   QL       1.14       0.018
   QN       1.87       0.0028
   IP       1.87       0.0028
-  IB       5.0        0.1
   QR       2.96       0.00017
   S        2.00       0.20
   SH       2.00       0.20
   P        2.10       0.20
   LP       1.2        0.016
+  IB       5.0        0.1                solvated ion for vacuum approximation
 
 STUB      RE
   H        1.00       0.020

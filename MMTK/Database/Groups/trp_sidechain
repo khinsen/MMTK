@@ -21,3 +21,4 @@ name = 'trp_sidechain'
 pdbmap = [('TRP', {'NE1': N_epsilon_1, '1HD': H_delta_1, '3HE': H_epsilon_3, 'CH2': C_eta_2, '3HB': H_beta_3, '3HZ': H_zeta_3, 'CB': C_beta, 'CD1': C_delta_1, '2HB': H_beta_2, '1HE': H_epsilon_1, 'CD2': C_delta_2, 'CE2': C_epsilon_2, 'CE3': C_epsilon_3, '2HH': H_eta_2, 'CG': C_gamma, 'CZ3': C_zeta_3, 'CZ2': C_zeta_2, '2HZ': H_zeta_2, }, ), ]
 pdb_alternative = {'1HB': '3HB', '1HZ': '3HZ', 'HB2': '2HB', 'HB3': '3HB', 'HB1': '3HB', 'HD1': '1HD', 'HZ2': '2HZ', 'HZ3': '3HZ', 'HE1': '1HE', 'HE3': '3HE', 'HH2': '2HH', }
 amber_atom_type = {C_gamma: 'C*', H_zeta_3: 'HA', C_zeta_3: 'CA', H_epsilon_3: 'HA', C_zeta_2: 'CA', H_delta_1: 'H4', H_beta_2: 'HC', H_zeta_2: 'HA', C_epsilon_3: 'CA', N_epsilon_1: 'NA', H_eta_2: 'HA', C_eta_2: 'CA', H_epsilon_1: 'H', C_epsilon_2: 'CN', H_beta_3: 'HC', C_beta: 'CT', C_delta_2: 'CB', C_delta_1: 'CW', }
+amber12_atom_type = amber_atom_type

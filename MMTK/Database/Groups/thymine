@@ -22,3 +22,4 @@ pdb_alternative = {'C5M': 'C7', 'H51': 'H71', 'H52': 'H72', 'H53': 'H73'}
 
 amber_atom_type = {C_6: 'CM', C_7: 'CT', C_4: 'C', C_5: 'CM', H_71: 'HC', H_73: 'HC', H_72: 'HC', N_3: 'NA', C_2: 'C', N_1: 'N*', O_2: 'O', H_3: 'H', O_4: 'O', H_6: 'H4', }
 
+amber12_atom_type = amber_atom_type
