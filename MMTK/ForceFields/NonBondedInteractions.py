@@ -24,7 +24,8 @@ class NonBondedForceField(ForceField):
         self.type = 'nonbonded'
 
     def ready(self, global_data):
-        return 'bonded' in global_data.get('initialized')
+        return all([klass in global_data.get('initialized')
+                    for klass in global_data.get('nb_exclusions')])
 
     def excludedPairs(self, subset1, subset2, global_data):
         if 'excluded_pairs' not in global_data.get('initialized'):
