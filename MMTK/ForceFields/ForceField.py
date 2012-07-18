@@ -46,7 +46,10 @@ class ForceField(object):
                 options[key] = value
 
     def ready(self, global_data):
-        return 1
+        return True
+
+    def declareDependencies(self, global_data):
+        pass
 
     def bondedForceFields(self):
         return []
@@ -98,45 +101,99 @@ class CompoundForceField(ForceField):
         self.type = 'compound'
         self.arguments = args
 
+    def declareDependencies(self, global_data):
+        for ff in self.fflist:
+            ff.declareDependencies(global_data)
+
+    def flatFFList(self):
+        flat_list = []
+        for ff in self.fflist:
+            if isinstance(ff, CompoundForceField):
+                flat_list.extend(ff.flatFFList())
+            else:
+                flat_list.append(ff)
+        return flat_list
+
+    # def evaluatorParameters(self, system, subset1, subset2, global_data):
+    #     self.declareDependencies()
+    #     parameters = {}
+    #     remaining = self.flatFFList()
+    #     while remaining:
+    #         done = []
+    #         for ff in remaining:
+    #             if ff.ready(global_data):
+    #                 params = ff.evaluatorParameters(system, subset1, subset2,
+    #                                                 global_data)
+    #                 if not isinstance(params, dict):
+    #                     raise ValueError("evaluator parameters are not a dict")
+    #                 for key, value in params.items():
+    #                     parameters[key] = _combine(value,
+    #                                                parameters.get(key, None))
+    #                 done.append(ff)
+    #         if not done:
+    #             raise TypeError("Cyclic force field dependence")
+    #         for ff in done:
+    #             remaining.remove(ff)
+    #     return parameters
+
+    # def evaluatorTerms(self, system, subset1, subset2, global_data):
+    #     self.declareDependencies()
+    #     eval_objects = []
+    #     remaining = self.flatFFList()
+    #     while remaining:
+    #         done = []
+    #         for ff in remaining:
+    #             if ff.ready(global_data):
+    #                 terms = ff.evaluatorTerms(system, subset1, subset2,
+    #                                           global_data)
+    #                 if not isinstance(terms, list):
+    #                     raise ValueError("evaluator term list not a list")
+    #                 eval_objects.extend(terms)
+    #                 done.append(ff)
+    #         if not done:
+    #             raise TypeError("Cyclic force field dependence")
+    #         for ff in done:
+    #             remaining.remove(ff)
+    #     return eval_objects
+
     def evaluatorParameters(self, system, subset1, subset2, global_data):
         parameters = {}
-        remaining = copy.copy(self.fflist)
-        while remaining:
-            done = []
-            for ff in remaining:
-                if ff.ready(global_data):
-                    params = ff.evaluatorParameters(system, subset1, subset2,
-                                                    global_data)
-                    if not isinstance(params, dict):
-                        raise ValueError("evaluator parameters are not a dict")
-                    for key, value in params.items():
-                        parameters[key] = _combine(value,
-                                                   parameters.get(key, None))
-                    done.append(ff)
-            if not done:
-                raise TypeError("Cyclic force field dependence")
-            for ff in done:
-                remaining.remove(ff)
+        def add_item(params):
+            if not isinstance(params, dict):
+                raise ValueError("evaluator parameters are not a dict")
+            for key, value in params.items():
+                parameters[key] = _combine(value,
+                                           parameters.get(key, None))
+        self._compoundEvaluator(system, subset1, subset2, global_data,
+                                'evaluatorParameters', add_item)
         return parameters
 
     def evaluatorTerms(self, system, subset1, subset2, global_data):
         eval_objects = []
-        remaining = copy.copy(self.fflist)
+        def add_item(terms):
+            if not isinstance(terms, list):
+                raise ValueError("evaluator term list not a list")
+            eval_objects.extend(terms)
+        self._compoundEvaluator(system, subset1, subset2, global_data,
+                                'evaluatorTerms', add_item)
+        return eval_objects
+
+    def _compoundEvaluator(self, system, subset1, subset2, global_data,
+                           method, add_item):
+        self.declareDependencies(global_data)
+        remaining = self.flatFFList()
         while remaining:
             done = []
             for ff in remaining:
                 if ff.ready(global_data):
-                    terms = ff.evaluatorTerms(system, subset1, subset2,
-                                              global_data)
-                    if not isinstance(terms, list):
-                        raise ValueError("evaluator term list not a list")
-                    eval_objects.extend(terms)
+                    item = getattr(ff, method)(system, subset1, subset2,
+                                               global_data)
+                    add_item(item)
                     done.append(ff)
             if not done:
                 raise TypeError("Cyclic force field dependence")
             for ff in done:
                 remaining.remove(ff)
-        return eval_objects
 
     def bondedForceFields(self):
         return reduce(operator.add,

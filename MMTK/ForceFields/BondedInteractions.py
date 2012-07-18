@@ -21,6 +21,9 @@ class BondedForceField(ForceField):
         ForceField.__init__(self, name)
         self.type = 'bonded'
 
+    def declareDependencies(self, global_data):
+        global_data.add('nb_exclusions', self.__class__)
+
     def evaluatorParameters(self, universe, subset1, subset2, global_data):
         data = ForceFieldData()
         data.set('universe', universe)
@@ -82,7 +85,7 @@ class BondedForceField(ForceField):
                 delattr(atom, label1)
             for atom in subset2.atomList():
                 delattr(atom, label2)
-        global_data.add('initialized', 'bonded')
+        global_data.add('initialized', self.__class__)
         return {'harmonic_distance_term': data.get('bonds'),
                 'harmonic_angle_term': data.get('angles'),
                 'cosine_dihedral_term': data.get('dihedrals')}

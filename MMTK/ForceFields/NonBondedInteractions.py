@@ -24,7 +24,8 @@ class NonBondedForceField(ForceField):
         self.type = 'nonbonded'
 
     def ready(self, global_data):
-        return 'bonded' in global_data.get('initialized')
+        return all([klass in global_data.get('initialized')
+                    for klass in global_data.get('nb_exclusions')])
 
     def supportsPathIntegrals(self):
         return True
