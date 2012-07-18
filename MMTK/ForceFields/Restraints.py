@@ -24,6 +24,7 @@ Example::
 __docformat__ = 'restructuredtext'
 
 from MMTK.ForceFields.ForceField import ForceField
+from MMTK import Utility
 from MMTK_forcefield import HarmonicDistanceTerm, HarmonicAngleTerm, \
                             CosineDihedralTerm
 from MMTK_restraints import HarmonicCMTrapTerm, HarmonicCMDistanceTerm
@@ -35,7 +36,8 @@ class HarmonicDistanceRestraint(ForceField):
     Harmonic distance restraint between two atoms
     """
 
-    def __init__(self, obj1, obj2, distance, force_constant):
+    def __init__(self, obj1, obj2, distance, force_constant,
+                 nb_exclusion=False):
         """
         :param obj1: the object defining center-of-mass 1
         :type obj1: :class:`~MMTK.Collections.GroupOfAtoms`
@@ -49,6 +51,11 @@ class HarmonicDistanceRestraint(ForceField):
                                force_constant*((cm1-cm2).length()-distance)**2,
                                where cm1 and cm2 are the centrer-of-mass
                                positions of the two objects.
+        :type force_constant: float
+        :param nb_exclussion: if True, non-bonded interactions between
+                              the restrained atoms are suppressed, as
+                              for a chemical bond
+        :type nb_exclussion: bool
         """
         if isinstance(obj1, int) and isinstance(obj2, int):
             # Older MMTK versions admitted only single atoms and
@@ -58,11 +65,19 @@ class HarmonicDistanceRestraint(ForceField):
             self.atom_indices_2 = [obj2]
         self.atom_indices_1 = self.getAtomParameterIndices(obj1.atomList())
         self.atom_indices_2 = self.getAtomParameterIndices(obj2.atomList())
+        if nb_exclusion and (len(self.atom_indices_1) > 1
+                             or len(self.atom_indices_2) > 1):
+            raise ValueError("Non-bonded exclusion possible only "
+                             "between single-atom objects")
         self.arguments = (self.atom_indices_1, self.atom_indices_2,
-                          distance, force_constant) 
+                          distance, force_constant, nb_exclusion)
         self.distance = distance
         self.force_constant = force_constant
+        self.nb_exclusion = nb_exclusion
         ForceField.__init__(self, 'harmonic distance restraint')
+
+    def declareDependencies(self, global_data):
+        global_data.add('nb_exclusions', self.__class__)
 
     def evaluatorParameters(self, universe, subset1, subset2, global_data):
         if universe.is_periodic and \
@@ -88,10 +103,17 @@ class HarmonicDistanceRestraint(ForceField):
                 # restrained atoms.
                 raise ValueError("Restrained atoms partially "
                                  "in a subset")
+        global_data.add('initialized', self.__class__)
         if not ok:
             # The objects are not in the subsets, so there is no
             # contribution to the total energy.
             return {'harmonic_distance_cm': []}
+        if self.nb_exclusion:
+            assert len(self.atom_indices_1) == 1 
+            assert len(self.atom_indices_2) == 1
+            i1 = self.atom_indices_1[0]
+            i2 = self.atom_indices_2[0]
+            global_data.add('excluded_pairs', Utility.normalizePair((i1, i2)))
         if len(self.atom_indices_1) == 1 and len(self.atom_indices_2) == 1:
             # Keep the old format for the single-atom case for best
             # compatibility with older MMTK versions.
