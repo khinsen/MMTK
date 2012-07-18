@@ -6,7 +6,7 @@
 import unittest
 from subsets import SubsetTest
 from MMTK import *
-import MMTK.ForceFields.Restraints as Restraints
+from MMTK.ForceFields import Restraints, SPCEForceField
 from Scientific import N
 
 class TrapTest(unittest.TestCase):
@@ -202,12 +202,30 @@ class DistanceTest(unittest.TestCase):
         self.assertAlmostEqual(e, 0., 7)
         subset = Collection([m1.H1, m2.H2])
         self.assertRaises(ValueError, self.universe3.energy, subset)
-        
+
+class NonbondedExclusionTest(unittest.TestCase):
+
+    def test_exclusion(self):
+        universe = InfiniteUniverse()
+        w1 = Molecule('water', position=(Vector(-0.2, 0., 0.)))
+        w2 = Molecule('water', position=(Vector(+0.2, 0., 0.)))
+        universe.addObject(w1)
+        universe.addObject(w2)
+        ff = SPCEForceField() + \
+               Restraints.HarmonicDistanceRestraint(w1.O, w2.O, 0.35, 1., False)
+        universe.setForceField(ff)
+        self.assert_(universe.energyTerms()['Lennard-Jones'] < 0.)
+        ff = SPCEForceField() + \
+               Restraints.HarmonicDistanceRestraint(w1.O, w2.O, 0.35, 1., True)
+        universe.setForceField(ff)
+        self.assert_(universe.energyTerms()['Lennard-Jones'] == 0.)
+
 def suite():
     loader = unittest.TestLoader()
     s = unittest.TestSuite()
     s.addTest(loader.loadTestsFromTestCase(TrapTest))
     s.addTest(loader.loadTestsFromTestCase(DistanceTest))
+    s.addTest(loader.loadTestsFromTestCase(NonbondedExclusionTest))
     return s
 
 if __name__ == '__main__':
