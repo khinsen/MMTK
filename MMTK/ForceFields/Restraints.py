@@ -23,6 +23,7 @@ Example::
 
 __docformat__ = 'restructuredtext'
 
+from MMTK.ChemicalObjects import isChemicalObject
 from MMTK.ForceFields.ForceField import ForceField
 from MMTK import Utility
 from MMTK_forcefield import HarmonicDistanceTerm, HarmonicAngleTerm, \
@@ -63,8 +64,12 @@ class HarmonicDistanceRestraint(ForceField):
             # trajectories made with those versions
             self.atom_indices_1 = [obj1]
             self.atom_indices_2 = [obj2]
-        self.atom_indices_1 = self.getAtomParameterIndices(obj1.atomList())
-        self.atom_indices_2 = self.getAtomParameterIndices(obj2.atomList())
+        if isChemicalObject(obj1):
+            obj1 = obj1.atomList()
+        if isChemicalObject(obj2):
+            obj2 = obj2.atomList()
+        self.atom_indices_1 = self.getAtomParameterIndices(obj1)
+        self.atom_indices_2 = self.getAtomParameterIndices(obj2)
         if nb_exclusion and (len(self.atom_indices_1) > 1
                              or len(self.atom_indices_2) > 1):
             raise ValueError("Non-bonded exclusion possible only "
@@ -281,7 +286,9 @@ class HarmonicTrapForceField(ForceField):
         :param force_constant: the force constant of the harmonic potential
         :type force_constant: float
         """
-        self.atom_indices = self.getAtomParameterIndices(obj.atomList())
+        if isChemicalObject(obj):
+            obj = obj.atomList()
+        self.atom_indices = self.getAtomParameterIndices(obj)
         self.arguments = (self.atom_indices, center, force_constant)
         ForceField.__init__(self, 'harmonic_trap')
         self.center = center
