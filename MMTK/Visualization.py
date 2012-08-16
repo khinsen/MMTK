@@ -45,6 +45,13 @@ import subprocess, sys, tempfile, os
 tempdir = None
 
 #
+# Identify OS
+#
+running_on_windows = sys.platform == 'win32'
+running_on_macosx = sys.platform.startswith('darwin')
+running_on_linux = sys.platform.startswith('linux')
+
+#
 # Get visualization program names
 #
 viewer = {}
@@ -203,40 +210,20 @@ def view(object, *parameters):
 def genericViewConfiguration(object, configuration = None, format = 'pdb',
                              label = None):
     format = format.lower()
-    if format[:6] == 'opengl':
-        from Scientific.Visualization import PyOpenGL
-        model = format[7:]
-        if model == '':
-            model = 'wireframe'
-        g_objects = object.graphicsObjects(configuration = None,
-                                           model = model,
-                                           graphics_module = PyOpenGL)
-        scene = PyOpenGL.Scene(g_objects)
-        scene.view()
-        scene.mainloop()
-        return None
+    viewer_format = format.split('.')[0]
 
-    if sys.platform != 'win32':
-        if len(viewer) == 0:
-            Utility.warning('No PDB or VRML viewer defined.')
-            return
-        format = format.lower()
-        viewer_format = format.split('.')[0]
-        if not viewer.has_key(viewer_format):
-            format = viewer.keys()[0]
-            viewer_format = format.split('.')[0]
     tempfile.tempdir = tempdir
     filename = tempfile.mktemp()
     tempfile.tempdir = None
-    if format[:3] == 'pdb':
+    if viewer_format == 'pdb':
         filename = filename + '.pdb'
-    elif format[:4] == 'vrml':
+    elif viewer_format == 'vrml':
         filename = filename + '.wrl'
-    if sys.platform == 'win32':
+    
+    if running_on_windows:
         object.writeToFile(filename, configuration, format)
-        import win32api
         try:
-            win32api.ShellExecute(0, "open", filename, None, "", 1)
+            os.startfile(filename)
         except win32api.error, error_number:
             #Looking for error 31, SE_ERR_NOASSOC, in particular
             file_type = os.path.splitext(filename)[1]
@@ -246,7 +233,8 @@ def genericViewConfiguration(object, configuration = None, format = 'pdb',
             else:
                 print 'Unexpected error attempting to open .%s file' % file_type
                 print sys.exc_value
-    else:
+    elif viewer.has_key(viewer_format):
+        # On Unix-like systems, give priority to a  user-specified viewer.
         object.writeToFile(filename, configuration, format)
         if os.fork() == 0:
             pipe = os.popen(viewer[format][1] + ' ' + filename + \
@@ -254,13 +242,22 @@ def genericViewConfiguration(object, configuration = None, format = 'pdb',
             pipe.close()
             os.unlink(filename)
             os._exit(0)
+    elif running_on_macosx:
+        object.writeToFile(filename, configuration, format)
+        subprocess.call(["/usr/bin/open", filename])
+    elif running_on_linux:
+        object.writeToFile(filename, configuration, format)
+        subprocess.call(["xdg-open", filename])
+    else:
+        Utility.warning('No viewer for %s defined.' % viewer_format)
+        return
 
 def viewConfiguration(*args, **kwargs):
     pdbviewer, exec_path = viewer.get('pdb', (None, None))
     function = {'vmd': viewConfigurationVMD,
                 'xmol': viewConfigurationXMol,
-                'imol': viewConfigurationIMol,
-                None: genericViewConfiguration}[pdbviewer]
+                'imol': viewConfigurationIMol} \
+               .get(pdbviewer,genericViewConfiguration)
     function(*args, **kwargs)
 
 #
@@ -350,7 +347,7 @@ def viewSequenceXMol(object, conf_list, periodic = 0, label = None):
         object.writeToFile(file, conf, 'pdb')
     bigfile = tempfile.mktemp()
     tempfile.tempdir = None
-    os.system('cat ' + ' '.join(file_list) + ' > ' + bigfile)
+    subprocess.call(['cat'] + file_list + ['>', bigfile])
     for file in file_list:
         os.unlink(file)
     if os.fork() == 0:
@@ -517,7 +514,7 @@ def viewConfigurationIMol(object, configuration = None, format = 'pdb',
     filename = tempfile.mktemp() + '.pdb'
     tempfile.tempdir = None
     object.writeToFile(filename, configuration, format)
-    os.system('open -a %s %s ' % (prog, filename))
+    subprocess.call(['open', '-a', prog, filename])
 
 #
 # Animate sequence
@@ -532,8 +529,7 @@ def viewSequenceIMol(object, conf_list, periodic = 0, label=None):
         file.write(object, conf)
     file.close()
     tempfile.tempdir = None
-    os.system('open -a %s %s ' % (prog, filename))
-
+    subprocess.call(['open', '-a', prog, filename])
 
 #
 # PyMOL support
