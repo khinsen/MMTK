@@ -1,3 +1,39 @@
+2.7.6 --> 2.7.7
+===============
+
+New features:
+
+- The Amber12SB force field is implemented in addition to Amber94 and Amber99.
+
+- New restraint term: HarmonicTrapForceField restrains the center of mass
+  of an object to a fixed point in space using a spring term.
+
+- HarmonicDistanceRestraint now accepts non-atom objects, applying the
+  restraint between their centers of mass. A distance restraint can optionally
+  be treated like a chemical bond, suppressing any non-bonded interactions
+  between the same pair of atoms.
+
+- The Amber parameter files have been updated to the versions contained
+  in AmberTools 12.
+
+
+Removed features:
+
+- The DPMTA library and its MMTK interface code, implementing the
+  multipole method for electrostatic interactions, has been removed.
+  The MMTK interface has been unusable for years due to a typo that
+  made it crash. No one ever complained, so it seems safe to assume that
+  nobody uses it. DPMTA has become an obstacle to the distribution and
+  packaging of MMTK because it doesn't have a clear licence.
+
+Improvements:
+
+- The visualization interface under MacOSX and Linux has been modified.
+  When no PDBVIEWER is defined, it defaults to the system mechanism for
+  opening PDB or VRML files, which is "open" under MacOSX and "xdg-open"
+  under Linux.
+
+
 2.7.5 --> 2.7.6
 ===============
 
