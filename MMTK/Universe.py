@@ -387,7 +387,8 @@ class Universe(Collections.GroupOfAtoms, Visualization.Viewable):
         self._bond_database = None
 
     def position(self, object, conf):
-        if ChemicalObjects.isChemicalObject(object):
+        if ChemicalObjects.isChemicalObject(object) \
+           or Collections.isCollection(object):
             return object.position(conf)
         elif isVector(object):
             return object
