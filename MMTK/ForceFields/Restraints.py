@@ -24,6 +24,7 @@ Example::
 __docformat__ = 'restructuredtext'
 
 from MMTK.ChemicalObjects import isChemicalObject
+from MMTK.Collections import isCollection
 from MMTK.ForceFields.ForceField import ForceField
 from MMTK import Utility
 from MMTK_forcefield import HarmonicDistanceTerm, HarmonicAngleTerm, \
@@ -64,9 +65,9 @@ class HarmonicDistanceRestraint(ForceField):
             # trajectories made with those versions
             self.atom_indices_1 = [obj1]
             self.atom_indices_2 = [obj2]
-        if isChemicalObject(obj1):
+        if isChemicalObject(obj1) or isCollection(obj1):
             obj1 = obj1.atomList()
-        if isChemicalObject(obj2):
+        if isChemicalObject(obj2) or isCollection(obj2):
             obj2 = obj2.atomList()
         self.atom_indices_1 = self.getAtomParameterIndices(obj1)
         self.atom_indices_2 = self.getAtomParameterIndices(obj2)

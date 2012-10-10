@@ -388,7 +388,8 @@ class Universe(Collections.GroupOfAtoms, Visualization.Viewable):
 
     def position(self, object, conf):
         if ChemicalObjects.isChemicalObject(object) \
-               or isinstance(object, ChemicalObjects.Bead):
+               or isinstance(object, ChemicalObjects.Bead) \
+               or Collections.isCollection(object):
             return object.position(conf)
         elif isVector(object):
             return object
