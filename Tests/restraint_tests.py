@@ -49,7 +49,7 @@ class TrapTest(unittest.TestCase):
                 if i == j:
                     self.assertAlmostEqual(fc[i, j], 2., 7)
                 else:
-                    self.assertEqual(fc[i,j], 0.)
+                    self.assertAlmostEqual(fc[i,j], 0., 7)
 
     def test_energy_two_atoms(self):
         e, g, fc = self.universe2.energyGradientsAndForceConstants()
@@ -64,7 +64,7 @@ class TrapTest(unittest.TestCase):
                         if i == j:
                             self.assertAlmostEqual(fc12[i, j], 0.5, 7)
                         else:
-                            self.assertEqual(fc12[i,j], 0.)
+                            self.assertAlmostEqual(fc12[i,j], 0., 7)
 
     def test_energy_water(self):
 
@@ -86,7 +86,7 @@ class TrapTest(unittest.TestCase):
                         if i == j:
                             self.assertAlmostEqual(fc12[i, j], f, 7)
                         else:
-                            self.assertEqual(fc12[i,j], 0.)
+                            self.assertAlmostEqual(fc12[i,j], 0., 7)
 
     def test_subsets(self):
         H1 = self.universe3[0].H1
@@ -147,7 +147,7 @@ class DistanceTest(unittest.TestCase):
             self.assertAlmostEqual(fc[i, i], fc_ref[i], 7)
             for j in range(3):
                 if i != j:
-                    self.assertEqual(fc[i,j], 0.)
+                    self.assertAlmostEqual(fc[i,j], 0., 7)
 
     def test_energy_atom_pairs(self):
         e, g, fc = self.universe2.energyGradientsAndForceConstants()
@@ -169,7 +169,7 @@ class DistanceTest(unittest.TestCase):
                         self.assertAlmostEqual(fcp[i, i], -fc_ref[i], 7)
                     for j in range(3):
                         if i != j:
-                            self.assertEqual(fcp[i,j], 0.)
+                            self.assertAlmostEqual(fcp[i,j], 0., 7)
 
     def test_energy_water(self):
         e, g, fc = self.universe3.energyGradientsAndForceConstants()
@@ -189,7 +189,7 @@ class DistanceTest(unittest.TestCase):
                             if i == j:
                                 self.assertAlmostEqual(fc12[i, j], f*fc_ref[i], 7)
                             else:
-                                self.assertEqual(fc12[i,j], 0.)
+                                self.assertAlmostEqual(fc12[i,j], 0., 7)
 
     def test_subsets(self):
         m1 = self.universe3[0]
@@ -214,11 +214,11 @@ class NonbondedExclusionTest(unittest.TestCase):
         ff = SPCEForceField() + \
                Restraints.HarmonicDistanceRestraint(w1.O, w2.O, 0.35, 1., False)
         universe.setForceField(ff)
-        self.assert_(universe.energyTerms()['Lennard-Jones'] < 0.)
+        self.assert_(universe.energyTerms()['Lennard-Jones'] < -0.1)
         ff = SPCEForceField() + \
                Restraints.HarmonicDistanceRestraint(w1.O, w2.O, 0.35, 1., True)
         universe.setForceField(ff)
-        self.assert_(universe.energyTerms()['Lennard-Jones'] == 0.)
+        self.assertAlmostEqual(universe.energyTerms()['Lennard-Jones'], 0., 7)
 
 def suite():
     loader = unittest.TestLoader()
