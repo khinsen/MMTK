@@ -217,6 +217,12 @@ if sphinx:
             # previously installed version
             build = self.get_finalized_command('build')
             sys.path.insert(0, os.path.abspath(build.build_lib))
+            ff = sum((fns for dir, fns in data_files if 'ForceFields' in dir),
+                     [])
+            for fn in ff:
+                self.copy_file(fn,
+                               os.path.join(build.build_lib, fn),
+                               preserve_mode=False)
             try:
                 sphinx.setup_command.BuildDoc.run(self)
             except UnicodeDecodeError:
