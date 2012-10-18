@@ -75,6 +75,7 @@ class MMBondedForceField(MMAtomParameters, BondedForceField):
         self.dataset = parameters
         self.scale_factor = scale_factor
         BondedForceField.__init__(self, name)
+        self.arguments = (name, parameters, scale_factor)
 
     def evaluatorParameters(self, universe, subset1, subset2, global_data):
         self.collectAtomTypesAndIndices(universe, global_data)
@@ -189,6 +190,7 @@ class MMLJForceField(MMAtomParameters, LJForceField):
         self.dataset = parameters
         LJForceField.__init__(self, name, cutoff, scale_factor)
         self.lj_14_factor = self.dataset.lennard_jones_1_4
+        self.arguments = (name, parameters, cutoff, scale_factor)
 
     def evaluatorParameters(self, universe, subset1, subset2, global_data):
         self.collectAtomTypesAndIndices(universe, global_data)
@@ -202,6 +204,7 @@ class MMESForceField(MMAtomParameters, ElectrostaticForceField):
         self.dataset = parameters
         ElectrostaticForceField.__init__(self, name, cutoff, scale_factor)
         self.es_14_factor = self.dataset.electrostatic_1_4
+        self.arguments = (name, parameters, cutoff, scale_factor)
 
     def evaluatorParameters(self, universe, subset1, subset2, global_data):
         self.collectCharges(universe, global_data)
@@ -216,6 +219,7 @@ class MMEwaldESForceField(MMAtomParameters, ESEwaldForceField):
         self.dataset = parameters
         ESEwaldForceField.__init__(self, name, options)
         self.es_14_factor = self.dataset.electrostatic_1_4
+        self.arguments = (name, parameters, options)
 
     def evaluatorParameters(self, universe, subset1, subset2, global_data):
         self.collectCharges(universe, global_data)
@@ -243,7 +247,9 @@ class MMNonbondedForceField(MMAtomParameters, NonBondedForceField):
             self.es_options = {'method': 'cutoff', 'cutoff': es_options}
         else:
             self.es_options = copy.copy(es_options)
-            
+
+        self.arguments = (name, parameters, lj_options, es_options)
+
     def charge(self, atoms):
         total = 0.
         for a in atoms.atomList():
@@ -339,6 +345,8 @@ class MMForceField(MMAtomParameters, CompoundForceField):
         self.nonbonded = MMNonbondedForceField(name, parameters,
                                                lj_options, es_options)
         apply(CompoundForceField.__init__, (self, self.bonded, self.nonbonded))
+        self.arguments = (name, parameters, lj_options, es_options,
+                          bonded_scale_factor)
 
     def evaluatorParameters(self, universe, subset1, subset2, global_data):
         self.collectAtomTypesAndIndices(universe, global_data)
