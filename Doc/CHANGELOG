@@ -1,3 +1,23 @@
+2.7.7 --> 2.7.8
+===============
+
+Improvements:
+
+- Collections can be used in place of ChemicalObjects as arguments
+  to HarmonicDistanceTerm() and Universe.distance().
+
+- MMForceField and its components can be used directly in user code,
+  in addition to serving as subclasses (e.g. for AmberForceField).
+
+
+Bug fixes:
+
+- Building the Spinx documentation now works as part of a build procedure,
+  without requiring installation of MMTK.
+
+- No more test case failures on some Linux systems.
+
+
 2.7.6 --> 2.7.7
 ===============
 
