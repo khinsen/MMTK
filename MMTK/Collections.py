@@ -14,7 +14,7 @@ from MMTK.Geometry import superpositionFit
 from Scientific.Geometry import Vector, Tensor, Objects3D
 from Scientific.Geometry import Transformation
 from Scientific import N
-import copy, itertools
+import copy, itertools, types
 
 #
 # This class defines groups of atoms. It is used as a base class
@@ -605,11 +605,16 @@ class Collection(GroupOfAtoms, Visualization.Viewable):
 
     def __init__(self, *objects):
         """
-        :param objects: a chemical object or a sequence of chemical objects that
-                        define the initial content of the collection.
+        :param objects: a chemical object or a sequence of or a generator
+                        yielding chemical objects that define the initial
+                        content of the collection.
         """
         self.objects = []
-        self.addObject(objects)
+        if len(objects) == 1 and isinstance(objects[0], types.GeneratorType):
+            for obj in objects[0]:
+                self.addObject(obj)
+        else:
+            self.addObject(objects)
 
     is_collection = 1
 
