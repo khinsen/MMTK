@@ -146,9 +146,6 @@ class AmberParameters(object):
             line = file.readline().rstrip()
             if not line: break
             names, params = line[:11], line[11:]
-            name1, name2, name3, name4 = [_normalizeName(n)
-                                          for n in names.split('-')]
-            name1, name2, name3, name4 = _sort4(name1, name2, name3, name4)
             params = params.strip().split()[:4]
             divf = int(params[0])
             k = float(params[1])
@@ -158,6 +155,9 @@ class AmberParameters(object):
                 append.addTerm(divf, k, delta, n)
                 if n >= 0: append = None
             else:
+                name1, name2, name3, name4 = [_normalizeName(name)
+                                              for name in names.split('-')]
+                name1, name2, name3, name4 = _sort4(name1, name2, name3, name4)
                 p = AmberDihedralParameters(self.atom_types[name1],
                                             self.atom_types[name2],
                                             self.atom_types[name3],
