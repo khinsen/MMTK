@@ -75,7 +75,7 @@ class BrownianModes(Core.NormalModes):
     is possible as well.
 
     """
-    features = []
+    features = [Features.PathIntegralsWithSpringTermsFeature]
 
     def __init__(self, universe = None, friction = None,
                  temperature = 300.*Units.K,

@@ -66,7 +66,7 @@ class VibrationalModes(Core.NormalModes):
 
     """
 
-    features = []
+    features = [Features.PathIntegralsWithSpringTermsFeature]
 
     def __init__(self, universe=None, temperature = 300.*Units.K,
                  subspace = None, delta = None, sparse = False):
