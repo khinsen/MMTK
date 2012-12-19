@@ -39,6 +39,8 @@ include Examples/LangevinDynamics/*.c
 include Examples/LangevinDynamics/ranf.h
 include Examples/LangevinDynamics/README
 include Examples/MDIntegrator/README
+include Examples/PathIntegrals/*.dat
+include Examples/PathIntegrals/Database/Molecules/*
 prune Examples/Forcefield/HarmonicOscillator/C/build
 prune Examples/Forcefield/HarmonicOscillator/C/dist
 prune Examples/Forcefield/HarmonicOscillator/Cython/build
