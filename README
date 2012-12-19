@@ -1,7 +1,7 @@
 The Molecular Modelling Toolkit
 ===============================
 
-This is release 2.7 of MMTK, the Molecular Modelling Toolkit. For more
+This is release 2.9 of MMTK, the Molecular Modelling Toolkit. For more
 information about MMTK, look at the manual (in the directories
 Doc/HTML and Doc/PDF) and at the examples in the directory Examples.
 
@@ -19,16 +19,12 @@ donations.
 Installation
 ============
 
-Prerequisites: Python 2.5 or higher, ScientificPython 2.6 or higher,
-               NumPy 1.x.
+Prerequisites:
 
-It should still be possible to use Numerical Python 22.x or 23.x with
-this release of MMTK, but migration to NumPy is strongly encouraged.
-MMTK is NOT compatible with Numerical Python 24.x.
-
-Note: MMTK is developed and tested using Python 2.6/2.7and NumPy
-1.6. However, it should work with Python 2.5 as well.
-
+ - Python 2.6 or 2.7   (http://www.python.org/)
+ - ScientificPython 2.8 or higher (http://dirac.cnrs-orleans.fr/ScientificPython)
+ - NumPy 1.6 or higher (http://numpy.scipy.org/)
+ - FFTW 3.0 or higher  (http://www.fftw.org/)
 
 On most Unix systems, installation requires two commands:
 
@@ -62,8 +58,9 @@ Numeric vs NumPy
 There are three nearly compatible implementations of numeric arrays for
 Python: the original one, Numerical Python (module name "Numeric"),
 a later rewrite called numarray, and an evolution of Numeric that integrates
-features from numarray, called NumPy. In the long run, only NumPy will
-be maintained and further developed.
+features from numarray, called NumPy. Numerical Python and numarray
+are considered obsolete. NumPy is the only actively developed
+and maintained array module for Python at this time.
 
 MMTK was originally written for Numeric, but has supported NumPy as
 well for quite a while. When MMTK is installed, it checks whether
@@ -72,8 +69,7 @@ same package. MMTK development is done with NumPy, and Numeric support
 will be removed in a future version. Unless you have a good reason to
 use Numeric, please use NumPy!
 
-MMTK does not support numarray at all. Since numarray development has
-stopped, this is not likely to change in the future.
+MMTK has never supported numarray and never will.
 
 
 Platform-specific notes
@@ -92,16 +88,6 @@ properly to compile python extensions, see
 http://www.python.org/doc/2.2.1/inst/non-ms-compilers.html for
 details. The option "--compiler=mingw32" must be added when running
 setup.py.
-
-MMTK can be compiled using Microsoft Visual Studio 6.0 as well. For
-more information, check the Wiki pages at:
-
-     http://dirac.cnrs-orleans.fr/mmtk_wiki
-
-
-For using visualization under Windows, you need Mark Hammond's Win32
-extensions, available at
-http://starship.python.net/crew/mhammond/win32/Downloads.html
 
 
 Mac OS X:
@@ -218,19 +204,20 @@ the text of this license.
 Acknowledgements
 ================
 
-The DCD reader was contributed by Lutz Ehrlich, and uses a C library
-for reading DCD files (files Src/ReadDCD.c and Src/ReadDCD.h) which
-was written by Mark Nelson at the University of Illinois.
+Path integral support was developed in collaboration with Chris Ing.
+Chris Ing also translated the documentation to Sphinx, wrote test
+cases, and made lots of good suggestions.
 
 The MolecularSurface module was contributed by Peter McCluskey.
 
 Patches to make MMTK work under Windows were provided by Jon Michelsen.
 
+The DCD reader was contributed by Lutz Ehrlich, and uses a C library
+for reading DCD files (files Src/ReadDCD.c and Src/ReadDCD.h) which
+was written by Mark Nelson at the University of Illinois.
+
 Peter Cook contributed Windows code, examples, code improvements, and
 good suggestions.
-
-Chris Ing translated the documentation to Sphinx, wrote test cases,
-and made lots of good suggestions.
 
 Routines for matrix diagonalization were taken from LAPACK, and
 for the erfc function from the CEPHES library.
@@ -242,4 +229,4 @@ Rue Charles Sadron
 45071 Orleans Cedex 2
 France
 
-E-Mail: hinsen@cnrs-orleans.fr
+E-Mail: konrad.hinsen@cnrs-orleans.fr
