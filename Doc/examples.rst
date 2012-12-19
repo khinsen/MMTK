@@ -125,6 +125,18 @@ obtain reasonable results.
     :doc:`construction.py <../Examples/DNA/construction.py>`
     contains the construction of a DNA strand with a ligand.
 
+.. _Example-PathIntegrals:
+
+- Path integral examples
+
+  - The program
+    :doc:`harmonic_oscillator.py <../Examples/PathIntegrals/harmonic_oscillator.py>`
+    simulates a quantum harmonic oscillator.
+
+  - The program
+    :doc:`quantum_sugar.py <../Examples/PathIntegrals/quantum_sugar.py>`
+    simulates a quantum harmonic oscillator.
+
 .. _Example-Forcefield:
 
 - Forcefield examples

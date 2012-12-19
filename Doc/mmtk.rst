@@ -1131,6 +1131,36 @@ approach. It is also possible to construct a suitable basis vector set
 from small-deformation vector fields
 (e.g. :class:`MMTK.FourierBasis.FourierBasis`).
 
+Path integral simulations
+#########################
+
+MMTK can perform quantum simulations based on the path integral
+formalism. In this approach, each atom is represented by multiple
+point masses called "beads". Interactions are calculated between
+equally-numbered beads of all atoms. In addition, the beads of each
+atom are connected in a circular chain by harmonic springs whose force
+constant depends on the temperature and the mass of the particles.
+The higher the number of beads per atom, the more accurately quantum
+effects are described, but the cost of a simulation is also
+proportional to the number of beads.
+
+Performing a path integral simulation requires the following
+steps in addition to what is required for a standard classical
+simulation:
+
+ 1. The number of beads must be set for each quantum atom. The default
+    value is 1, corresponding to a classical atom. See
+    :class:`MMTK.ChemicalObjects.Atom` for how to define the number of
+    beads.
+
+ 2. An environment object of class :class:`MMTK.Environment.PathIntegrals`
+    must be added to the universe.
+
+ 3. An integrator with explicit path integral support must be
+    used.
+
+See also the :ref:`examples <Example-PathIntegrals>`.
+
 Analysis operations
 ###################
 
