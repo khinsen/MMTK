@@ -3,7 +3,7 @@
 
 from MMTK import *
 from MMTK.ForceFields import Amber99ForceField
-from MMTK_PINormalModeIntegrator import PINormalModeIntegrator, \
+from MMTK.PINormalModeIntegrator import PINormalModeIntegrator, \
                                         PILangevinNormalModeIntegrator
 from MMTK.Trajectory import Trajectory, TrajectoryOutput
 from MMTK.NormalModes import VibrationalModes

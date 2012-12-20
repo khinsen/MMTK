@@ -8,14 +8,14 @@ import numpy.linalg as LA
 cimport numpy as N
 import cython
 
-cimport MMTK_PIIntegratorSupport
+cimport MMTK.PIIntegratorSupport
 from MMTK import Units, ParticleProperties, Features, Environment
 import MMTK_trajectory
 import MMTK_forcefield
-import MMTK_PIIntegratorSupport
+import MMTK.PIIntegratorSupport
 
-import mtrand
-cimport mtrand
+import MMTK.mtrand
+cimport MMTK.mtrand
 
 include "MMTK/python.pxi"
 include "MMTK/numeric.pxi"
@@ -38,7 +38,7 @@ cdef double k_B = Units.k_B
 #
 # Velocity Verlet integrator
 #
-cdef class PICartesianIntegrator(MMTK_PIIntegratorSupport.PIIntegrator):
+cdef class PICartesianIntegrator(MMTK.PIIntegratorSupport.PIIntegrator):
 
     """
     Velocity-Verlet molecular dynamics integrator
@@ -85,7 +85,7 @@ cdef class PICartesianIntegrator(MMTK_PIIntegratorSupport.PIIntegrator):
                              separate thread (default: False)
         @type background: C{bool}
         """
-        MMTK_PIIntegratorSupport.PIIntegrator.__init__(
+        MMTK.PIIntegratorSupport.PIIntegrator.__init__(
             self, universe, options, "Velocity Verlet integrator")
         # Supported features: PathIntegrals
         self.features = [Features.PathIntegralsWithSpringTermsFeature]
@@ -309,9 +309,9 @@ cdef class PILangevinCartesianIntegrator(PICartesianIntegrator):
             mb = sqrt(1./(beta*m[i]))
             for j in range(3):
                 for k in range(ns):
-                    temp[k] = C1[k, 0]*v[i, j] + mb*C2[k, 0]*mtrand.standard_normal()
+                    temp[k] = C1[k, 0]*v[i, j] + mb*C2[k, 0]*MMTK.mtrand.standard_normal()
                     for l in range(1, ns):
-                        temp[k] += C1[k, l]*s[l-1, i, j] + mb*C2[k, l]*mtrand.standard_normal()
+                        temp[k] += C1[k, l]*s[l-1, i, j] + mb*C2[k, l]*MMTK.mtrand.standard_normal()
                 v[i, j] = temp[0]
                 for k in range(1, ns):
                     s[k-1, i, j] = temp[k]

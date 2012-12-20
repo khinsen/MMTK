@@ -14,8 +14,13 @@ include Src/*.c
 include Src/*.i
 include Src/*.h
 include Src/*.pyx
+include Src/MMTK/*.pyx
+include Src/MMTK/*.c
+include Src/MMTK/*.h
 include Src/*opt
 recursive-include Include *.h
+recursive-include Include *.pxi
+recursive-include Include *.pxd
 exclude test/*
 exclude Test/*
 include Tests/*.py

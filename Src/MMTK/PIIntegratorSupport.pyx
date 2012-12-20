@@ -5,7 +5,9 @@ import numpy as N
 cimport numpy as N
 import cython
 
+include "MMTK/core.pxi"
 cimport MMTK_trajectory_generator
+
 from MMTK import Units, ParticleProperties, Features, Environment
 import MMTK_trajectory
 import MMTK_forcefield

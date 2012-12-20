@@ -8,7 +8,7 @@ from MMTK import *
 import MMTK.Utility
 from MMTK.Environment import PathIntegrals
 from MMTK.Trajectory import Trajectory, SnapshotGenerator, TrajectoryOutput
-from MMTK_PINormalModeIntegrator import PINormalModeIntegrator, PILangevinNormalModeIntegrator
+from MMTK.PINormalModeIntegrator import PINormalModeIntegrator, PILangevinNormalModeIntegrator
 from MMTK.ForceFields import Amber99ForceField
 from Scientific import N
 import os

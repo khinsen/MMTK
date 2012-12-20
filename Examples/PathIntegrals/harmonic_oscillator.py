@@ -4,7 +4,7 @@
 
 from MMTK import *
 from MMTK.ForceFields.Restraints import HarmonicDistanceRestraint
-from MMTK_PINormalModeIntegrator import PILangevinNormalModeIntegrator
+from MMTK.PINormalModeIntegrator import PILangevinNormalModeIntegrator
 from MMTK.Trajectory import Trajectory, TrajectoryOutput
 from MMTK.Subspace import RigidMotionSubspace
 from Scientific import N

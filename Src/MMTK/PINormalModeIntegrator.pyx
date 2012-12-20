@@ -7,16 +7,16 @@ import numpy as N
 cimport numpy as N
 import cython
 
-cimport MMTK_PIIntegratorSupport
+cimport MMTK.PIIntegratorSupport
 from MMTK import Units, ParticleProperties, Features, Environment
 import MMTK_trajectory
 import MMTK_forcefield
 import MMTK_universe
-import MMTK_PIIntegratorSupport
+import MMTK.PIIntegratorSupport
 import numbers
 
-import mtrand
-cimport mtrand
+import MMTK.mtrand
+cimport MMTK.mtrand
 
 include "MMTK/python.pxi"
 include "MMTK/numeric.pxi"
@@ -48,7 +48,7 @@ cdef double k_B = Units.k_B
 #
 # Velocity Verlet integrator in normal-mode coordinates
 #
-cdef class PINormalModeIntegrator(MMTK_PIIntegratorSupport.PIIntegrator):
+cdef class PINormalModeIntegrator(MMTK.PIIntegratorSupport.PIIntegrator):
 
     cdef N.ndarray workspace1, workspace2
     cdef double *workspace_ptr_1, *workspace_ptr_2
@@ -99,7 +99,7 @@ cdef class PINormalModeIntegrator(MMTK_PIIntegratorSupport.PIIntegrator):
                              separate thread (default: False)
         @type background: C{bool}
         """
-        MMTK_PIIntegratorSupport.PIIntegrator.__init__(
+        MMTK.PIIntegratorSupport.PIIntegrator.__init__(
             self, universe, options, "Path integral normal-mode integrator")
         # Supported features: PathIntegrals
         self.features = [Features.PathIntegralsFeature]
@@ -507,9 +507,9 @@ cdef class PILangevinNormalModeIntegrator(PINormalModeIntegrator):
                     c2 = sqrt(1-c1*c1)
                     for j in range(3):
                         if k == 0 or k == nb/2:
-                            nmv[j, i+k] = c1*nmv[j, i+k] + c2*mb*mtrand.standard_normal()
+                            nmv[j, i+k] = c1*nmv[j, i+k] + c2*mb*MMTK.mtrand.standard_normal()
                         else:
-                            nmv[j, i+k] = c1*nmv[j, i+k] + sqrt(0.5)*c2*mb*mtrand.standard_normal()
+                            nmv[j, i+k] = c1*nmv[j, i+k] + sqrt(0.5)*c2*mb*MMTK.mtrand.standard_normal()
                 # Conversion back to Cartesian coordinates
                 self.normalModeToCartesian(v, nmv, i, nb)
 

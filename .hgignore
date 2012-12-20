@@ -21,10 +21,10 @@ Src/MMTK_restraints.c
 Src/MMTK_state_accessor.c
 Src/MMTK_trajectory_action.c
 Src/MMTK_trajectory_generator.c
-Src/MMTK_PIIntegratorSupport.c
-Src/MMTK_PINormalModeIntegrator.c
-Src/MMTK_PICartesianIntegrator.c
-Src/mtrand.c
+Src/MMTK/PIIntegratorSupport.c
+Src/MMTK/PINormalModeIntegrator.c
+Src/MMTK/PICartesianIntegrator.c
+Src/MMTK/mtrand.c
 Examples/Forcefield/*/Cython/*.c
 Examples/MDIntegrator/*.c
 1
