@@ -3,6 +3,12 @@
 # Written by Konrad Hinsen
 #
 
+"""
+Velocity Verlet integrator for path integral systems
+"""
+
+__docformat__ = 'restructuredtext'
+
 import numpy as N
 import numpy.linalg as LA
 cimport numpy as N
@@ -41,8 +47,7 @@ cdef double k_B = Units.k_B
 cdef class PICartesianIntegrator(MMTK.PIIntegratorSupport.PIIntegrator):
 
     """
-    Velocity-Verlet molecular dynamics integrator
-    with path integral support
+    Velocity-Verlet molecular dynamics integrator with path integral support
 
     The integrator is fully thread-safe.
 
@@ -65,25 +70,26 @@ cdef class PICartesianIntegrator(MMTK.PIIntegratorSupport.PIIntegrator):
      - category "energy": potential and kinetic energy, plus
        extended-system energy terms if a thermostat and/or barostat
        are used
+
     """
 
     def __init__(self, universe, **options):
         """
-        @param universe: the universe on which the integrator acts
-        @type universe: L{MMTK.Universe}
-        @keyword steps: the number of integration steps (default is 100)
-        @type steps: C{int}
-        @keyword delta_t: the time step (default is 1 fs)
-        @type delta_t: C{float}
-        @keyword actions: a list of actions to be executed periodically
+        :param universe: the universe on which the integrator acts
+        :type universe: MMTK.Universe
+        :keyword steps: the number of integration steps (default is 100)
+        :type steps: int
+        :keyword delta_t: the time step (default is 1 fs)
+        :type delta_t: float
+        :keyword actions: a list of actions to be executed periodically
                           (default is none)
-        @type actions: C{list}
-        @keyword threads: the number of threads to use in energy evaluation
+        :type actions: list
+        :keyword threads: the number of threads to use in energy evaluation
                           (default set by MMTK_ENERGY_THREADS)
-        @type threads: C{int}
-        @keyword background: if True, the integration is executed as a
+        :type threads: int
+        :keyword background: if True, the integration is executed as a
                              separate thread (default: False)
-        @type background: C{bool}
+        :type background: bool
         """
         MMTK.PIIntegratorSupport.PIIntegrator.__init__(
             self, universe, options, "Velocity Verlet integrator")
@@ -284,6 +290,15 @@ cdef class PICartesianIntegrator(MMTK.PIIntegratorSupport.PIIntegrator):
 # Velocity Verlet integrator with a colored-noise Langevin thermostat
 #
 cdef class PILangevinCartesianIntegrator(PICartesianIntegrator):
+
+    """
+    Velocity-Verlet molecular dynamics integrator with path integral support
+    and a Langevin thermostat.
+
+    This integrator works like PICartesianIntegrator, but has
+    an additional open "friction_matrix", which is a square array.
+
+    """
 
     cdef N.ndarray C1, C2
     cdef s, xi, temp

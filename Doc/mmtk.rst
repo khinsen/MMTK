@@ -1157,7 +1157,11 @@ simulation:
     must be added to the universe.
 
  3. An integrator with explicit path integral support must be
-    used.
+    used. There are currently four such integrators:
+    :class:`MMTK.PICartesianIntegrator.PICartesianIntegrator`,
+    :class:`MMTK.PICartesianIntegrator.PILangevinCartesianIntegrator`,
+    :class:`MMTK.PINormalModeIntegrator.PINormalModeIntegrator`, and
+    :class:`MMTK.PINormalModeIntegrator.PILangevinNormalModeIntegrator`.
 
 See also the :ref:`examples <Example-PathIntegrals>`.
 

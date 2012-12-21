@@ -73,6 +73,14 @@ MMTK.Dynamics
 =============
 .. automodule::  MMTK.Dynamics
 
+MMTK.PICartesianIntegrator
+==========================
+.. automodule::  MMTK.PICartesianIntegrator
+
+MMTK.PINormalModeIntegrator
+===========================
+.. automodule::  MMTK.PINormalModeIntegrator
+
 MMTK.Environment
 ================
 .. automodule::  MMTK.Environment

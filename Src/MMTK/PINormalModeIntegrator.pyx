@@ -3,6 +3,12 @@
 # Written by Konrad Hinsen
 #
 
+"""
+Path integral MD integrator using normal-mode coordinates
+"""
+
+__docformat__ = 'restructuredtext'
+
 import numpy as N
 cimport numpy as N
 import cython
@@ -83,21 +89,21 @@ cdef class PINormalModeIntegrator(MMTK.PIIntegratorSupport.PIIntegrator):
 
     def __init__(self, universe, **options):
         """
-        @param universe: the universe on which the integrator acts
-        @type universe: L{MMTK.Universe}
-        @keyword steps: the number of integration steps (default is 100)
-        @type steps: C{int}
-        @keyword delta_t: the time step (default is 1 fs)
-        @type delta_t: C{float}
-        @keyword actions: a list of actions to be executed periodically
+        :param universe: the universe on which the integrator acts
+        :type universe: MMTK.Universe
+        :keyword steps: the number of integration steps (default is 100)
+        :type steps: int
+        :keyword delta_t: the time step (default is 1 fs)
+        :type delta_t: float
+        :keyword actions: a list of actions to be executed periodically
                           (default is none)
-        @type actions: C{list}
-        @keyword threads: the number of threads to use in energy evaluation
+        :type actions: list
+        :keyword threads: the number of threads to use in energy evaluation
                           (default set by MMTK_ENERGY_THREADS)
-        @type threads: C{int}
-        @keyword background: if True, the integration is executed as a
+        :type threads: int
+        :keyword background: if True, the integration is executed as a
                              separate thread (default: False)
-        @type background: C{bool}
+        :type background: bool
         """
         MMTK.PIIntegratorSupport.PIIntegrator.__init__(
             self, universe, options, "Path integral normal-mode integrator")
@@ -475,6 +481,16 @@ cdef class PINormalModeIntegrator(MMTK.PIIntegratorSupport.PIIntegrator):
 # with a Langevin thermostat
 #
 cdef class PILangevinNormalModeIntegrator(PINormalModeIntegrator):
+
+    """
+    Molecular dynamics integrator for path integral systems using
+    normal-mode coordinates and a Langevin thermostat.
+
+    This integrator works like PINormalModeIntegrator, but has
+    an additional option "centroid_friction", which is a ParticleScalar
+    (one friction constant per atom) or a plain number.
+
+    """
 
     cdef N.ndarray gamma
 
