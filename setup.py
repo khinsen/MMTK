@@ -28,7 +28,7 @@ if use_cython:
         from Cython.Distutils import build_ext
         use_cython = True
     except ImportError:
-        pass
+        use_cython = False
 if not use_cython:
     from distutils.command.build_ext import build_ext
 src_ext = 'pyx' if use_cython else 'c'
