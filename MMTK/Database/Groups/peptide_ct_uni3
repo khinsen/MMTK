@@ -9,5 +9,5 @@ pdbmap = [('', {'N': N, 'O': O, 'CA': C_alpha, 'C': C, 'H': H, 'OXT': O_2, }, ),
 amber91_atom_type = {C_alpha: 'CH', O: 'O2', N: 'N', C: 'C', O_2: 'O2', H: 'H', }
 opls_atom_type = {C_alpha: 'CH', O: 'O2', N: 'N', C: 'C', O_2: 'O2', H: 'H', }
 opls_charge = {C_alpha: .1, O: -.8, N: -.57, C: .7, O_2: -.8, H: .37, }
-pdb_alternative = {'O1': 'O', 'O2': 'OXT', 'HN': 'H', 'OT': 'OXT', 'OT2': 'OXT', 'OT1': 'O', }
+pdb_alternative = {'O1': 'O', 'O2': 'OXT', 'HN': 'H', 'OT': 'OXT', 'OT2': 'OXT', 'OT1': 'O', 'OC2': 'OXT', 'OC1': 'O', }
 name = 'peptide C terminus'
