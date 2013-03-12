@@ -12,4 +12,4 @@ pdbmap = [('', {'N': N, 'O': O, '2HT': H_2, 'HA': H_alpha, 'CA': C_alpha, '1HT':
 name = 'peptide N terminus/C terminus'
 amber_atom_type = {H_3: 'H', C: 'C', O: 'O', H_alpha: 'HP', H_1: 'H', C_alpha: 'CT', H_2: 'H', N: 'N3', O_2: 'O2',}
 amber12_atom_type = {H_3: 'H', C: 'C', O: 'O', H_alpha: 'HP', H_1: 'H', C_alpha: 'CX', H_2: 'H', N: 'N3', O_2: 'O2',}
-pdb_alternative = {'HT1': '1HT', 'HT2': '2HT', 'HT3': '3HT', 'H1': '1HT', 'H3': '3HT', 'H2': '2HT', '2HA': 'HA', 'HA2': 'HA', 'O2': 'OXT', 'OT': 'OXT', 'OT2': 'OXT', 'OT1': 'O', "O'": 'O', "O''": 'OXT'}
+pdb_alternative = {'HT1': '1HT', 'HT2': '2HT', 'HT3': '3HT', 'H1': '1HT', 'H3': '3HT', 'H2': '2HT', '2HA': 'HA', 'HA2': 'HA', 'O2': 'OXT', 'OT': 'OXT', 'OT2': 'OXT', 'OT1': 'O', 'OC2': 'OXT', 'OC1': 'O', "O'": 'O', "O''": 'OXT'}
