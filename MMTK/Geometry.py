@@ -750,8 +750,8 @@ def superpositionFit(confs):
                   position for each atom
     :type confs: sequence of (float, Vector, Vector)
     :returns: the quaternion representing the rotation,
-              the center of mass in the alternate configuraton,
               the center of mass in the reference configuration,
+              the center of mass in the alternate configuraton,
               and the RMS distance after the optimal superposition
     """
     w_sum = 0.
