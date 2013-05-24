@@ -502,12 +502,24 @@ evaluator_dealloc(PyFFEvaluatorObject *self)
     for (i = 1; i < self->nthreads; i++) {
       int j = 50;
       tinfo->exit = 1;
+#if THREAD_DEBUG
+      printf("Releasing thread %d\n", tinfo->input.thread_id);
+#endif
       PyThread_release_lock(tinfo->lock);
       while (!tinfo->stop && j--) {
+#if THREAD_DEBUG
+        printf("evaluator_dealloc: Waiting for thread %d to stop (tinfo->stop is %d)\n",
+               tinfo->input.thread_id, tinfo->stop);
+#endif
 #ifdef MS_WINDOWS
-	Sleep(10);
+	Sleep(10);  /* 10 ms */
 #else
-	sleep(10);
+        {
+          struct timeval tv;
+          tv.tv_sec = 0;
+          tv.tv_usec = 10000;  /* 10 ms */
+          select(0, NULL, NULL, NULL, &tv);
+        }
 #endif
       }
       Py_XDECREF(tinfo->energy.gradients);
