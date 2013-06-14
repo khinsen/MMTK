@@ -1,3 +1,23 @@
+2.7.8 --> 2.7.9
+===============
+
+Improvements:
+
+- Allow a Collection to be constructed from a generator
+
+- Make Amber file parser more tolerant to accept more mod_files
+
+- More pdb_alternative atom names: GROMACS-style OC1/OC2 in
+  C-terminal peptide group
+
+- Compile C versions of extension modules if Cython is not installed
+
+Bug fixes:
+
+- Remove long delays when deallocating thread-based
+  energy evaluators
+
+
 2.7.7 --> 2.7.8
 ===============
 
