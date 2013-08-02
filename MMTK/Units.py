@@ -117,7 +117,7 @@ invcm = c/cm
 
 # Avogadro number
 
-Nav = 6.0221367e23
+Nav = 6.02214129e23
 
 # Mass units
 # internal unit: amu (= g/mol)
@@ -149,7 +149,7 @@ dyn = 1.e-5*N
 # internal unit: charge in e
 
 e = 1.
-C = 6.24150636309e18*e      # Coulomb (SI)
+C = 6.24150934326018*e      # Coulomb (SI)
 A = C/s                     # Ampere (SI)
 D = 1.e-15*C/c              # Debye
 V = J/C                     # Volt
@@ -172,12 +172,12 @@ atm = 101325*Pa             # atmosphere
 
 # Constants
 
-h = 6.626176e-34*J*s
+h = 6.62606957e-34*J*s
 hbar = h/(2.*Numeric.pi)
-k_B = 1.3806513e-23*J/K
+k_B = 1.3806488e-23*J/K
 eps0 = 1./(4.e-7*Numeric.pi)*A**2*m/J/c**2
 
-me = 0.51099906*mega*eV/c**2
+me = 0.510998928*mega*eV/c**2
 
 electrostatic_energy = 1/(4.*Numeric.pi*eps0)
 
