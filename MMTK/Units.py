@@ -149,7 +149,7 @@ dyn = 1.e-5*N
 # internal unit: charge in e
 
 e = 1.
-C = 6.24150934326018*e      # Coulomb (SI)
+C = 6.24150934326018e18*e  # Coulomb (SI)
 A = C/s                     # Ampere (SI)
 D = 1.e-15*C/c              # Debye
 V = J/C                     # Volt
