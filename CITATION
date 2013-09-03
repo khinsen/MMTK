@@ -1,0 +1,20 @@
+If you use MMTK for your research work, please cite
+
+  Konrad Hinsen
+  The Molecular Modeling Toolkit: A New Approach to Molecular Simulations
+  J. Comp. Chem. 21, 79-85 (2000)
+  DOI: 10.1002/(SICI)1096-987X(20000130)21:2<79::AID-JCC1>3.0.CO;2-B
+
+
+For BibTeX users, here is a BibTeX record ready to paste into
+your reference collection:
+
+@article{MMTK,
+	Author = {Hinsen, Konrad},
+	Journal = {J. Comp. Chem.},
+	Pages = {79-85},
+	Title = {The Molecular Modeling Toolkit: A New Approach to Molecular Simulations},
+	Volume = {21},
+	Year = {2000}
+	Doi = {10.1002/(SICI)1096-987X(20000130)21:2<79::AID-JCC1>3.0.CO;2-B},
+}

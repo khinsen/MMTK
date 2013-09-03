@@ -1,4 +1,4 @@
-include README LICENSE LICENCE MANIFEST.in
+include README LICENSE LICENCE CITATION MANIFEST.in
 include tviewer
 include MMTK/ForceFields/force_fields
 include MMTK/ForceFields/Amber/*parm*
