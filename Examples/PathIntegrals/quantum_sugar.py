@@ -3,8 +3,8 @@
 
 from MMTK import *
 from MMTK.ForceFields import Amber99ForceField
-from MMTK.PINormalModeIntegrator import PINormalModeIntegrator, \
-                                        PILangevinNormalModeIntegrator
+from MMTK.PICartesianIntegrator import PICartesianIntegrator, \
+                                       PILangevinCartesianIntegrator
 from MMTK.Trajectory import Trajectory, TrajectoryOutput
 from MMTK.NormalModes import VibrationalModes
 from MMTK import Features
@@ -69,8 +69,8 @@ dt = timeStep(universe)
 universe.initializeVelocitiesToTemperature(temperature)
 
 # Create the integrator
-integrator = PILangevinNormalModeIntegrator(universe, delta_t=dt,
-                                            centroid_friction = 1./Units.ps)
+integrator = PILangevinCartesianIntegrator(universe, delta_t=dt,
+                                           friction_matrix = N.array([[1./Units.ps]]))
 
 # Produce a trajectory.
 trajectory = Trajectory(universe, "sugar.nc", "w")
