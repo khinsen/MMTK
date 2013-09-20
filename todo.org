@@ -33,7 +33,7 @@ calculating averages are not obvious).
 Same problem as for ParticleProperties.
 
 ** Integration
-*** TODO [#A] Integrators
+*** TODO Integrators
 **** DONE Velocity-Verlet integrator using normal mode variables
 **** DONE Fix normal mode coordinates with PBC
 **** DONE Colored-noise Langevin version of this integrator
@@ -63,12 +63,11 @@ see paper by Ceriotti et al.
  - [ ] angularMomentum
  - [ ] angularVelocity
  - [ ] booleanMask
-*** TODO Energy evaluation
-*** TODO Trajectories
+*** DONE Energy evaluation
+*** DONE Trajectories
 *** TODO ParticleProperties
 *** TODO Subspace.PairDistanceSubspace
 ** I/O
-
 *** DONE [#A] PDB output
 Currently: centroids
 Add new file type(s) for representing all the beads:
