@@ -283,7 +283,7 @@ class PeptideChain(Biopolymers.ResidueChain):
                                  'c_terminus': c_term,
                                  'model': model,
                                  'circular': circular}
-            if type(sequence[0]) == type(''):
+            if isinstance(sequence[0], basestring):
                 conf = None
                 numbers = range(len(sequence))
             else:
