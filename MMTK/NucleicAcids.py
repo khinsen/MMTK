@@ -164,9 +164,11 @@ class NucleotideChain(Biopolymers.ResidueChain):
                                  'circular': circular}
             if isinstance(sequence[0], basestring):
 		conf = None
+                numbers = range(len(sequence))
 	    else:
 		conf = sequence
 		sequence = [r.name for r in sequence]
+                numbers = [r.number for r in conf]
 	    sequence = [Biopolymers._fullName(r) for r in sequence]
             if term5:
                 if sequence[0].find('5ter') == -1:
@@ -177,10 +179,10 @@ class NucleotideChain(Biopolymers.ResidueChain):
 
             self.groups = []
             n = 0
-            for residue in sequence:
+            for residue, number in zip(sequence, numbers):
                 n += 1
                 r = Nucleotide(residue, model)
-                r.name = r.symbol + '_' + `n`
+                r.name = r.symbol + '_' + str(number)
                 r.sequence_number = n
                 r.parent = self
                 self.groups.append(r)
