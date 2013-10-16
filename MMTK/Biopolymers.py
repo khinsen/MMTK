@@ -277,4 +277,7 @@ def defineNucleicAcidResidue(full_name, code):
     if _aa_residue_names.has_key(code) or _na_residue_names.has_key(code):
         raise ValueError("residue name " + code + " already used")
     _na_residue_names[code] = full_name
-    Scientific.IO.PDB.defineNucleicAcidResidue(code)
+    if code.startswith('r') or code.startswith('d'):
+        Scientific.IO.PDB.defineNucleicAcidResidue(code[1:])
+    else:
+        Scientific.IO.PDB.defineNucleicAcidResidue(code)
