@@ -450,7 +450,13 @@ def _sort3(s1, s2, s3):
     return s1, s2, s3
 
 def _sort4(s1, s2, s3, s4):
-    if s3 < s2:
-        return s4, s3, s2, s1
+    if s2 == s3:
+        if s1 < s4:
+            return s1, s2, s3, s4
+        else:
+            return s4, s3, s2, s1
     else:
-        return s1, s2, s3, s4
+        if s3 < s2:
+            return s4, s3, s2, s1
+        else:
+            return s1, s2, s3, s4
