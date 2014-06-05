@@ -394,7 +394,10 @@ class PeptideChain(Biopolymers.ResidueChain):
         self.atoms.extend(r_new.atoms)
         self.bonds.extend(r_new.bonds)
         r_new.sequence_number = n+1
-        r_new.name = r_new.symbol+`n+1`
+        if r_old.name.startswith(r_old.symbol):
+            r_new.name = r_new.symbol+r_old.name[len(r_old.symbol):]
+        else:
+            r_new.name = r_new.symbol+`n+1`
         r_new.parent = self
         self.groups[n] = r_new
         if n > 0:
