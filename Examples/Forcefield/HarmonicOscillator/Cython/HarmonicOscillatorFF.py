@@ -63,5 +63,5 @@ class HarmonicOscillatorForceField(ForceField):
         return [HarmonicOscillatorTerm(universe,
                                        self.atom_index + o[0],
                                        self.center,
-                                       self.force_constant)
+                                       f*self.force_constant)
                 for o in offsets]
