@@ -1,0 +1,5 @@
+symbol = 'Pt2'
+name = 'phosphotyrosine_2'
+C_alpha = Atom('phosphotyrosine_2')
+pdbmap = [('PT2', {'CA': C_alpha}),]
+chain_links = [C_alpha, C_alpha]

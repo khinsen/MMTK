@@ -190,6 +190,7 @@ _aa_residue_names = {'ala': 'alanine',          'a': 'alanine',
                      'hid': 'histidine_deltah', 'hie': 'histidine_epsilonh',
                      'hip': 'histidine_plus',
                      'lyp': 'lysine_neutral',
+                     'pt2': 'phosphotyrosine_2',
                      'ace': 'ace_beginning',    'nme': 'nmethyl',
                      'nhe': 'amide',
                      }
