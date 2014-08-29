@@ -1,0 +1,10 @@
+name = 'phosphotyrosine_2'
+symbol = 'C'
+mass = 241.140149
+color = 'black'
+vdW_radius = 0.17
+
+b_coherent = 28.125092*fm
+b_incoherent = 206.777000*fm
+b_coherent_deut = 32.177607*fm
+b_incoherent_deut = 37.217000*fm

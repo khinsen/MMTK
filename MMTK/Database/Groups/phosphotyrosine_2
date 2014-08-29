@@ -1,0 +1,10 @@
+# Phosphotyrosine with unprotonated phosphate group (charge -2)
+# AMBER parameters from http://www.pharmacy.manchester.ac.uk/bryce/amber/ (entry TYR-PO3)
+
+sidechain = Group('ptyr2_sidechain')
+peptide = Group('peptide')
+bonds = [Bond(peptide.C_alpha, sidechain.C_beta), ]
+symbol = 'Pt2'
+amber_charge = {peptide.H_alpha: 0.027982, sidechain.H_delta_2: 0.112503, sidechain.C_epsilon_1: -0.254266, sidechain.C_epsilon_2: -0.254266, sidechain.H_delta_1: 0.112503, sidechain.H_beta_3: 0.081930, peptide.O: -0.581900, sidechain.O_eta: -0.557944, sidechain.H_epsilon_1: 0.161606, peptide.H: 0.2936, sidechain.H_beta_2: 0.081930, peptide.C: 0.536600, sidechain.C_delta_2: -0.198084, peptide.N: -0.5163, sidechain.C_gamma: 0.073446, peptide.C_alpha: 0.141279, sidechain.H_epsilon_2: 0.161606, sidechain.C_zeta: 0.477009, sidechain.C_delta_1: -0.198081, sidechain.C_beta: -0.251171, sidechain.P_theta: 1.380672, sidechain.O_theta_1: -0.94355, sidechain.O_theta_2: -0.94355, sidechain.O_theta_3: -0.94355, }
+name = 'phosphotyrosine_2'
+chain_links = [peptide.N, peptide.C]
