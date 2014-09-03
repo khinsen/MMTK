@@ -138,12 +138,12 @@ cdef class PINormalModeIntegrator(MMTK.PIIntegratorSupport.PIIntegrator):
         cdef double *w2 = self.workspace_ptr_2
         cdef fftw_plan p
         cdef int i, j
-        p = fftw_plan_dft_1d(nb, <fftw_complex *>w1, <fftw_complex *>w2,
-                             FFTW_FORWARD, FFTW_ESTIMATE)
         if nb == 1:
             for i in range(3):
                 nmc[i, bead_index] = x[bead_index, i]
         else:
+            p = fftw_plan_dft_1d(nb, <fftw_complex *>w1, <fftw_complex *>w2,
+                                 FFTW_FORWARD, FFTW_ESTIMATE)
             for i in range(3):
                 for j in range(nb):
                     w1[2*j] = x[bead_index+j, i]
@@ -165,12 +165,12 @@ cdef class PINormalModeIntegrator(MMTK.PIIntegratorSupport.PIIntegrator):
         cdef double *w2 = self.workspace_ptr_2
         cdef fftw_plan p
         cdef int i, j
-        p = fftw_plan_dft_1d(nb, <fftw_complex *>w1, <fftw_complex *>w2,
-                             FFTW_BACKWARD, FFTW_ESTIMATE)
         if nb == 1:
             for i in range(3):
                 x[bead_index, i] = nmc[i, bead_index]
         else:
+            p = fftw_plan_dft_1d(nb, <fftw_complex *>w1, <fftw_complex *>w2,
+                                 FFTW_BACKWARD, FFTW_ESTIMATE)
             for i in range(3):
                 w1[0] = nmc[i, bead_index+0]
                 w1[1] = 0.
