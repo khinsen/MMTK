@@ -25,6 +25,7 @@ execfile('MMTK/__pkginfo__.py', pkginfo.__dict__)
 use_cython = int(os.environ.get('MMTK_USE_CYTHON', '0')) != 0
 if use_cython:
     try:
+        from Cython.Build import cythonize
         from Cython.Distutils import build_ext
         use_cython = True
     except ImportError:
@@ -396,6 +397,9 @@ extensions = [Extension('%s.MMTK_DCD' % ext_pkg,
                         libraries=libraries,
                         define_macros=macros),
               ]
+
+if use_cython:
+    extensions = cythonize(extensions, include_path=include_dirs)
 
 #################################################################
 
