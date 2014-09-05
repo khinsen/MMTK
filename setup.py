@@ -26,12 +26,10 @@ use_cython = int(os.environ.get('MMTK_USE_CYTHON', '0')) != 0
 if use_cython:
     try:
         from Cython.Build import cythonize
-        from Cython.Distutils import build_ext
         use_cython = True
     except ImportError:
         use_cython = False
-if not use_cython:
-    from distutils.command.build_ext import build_ext
+
 src_ext = 'pyx' if use_cython else 'c'
 
 # Check that we have Scientific 2.6 or higher
@@ -199,7 +197,6 @@ cmdclass = {
     'build' : modified_build,
     'sdist': modified_sdist,
     'install_data': modified_install_data,
-    'build_ext': build_ext,
     'test': test
 }
 
