@@ -19,7 +19,8 @@ cdef extern from "MMTK/arrayobject.h":
     ctypedef struct PyArrayObject:
         char *data 
         int nd 
-        int *dimensions, *strides 
+        int *dimensions 
+        int *strides 
         PyObject *base 
         PyArray_Descr *descr 
         int flags
@@ -27,7 +28,8 @@ cdef extern from "MMTK/arrayobject.h":
     ctypedef class Scientific.N.ArrayType [object PyArrayObject]: 
         cdef char *data 
         cdef int nd 
-        cdef int *dimensions, *strides 
+        cdef int *dimensions 
+        cdef int *strides 
         cdef object base 
         cdef PyArray_Descr *descr 
         cdef int flags
