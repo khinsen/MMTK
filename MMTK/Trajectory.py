@@ -62,7 +62,8 @@ class Trajectory(object):
     """
 
     def __init__(self, object, filename, mode = 'r', comment = None,
-                 double_precision = False, cycle = 0, block_size = 1):
+                 double_precision = False, cycle = 0, block_size = 1,
+                 with_database = False):
         """
         :param object: the object whose data is stored in the trajectory file.
                        This can be 'None' when opening a file for reading;
@@ -102,6 +103,14 @@ class Trajectory(object):
                            always used a block size of 1 and cannot handle
                            trajectories with different block sizes.
         :type block_size: int
+        :param with_database: if True, minimal database entries for the
+                              molecules in the universe are stored in the
+                              trajectory file. This is useful for universes
+                              created from non-standard database entries,
+                              or using a MoleculeFactory. However, it is not
+                              possible to add optional information (e.g. force
+                              field parameters) to these database entries.
+        :type with_database: bool
         """
         filename = os.path.expanduser(filename)
         self.filename = filename
@@ -109,6 +118,10 @@ class Trajectory(object):
         if object is None and mode == 'r':
             file = NetCDF.NetCDFFile(filename, 'r')
             description = file.variables['description'][:].tostring()
+            if 'database' in file.variables:
+                database = file.variables['database'][:].tostring()
+            else:
+                database = None
             try:
                 self.block_size = file.dimensions['minor_step_number']
             except KeyError:
@@ -134,8 +147,15 @@ class Trajectory(object):
             file.close()
             import Skeleton
             local = {}
-            skeleton = eval(description, vars(Skeleton), local)
-            universe = skeleton.make({}, conf)
+            if database:
+                import Database
+                Database.initializeDatabase(eval(database))
+            try:
+                skeleton = eval(description, vars(Skeleton), local)
+                universe = skeleton.make({}, conf)
+            finally:
+                if database:
+                    Database.initializeDatabase()
             universe.setCellParameters(cell)
             object = universe
             initialize = 1
@@ -160,14 +180,22 @@ class Trajectory(object):
             for o in Collections.Collection(object):
                 toplevel.add(o.topLevelChemicalObject())
             object = Collections.Collection(list(toplevel))
+        import MMTK_trajectory
         if description is None:
             description = universe.description(object, inverse_map)
-        import MMTK_trajectory
-        self.trajectory = MMTK_trajectory.Trajectory(universe, description,
-                                                     index_map, filename,
-                                                     mode + 's',
-                                                     double_precision, cycle,
-                                                     block_size)
+        if with_database:
+            database = str(makeDatabase(universe))
+            self.trajectory = MMTK_trajectory.Trajectory(universe, description,
+                                                         index_map, filename,
+                                                         mode + 's',
+                                                         double_precision, cycle,
+                                                         block_size, database)
+        else:
+            self.trajectory = MMTK_trajectory.Trajectory(universe, description,
+                                                         index_map, filename,
+                                                         mode + 's',
+                                                         double_precision, cycle,
+                                                         block_size)
         self.universe = universe
         self.index_map = index_map
         try:
@@ -965,6 +993,140 @@ def isTrajectory(object):
     """
     import MMTK_trajectory
     return isinstance(object, (Trajectory, MMTK_trajectory.trajectory_type))
+
+#
+# Make a minimal database covering all objects in a universe, for
+# storage in a trajectory.
+#
+def makeDatabase(universe):
+
+    def relativeName(obj, root):
+        parent = obj.parent
+        if parent is None or parent is root:
+            return obj.name
+        else:
+            return "%s.%s" % (relativeName(obj.parent, root), obj.name)
+
+    def addEntry(db, inv_db, preferred_name, name_template, entry):
+        entry = tuple(entry)
+        preferred_name = preferred_name.lower()
+        entry_name = inv_db.get(entry, None)
+        if entry_name is None:
+            if preferred_name not in db:
+                entry_name = preferred_name
+            else:
+                i = 1
+                while True:
+                    entry_name = name_template % i
+                    if entry_name not in db:
+                        break
+                    i += 1
+            db[entry_name] = entry
+            inv_db[entry] = entry_name
+        return entry_name
+
+    def addAtomType(db, inv_db, atom):
+        entry = []
+        try:
+            name = atom.type.name
+            entry.append("name='%s'" % name)
+        except AttributeError:
+            name = None
+        try:
+            symbol = atom.symbol
+            entry.append("symbol='%s'" % symbol)
+        except AttributeError:
+            symbol = None
+        entry.append('mass=%s' % atom.mass())
+        return addEntry(db['Atoms'], inv_db['Atoms'],
+                        name if symbol is None else symbol, 'atom_%d', entry)
+
+    def compositeObjectEntry(db, inv_db, obj, entry):
+        subgroup_bonds = []
+        for subgroup in obj.groups:
+            subgroup_entry = addGroupType(db, inv_db, subgroup)
+            subgroup_name = subgroup.name
+            entry.append("%s=Group('%s')" % (subgroup_name, subgroup_entry))
+            subgroup_bonds.extend(subgroup.bonds)
+        atom_names = {}
+        for atom in obj.atoms:
+            atom_names[atom] = relativeName(atom, obj)
+            if atom.parent is obj:
+                atom_entry = addAtomType(db, inv_db, atom)
+                atom_name = atom.name
+                entry.append("%s=Atom('%s')" % (atom_name, atom_entry))
+        bonds = ",".join(["Bond(%s, %s)" % (atom_names[bond.a1], atom_names[bond.a2])
+                          for bond in obj.bonds if bond not in subgroup_bonds])
+        if bonds:
+            entry.append("bonds=[%s]" % bonds)
+
+    def addGroupType(db, inv_db, group):
+        entry = []
+        try:
+            name = group.type.name
+            entry.append("name='%s'" % name)
+        except AttributeError:
+            name = None
+        try:
+            entry.append("symbol='%s'" % group.symbol)
+        except AttributeError:
+            pass
+        compositeObjectEntry(db, inv_db, group, entry)
+        return addEntry(db['Groups'], inv_db['Groups'], name, 'group_%d', entry)
+
+    def addMoleculeType(db, inv_db, molecule):
+        from MMTK.Biopolymers import ResidueChain
+        entry = []
+        try:
+            name = molecule.type.name
+            entry.append("name='%s'" % name)
+        except AttributeError:
+            name = None
+        compositeObjectEntry(db, inv_db, molecule, entry)
+        if isinstance(molecule, ResidueChain):
+            return None
+        else:
+            return addEntry(db['Molecules'], inv_db['Molecules'],
+                            name, 'mol_%d', entry)
+
+    def addComplexType(db, inv_db, complex):
+        from MMTK.Proteins import Protein
+        entry = []
+        try:
+            name = complex.name
+            entry.append("name='%s'" % name)
+        except AttributeError:
+            name = None
+        for mol in complex.molecules:
+            mol_entry = addMoleculeType(db, inv_db, mol)
+            mol_name = mol.name
+            entry.append("%s=Molecule(%s)" % (mol_name, mol_entry))
+        if isinstance(complex, Protein):
+            return None
+        else:
+            return addEntry(db['Complexes'], inv_db['Complexes'],
+                            name, 'complex_%d', entry)
+
+    def addObjectType(db, inv_db, obj):
+        from MMTK.ChemicalObjects import Atom, Group, Molecule, Complex
+        if isinstance(obj, Atom):
+            addAtomType(db, inv_db, obj)
+        elif isinstance(obj, Molecule):
+            addMoleculeType(db, inv_db, obj)
+        elif isinstance(obj, Complex):
+            addComplexType(db, inv_db, obj)
+
+
+    db = {'Atoms': {}, 'Groups': {}, 'Molecules': {},
+          'Crystals': {}, 'Complexes': {}}
+    inverse_db = {'Atoms': {}, 'Groups': {}, 'Molecules': {},
+                  'Crystals': {}, 'Complexes': {}}
+    for obj in universe:
+        addObjectType(db, inverse_db, obj)
+    for sub_db in db.values():
+        for key, value in sub_db.items():
+            sub_db[key] = '\n'.join(value)
+    return db
 
 #
 # Base class for all objects that generate trajectories

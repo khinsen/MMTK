@@ -117,6 +117,7 @@ typedef struct {
 #define PyTrajectory_Open_RET PyTrajectoryObject *
 #define PyTrajectory_Open_PROTO Py_PROTO((PyObject *universe, \
 					  PyObject *description, \
+					  PyObject *database, \
 					  PyArrayObject *index_map, \
 					  char *filename, char *mode, \
                                           int floatttype, int cycle, \

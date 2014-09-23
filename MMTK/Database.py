@@ -79,16 +79,26 @@ def addDatabaseDirectory(directory):
 # 
 class Database(object):
 
-    def __init__(self, directory, type_constructor):
-        self.directory = directory
+    def __init__(self, directory, type_constructor, local_db=None):
+        if local_db is None:
+            self.directory = directory
+            self.local_db = None
+        else:
+            self.directory = None
+            self.local_db = local_db[directory]
         self.type_constructor = type_constructor
         self.types = {}
 
     def findType(self, name):
         name = name.lower()
         if not self.types.has_key(name):
-            filename = databasePath(name, self.directory, False)
-            self.types[name] = self.type_constructor(filename, name)
+            if self.directory is not None:
+                filename = databasePath(name, self.directory, False)
+                self.types[name] = self.type_constructor(filename, name)
+            elif self.local_db is not None:
+                import StringIO
+                dbfile = StringIO.StringIO(self.local_db[name])
+                self.types[name] = self.type_constructor(dbfile, name)
         return self.types[name]
 
 #
@@ -97,10 +107,12 @@ class Database(object):
 #
 class ChemicalObjectType(object):
 
-    def __init__(self, filename, database_name, module, instancevars):
-        self.filename = filename
+    def __init__(self, file_or_filename, database_name, module, instancevars):
         self.database_name = database_name
-        file_text = Utility.readURL(filename)
+        if isinstance(file_or_filename, basestring):
+            file_text = Utility.readURL(file_or_filename)
+        else:
+            file_text = file_or_filename.read()
         newvars = {}
         exec file_text in vars(module), newvars
         for name, value in newvars.items():
@@ -226,9 +238,9 @@ class AtomType(ChemicalObjectType):
 
     error = 'AtomTypeError'
 
-    def __init__(self, filename, database_name):
+    def __init__(self, file_or_filename, database_name):
         from MMTK import AtomEnvironment
-        ChemicalObjectType.__init__(self, filename, database_name,
+        ChemicalObjectType.__init__(self, file_or_filename, database_name,
                                     AtomEnvironment, ())
         if not isinstance(self.mass, list):
             self.mass = [(self.mass, 100.)]
@@ -258,9 +270,9 @@ class GroupType(ChemicalObjectType):
 
     error = 'GroupTypeError'
 
-    def __init__(self, filename, database_name):
+    def __init__(self, file_or_filename, database_name):
         from MMTK import GroupEnvironment
-        ChemicalObjectType.__init__(self, filename, database_name,
+        ChemicalObjectType.__init__(self, file_or_filename, database_name,
                                     GroupEnvironment,
                                     ('atoms', 'groups', 'bonds',
                                      'chain_links'))
@@ -280,9 +292,9 @@ class MoleculeType(ChemicalObjectType):
 
     error = 'MoleculeTypeError'
 
-    def __init__(self, filename, database_name):
+    def __init__(self, file_or_filename, database_name):
         from MMTK import MoleculeEnvironment
-        ChemicalObjectType.__init__(self, filename, database_name,
+        ChemicalObjectType.__init__(self, file_or_filename, database_name,
                                     MoleculeEnvironment,
                                     ('atoms', 'groups', 'bonds'))
         for g in self.groups:
@@ -301,9 +313,9 @@ class CrystalType(ChemicalObjectType):
 
     error = 'CrystalTypeError'
 
-    def __init__(self, filename, database_name):
+    def __init__(self, file_or_filename, database_name):
         from MMTK import CrystalEnvironment
-        ChemicalObjectType.__init__(self, filename, database_name,
+        ChemicalObjectType.__init__(self, file_or_filename, database_name,
                                     CrystalEnvironment,
                                     ('atoms', 'groups', 'molecules', 'bonds'))
         for g in self.groups:
@@ -325,9 +337,9 @@ class ComplexType(ChemicalObjectType):
 
     error = 'ComplexTypeError'
 
-    def __init__(self, filename, database_name):
+    def __init__(self, file_or_filename, database_name):
         import ComplexEnvironment
-        ChemicalObjectType.__init__(self, filename, database_name,
+        ChemicalObjectType.__init__(self, file_or_filename, database_name,
                                     ComplexEnvironment,
                                     ('atoms', 'molecules'))
         for m in self.molecules:
@@ -399,14 +411,23 @@ class ProteinType(ReferenceType):
                self.database_name + '")'
 
 #
-# The five databases.
+# Initialize the databases. This is normally done once per
+# execution, but may be redone when trajectory-local databases
+# are used.
 #
-atom_types = Database('Atoms', AtomType)
-group_types = Database('Groups', GroupType)
-molecule_types = Database('Molecules', MoleculeType)
-crystal_types = Database('Crystals', CrystalType)
-complex_types = Database('Complexes', ComplexType)
-protein_types = Database('Proteins', ProteinType)
+def initializeDatabase(local_db=None):
+    global atom_types, group_types, molecule_types
+    global crystal_types, complex_types, protein_types
+
+    atom_types = Database('Atoms', AtomType, local_db)
+    group_types = Database('Groups', GroupType, local_db)
+    molecule_types = Database('Molecules', MoleculeType, local_db)
+    crystal_types = Database('Crystals', CrystalType, local_db)
+    complex_types = Database('Complexes', ComplexType, local_db)
+
+    protein_types = Database('Proteins', ProteinType)
+
+initializeDatabase()
 
 #
 # The following classes represent the chemical objects

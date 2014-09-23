@@ -868,7 +868,7 @@ verify_description(char *d1, char *d2)
 
 static PyTrajectoryObject *
 PyTrajectory_Open(PyObject *universe, PyObject *description,
-		  PyArrayObject *index_map,
+                  PyObject *database, PyArrayObject *index_map,
 		  char *filename, char *mode, int floattype, int cycle,
 		  int block_size)
 {
@@ -876,6 +876,7 @@ PyTrajectory_Open(PyObject *universe, PyObject *description,
   PyUniverseSpecObject *universe_spec;
   PyObject *n_ob;
   PyNetCDFVariableObject *description_var;
+  PyNetCDFVariableObject *database_var;
 
   if (!PyObject_HasAttrString(universe, "is_universe")) {
     PyErr_SetString(PyExc_TypeError, "not a universe object");
@@ -887,6 +888,10 @@ PyTrajectory_Open(PyObject *universe, PyObject *description,
     return NULL;
   if (!PyString_Check(description)) {
     PyErr_SetString(PyExc_TypeError, "system description not a string");
+    return NULL;
+  }
+  if (database && !PyString_Check(database)) {
+    PyErr_SetString(PyExc_TypeError, "database not a string");
     return NULL;
   }
   n_ob = PyObject_CallMethod((PyObject *)universe, "numberOfAtoms", NULL);
@@ -958,6 +963,7 @@ PyTrajectory_Open(PyObject *universe, PyObject *description,
     }
     else {
       char *description_length = "description_length";
+      char *database_length = "database_length";
       Py_ssize_t len;
       int ret;
       PyNetCDFFile_SetAttributeString(self->file, "Conventions", "MMTK/Trajectory");
@@ -984,6 +990,7 @@ PyTrajectory_Open(PyObject *universe, PyObject *description,
 					  universe_spec->geometry_data_length)
 	  == -1)
 	goto error;
+
       len = PyString_Size(description);
       if (len > INT_MAX) {
 	PyErr_SetString(PyExc_ValueError, "description string too long");
@@ -1002,6 +1009,28 @@ PyTrajectory_Open(PyObject *universe, PyObject *description,
       Py_DECREF(description_var);
       if (ret == -1)
 	goto error;
+
+      if (database) {
+        len = PyString_Size(database);
+        if (len > INT_MAX) {
+          PyErr_SetString(PyExc_ValueError, "database string too long");
+          goto error;
+        }
+        if (PyNetCDFFile_CreateDimension(self->file, database_length,
+                                         (int)len) == -1)
+          goto error;
+        database_var = PyNetCDFFile_CreateVariable(self->file,
+                                                   "database", 'c',
+                                                   &database_length, 1);
+        if (database_var == NULL)
+          goto error;
+        ret = PyNetCDFVariable_WriteString(database_var,
+                                           (PyStringObject *)database);
+        Py_DECREF(database_var);
+        if (ret == -1)
+          goto error;
+      }
+
       if (self->block_size > 1) {
 	char *dim_names[2];
 	dim_names[0] = step_number;
@@ -1110,16 +1139,18 @@ error:
 static PyObject *
 Trajectory(PyObject *self, PyObject *args)
 {
-  PyObject *universe, *description, *index_map;
+  PyObject *universe, *description, *database, *index_map;
   char *filename;
   char *mode = "r";
   int dpflag = 0;
   int cycle = 0;
   int block_size = 1;
 
-  if (!PyArg_ParseTuple(args, "OO!Os|siii:Trajectory",
+  database = NULL;
+  if (!PyArg_ParseTuple(args, "OO!Os|siiiO!:Trajectory",
 			&universe, &PyString_Type, &description, &index_map, 
-			&filename, &mode, &dpflag, &cycle, &block_size))
+			&filename, &mode, &dpflag, &cycle, &block_size,
+                        &PyString_Type, &database))
     return NULL;
   if (index_map == Py_None)
     index_map = NULL;
@@ -1127,7 +1158,7 @@ Trajectory(PyObject *self, PyObject *args)
     PyErr_SetString(PyExc_TypeError, "index map must be an array");
     return NULL;
   }
-  return (PyObject *)PyTrajectory_Open(universe, description,
+  return (PyObject *)PyTrajectory_Open(universe, description, database,
 				       (PyArrayObject *)index_map,
 				       filename, mode,
 				       dpflag?PyArray_DOUBLE:PyArray_FLOAT,
