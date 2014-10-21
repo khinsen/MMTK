@@ -274,7 +274,7 @@ if sys.platform[:5] == 'linux' and 'gcc' in sysconfig['CC']:
                 '-fkeep-inline-functions']
 if sys.platform == 'darwin' and 'gcc' in sysconfig['CC']:
     high_opt = ['-O3', '-ffast-math', '-fomit-frame-pointer',
-                '-fkeep-inline-functions', '-falign-loops=16']
+                '-fkeep-inline-functions']
 if sys.platform == 'aix4':
     high_opt = ['-O4']
 if sys.platform == 'odf1V4':
