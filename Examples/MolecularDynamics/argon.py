@@ -7,6 +7,7 @@ from MMTK.Environment import NoseThermostat, AndersenBarostat
 from MMTK.Trajectory import Trajectory, TrajectoryOutput, LogOutput
 from MMTK.Dynamics import VelocityVerletIntegrator, VelocityScaler, \
                           TranslationRemover, BarostatReset
+from MMTK.ProgressOutput import ProgressOutput
 import string
 from Scientific.IO.TextFile import TextFile
 
@@ -54,11 +55,13 @@ integrator(steps = 2000,
            actions = [TranslationRemover(0, None, 100),
                       VelocityScaler(temperature, 0.1*temperature,
                                      0, None, 100),
-                      BarostatReset(100)] + output_actions)
+                      BarostatReset(100),
+                      ProgressOutput(2000)] + output_actions)
 
 # Do some "production" steps.
 integrator(steps = 2000,
-           actions = [TranslationRemover(0, None, 100)] + output_actions)
+           actions = [TranslationRemover(0, None, 100),
+                      ProgressOutput(2000)] + output_actions)
 
 # Close the trajectory.
 trajectory.close()
