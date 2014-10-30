@@ -197,7 +197,11 @@ MMTK.PDBMoleculeFactory
 MMTK.ParticleProperties
 =======================
 .. automodule::  MMTK.ParticleProperties 
- 
+
+MMTK.ProgressOutput
+=======================
+.. automodule::  MMTK.ProgressOutput
+
 MMTK.ProteinFriction
 ====================
 .. automodule::  MMTK.ProteinFriction 
