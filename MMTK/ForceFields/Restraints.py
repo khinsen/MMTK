@@ -168,7 +168,6 @@ class HarmonicDistanceRestraint(ForceField):
         return 'ForceFields.Restraints.' + self.__class__.__name__ + \
                `self.arguments`
 
-
 class HarmonicAngleRestraint(ForceField):
 
     """
@@ -212,10 +211,11 @@ class HarmonicAngleRestraint(ForceField):
     def evaluatorTerms(self, universe, subset1, subset2, global_data):
         params = self.evaluatorParameters(universe, subset1, subset2,
                                           global_data)['harmonic_angle_term']
-        indices = N.array([params[0][:3]])
-        parameters = N.array([params[0][3:]])
-        return [HarmonicAngleTerm(universe._spec, indices, parameters,
-                                  self.name)]
+        return [HarmonicAngleTerm(universe._spec,
+                                  N.array([p[:3]]),
+                                  N.array([p[3:]]),
+                                  self.name)
+                for p in params]
 
 class HarmonicDihedralRestraint(ForceField):
 
@@ -266,10 +266,11 @@ class HarmonicDihedralRestraint(ForceField):
     def evaluatorTerms(self, universe, subset1, subset2, global_data):
         params = self.evaluatorParameters(universe, subset1, subset2,
                                           global_data)['cosine_dihedral_term']
-        indices = N.array([params[0][:4]])
-        parameters = N.array([params[0][4:]])
-        return [CosineDihedralTerm(universe._spec, indices, parameters,
-                                   self.name)]
+        return [CosineDihedralTerm(universe._spec,
+                                   N.array([p[:4]]),
+                                   N.array([p[4:]]),
+                                   self.name)
+                for p in params]
 
 class HarmonicTrapForceField(ForceField):
 
@@ -295,7 +296,7 @@ class HarmonicTrapForceField(ForceField):
         self.center = center
         self.force_constant = force_constant
 
-    def ready(self, global_data):
+    def supportsPathIntegrals(self):
         return True
 
     def evaluatorParameters(self, universe, subset1, subset2, global_data):
@@ -315,8 +316,11 @@ class HarmonicTrapForceField(ForceField):
                         # restrained atoms.
                         raise ValueError("Restrained atoms partially "
                                          "in a subset")
+
+        f, offsets = self.beadOffsetsAndFactor(self.atom_indices, global_data)
         return {'harmonic_trap_cm':
-                [(self.atom_indices, self.center, self.force_constant)]}
+                [(self.atom_indices+o, self.center, f*self.force_constant)
+                 for o in offsets]}
 
     def evaluatorTerms(self, universe, subset1, subset2, global_data):
         params = self.evaluatorParameters(universe, subset1, subset2,
