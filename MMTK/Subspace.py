@@ -230,10 +230,8 @@ def _rbMotionVectors(universe, beads, center):
 
 def beadSets(atoms):
     nb = [a.numberOfBeads() for a in atoms]
-    nbeads = max(nb)
-    assert all(nbeads % n == 0 for n in nb)
-    # Integer division, becomes // in Python 3
-    offsets = N.transpose([N.repeat(N.arange(n), nbeads/n) for n in nb])
+    _, offsets = Utility.beadOffsetsAndFactor(nb)
+
     for o in offsets:
         yield [a.bead(i) for a, i in zip(atoms, o)]
 

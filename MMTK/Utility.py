@@ -318,3 +318,24 @@ def readURL(filename):
     data = file.read()
     file.close()
     return data
+
+#
+# Group beads into matching sets
+#
+def beadOffsetsAndFactor(nb, nbmax=None):
+    localmax = max(nb)
+    if nbmax is None:
+        nbmax = localmax
+    # Make sure the beads for each of the requested atoms can be mapped evenly
+    # onto those of the atom with the most beads.
+    assert all(nbmax % n == 0 for n in nb)
+    # Each interaction between the requested atoms needs to be scaled by f in
+    # order to compensate for these atoms having fewer beads than others in the
+    # system.
+    f = nbmax // localmax
+    # Combinations of bead offsets for all the requested atoms, taking into
+    # account the possibility of atoms having different bead counts. For
+    # example, the row [0, 0, 1, 3] indicates the first bead for the first two
+    # atoms, but other beads for the other atoms.
+    offsets = N.transpose([N.repeat(N.arange(n), localmax // n) for n in nb])
+    return f, offsets

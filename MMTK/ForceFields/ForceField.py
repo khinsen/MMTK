@@ -82,13 +82,13 @@ class ForceField(object):
         return False
 
     def beadOffsetsAndFactor(self, atom_indices, global_data):
+        # Maximum number of beads in any atom.
         nbeads = global_data.get('nbeads')
         bead_data = global_data.get('bead_data')
+        # Bead counts for the requested atoms.
         nb = [bead_data[i, 1] for i in atom_indices]
-        assert all(nbeads % n == 0 for n in nb)
-        # Integer divisions, become // in Python 3
-        f = nbeads / max(nb)
-        return f, N.transpose([N.repeat(N.arange(n), nbeads/n/f) for n in nb])
+
+        return Utility.beadOffsetsAndFactor(nb, nbmax=nbeads)
 
 #
 # A CompoundForceField represents the sum of its component force fields
