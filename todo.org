@@ -7,7 +7,7 @@ precomputed.
 
 *** DONE Check that the bead numbers of all atoms in the universe are consistent
 
-*** TODO [#C] Merge path integral setup in EnergyEvaluator and EnergyEvaluatorParameters
+*** DONE [#C] Merge path integral setup in EnergyEvaluator and EnergyEvaluatorParameters
 
 *** DONE [#A] Fix reciprocal sums in Ewald summation
 The reciprocal sum must be calculated once for each time slice, using
