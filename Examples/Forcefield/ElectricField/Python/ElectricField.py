@@ -24,7 +24,7 @@ class ElectricFieldTerm(EnergyTerm):
     # EnergyTerm.__init__ takes care of storing the name and the
     # universe object.
     def __init__(self, universe, strength, charges):
-        EnergyTerm.__init__(self, 'electric field', universe)
+        EnergyTerm.__init__(self, 'electric_field', universe)
         self.strength = strength
         self.charges = charges
 
@@ -46,8 +46,6 @@ class ElectricFieldTerm(EnergyTerm):
         if do_force_constants:
             # The force constants are zero -> nothing to calculate.
             results['force_constants'] = SymmetricPairTensor(self.universe)
-        else:
-            force_constants = None            
         return results
 
 

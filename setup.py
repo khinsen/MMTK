@@ -25,12 +25,11 @@ execfile('MMTK/__pkginfo__.py', pkginfo.__dict__)
 use_cython = int(os.environ.get('MMTK_USE_CYTHON', '0')) != 0
 if use_cython:
     try:
-        from Cython.Distutils import build_ext
+        from Cython.Build import cythonize
         use_cython = True
     except ImportError:
         use_cython = False
-if not use_cython:
-    from distutils.command.build_ext import build_ext
+
 src_ext = 'pyx' if use_cython else 'c'
 
 # Check that we have Scientific 2.6 or higher
@@ -74,7 +73,7 @@ if num_package == "NumPy":
     include_dirs.extend(numpy.distutils.misc_util.get_numpy_include_dirs())
 
 headers = glob(os.path.join("Include", "MMTK", "*.h"))
-headers.extend(glob(os.path.join("Include", "MMTK", "*.pxi")))
+headers.extend(glob(os.path.join("Include", "MMTK", "*.px[di]")))
 
 paths = [os.path.join('MMTK', 'ForceFields'),
          os.path.join('MMTK', 'ForceFields', 'Amber'),
@@ -198,7 +197,6 @@ cmdclass = {
     'build' : modified_build,
     'sdist': modified_sdist,
     'install_data': modified_install_data,
-    'build_ext': build_ext,
     'test': test
 }
 
@@ -283,6 +281,99 @@ if sys.platform == 'odf1V4':
 high_opt.append('-g')
 
 #################################################################
+# Extensions
+
+ext_pkg = 'MMTK.'+sys.platform
+
+extensions = [Extension('%s.MMTK_DCD' % ext_pkg,
+                        ['Src/MMTK_DCD.c', 'Src/ReadDCD.c'],
+                        extra_compile_args = compile_args,
+                        include_dirs=include_dirs,
+                        libraries=libraries,
+                        define_macros=macros),
+              Extension('%s.MMTK_deformation' % ext_pkg,
+                        ['Src/MMTK_deformation.c'],
+                        extra_compile_args = compile_args + high_opt,
+                        include_dirs=include_dirs,
+                        libraries=libraries,
+                        define_macros=macros),
+              Extension('%s.MMTK_dynamics' % ext_pkg,
+                        ['Src/MMTK_dynamics.c'],
+                        extra_compile_args = compile_args,
+                        include_dirs=include_dirs,
+                        libraries=libraries,
+                        define_macros=macros),
+              Extension('%s.MMTK_minimization' % ext_pkg,
+                        ['Src/MMTK_minimization.c'],
+                        extra_compile_args = compile_args,
+                        include_dirs=include_dirs,
+                        libraries=libraries,
+                        define_macros=macros),
+              Extension('%s.MMTK_surface' % ext_pkg,
+                        ['Src/MMTK_surface.c'],
+                        extra_compile_args = compile_args,
+                        include_dirs=include_dirs,
+                        libraries=libraries,
+                        define_macros=macros),
+              Extension('%s.MMTK_trajectory' % ext_pkg,
+                        ['Src/MMTK_trajectory.c'],
+                        extra_compile_args = compile_args,
+                        include_dirs=include_dirs,
+                        libraries=libraries,
+                        define_macros=macros),
+              Extension('%s.MMTK_universe' % ext_pkg,
+                        ['Src/MMTK_universe.c'],
+                        extra_compile_args = compile_args,
+                        include_dirs=include_dirs,
+                        libraries=libraries,
+                        define_macros=macros),
+              Extension('%s.MMTK_forcefield' % ext_pkg,
+                        ['Src/MMTK_forcefield.c',
+                         'Src/bonded.c', 'Src/nonbonded.c',
+                         'Src/ewald.c', 'Src/sparsefc.c'],
+                        extra_compile_args = compile_args + high_opt,
+                        include_dirs=include_dirs + ['Src'],
+                        define_macros = [('SERIAL', None),
+                                         ('VIRIAL', None),
+                                         ('MACROSCOPIC', None)]
+                                        + macros,
+                        libraries=libraries),
+              Extension('%s.MMTK_energy_term' % ext_pkg,
+                        ['Src/MMTK_energy_term.%s' % src_ext],
+                        extra_compile_args = compile_args,
+                        include_dirs=include_dirs,
+                        libraries=libraries,
+                        define_macros=macros),
+              Extension('%s.MMTK_restraints' % ext_pkg,
+                        ['Src/MMTK_restraints.%s' % src_ext],
+                        extra_compile_args = compile_args,
+                        include_dirs=include_dirs,
+                        libraries=libraries,
+                        define_macros=macros),
+              Extension('%s.MMTK_trajectory_action' % ext_pkg,
+                        ['Src/MMTK_trajectory_action.%s' % src_ext],
+                        extra_compile_args = compile_args,
+                        include_dirs=include_dirs,
+                        libraries=libraries,
+                        define_macros=macros),
+              Extension('%s.MMTK_trajectory_generator' % ext_pkg,
+                        ['Src/MMTK_trajectory_generator.%s' % src_ext],
+                        extra_compile_args = compile_args,
+                        include_dirs=include_dirs,
+                        libraries=libraries,
+                        define_macros=macros),
+              Extension('%s.MMTK_state_accessor' % ext_pkg,
+                        ['Src/MMTK_state_accessor.%s' % src_ext],
+                        extra_compile_args = compile_args,
+                        include_dirs=include_dirs,
+                        libraries=libraries,
+                        define_macros=macros),
+              ]
+
+if use_cython:
+    extensions = cythonize(extensions, include_path=include_dirs)
+
+#################################################################
 
 setup (name = package_name,
        version = pkginfo.__version__,
@@ -307,91 +398,7 @@ simulations.
                    'MMTK.NormalModes', 'MMTK.Tk', 'MMTK.Tools',
                    'MMTK.Tools.TrajectoryViewer'],
        headers = headers,
-       ext_package = 'MMTK.'+sys.platform,
-       ext_modules = [Extension('MMTK_DCD',
-                                ['Src/MMTK_DCD.c', 'Src/ReadDCD.c'],
-                                extra_compile_args = compile_args,
-                                include_dirs=include_dirs,
-                                libraries=libraries,
-                                define_macros=macros),
-                      Extension('MMTK_deformation',
-                                ['Src/MMTK_deformation.c'],
-                                extra_compile_args = compile_args + high_opt,
-                                include_dirs=include_dirs,
-                                libraries=libraries,
-                                define_macros=macros),
-                      Extension('MMTK_dynamics',
-                                ['Src/MMTK_dynamics.c'],
-                                extra_compile_args = compile_args,
-                                include_dirs=include_dirs,
-                                libraries=libraries,
-                                define_macros=macros),
-                      Extension('MMTK_minimization',
-                                ['Src/MMTK_minimization.c'],
-                                extra_compile_args = compile_args,
-                                include_dirs=include_dirs,
-                                libraries=libraries,
-                                define_macros=macros),
-                      Extension('MMTK_surface',
-                                ['Src/MMTK_surface.c'],
-                                extra_compile_args = compile_args,
-                                include_dirs=include_dirs,
-                                libraries=libraries,
-                                define_macros=macros),
-                      Extension('MMTK_trajectory',
-                                ['Src/MMTK_trajectory.c'],
-                                extra_compile_args = compile_args,
-                                include_dirs=include_dirs,
-                                libraries=libraries,
-                                define_macros=macros),
-                      Extension('MMTK_universe',
-                                ['Src/MMTK_universe.c'],
-                                extra_compile_args = compile_args,
-                                include_dirs=include_dirs,
-                                libraries=libraries,
-                                define_macros=macros),
-                      Extension('MMTK_forcefield',
-                                ['Src/MMTK_forcefield.c',
-                                 'Src/bonded.c', 'Src/nonbonded.c',
-                                 'Src/ewald.c', 'Src/sparsefc.c'],
-                                extra_compile_args = compile_args + high_opt,
-                                include_dirs=include_dirs + ['Src'],
-                                define_macros = [('SERIAL', None),
-                                                 ('VIRIAL', None),
-                                                 ('MACROSCOPIC', None)]
-                                                + macros,
-                                libraries=libraries),
-                      Extension('MMTK_energy_term',
-                                ['Src/MMTK_energy_term.%s' % src_ext],
-                                extra_compile_args = compile_args,
-                                include_dirs=include_dirs,
-                                libraries=libraries,
-                                define_macros=macros),
-                      Extension('MMTK_restraints',
-                                ['Src/MMTK_restraints.%s' % src_ext],
-                                extra_compile_args = compile_args,
-                                include_dirs=include_dirs,
-                                libraries=libraries,
-                                define_macros=macros),
-                      Extension('MMTK_trajectory_action',
-                                ['Src/MMTK_trajectory_action.%s' % src_ext],
-                                extra_compile_args = compile_args,
-                                include_dirs=include_dirs,
-                                libraries=libraries,
-                                define_macros=macros),
-                      Extension('MMTK_trajectory_generator',
-                                ['Src/MMTK_trajectory_generator.%s' % src_ext],
-                                extra_compile_args = compile_args,
-                                include_dirs=include_dirs,
-                                libraries=libraries,
-                                define_macros=macros),
-                      Extension('MMTK_state_accessor',
-                                ['Src/MMTK_state_accessor.%s' % src_ext],
-                                extra_compile_args = compile_args,
-                                include_dirs=include_dirs,
-                                libraries=libraries,
-                                define_macros=macros),
-                      ],
+       ext_modules = extensions,
 
        data_files = data_files,
        scripts = ['tviewer'],

@@ -216,10 +216,7 @@ class ForceFieldData(object):
             self.dict[tag] = [value]
 
     def get(self, tag):
-        try:
-            return self.dict[tag]
-        except KeyError:
-            return []
+        return self.dict.get(tag, [])
 
     def set(self, tag, value):
         self.dict[tag] = value

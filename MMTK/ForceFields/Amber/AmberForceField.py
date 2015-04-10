@@ -115,7 +115,10 @@ def readAmber94(main_file = None, mod_files = None):
     else:
         if main_file is None:
             main_file = os.path.join(this_directory, "parm94.dat")
-        mod_files = map(lambda mf: (fullModFilePath(mf), 'MOD4'), mod_files)
+        if mod_files is None:
+            mod_files = []
+        else:
+            mod_files = map(lambda mf: (fullModFilePath(mf), 'MOD4'), mod_files)
         params = AmberData.AmberParameters(main_file, mod_files)
         params.lennard_jones_1_4 = 0.5
         params.electrostatic_1_4 = 1./1.2
@@ -139,7 +142,10 @@ def readAmber99(main_file = None, mod_files = None):
     else:
         if main_file is None:
             main_file = os.path.join(this_directory, "parm99.dat")
-        mod_files = map(lambda mf: (fullModFilePath(mf), 'MOD4'), mod_files)
+        if mod_files is None:
+            mod_files = []
+        else:
+            mod_files = map(lambda mf: (fullModFilePath(mf), 'MOD4'), mod_files)
         params = AmberData.AmberParameters(main_file, mod_files)
         params.lennard_jones_1_4 = 0.5
         params.electrostatic_1_4 = 1./1.2
@@ -175,7 +181,10 @@ def readOPLS(main_file = None, mod_files = None):
     else:
         if main_file is None:
             main_file = os.path.join(this_directory, "opls_parm.dat")
-        mod_files = map(lambda mf: (fullModFilePath(mf), 'OPLS'), mod_files)
+        if mod_files is None:
+            mod_files = []
+        else:
+            mod_files = map(lambda mf: (fullModFilePath(mf), 'OPLS'), mod_files)
         params = AmberData.AmberParameters(main_file, mod_files)
         params.lennard_jones_1_4 = 0.125
         params.electrostatic_1_4 = 0.5

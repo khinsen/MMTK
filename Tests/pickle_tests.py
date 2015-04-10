@@ -21,6 +21,12 @@ class PeptideTest(unittest.TestCase):
         self.universe = MMTK.InfiniteUniverse(Amber99ForceField())
         self.universe.peptide = Protein('bala1')
 
+    def tearDown(self):
+        try:
+            os.remove('test.pickle')
+        except OSError:
+            pass
+
     def test_energy(self):
         # Check that the energy terms after pickling and reloading
         # are the same.

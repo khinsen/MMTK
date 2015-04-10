@@ -89,7 +89,9 @@ class ParticleVectorSet(object):
             raise IndexError
         return ParticleProperties.ParticleVector(self.universe, self.array[i])
 
-
+#
+# Generic subspace defined by a list of motion vectors
+#
 class Subspace(object):
 
     """
@@ -344,7 +346,9 @@ class RigidMotionSubspace(Subspace):
         for i in range(len(vectors)):
             self._basis.array[i] = vectors[i].array
 
-
+#
+# Pairwise relative motion
+#
 class PairDistanceSubspace(Subspace):
 
     """

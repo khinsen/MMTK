@@ -55,7 +55,6 @@ class NoseThermostat(EnvironmentObject):
                                 thermostat coordinate
         :type relaxation_time: float
         """
-        self.arguments = (temperature, relaxation_time)
         self.parameters = N.array([temperature, relaxation_time])
         self.coordinates = N.array([0., 0.])
 
@@ -90,7 +89,6 @@ class AndersenBarostat(EnvironmentObject):
                                 barostat coordinate
         :type relaxation_time: float
         """
-        self.arguments = (pressure, relaxation_time)
         self.parameters = N.array([pressure, relaxation_time])
         self.coordinates = N.array([0.])
 

@@ -467,6 +467,8 @@ class GroupOfAtoms(object):
         """
         if velocities is None:
             velocities = self.atomList()[0].universe().velocities()
+        if velocities is None:
+            return None
         energy = 0.
         for a in self.atomIterator():
             v = velocities[a]
@@ -494,6 +496,8 @@ class GroupOfAtoms(object):
         """
         if velocities is None:
             velocities = self.atomList()[0].universe().velocities()
+        if velocities is None:
+            return None
         return sum((a._mass*velocities[a] for a in self.atomIterator()),
                    Vector(0., 0., 0.))
 
@@ -510,6 +514,8 @@ class GroupOfAtoms(object):
         """
         if velocities is None:
             velocities = self.atomList()[0].universe().velocities()
+        if velocities is None:
+            return None
         cm = self.centerOfMass(conf)
         return sum((a._mass*a.position(conf).cross(velocities[a])
                     for a in self.atomIterator()),
@@ -528,6 +534,8 @@ class GroupOfAtoms(object):
         """
         if velocities is None:
             velocities = self.atomList()[0].universe().velocities()
+        if velocities is None:
+            return None
         cm, inertia = self.centerAndMomentOfInertia(conf)
         l = sum((a._mass*a.position(conf).cross(velocities[a])
                  for a in self.atomIterator()),

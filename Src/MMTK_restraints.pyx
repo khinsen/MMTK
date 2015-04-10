@@ -40,7 +40,8 @@ cdef class HarmonicCMTrapTerm(EnergyTerm):
 
     cdef void evaluate(self, PyFFEvaluatorObject *eval,
                        energy_spec *input, energy_data *energy):
-        cdef vector3 *coordinates, *gradients
+        cdef vector3 *coordinates
+        cdef vector3 *gradients
         cdef N.ndarray[N.int_t] atom_indices
         cdef N.ndarray[N.float_t] masses
         cdef N.ndarray[N.float_t, ndim=4] fc
@@ -111,7 +112,8 @@ cdef class HarmonicCMDistanceTerm(EnergyTerm):
 
     cdef void evaluate(self, PyFFEvaluatorObject *eval,
                        energy_spec *input, energy_data *energy):
-        cdef vector3 *coordinates, *gradients
+        cdef vector3 *coordinates
+        cdef vector3 *gradients
         cdef N.ndarray[N.int_t] atom_indices_1
         cdef N.ndarray[N.int_t] atom_indices_2
         cdef N.ndarray[N.float_t] masses

@@ -49,9 +49,10 @@ cdef class ElectricFieldTerm(EnergyTerm):
     # The third argument is a C structure that contains the
     # energy term fields and gradient arrays for storing the results.
     # For details, see MMTK_forcefield.pxi.
-    cdef void evaluate(self, EnergyEvaluator eval,
+    cdef void evaluate(self, PyFFEvaluatorObject *eval,
                        energy_spec *input, energy_data *energy):
-        cdef vector3 *coordinates, *gradients
+        cdef vector3 *coordinates
+        cdef vector3 *gradients
         cdef double *q
         cdef double e
         cdef int natoms, i
