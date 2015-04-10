@@ -75,7 +75,7 @@ cdef extern from "MMTK/forcefield.h":
         cdef char **term_names
 
     ctypedef struct PyFFEvaluatorObject
-    
+
     ctypedef void ff_eval_function(PyFFEvaluatorObject *evaluator,
                                    energy_data *ed,
                                    PyArrayObject *configuration,

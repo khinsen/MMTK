@@ -1217,13 +1217,15 @@ class Universe(Collections.GroupOfAtoms, Visualization.Viewable):
     def kineticEnergy(self, velocities = None):
         if velocities is None:
             velocities = self.velocities()
-            if velocities is None:
-                return None
+        if velocities is None:
+            return None
         return 0.5*velocities.massWeightedDotProduct(velocities)
 
     def momentum(self, velocities = None):
         if velocities is None:
             velocities = self.velocities()
+        if velocities is None:
+            return None
         return (self.masses()*velocities).sumOverParticles()
 
     def translateBy(self, vector):

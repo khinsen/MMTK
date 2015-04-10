@@ -481,8 +481,8 @@ class GroupOfAtoms(object):
         """
         if velocities is None:
             velocities = self.atomList()[0].universe().velocities()
-            if velocities is None:
-                return None
+        if velocities is None:
+            return None
         energy = 0.
         for b in self.beadIterator():
             v = velocities[b]
@@ -510,6 +510,8 @@ class GroupOfAtoms(object):
         """
         if velocities is None:
             velocities = self.atomList()[0].universe().velocities()
+        if velocities is None:
+            return None
         return sum((b._mass*velocities[b] for b in self.beadIterator()),
                    Vector(0., 0., 0.))
 
@@ -526,6 +528,8 @@ class GroupOfAtoms(object):
         """
         if velocities is None:
             velocities = self.atomList()[0].universe().velocities()
+        if velocities is None:
+            return None
         cm = self.centerOfMass(conf)
         return sum((b._mass*b.position(conf).cross(velocities[b])
                     for b in self.beadIterator()),
@@ -544,6 +548,8 @@ class GroupOfAtoms(object):
         """
         if velocities is None:
             velocities = self.atomList()[0].universe().velocities()
+        if velocities is None:
+            return None
         cm, inertia = self.centerAndMomentOfInertia(conf)
         l = sum((b._mass*b.position(conf).cross(velocities[b])
                  for b in self.beadIterator()),

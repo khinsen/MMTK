@@ -247,7 +247,7 @@ class LinkedRigidBodyMotionSubspace(Subspace):
     def __init__(self, universe, rigid_bodies):
         """
         :param universe: the universe for which the subspace is created
-        :type universe: MMTK.Universe.Universe
+        :type universe: :class:`~MMTK.Universe.Universe`
         :param rigid_bodies: a list or set of rigid bodies
                              with some common atoms
         """

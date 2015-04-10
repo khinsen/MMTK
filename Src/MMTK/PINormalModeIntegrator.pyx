@@ -13,12 +13,12 @@ import numpy as N
 cimport numpy as N
 import cython
 
-cimport MMTK.PIIntegratorSupport
 from MMTK import Units, ParticleProperties, Features, Environment
 import MMTK_trajectory
 import MMTK_forcefield
 import MMTK_universe
 import MMTK.PIIntegratorSupport
+cimport MMTK.PIIntegratorSupport
 import numbers
 
 import MMTK.mtrand
@@ -34,7 +34,7 @@ include "MMTK/forcefield.pxi"
 cdef extern from "fftw3.h":
     ctypedef struct fftw_complex
     ctypedef void *fftw_plan
-    cdef int FFTW_FORWARD, FFTW_BACKWARD, FFTW_MEASURE, FFTW_ESTIMATE
+    cdef int FFTW_FORWARD, FFTW_BACKWARD, FFTW_ESTIMATE
     cdef void fftw_execute(fftw_plan p)
     cdef fftw_plan fftw_plan_dft_1d(int n, fftw_complex *data_in, fftw_complex *data_out,
                                     int sign, int flags)
@@ -56,15 +56,12 @@ cdef double k_B = Units.k_B
 #
 cdef class PINormalModeIntegrator(MMTK.PIIntegratorSupport.PIIntegrator):
 
-    cdef N.ndarray workspace1, workspace2
-    cdef double *workspace_ptr_1, *workspace_ptr_2
-
     """
     Molecular dynamics integrator for path integral systems using
     normal-mode coordinates.
 
     The integration is started by calling the integrator object.
-    All the keyword options (see documnentation of __init__) can be
+    All the keyword options (see documentation of __init__) can be
     specified either when creating the integrator or when calling it.
 
     The following data categories and variables are available for
@@ -83,9 +80,15 @@ cdef class PINormalModeIntegrator(MMTK.PIIntegratorSupport.PIIntegrator):
        extended-system energy terms if a thermostat and/or barostat
        are used
 
+     - category "thermodynamic": temperature
+
      - category "auxiliary": primitive and virial quantum energy estimators
 
     """
+
+    cdef N.ndarray workspace1, workspace2
+    cdef double *workspace_ptr_1
+    cdef double *workspace_ptr_2
 
     def __init__(self, universe, **options):
         """
@@ -114,8 +117,8 @@ cdef class PINormalModeIntegrator(MMTK.PIIntegratorSupport.PIIntegrator):
                        'background': False, 'threads': None,
                        'frozen_subspace': None, 'actions': []}
 
-    available_data = ['configuration', 'velocities', 'gradients',
-                      'energy', 'thermodynamic', 'time', 'auxiliary']
+    available_data = ['time', 'configuration', 'velocities', 'gradients',
+                      'energy', 'thermodynamic', 'auxiliary']
 
     restart_data = ['configuration', 'velocities', 'energy']
 
@@ -240,11 +243,15 @@ cdef class PINormalModeIntegrator(MMTK.PIIntegratorSupport.PIIntegrator):
                               double dt, double beta):
         pass
 
+    # Cython compiler directives set for efficiency:
+    # - No bound checks on index operations
+    # - No support for negative indices
+    # - Division uses C semantics
     @cython.boundscheck(False)
     @cython.wraparound(False)
     @cython.cdivision(True)
     cdef start(self):
-        cdef N.ndarray[double, ndim=2] x, v, g, dv
+        cdef N.ndarray[double, ndim=2] x, v, g, dv, nmc, nmv
         cdef N.ndarray[double, ndim=1] m
         cdef N.ndarray[short, ndim=2] bd
         cdef N.ndarray[double, ndim=3] ss
@@ -253,7 +260,7 @@ cdef class PINormalModeIntegrator(MMTK.PIIntegratorSupport.PIIntegrator):
         cdef double qe_prim, qe_vir, qe_cvir
         cdef int natoms, nbeads, nsteps, step, df, cdf
         cdef Py_ssize_t i, j, k
-    
+
         # Check if velocities have been initialized
         if self.universe.velocities() is None:
             raise ValueError("no velocities")
@@ -281,7 +288,7 @@ cdef class PINormalModeIntegrator(MMTK.PIIntegratorSupport.PIIntegrator):
             ss = subspace.getBasis().array
             df = 3*nbeads-ss.shape[0]
             cdf = self.centroidDegreesOfFreedom(subspace, bd)
-        
+
         # For efficiency, the Cython code works at the array
         # level rather than at the ParticleProperty level.
         x = configuration.array
@@ -291,14 +298,14 @@ cdef class PINormalModeIntegrator(MMTK.PIIntegratorSupport.PIIntegrator):
         dv = N.zeros((nbeads, 3), N.float)
         nmc = N.zeros((3, nbeads), N.float)
         nmv = N.zeros((3, nbeads), N.float)
-        
+
         # Allocate workspace for Fourier transforms
         nb_max = bd[:, 1].max()
         self.workspace1 = N.zeros((2*nb_max,), N.float)
         self.workspace_ptr_1 = <double *>self.workspace1.data
         self.workspace2 = N.zeros((2*nb_max,), N.float)
         self.workspace_ptr_2 = <double *>self.workspace2.data
-        
+
         # Ask for energy gradients to be calculated and stored in
         # the array g. Force constants are not requested.
         energy.gradients = <void *>g
@@ -358,12 +365,12 @@ cdef class PINormalModeIntegrator(MMTK.PIIntegratorSupport.PIIntegrator):
         self.foldCoordinatesIntoBox()
         self.calculateEnergies(x, &energy, 0)
         self.freeze(v, ss)
-    
+
         for i in range(nbeads):
             if bd[i, 0] == 0:
                 self.fixBeadPositions(x, i, bd[i, 1])
                 self.cartesianToNormalMode(x, nmc, i, bd[i, 1])
-                
+
         se = self.springEnergyNormalModes(nmc, m, bd, beta)
         qe_prim = energy.energy - se + 0.5*df/beta
         qe_vir = energy.energy - 0.5*energy.virial
@@ -392,7 +399,7 @@ cdef class PINormalModeIntegrator(MMTK.PIIntegratorSupport.PIIntegrator):
                 for j in range(3):
                     assert fabs(x[i, j]-x_test[i, j]) < 1.e-7
                     assert fabs(v[i, j]-v_test[i, j]) < 1.e-7
-        
+
         # Main integration loop
         time = 0.
         self.trajectoryActions(0)
@@ -541,5 +548,4 @@ cdef class PILangevinNormalModeIntegrator(PINormalModeIntegrator):
             nbeads = self.universe.numberOfPoints()
             self.gamma = N.zeros((nbeads,), N.float)+friction
         PINormalModeIntegrator.start(self)
-        gamma = None
 

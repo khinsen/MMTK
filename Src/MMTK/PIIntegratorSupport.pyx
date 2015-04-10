@@ -47,7 +47,7 @@ cdef class PIIntegrator(MMTK_trajectory_generator.EnergyBasedTrajectoryGenerator
                     self.universe_spec.geometry_data)
                 for i in range(3):
                     xv[bead_index+j][i] = xv[bead_index+j-1][i] + temp[i]
-    
+
     @cython.boundscheck(False)
     @cython.wraparound(False)
     @cython.cdivision(True)
@@ -68,7 +68,7 @@ cdef class PIIntegrator(MMTK_trajectory_generator.EnergyBasedTrajectoryGenerator
                 e += 0.5*nb*nb*m[i]*sumsq/(beta*beta*hbar*hbar)
         return e
 
-    @cython.boundscheck(True)
+    @cython.boundscheck(False)
     @cython.wraparound(False)
     @cython.cdivision(True)
     cdef double centroidVirial(self,

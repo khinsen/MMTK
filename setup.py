@@ -73,7 +73,7 @@ if num_package == "NumPy":
     include_dirs.extend(numpy.distutils.misc_util.get_numpy_include_dirs())
 
 headers = glob(os.path.join("Include", "MMTK", "*.h"))
-headers.extend(glob(os.path.join("Include", "MMTK", "*.pxi")))
+headers.extend(glob(os.path.join("Include", "MMTK", "*.px[di]")))
 
 paths = [os.path.join('MMTK', 'ForceFields'),
          os.path.join('MMTK', 'ForceFields', 'Amber'),

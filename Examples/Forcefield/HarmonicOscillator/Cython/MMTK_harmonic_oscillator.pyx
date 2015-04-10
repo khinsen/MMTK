@@ -54,7 +54,8 @@ cdef class HarmonicOscillatorTerm(EnergyTerm):
     # For details, see MMTK_forcefield.pxi.
     cdef void evaluate(self, PyFFEvaluatorObject *eval,
                        energy_spec *input, energy_data *energy):
-        cdef vector3 *coordinates, *gradients
+        cdef vector3 *coordinates
+        cdef vector3 *gradients
         cdef double *fc
         cdef double dx, dy, dz
         cdef int n, offset

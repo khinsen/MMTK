@@ -135,7 +135,7 @@ obtain reasonable results.
 
   - The program
     :doc:`quantum_sugar.py <../Examples/PathIntegrals/quantum_sugar.py>`
-    simulates a quantum harmonic oscillator.
+    simulates a sugar molecule, incorporating quantum effects.
 
 .. _Example-Forcefield:
 

@@ -60,7 +60,7 @@ integrator(steps=10000,
                                                     "configuration"),
                                        0, None, 5)])
 
-# Print averages of the quantu energy estimator
+# Print averages of the quantum energy estimator
 data = trajectory.quantum_energy_primitive
 print "Primitive estimator:", mean(data), "+/-",  standardDeviation(data)
 data = trajectory.quantum_energy_virial

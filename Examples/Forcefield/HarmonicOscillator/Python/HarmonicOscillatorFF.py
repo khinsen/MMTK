@@ -24,7 +24,7 @@ class HarmonicOscillatorTerm(EnergyTerm):
     # EnergyTerm.__init__ takes care of storing the name and the
     # universe object.
     def __init__(self, universe, atom_index, center, force_constant):
-        EnergyTerm.__init__(self, 'harmonic oscillator', universe)
+        EnergyTerm.__init__(self, 'harmonic_oscillator', universe)
         self.atom_index = atom_index
         self.center = center
         self.force_constant = force_constant
@@ -37,6 +37,7 @@ class HarmonicOscillatorTerm(EnergyTerm):
         results = {}
         d = configuration[self.atom_index]-self.center
         results['energy'] = 0.5*self.force_constant*(d*d)
+        results['virial'] = -self.force_constant*(d*d)
         if do_gradients:
             gradients = ParticleVector(self.universe)
             gradients[self.atom_index] = self.force_constant*d

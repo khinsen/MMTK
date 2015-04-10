@@ -21,6 +21,12 @@ class PeptideTest(unittest.TestCase):
         self.universe = MMTK.InfiniteUniverse(Amber99ForceField())
         self.universe.peptide = Protein('bala1')
 
+    def tearDown(self):
+        try:
+            os.remove('test.pickle')
+        except OSError:
+            pass
+
     def test_energy(self):
         # Check that the energy terms after pickling and reloading
         # are the same.
@@ -96,6 +102,12 @@ class PathIntegralTest(unittest.TestCase):
         self.universe.water.H1.setNumberOfBeads(8)
         self.universe.water.H2.setNumberOfBeads(8)
 
+    def tearDown(self):
+        try:
+            os.remove('test.pickle')
+        except OSError:
+            pass
+
     def test_pickle(self):
         MMTK.save(self.universe, 'test.pickle')
         restored_universe = MMTK.load('test.pickle')
@@ -103,7 +115,7 @@ class PathIntegralTest(unittest.TestCase):
         self.assertEqual(restored_universe.water.H1.numberOfBeads(), 8)
         self.assertEqual(restored_universe.water.H2.numberOfBeads(), 8)
         self.assertEqual(restored_universe.water.O.numberOfBeads(), 1)
-        
+
 def suite():
     loader = unittest.TestLoader()
     s = unittest.TestSuite()

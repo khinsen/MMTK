@@ -10,15 +10,15 @@ Velocity Verlet integrator for path integral systems
 __docformat__ = 'restructuredtext'
 
 import numpy as N
-import numpy.linalg as LA
 cimport numpy as N
+import numpy.linalg as LA
 import cython
 
-cimport MMTK.PIIntegratorSupport
 from MMTK import Units, ParticleProperties, Features, Environment
 import MMTK_trajectory
 import MMTK_forcefield
 import MMTK.PIIntegratorSupport
+cimport MMTK.PIIntegratorSupport
 
 import MMTK.mtrand
 cimport MMTK.mtrand
@@ -52,7 +52,7 @@ cdef class PICartesianIntegrator(MMTK.PIIntegratorSupport.PIIntegrator):
     The integrator is fully thread-safe.
 
     The integration is started by calling the integrator object.
-    All the keyword options (see documnentation of __init__) can be
+    All the keyword options (see documentation of __init__) can be
     specified either when creating the integrator or when calling it.
 
     The following data categories and variables are available for
@@ -70,6 +70,10 @@ cdef class PICartesianIntegrator(MMTK.PIIntegratorSupport.PIIntegrator):
      - category "energy": potential and kinetic energy, plus
        extended-system energy terms if a thermostat and/or barostat
        are used
+
+     - category "thermodynamic": temperature
+
+     - category "auxiliary": primitive and virial quantum energy estimators
 
     """
 
@@ -100,8 +104,8 @@ cdef class PICartesianIntegrator(MMTK.PIIntegratorSupport.PIIntegrator):
                        'background': False, 'threads': None,
                        'frozen_subspace': None, 'actions': []}
 
-    available_data = ['configuration', 'velocities', 'gradients',
-                      'energy', 'time', 'thermodynamic', 'auxiliary']
+    available_data = ['time', 'configuration', 'velocities', 'gradients',
+                      'energy', 'thermodynamic', 'auxiliary']
 
     restart_data = ['configuration', 'velocities', 'energy']
 
@@ -114,7 +118,7 @@ cdef class PICartesianIntegrator(MMTK.PIIntegratorSupport.PIIntegrator):
     # - No bound checks on index operations
     # - No support for negative indices
     # - Division uses C semantics
-    @cython.boundscheck(True)
+    @cython.boundscheck(False)
     @cython.wraparound(False)
     @cython.cdivision(True)
     cdef start(self):
@@ -123,11 +127,11 @@ cdef class PICartesianIntegrator(MMTK.PIIntegratorSupport.PIIntegrator):
         cdef N.ndarray[short, ndim=2] bd
         cdef N.ndarray[double, ndim=3] ss
         cdef energy_data energy
-        cdef double time, delta_t, ke, temperature
+        cdef double time, delta_t, ke, beta, temperature
         cdef double qe_prim, qe_vir, qe_cvir
         cdef int natoms, nbeads, nsteps, step, df, cdf
         cdef Py_ssize_t i, j, k
-    
+
         # Check if velocities have been initialized
         if self.universe.velocities() is None:
             raise ValueError("no velocities")
@@ -144,7 +148,7 @@ cdef class PICartesianIntegrator(MMTK.PIIntegratorSupport.PIIntegrator):
         bd = self.evaluator_object.global_data.get('bead_data')
         pi_environment = self.universe.environmentObjectList(Environment.PathIntegrals)[0]
         beta = pi_environment.beta
-    
+
         # Check if there is a frozen_subspace
         subspace = self.getOption('frozen_subspace')
         if subspace is None:
@@ -155,7 +159,7 @@ cdef class PICartesianIntegrator(MMTK.PIIntegratorSupport.PIIntegrator):
             ss = subspace.getBasis().array
             df = 3*nbeads-ss.shape[0]
             cdf = self.centroidDegreesOfFreedom(subspace, bd)
-        
+
         # For efficiency, the Cython code works at the array
         # level rather than at the ParticleProperty level.
         x = configuration.array
@@ -241,7 +245,7 @@ cdef class PICartesianIntegrator(MMTK.PIIntegratorSupport.PIIntegrator):
         for step in range(nsteps):
             # First application of thermostat
             self.applyThermostat(v, m, bd, delta_t, beta)
-            # First half-step
+            # First integration half-step
             for i in range(nbeads):
                 for j in range(3):
                     v[i, j] += dv[i, j]
@@ -261,7 +265,7 @@ cdef class PICartesianIntegrator(MMTK.PIIntegratorSupport.PIIntegrator):
             qe_cvir = energy.energy \
                       - 0.5*self.centroidVirial(x, g, bd) \
                       + 0.5*cdf/beta
-            # Second half-step
+            # Second integration half-step
             for i in range(nbeads):
                 for j in range(3):
                     dv[i, j] = -0.5*delta_t*g[i, j]/m[i]
@@ -302,8 +306,8 @@ cdef class PILangevinCartesianIntegrator(PICartesianIntegrator):
 
     cdef N.ndarray C1, C2
     cdef s, xi, temp
-    
-    @cython.boundscheck(True)
+
+    @cython.boundscheck(False)
     @cython.wraparound(False)
     @cython.cdivision(True)
     cdef void applyThermostat(self, N.ndarray[double, ndim=2] v,

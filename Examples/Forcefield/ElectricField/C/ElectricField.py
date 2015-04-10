@@ -60,7 +60,6 @@ class ElectricField(ForceField):
                 c = o.getAtomProperty(a, self.charge_property)
                 for b in a.beads():
                     charges[b] = c
-        print charges.array
         # Here we pass all the parameters as "simple" data types to
         # the C code that handles energy calculations.
         return [ElectricFieldTerm(universe._spec, charges.array,

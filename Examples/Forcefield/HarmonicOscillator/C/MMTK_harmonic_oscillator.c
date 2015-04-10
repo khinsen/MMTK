@@ -8,12 +8,12 @@
    Everything else is just bookkeeping. */
 static void
 harmonic_evaluator(PyFFEnergyTermObject *self,
-		   PyFFEvaluatorObject *eval,
-		   energy_spec *input,
-		   energy_data *energy)
+                   PyFFEvaluatorObject *eval,
+                   energy_spec *input,
+                   energy_data *energy)
      /* The four parameters are pointers to structures that are
-	defined in MMTK/forcefield.h.
-	PyFFEnergyTermObject: All data relevant to this particular
+        defined in MMTK/forcefield.h.
+        PyFFEnergyTermObject: All data relevant to this particular
                               energy term.
         PyFFEvaluatorObject:  Data referring to the global energy
                               evaluation process, e.g. parallelization
@@ -48,7 +48,7 @@ harmonic_evaluator(PyFFEnergyTermObject *self,
   /* If only the energy is asked for, stop here. */
   if (energy->gradients == NULL && energy->force_constants == NULL)
     return;
-  
+
   /* Add the gradient contribution to the global gradient array.
      It would be a serious error to use '=' instead of '+=' here,
      in that case all previously calculated forces would be erased. */
@@ -101,8 +101,8 @@ HarmonicOscillatorTerm(PyObject *dummy, PyObject *args)
     return NULL;
   /* Convert the parameters to C data types. */
   if (!PyArg_ParseTuple(args, "O!idddd",
-			&PyUniverseSpec_Type, &self->universe_spec,
-			&atom_index, &x, &y, &z, &force_constant))
+                        &PyUniverseSpec_Type, &self->universe_spec,
+                        &atom_index, &x, &y, &z, &force_constant))
     return NULL;
   /* We keep a reference to the universe_spec in the newly created
      energy term object, so we have to increase the reference count. */
@@ -135,7 +135,7 @@ HarmonicOscillatorTerm(PyObject *dummy, PyObject *args)
    alternatives). The list is terminated by a NULL entry. */
 static PyMethodDef functions[] = {
   {"HarmonicOscillatorTerm", HarmonicOscillatorTerm, 1},
-  {NULL, NULL}		/* sentinel */
+  {NULL, NULL} /* sentinel */
 };
 
 
