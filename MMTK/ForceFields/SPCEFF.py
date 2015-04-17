@@ -88,8 +88,7 @@ class SPCEForceField(MMForceField.MMForceField):
                               specified by the dictionary
                               entry "cutoff"), "ewald" (Ewald
                               summation, only for periodic
-                              universes), "screened" or
-                              "multipole" (fast-multipole method).
+                              universes), or "screened".
 
         """
         MMForceField.MMForceField.__init__(self, 'SPCE', SPCEParameters(),

@@ -305,8 +305,6 @@ class MMNonbondedForceField(MMAtomParameters, NonBondedForceField):
             options['no_reciprocal_sum'] = 1
             del options['cutoff']
             return MMEwaldESForceField(self.name, self.dataset, options)
-        elif es_method == 'multipole':
-            return MMMPESForceField(self.name, self.dataset, self.es_options)
         elif es_method == 'direct':
             return MMESForceField(self.name, self.dataset, None,
                                   es_scale_factor)
