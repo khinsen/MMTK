@@ -1716,13 +1716,12 @@ should be considered:
 - The use of threads incurs some computational overhead. For very small
   systems, it is usually faster not to use threads.
 
-- Not all energy terms necessarily support threads. Of the force field
-  terms that part of MMTK, only the multipole algorithms for
-  electrostatic interactions does not support threads, but additional
-  force fields defined outside MMTK might also be affected. MMTK
-  automatically evaluates such energy terms with a single thread, such
-  that there is no risk of getting wrong results. However, you might not
-  get the performance you expect.
+- Not all energy terms necessarily support threads. All of the force
+  field terms that are part of MMTK do, but additional force fields
+  defined outside MMTK might not. MMTK automatically evaluates such
+  energy terms with a single thread, such that there is no risk of
+  getting wrong results. However, you might not get the performance
+  you expect.
 
 - If second derivatives of the potential energy are requested, energy
   evaluation is handled by a single thread. An efficient implementation
