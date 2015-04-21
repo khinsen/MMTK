@@ -3,6 +3,8 @@
 # Written by Konrad Hinsen
 #
 
+#cython: boundscheck=False, wraparound=False, cdivision=True
+
 """
 Velocity Verlet integrator for path integral systems
 """
@@ -12,7 +14,6 @@ __docformat__ = 'restructuredtext'
 import numpy as N
 cimport numpy as N
 import numpy.linalg as LA
-import cython
 
 from MMTK import Units, ParticleProperties, Features, Environment
 import MMTK_trajectory
@@ -114,13 +115,6 @@ cdef class PICartesianIntegrator(MMTK.PIIntegratorSupport.PIIntegrator):
                               double dt, double beta):
         pass
 
-    # Cython compiler directives set for efficiency:
-    # - No bound checks on index operations
-    # - No support for negative indices
-    # - Division uses C semantics
-    @cython.boundscheck(False)
-    @cython.wraparound(False)
-    @cython.cdivision(True)
     cdef start(self):
         cdef N.ndarray[double, ndim=2] x, v, g, dv
         cdef N.ndarray[double, ndim=1] m
@@ -307,9 +301,6 @@ cdef class PILangevinCartesianIntegrator(PICartesianIntegrator):
     cdef N.ndarray C1, C2
     cdef s, xi, temp
 
-    @cython.boundscheck(False)
-    @cython.wraparound(False)
-    @cython.cdivision(True)
     cdef void applyThermostat(self, N.ndarray[double, ndim=2] v,
                               N.ndarray[double, ndim=1] m, N.ndarray[short, ndim=2] bd,
                               double dt, double beta):
@@ -335,9 +326,6 @@ cdef class PILangevinCartesianIntegrator(PICartesianIntegrator):
                 for k in range(1, ns):
                     s[k-1, i, j] = temp[k]
 
-    @cython.boundscheck(False)
-    @cython.wraparound(False)
-    @cython.cdivision(True)
     cdef start(self):
         friction = self.getOption('friction_matrix')
         assert isinstance(friction, N.ndarray)

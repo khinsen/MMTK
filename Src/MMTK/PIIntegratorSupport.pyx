@@ -1,9 +1,10 @@
 # Common functions for PI MD integrators
 #
 
+#cython: boundscheck=False, wraparound=False, cdivision=True
+
 import numpy as N
 cimport numpy as N
-import cython
 
 include "MMTK/core.pxi"
 cimport MMTK_trajectory_generator
@@ -32,9 +33,6 @@ cdef class PIIntegrator(MMTK_trajectory_generator.EnergyBasedTrajectoryGenerator
         MMTK_trajectory_generator.EnergyBasedTrajectoryGenerator \
                    .__init__(self, universe, options, name)
 
-    @cython.boundscheck(False)
-    @cython.wraparound(False)
-    @cython.cdivision(True)
     cdef fixBeadPositions(self, N.ndarray[double, ndim=2] x,
                                int bead_index, int nb):
         cdef int i, j
@@ -48,9 +46,6 @@ cdef class PIIntegrator(MMTK_trajectory_generator.EnergyBasedTrajectoryGenerator
                 for i in range(3):
                     xv[bead_index+j][i] = xv[bead_index+j-1][i] + temp[i]
 
-    @cython.boundscheck(False)
-    @cython.wraparound(False)
-    @cython.cdivision(True)
     cdef double springEnergyCartesian(self, N.ndarray[double, ndim=2] x,
                                       N.ndarray[double, ndim=1] m,
                                       N.ndarray[short, ndim=2] bd,
@@ -68,9 +63,6 @@ cdef class PIIntegrator(MMTK_trajectory_generator.EnergyBasedTrajectoryGenerator
                 e += 0.5*nb*nb*m[i]*sumsq/(beta*beta*hbar*hbar)
         return e
 
-    @cython.boundscheck(False)
-    @cython.wraparound(False)
-    @cython.cdivision(True)
     cdef double centroidVirial(self,
                                N.ndarray[double, ndim=2] x,
                                N.ndarray[double, ndim=2] g,
@@ -91,9 +83,6 @@ cdef class PIIntegrator(MMTK_trajectory_generator.EnergyBasedTrajectoryGenerator
                         cvirial -= (x[i+k, j]-centroid[j]/nb)*g[i+k, j]
         return cvirial
 
-    @cython.boundscheck(False)
-    @cython.wraparound(False)
-    @cython.cdivision(True)
     cdef void freeze(self, N.ndarray[double, ndim=2] d, N.ndarray[double, ndim=3] ss):
         cdef int ndim = ss.shape[0]
         cdef int npoints = ss.shape[1]

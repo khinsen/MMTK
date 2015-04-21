@@ -10,7 +10,6 @@ import_MMTK_forcefield()
 from MMTK import Features
 import numpy as N
 cimport numpy as N
-import cython
 
 cdef extern from "stdlib.h":
 

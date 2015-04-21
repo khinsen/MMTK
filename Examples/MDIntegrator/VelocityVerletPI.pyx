@@ -3,9 +3,10 @@
 # Written by Konrad Hinsen
 #
 
+#cython: boundscheck=False, wraparound=False, cdivision=True
+
 import numpy as N
 cimport numpy as N
-import cython
 
 cimport MMTK_trajectory_generator
 from MMTK import Units, ParticleProperties, Features
@@ -84,13 +85,6 @@ cdef class VelocityVerletIntegrator(MMTK_trajectory_generator.EnergyBasedTraject
 
     restart_data = ['configuration', 'velocities', 'energy']
 
-    # Cython compiler directives set for efficiency:
-    # - No bound checks on index operations
-    # - No support for negative indices
-    # - Division uses C semantics
-    @cython.boundscheck(False)
-    @cython.wraparound(False)
-    @cython.cdivision(True)
     cdef start(self):
         cdef N.ndarray[double, ndim=2] x, v, g, dv
         cdef N.ndarray[double, ndim=1] m

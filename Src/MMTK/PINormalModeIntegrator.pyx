@@ -3,6 +3,8 @@
 # Written by Konrad Hinsen
 #
 
+#cython: boundscheck=False, wraparound=False, cdivision=True
+
 """
 Path integral MD integrator using normal-mode coordinates
 """
@@ -11,7 +13,6 @@ __docformat__ = 'restructuredtext'
 
 import numpy as N
 cimport numpy as N
-import cython
 
 from MMTK import Units, ParticleProperties, Features, Environment
 import MMTK_trajectory
@@ -132,9 +133,6 @@ cdef class PINormalModeIntegrator(MMTK.PIIntegratorSupport.PIIntegrator):
     #    nbeads compared to the notation in this paper.
     # 3) Velocities are used instead of momenta in the integrator.
 
-    @cython.boundscheck(False)
-    @cython.wraparound(False)
-    @cython.cdivision(True)
     cdef cartesianToNormalMode(self, N.ndarray[double, ndim=2] x, N.ndarray[double, ndim=2] nmc,
                                int bead_index, int nb):
         cdef double *w1 = self.workspace_ptr_1
@@ -159,9 +157,6 @@ cdef class PINormalModeIntegrator(MMTK.PIIntegratorSupport.PIIntegrator):
                 nmc[i, bead_index+nb/2] = w2[nb]
             fftw_destroy_plan(p)
 
-    @cython.boundscheck(False)
-    @cython.wraparound(False)
-    @cython.cdivision(True)
     cdef normalModeToCartesian(self, N.ndarray[double, ndim=2] x, N.ndarray[double, ndim=2] nmc,
                                int bead_index, int nb):
         cdef double *w1 = self.workspace_ptr_1
@@ -189,9 +184,6 @@ cdef class PINormalModeIntegrator(MMTK.PIIntegratorSupport.PIIntegrator):
                     x[bead_index+j, i] = w2[2*j]/nb
             fftw_destroy_plan(p)
 
-    @cython.boundscheck(False)
-    @cython.wraparound(False)
-    @cython.cdivision(True)
     cdef void propagateOscillators(self, N.ndarray[double, ndim=2] nmc,
                                    N.ndarray[double, ndim=2] nmv,
                                    int bead_index, int nb, double beta, double dt):
@@ -210,9 +202,6 @@ cdef class PINormalModeIntegrator(MMTK.PIIntegratorSupport.PIIntegrator):
                 nmc[i, bead_index+k] = s*nmv[i, bead_index+k]/omega_k + c*nmc[i, bead_index+k]
                 nmv[i, bead_index+k] = temp
 
-    @cython.boundscheck(False)
-    @cython.wraparound(False)
-    @cython.cdivision(True)
     cdef double springEnergyNormalModes(self, N.ndarray[double, ndim=2] nmc,
                                         N.ndarray[double, ndim=1] m,
                                         N.ndarray[short, ndim=2] bd,
@@ -243,13 +232,6 @@ cdef class PINormalModeIntegrator(MMTK.PIIntegratorSupport.PIIntegrator):
                               double dt, double beta):
         pass
 
-    # Cython compiler directives set for efficiency:
-    # - No bound checks on index operations
-    # - No support for negative indices
-    # - Division uses C semantics
-    @cython.boundscheck(False)
-    @cython.wraparound(False)
-    @cython.cdivision(True)
     cdef start(self):
         cdef N.ndarray[double, ndim=2] x, v, g, dv, nmc, nmv
         cdef N.ndarray[double, ndim=1] m
@@ -501,9 +483,6 @@ cdef class PILangevinNormalModeIntegrator(PINormalModeIntegrator):
 
     cdef N.ndarray gamma
 
-    @cython.boundscheck(False)
-    @cython.wraparound(False)
-    @cython.cdivision(True)
     cdef void applyThermostat(self, N.ndarray[double, ndim=2] v, N.ndarray[double, ndim=2] nmv,
                               N.ndarray[double, ndim=1] m, N.ndarray[short, ndim=2] bd,
                               double dt, double beta):
@@ -536,9 +515,6 @@ cdef class PILangevinNormalModeIntegrator(PINormalModeIntegrator):
                 # Conversion back to Cartesian coordinates
                 self.normalModeToCartesian(v, nmv, i, nb)
 
-    @cython.boundscheck(False)
-    @cython.wraparound(False)
-    @cython.cdivision(True)
     cdef start(self):
         friction = self.getOption('centroid_friction')
         if isinstance(friction, ParticleProperties.ParticleScalar):
