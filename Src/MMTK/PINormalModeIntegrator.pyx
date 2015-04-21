@@ -428,6 +428,9 @@ cdef class PINormalModeIntegrator(MMTK.PIIntegratorSupport.PIIntegrator):
                     v[i, j] += dv[i, j]
             # Second application of thermostat
             self.applyThermostat(v, nmv, m, bd, delta_t, beta)
+            for i in range(nbeads):
+                if bd[i, 0] == 0:
+                    self.cartesianToNormalMode(v, nmv, i, bd[i, 1])
             # Remove frozen subspace
             self.freeze(v, ss)
             # Calculate kinetic energy
