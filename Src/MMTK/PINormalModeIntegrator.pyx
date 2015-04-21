@@ -126,12 +126,15 @@ cdef class PINormalModeIntegrator(MMTK.PIIntegratorSupport.PIIntegrator):
     # The implementation of the equations of motion follows the article
     #   Ceriotti et al., J. Chem. Phys. 133, 124104 (2010)
     # with the following differences:
-    # 1) The normal mode coordinates are larger by a factor sqrt(nbeads).
+    # 1) All the normal mode coordinates are larger by a factor sqrt(nbeads),
+    #    and the non-real ones (k != 0, k != n/2) are additionally smaller by
+    #    sqrt(2).
     # 2) The spring energy is smaller by a factor of nbeads to take
     #    into account the factor nbeads in Eq. (3) of the paper cited above.
     #    The potential energy of the system is also smaller by a factor of
     #    nbeads compared to the notation in this paper.
     # 3) Velocities are used instead of momenta in the integrator.
+    # 4) Eq. (18) is also used for odd n, ignoring the k = n/2 case.
 
     cdef cartesianToNormalMode(self, N.ndarray[double, ndim=2] x, N.ndarray[double, ndim=2] nmc,
                                int bead_index, int nb):
@@ -151,10 +154,11 @@ cdef class PINormalModeIntegrator(MMTK.PIIntegratorSupport.PIIntegrator):
                     w1[2*j+1] = 0.
                 fftw_execute(p)
                 nmc[i, bead_index+0] = w2[0]
-                for j in range(1, nb/2):
+                for j in range(1, (nb+1)/2):
                     nmc[i, bead_index+j] = w2[2*j]
                     nmc[i, bead_index+nb-j] = w2[2*j+1]
-                nmc[i, bead_index+nb/2] = w2[nb]
+                if nb % 2 == 0:
+                    nmc[i, bead_index+nb/2] = w2[nb]
             fftw_destroy_plan(p)
 
     cdef normalModeToCartesian(self, N.ndarray[double, ndim=2] x, N.ndarray[double, ndim=2] nmc,
@@ -172,13 +176,14 @@ cdef class PINormalModeIntegrator(MMTK.PIIntegratorSupport.PIIntegrator):
             for i in range(3):
                 w1[0] = nmc[i, bead_index+0]
                 w1[1] = 0.
-                for j in range(1, nb/2):
+                for j in range(1, (nb+1)/2):
                     w1[2*j] = nmc[i, bead_index+j]
                     w1[2*j+1] = nmc[i, bead_index+nb-j]
                     w1[2*nb-2*j] = w1[2*j]
                     w1[2*nb-2*j+1] = -w1[2*j+1]
-                w1[nb] = nmc[i, bead_index+nb/2]
-                w1[nb+1] = 0.
+                if nb % 2 == 0:
+                    w1[nb] = nmc[i, bead_index+nb/2]
+                    w1[nb+1] = 0.
                 fftw_execute(p)
                 for j in range(nb):
                     x[bead_index+j, i] = w2[2*j]/nb
@@ -222,9 +227,9 @@ cdef class PINormalModeIntegrator(MMTK.PIIntegratorSupport.PIIntegrator):
                         sumsq += nmc[k, i+j]*nmc[k, i+j]
                     # j=nb/2 corresponds to the real-valued coordinate at
                     # the maximal frequency.
-                    if j != nb/2:
-                        sumsq *= 2.
-                    e += 0.5*m[i]*sumsq*omega_k*omega_k/nb
+                    if nb % 2 == 0 and j == nb/2:
+                        sumsq *= 0.5
+                    e += m[i]*sumsq*omega_k*omega_k/nb
         return e
 
     cdef void applyThermostat(self, N.ndarray[double, ndim=2] v, N.ndarray[double, ndim=2] nmv,
@@ -240,7 +245,7 @@ cdef class PINormalModeIntegrator(MMTK.PIIntegratorSupport.PIIntegrator):
         cdef energy_data energy
         cdef double time, delta_t, ke, ke_nm, se, beta, temperature
         cdef double qe_prim, qe_vir, qe_cvir
-        cdef int natoms, nbeads, nsteps, step, df, cdf
+        cdef int natoms, nbeads, nsteps, step, df, cdf, nb
         cdef Py_ssize_t i, j, k
 
         # Check if velocities have been initialized
@@ -443,12 +448,13 @@ cdef class PINormalModeIntegrator(MMTK.PIIntegratorSupport.PIIntegrator):
                 ke_nm = 0.
                 for i in range(nbeads):
                     if bd[i, 0] == 0:
+                        nb = bd[i, 1]
                         for j in range(3):
-                            for k in range(bd[i, 1]):
-                                if k == 0 or k == bd[i, 1]/2:
-                                    ke_nm += 0.5*m[i]*nmv[j, i+k]*nmv[j, i+k]/bd[i, 1]
+                            for k in range(nb):
+                                if k == 0 or (nb % 2 == 0 and k == nb/2):
+                                    ke_nm += 0.5*m[i]*nmv[j, i+k]*nmv[j, i+k]/nb
                                 else:
-                                    ke_nm += m[i]*nmv[j, i+k]*nmv[j, i+k]/bd[i, 1]
+                                    ke_nm += m[i]*nmv[j, i+k]*nmv[j, i+k]/nb
                 assert fabs(ke-ke_nm) < 1.e-7
             # End of time step
             time += delta_t
@@ -511,7 +517,7 @@ cdef class PILangevinNormalModeIntegrator(PINormalModeIntegrator):
                     c1 = exp(-0.5*dt*f)
                     c2 = sqrt(1-c1*c1)
                     for j in range(3):
-                        if k == 0 or k == nb/2:
+                        if k == 0 or (nb % 2 == 0 and k == nb/2):
                             nmv[j, i+k] = c1*nmv[j, i+k] + c2*mb*MMTK.mtrand.standard_normal()
                         else:
                             nmv[j, i+k] = c1*nmv[j, i+k] + sqrt(0.5)*c2*mb*MMTK.mtrand.standard_normal()
