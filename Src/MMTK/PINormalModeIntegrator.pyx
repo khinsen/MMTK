@@ -11,6 +11,8 @@ Path integral MD integrator using normal-mode coordinates
 
 __docformat__ = 'restructuredtext'
 
+from cpython.pycapsule cimport PyCapsule_GetPointer, PyCapsule_New
+
 import numpy as N
 cimport numpy as N
 
@@ -52,6 +54,11 @@ cdef extern from "stdlib.h":
 cdef double hbar = Units.hbar
 cdef double k_B = Units.k_B
 
+cdef bytes PLAN_CAPSULE_NAME = b'plan_capsule'
+
+cdef void plan_capsule_destructor(object cap):
+    fftw_destroy_plan(PyCapsule_GetPointer(cap, PLAN_CAPSULE_NAME))
+
 #
 # Velocity Verlet integrator in normal-mode coordinates
 #
@@ -90,6 +97,7 @@ cdef class PINormalModeIntegrator(MMTK.PIIntegratorSupport.PIIntegrator):
     cdef N.ndarray workspace1, workspace2
     cdef double *workspace_ptr_1
     cdef double *workspace_ptr_2
+    cdef dict plans
 
     def __init__(self, universe, **options):
         """
@@ -146,8 +154,13 @@ cdef class PINormalModeIntegrator(MMTK.PIIntegratorSupport.PIIntegrator):
             for i in range(3):
                 nmc[i, bead_index] = x[bead_index, i]
         else:
-            p = fftw_plan_dft_1d(nb, <fftw_complex *>w1, <fftw_complex *>w2,
-                                 FFTW_FORWARD, FFTW_ESTIMATE)
+            try:
+                p = PyCapsule_GetPointer(self.plans[(FFTW_FORWARD, nb)], PLAN_CAPSULE_NAME)
+            except KeyError:
+                p = fftw_plan_dft_1d(nb, <fftw_complex *>w1, <fftw_complex *>w2,
+                                     FFTW_FORWARD, FFTW_ESTIMATE)
+                self.plans[(FFTW_FORWARD, nb)] = \
+                        PyCapsule_New(p, PLAN_CAPSULE_NAME, plan_capsule_destructor)
             for i in range(3):
                 for j in range(nb):
                     w1[2*j] = x[bead_index+j, i]
@@ -159,7 +172,6 @@ cdef class PINormalModeIntegrator(MMTK.PIIntegratorSupport.PIIntegrator):
                     nmc[i, bead_index+nb-j] = w2[2*j+1]
                 if nb % 2 == 0:
                     nmc[i, bead_index+nb/2] = w2[nb]
-            fftw_destroy_plan(p)
 
     cdef normalModeToCartesian(self, N.ndarray[double, ndim=2] x, N.ndarray[double, ndim=2] nmc,
                                int bead_index, int nb):
@@ -171,8 +183,13 @@ cdef class PINormalModeIntegrator(MMTK.PIIntegratorSupport.PIIntegrator):
             for i in range(3):
                 x[bead_index, i] = nmc[i, bead_index]
         else:
-            p = fftw_plan_dft_1d(nb, <fftw_complex *>w1, <fftw_complex *>w2,
-                                 FFTW_BACKWARD, FFTW_ESTIMATE)
+            try:
+                p = PyCapsule_GetPointer(self.plans[(FFTW_BACKWARD, nb)], PLAN_CAPSULE_NAME)
+            except KeyError:
+                p = fftw_plan_dft_1d(nb, <fftw_complex *>w1, <fftw_complex *>w2,
+                                     FFTW_BACKWARD, FFTW_ESTIMATE)
+                self.plans[(FFTW_BACKWARD, nb)] = \
+                        PyCapsule_New(p, PLAN_CAPSULE_NAME, plan_capsule_destructor)
             for i in range(3):
                 w1[0] = nmc[i, bead_index+0]
                 w1[1] = 0.
@@ -187,7 +204,6 @@ cdef class PINormalModeIntegrator(MMTK.PIIntegratorSupport.PIIntegrator):
                 fftw_execute(p)
                 for j in range(nb):
                     x[bead_index+j, i] = w2[2*j]/nb
-            fftw_destroy_plan(p)
 
     cdef void propagateOscillators(self, N.ndarray[double, ndim=2] nmc,
                                    N.ndarray[double, ndim=2] nmv,
@@ -285,6 +301,9 @@ cdef class PINormalModeIntegrator(MMTK.PIIntegratorSupport.PIIntegrator):
         dv = N.zeros((nbeads, 3), N.float)
         nmc = N.zeros((3, nbeads), N.float)
         nmv = N.zeros((3, nbeads), N.float)
+
+        # Initialize the plan cache.
+        self.plans = {}
 
         # Allocate workspace for Fourier transforms
         nb_max = bd[:, 1].max()
