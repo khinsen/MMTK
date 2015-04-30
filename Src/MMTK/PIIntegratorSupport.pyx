@@ -3,29 +3,15 @@
 
 #cython: boundscheck=False, wraparound=False, cdivision=True
 
-import numpy as N
 cimport numpy as N
 
 include "MMTK/core.pxi"
 cimport MMTK_trajectory_generator
 
-from MMTK import Units, ParticleProperties, Features, Environment
-import MMTK_trajectory
-import MMTK_forcefield
-import MMTK_universe
+from MMTK import Units, ParticleProperties
 import MMTK_trajectory_generator
-import numbers
-
-cdef extern from "stdlib.h":
-    cdef double fabs(double)
-    cdef double sqrt(double)
-    cdef double sin(double)
-    cdef double cos(double)
-    cdef double exp(double)
-    cdef double M_PI
 
 cdef double hbar = Units.hbar
-cdef double k_B = Units.k_B
 
 cdef class PIIntegrator(MMTK_trajectory_generator.EnergyBasedTrajectoryGenerator):
 
@@ -34,8 +20,8 @@ cdef class PIIntegrator(MMTK_trajectory_generator.EnergyBasedTrajectoryGenerator
                    .__init__(self, universe, options, name)
 
     cdef fixBeadPositions(self, N.ndarray[double, ndim=2] x,
-                               int bead_index, int nb):
-        cdef int i, j
+                               Py_ssize_t bead_index, int nb):
+        cdef Py_ssize_t i, j
         cdef vector3 *xv = <vector3 *> x.data
         cdef vector3 temp
         if self.universe_spec.is_periodic and nb > 1:
@@ -50,7 +36,8 @@ cdef class PIIntegrator(MMTK_trajectory_generator.EnergyBasedTrajectoryGenerator
                                       N.ndarray[double, ndim=1] m,
                                       N.ndarray[short, ndim=2] bd,
                                       double beta):
-        cdef int i, j, k, nb
+        cdef Py_ssize_t i, j, k
+        cdef int nb
         cdef double sumsq
         cdef double e = 0.
         for i in range(x.shape[0]):
@@ -69,7 +56,8 @@ cdef class PIIntegrator(MMTK_trajectory_generator.EnergyBasedTrajectoryGenerator
                                N.ndarray[short, ndim=2] bd):
         cdef double centroid[3]
         cdef double cvirial = 0.
-        cdef int i, j, k, nb
+        cdef Py_ssize_t i, j, k
+        cdef int nb
         for i in range(x.shape[0]):
             # bd[i, 0] == 0 means "first bead of an atom"
             if bd[i, 0] == 0:
@@ -87,7 +75,7 @@ cdef class PIIntegrator(MMTK_trajectory_generator.EnergyBasedTrajectoryGenerator
         cdef int ndim = ss.shape[0]
         cdef int npoints = ss.shape[1]
         cdef double dp
-        cdef int i, j, k
+        cdef Py_ssize_t i, j, k
         for i in range(ndim):
             dp = 0.
             for j in range(npoints):
@@ -100,7 +88,7 @@ cdef class PIIntegrator(MMTK_trajectory_generator.EnergyBasedTrajectoryGenerator
     cdef int centroidDegreesOfFreedom(self, subspace,
                                       N.ndarray[short, ndim=2] bd):
         cdef N.ndarray[double, ndim=2] va
-        cdef int i, j, k
+        cdef Py_ssize_t i, j, k
         from MMTK.Subspace import Subspace
         vectors = []
         for k in range(3):

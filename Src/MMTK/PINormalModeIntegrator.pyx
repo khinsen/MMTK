@@ -17,14 +17,10 @@ import numpy as N
 cimport numpy as N
 
 from MMTK import Units, ParticleProperties, Features, Environment
-import MMTK_trajectory
-import MMTK_forcefield
-import MMTK_universe
 import MMTK.PIIntegratorSupport
 cimport MMTK.PIIntegratorSupport
 import numbers
 
-import MMTK.mtrand
 cimport MMTK.mtrand
 
 include "MMTK/python.pxi"
@@ -145,11 +141,11 @@ cdef class PINormalModeIntegrator(MMTK.PIIntegratorSupport.PIIntegrator):
     # 4) Eq. (18) is also used for odd n, ignoring the k = n/2 case.
 
     cdef cartesianToNormalMode(self, N.ndarray[double, ndim=2] x, N.ndarray[double, ndim=2] nmc,
-                               int bead_index, int nb):
+                               Py_ssize_t bead_index, int nb):
         cdef double *w1 = self.workspace_ptr_1
         cdef double *w2 = self.workspace_ptr_2
         cdef fftw_plan p
-        cdef int i, j
+        cdef Py_ssize_t i, j
         if nb == 1:
             for i in range(3):
                 nmc[i, bead_index] = x[bead_index, i]
@@ -174,11 +170,11 @@ cdef class PINormalModeIntegrator(MMTK.PIIntegratorSupport.PIIntegrator):
                     nmc[i, bead_index+nb/2] = w2[nb]
 
     cdef normalModeToCartesian(self, N.ndarray[double, ndim=2] x, N.ndarray[double, ndim=2] nmc,
-                               int bead_index, int nb):
+                               Py_ssize_t bead_index, int nb):
         cdef double *w1 = self.workspace_ptr_1
         cdef double *w2 = self.workspace_ptr_2
         cdef fftw_plan p
-        cdef int i, j
+        cdef Py_ssize_t i, j
         if nb == 1:
             for i in range(3):
                 x[bead_index, i] = nmc[i, bead_index]
@@ -207,11 +203,11 @@ cdef class PINormalModeIntegrator(MMTK.PIIntegratorSupport.PIIntegrator):
 
     cdef void propagateOscillators(self, N.ndarray[double, ndim=2] nmc,
                                    N.ndarray[double, ndim=2] nmv,
-                                   int bead_index, int nb, double beta, double dt):
+                                   Py_ssize_t bead_index, int nb, double beta, double dt):
         cdef double omega_n = nb/(beta*hbar)
         cdef double omega_k, omega_k_dt, s, c
         cdef double temp
-        cdef int i, k
+        cdef Py_ssize_t i, k
         for i in range(3):
             nmc[i, bead_index] += dt*nmv[i, bead_index]
             for k in range(1, nb):
@@ -227,7 +223,8 @@ cdef class PINormalModeIntegrator(MMTK.PIIntegratorSupport.PIIntegrator):
                                         N.ndarray[double, ndim=1] m,
                                         N.ndarray[short, ndim=2] bd,
                                         double beta):
-        cdef int i, j, k, nb
+        cdef Py_ssize_t i, j, k
+        cdef int nb
         cdef double sumsq
         cdef double omega_n, omega_k
         cdef double e = 0.
@@ -518,7 +515,8 @@ cdef class PILangevinNormalModeIntegrator(PINormalModeIntegrator):
         cdef int nbeads = v.shape[0]
         cdef double f, c1, c2
         cdef double omega_n, mb
-        cdef int i, j, k, nb
+        cdef Py_ssize_t i, j, k
+        cdef int nb
         for i in range(nbeads):
             # bd[i, 0] == 0 means "first bead of an atom"
             if bd[i, 0] == 0:

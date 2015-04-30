@@ -16,12 +16,9 @@ cimport numpy as N
 import numpy.linalg as LA
 
 from MMTK import Units, ParticleProperties, Features, Environment
-import MMTK_trajectory
-import MMTK_forcefield
 import MMTK.PIIntegratorSupport
 cimport MMTK.PIIntegratorSupport
 
-import MMTK.mtrand
 cimport MMTK.mtrand
 
 include "MMTK/python.pxi"
@@ -32,14 +29,8 @@ include "MMTK/trajectory.pxi"
 include "MMTK/forcefield.pxi"
 
 cdef extern from "stdlib.h":
-    cdef double fabs(double)
     cdef double sqrt(double)
-    cdef double sin(double)
-    cdef double cos(double)
-    cdef double exp(double)
-    cdef double M_PI
 
-cdef double hbar = Units.hbar
 cdef double k_B = Units.k_B
 
 #
@@ -111,7 +102,7 @@ cdef class PICartesianIntegrator(MMTK.PIIntegratorSupport.PIIntegrator):
     restart_data = ['configuration', 'velocities', 'energy']
 
     cdef void applyThermostat(self, N.ndarray[double, ndim=2] v,
-                              N.ndarray[double, ndim=1] m, N.ndarray[short, ndim=2] bd,
+                              N.ndarray[double, ndim=1] m,
                               double dt, double beta):
         pass
 
@@ -238,7 +229,7 @@ cdef class PICartesianIntegrator(MMTK.PIIntegratorSupport.PIIntegrator):
         self.trajectoryActions(0)
         for step in range(nsteps):
             # First application of thermostat
-            self.applyThermostat(v, m, bd, delta_t, beta)
+            self.applyThermostat(v, m, delta_t, beta)
             # First integration half-step
             for i in range(nbeads):
                 for j in range(3):
@@ -265,7 +256,7 @@ cdef class PICartesianIntegrator(MMTK.PIIntegratorSupport.PIIntegrator):
                     dv[i, j] = -0.5*delta_t*g[i, j]/m[i]
                     v[i, j] += dv[i, j]
             # Second application of thermostat
-            self.applyThermostat(v, m, bd, delta_t, beta)
+            self.applyThermostat(v, m, delta_t, beta)
             # Remove frozen subspace
             self.freeze(v, ss)
             # Calculate kinetic energy
@@ -302,7 +293,7 @@ cdef class PILangevinCartesianIntegrator(PICartesianIntegrator):
     cdef s, xi, temp
 
     cdef void applyThermostat(self, N.ndarray[double, ndim=2] v,
-                              N.ndarray[double, ndim=1] m, N.ndarray[short, ndim=2] bd,
+                              N.ndarray[double, ndim=1] m,
                               double dt, double beta):
         cdef N.ndarray[double, ndim=2] C1 = self.C1
         cdef N.ndarray[double, ndim=2] C2 = self.C2
@@ -312,10 +303,8 @@ cdef class PILangevinCartesianIntegrator(PICartesianIntegrator):
         cdef double mb
         cdef int nbeads = v.shape[0]
         cdef int ns = self.xi.shape[0]
-        cdef int nb
-        cdef int i, j, k, l
+        cdef Py_ssize_t i, j, k, l
         for i in range(nbeads):
-            nb = bd[i, 1]
             mb = sqrt(1./(beta*m[i]))
             for j in range(3):
                 for k in range(ns):
