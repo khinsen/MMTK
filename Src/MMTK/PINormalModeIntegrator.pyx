@@ -13,6 +13,8 @@ __docformat__ = 'restructuredtext'
 
 from cpython.pycapsule cimport PyCapsule_GetPointer, PyCapsule_New
 
+from libc.stdint cimport int32_t
+
 import numpy as N
 cimport numpy as N
 
@@ -141,7 +143,7 @@ cdef class PINormalModeIntegrator(MMTK.PIIntegratorSupport.PIIntegrator):
     # 4) Eq. (18) is also used for odd n, ignoring the k = n/2 case.
 
     cdef cartesianToNormalMode(self, N.ndarray[double, ndim=2] x, N.ndarray[double, ndim=2] nmc,
-                               Py_ssize_t bead_index, int nb):
+                               Py_ssize_t bead_index, int32_t nb):
         cdef double *w1 = self.workspace_ptr_1
         cdef double *w2 = self.workspace_ptr_2
         cdef fftw_plan p
@@ -170,7 +172,7 @@ cdef class PINormalModeIntegrator(MMTK.PIIntegratorSupport.PIIntegrator):
                     nmc[i, bead_index+nb/2] = w2[nb]
 
     cdef normalModeToCartesian(self, N.ndarray[double, ndim=2] x, N.ndarray[double, ndim=2] nmc,
-                               Py_ssize_t bead_index, int nb):
+                               Py_ssize_t bead_index, int32_t nb):
         cdef double *w1 = self.workspace_ptr_1
         cdef double *w2 = self.workspace_ptr_2
         cdef fftw_plan p
@@ -203,7 +205,7 @@ cdef class PINormalModeIntegrator(MMTK.PIIntegratorSupport.PIIntegrator):
 
     cdef void propagateOscillators(self, N.ndarray[double, ndim=2] nmc,
                                    N.ndarray[double, ndim=2] nmv,
-                                   Py_ssize_t bead_index, int nb, double beta, double dt):
+                                   Py_ssize_t bead_index, int32_t nb, double beta, double dt):
         cdef double omega_n = nb/(beta*hbar)
         cdef double omega_k, omega_k_dt, s, c
         cdef double temp
@@ -221,10 +223,10 @@ cdef class PINormalModeIntegrator(MMTK.PIIntegratorSupport.PIIntegrator):
 
     cdef double springEnergyNormalModes(self, N.ndarray[double, ndim=2] nmc,
                                         N.ndarray[double, ndim=1] m,
-                                        N.ndarray[short, ndim=2] bd,
+                                        N.ndarray[N.int32_t, ndim=2] bd,
                                         double beta):
         cdef Py_ssize_t i, j, k
-        cdef int nb
+        cdef int32_t nb
         cdef double sumsq
         cdef double omega_n, omega_k
         cdef double e = 0.
@@ -246,14 +248,14 @@ cdef class PINormalModeIntegrator(MMTK.PIIntegratorSupport.PIIntegrator):
         return e
 
     cdef void applyThermostat(self, N.ndarray[double, ndim=2] v, N.ndarray[double, ndim=2] nmv,
-                              N.ndarray[double, ndim=1] m, N.ndarray[short, ndim=2] bd,
+                              N.ndarray[double, ndim=1] m, N.ndarray[N.int32_t, ndim=2] bd,
                               double dt, double beta):
         pass
 
     cdef start(self):
         cdef N.ndarray[double, ndim=2] x, v, g, dv, nmc, nmv
         cdef N.ndarray[double, ndim=1] m
-        cdef N.ndarray[short, ndim=2] bd
+        cdef N.ndarray[N.int32_t, ndim=2] bd
         cdef N.ndarray[double, ndim=3] ss
         cdef energy_data energy
         cdef double time, delta_t, ke, ke_nm, se, beta, temperature
@@ -509,14 +511,14 @@ cdef class PILangevinNormalModeIntegrator(PINormalModeIntegrator):
     cdef N.ndarray gamma
 
     cdef void applyThermostat(self, N.ndarray[double, ndim=2] v, N.ndarray[double, ndim=2] nmv,
-                              N.ndarray[double, ndim=1] m, N.ndarray[short, ndim=2] bd,
+                              N.ndarray[double, ndim=1] m, N.ndarray[N.int32_t, ndim=2] bd,
                               double dt, double beta):
         cdef N.ndarray[double, ndim=1] g = self.gamma
         cdef int nbeads = v.shape[0]
         cdef double f, c1, c2
         cdef double omega_n, mb
         cdef Py_ssize_t i, j, k
-        cdef int nb
+        cdef int32_t nb
         for i in range(nbeads):
             # bd[i, 0] == 0 means "first bead of an atom"
             if bd[i, 0] == 0:

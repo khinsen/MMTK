@@ -3,6 +3,8 @@
 
 #cython: boundscheck=False, wraparound=False, cdivision=True
 
+from libc.stdint cimport int32_t
+
 cimport numpy as N
 
 include "MMTK/core.pxi"
@@ -20,7 +22,7 @@ cdef class PIIntegrator(MMTK_trajectory_generator.EnergyBasedTrajectoryGenerator
                    .__init__(self, universe, options, name)
 
     cdef fixBeadPositions(self, N.ndarray[double, ndim=2] x,
-                               Py_ssize_t bead_index, int nb):
+                               Py_ssize_t bead_index, int32_t nb):
         cdef Py_ssize_t i, j
         cdef vector3 *xv = <vector3 *> x.data
         cdef vector3 temp
@@ -34,10 +36,10 @@ cdef class PIIntegrator(MMTK_trajectory_generator.EnergyBasedTrajectoryGenerator
 
     cdef double springEnergyCartesian(self, N.ndarray[double, ndim=2] x,
                                       N.ndarray[double, ndim=1] m,
-                                      N.ndarray[short, ndim=2] bd,
+                                      N.ndarray[N.int32_t, ndim=2] bd,
                                       double beta):
         cdef Py_ssize_t i, j, k
-        cdef int nb
+        cdef int32_t nb
         cdef double sumsq
         cdef double e = 0.
         for i in range(x.shape[0]):
@@ -53,11 +55,11 @@ cdef class PIIntegrator(MMTK_trajectory_generator.EnergyBasedTrajectoryGenerator
     cdef double centroidVirial(self,
                                N.ndarray[double, ndim=2] x,
                                N.ndarray[double, ndim=2] g,
-                               N.ndarray[short, ndim=2] bd):
+                               N.ndarray[N.int32_t, ndim=2] bd):
         cdef double centroid[3]
         cdef double cvirial = 0.
         cdef Py_ssize_t i, j, k
-        cdef int nb
+        cdef int32_t nb
         for i in range(x.shape[0]):
             # bd[i, 0] == 0 means "first bead of an atom"
             if bd[i, 0] == 0:
@@ -86,7 +88,7 @@ cdef class PIIntegrator(MMTK_trajectory_generator.EnergyBasedTrajectoryGenerator
                     d[j, k] -= dp*ss[i, j, k]
 
     cdef int centroidDegreesOfFreedom(self, subspace,
-                                      N.ndarray[short, ndim=2] bd):
+                                      N.ndarray[N.int32_t, ndim=2] bd):
         cdef N.ndarray[double, ndim=2] va
         cdef Py_ssize_t i, j, k
         from MMTK.Subspace import Subspace

@@ -59,7 +59,7 @@ reciprocal_sum(energy_spec *input, energy_data *energy,
 	       double volume, double *charge, double beta,
 	       long *kmax, double cutoff_sq,
 	       box_fn *box_transformation_fn, double *universe_data,
-               int nbeads, short *bead_data,
+               int nbeads, int32_t *bead_data,
 	       void *scratch, PyFFEvaluatorObject *eval,
 	       PyFFEnergyTermObject *term)
 {
@@ -310,7 +310,7 @@ es_ewald_evaluator(PyFFEnergyTermObject *self,
 
   double *charge = (double *)((PyArrayObject *)self->data[1])->data;
   long *kmax = (long *)((PyArrayObject *)self->data[2])->data;
-  short *bead_data = (short *)((PyArrayObject *)self->data[3])->data;
+  int32_t *bead_data = (int32_t *)((PyArrayObject *)self->data[3])->data;
   double inv_cutoff = (self->param[0] == 0.) ? 0. : 1./self->param[0];
   double beta = self->param[2];
   double reciprocal_cutoff_sq = self->param[3];

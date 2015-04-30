@@ -10,6 +10,7 @@
 #include "MMTK/core.h"
 #include "MMTK/universe.h"
 #include <math.h>
+#include <stdint.h>
 
 #ifdef WITH_THREAD
 #include "pythread.h"

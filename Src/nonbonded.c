@@ -243,7 +243,7 @@ int
 nblist_iterate(PyNonbondedListObject *nblist, struct nblist_iterator *iterator)
 {
   long *excluded, *one_four;
-  short *bead_data;
+  int32_t *bead_data;
   int n_ex, n_14;
   int ix, iy, iz, use_box;
 
@@ -260,7 +260,7 @@ nblist_iterate(PyNonbondedListObject *nblist, struct nblist_iterator *iterator)
     iterator->j = iterator->box2->n-1;
     iterator->state = nblist_continue;
   case nblist_continue:
-    bead_data = (short *)((PyArrayObject *)nblist->bead_data)->data;
+    bead_data = (int32_t *)((PyArrayObject *)nblist->bead_data)->data;
     do {
       iterator->j++;
       if (iterator->j == iterator->box2->n) {
@@ -331,18 +331,18 @@ nblist_iterate(PyNonbondedListObject *nblist, struct nblist_iterator *iterator)
       if (nblist->nbeads == 1)
 	iterator->weight = 1;
       else {
-	short bn1 = bead_data[2*iterator->a1];
-	short nb1 = bead_data[2*iterator->a1+1];
-	short bn2 = bead_data[2*iterator->a2];
-	short nb2 = bead_data[2*iterator->a2+1];
+	int32_t bn1 = bead_data[2*iterator->a1];
+	int32_t nb1 = bead_data[2*iterator->a1+1];
+	int32_t bn2 = bead_data[2*iterator->a2];
+	int32_t nb2 = bead_data[2*iterator->a2+1];
 	iterator->weight = 0;
 	if (nb1 > nb2) {
-	  short f = nb1/nb2;
+	  int32_t f = nb1/nb2;
 	  if (bn2 == bn1/f)
 	    iterator->weight = nblist->nbeads / nb1;
 	}
 	else {
-	  short f = nb2/nb1;
+	  int32_t f = nb2/nb1;
 	  if (bn1 == bn2/f)
 	    iterator->weight = nblist->nbeads / nb2;
 	}
@@ -568,17 +568,17 @@ nblist_iterate(PyNonbondedListObject *nblist, struct nblist_iterator *iterator)
 
 #define pair_weight(a1, a2, nbeads) \
 { \
-  short bn1 = bead_data[2*a1]; \
-  short nb1 = bead_data[2*a1+1]; \
-  short bn2 = bead_data[2*a2]; \
-  short nb2 = bead_data[2*a2+1]; \
+  int32_t bn1 = bead_data[2*a1]; \
+  int32_t nb1 = bead_data[2*a1+1]; \
+  int32_t bn2 = bead_data[2*a2]; \
+  int32_t nb2 = bead_data[2*a2+1]; \
   if (nb1 > nb2) { \
-    short f = nb1/nb2; \
+    int32_t f = nb1/nb2; \
     if (bn2 == bn1/f) \
       weight = nbeads/nb1; \
   } \
   else { \
-    short f = nb2/nb1; \
+    int32_t f = nb2/nb1; \
     if (bn1 == bn2/f) \
       weight = nbeads/nb2; \
   } \
@@ -595,7 +595,7 @@ nonbonded_evaluator(PyFFEnergyTermObject *self,
   int n_ex = 2*((PyArrayObject *)nblist->excluded_pairs)->dimensions[0];
   long *one_four = (long *)((PyArrayObject *)nblist->one_four_pairs)->data;
   int n_14 = 2*((PyArrayObject *)nblist->one_four_pairs)->dimensions[0];
-  short *bead_data = (short *)((PyArrayObject *)nblist->bead_data)->data;
+  int32_t *bead_data = (int32_t *)((PyArrayObject *)nblist->bead_data)->data;
   distance_fn *d_fn = nblist->universe_spec->distance_function;
   double *distance_data = nblist->universe_spec->geometry_data;
   vector3 *x = (vector3 *)input->coordinates->data;

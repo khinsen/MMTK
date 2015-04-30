@@ -280,7 +280,7 @@ class NonbondedListTest:
         for cutoff in [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.]:
 
             nblist = NonbondedList(empty, empty, atom_indices,
-                                   1, N.array(len(atoms)*[[0, 1]], N.Int16),
+                                   1, N.array(len(atoms)*[[0, 1]], N.Int32),
                                    self.universe._spec, cutoff)
             nblist.update(self.universe.configuration().array)
             distances = nblist.pairDistances()
@@ -314,7 +314,7 @@ class NonbondedListTest:
         for cutoff in [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.]:
 
             nblist = NonbondedList(empty, empty, bead_indices,
-                                   4, N.array(len(atoms)*[[0, 2], [1, 2]], N.Int16),
+                                   4, N.array(len(atoms)*[[0, 2], [1, 2]], N.Int32),
                                    self.universe._spec, cutoff)
             nblist.update(self.universe.configuration().array)
             distances = nblist.pairDistances()

@@ -317,7 +317,7 @@ class _EnergyEvaluator(object):
             nbeads = 1
 
         self.global_data.set('nbeads', nbeads)
-        bead_data = N.zeros((self.universe.numberOfPoints(), 2), N.Int16)
+        bead_data = N.zeros((self.universe.numberOfPoints(), 2), N.Int32)
         for b in universe.beadIterator():
             bead_data[b.index, 0] = b.bead_number
             bead_data[b.index, 1] = b.atom.numberOfBeads()

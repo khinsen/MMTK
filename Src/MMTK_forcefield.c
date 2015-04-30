@@ -1845,8 +1845,8 @@ NonbondedList(PyObject *dummy, PyObject *args)
     nblist_dealloc(self);
     return NULL;
   }
-  if (((PyArrayObject *)self->bead_data)->descr->type_num != PyArray_SHORT) {
-    PyErr_SetString(PyExc_TypeError, "bead data must be an int16 array");
+  if (((PyArrayObject *)self->bead_data)->descr->type_num != PyArray_INT) {
+    PyErr_SetString(PyExc_TypeError, "bead data must be an int32 array");
     nblist_dealloc(self);
     return NULL;
   }

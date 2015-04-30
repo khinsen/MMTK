@@ -17,7 +17,7 @@ from Scientific.Geometry import Objects3D
 from Scientific import N
 import copy
 
-INT16_MAX = 32767 # 2^15 - 1
+INT32_MAX = 2147483647 # 2^31 - 1
 
 #
 # The base class for all chemical objects.
@@ -660,7 +660,7 @@ class Atom(ChemicalObject):
         :param nbeads: the number of beads
         :type nbeads: int
         """
-        assert 0 < nbeads <= INT16_MAX, 'number of beads must be positive and fit in int16'
+        assert 0 < nbeads <= INT32_MAX, 'number of beads must be positive and fit in int32'
         if nbeads != self.nbeads:
             self.unsetArray()
             p = self.position()

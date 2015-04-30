@@ -109,7 +109,7 @@ cdef class PICartesianIntegrator(MMTK.PIIntegratorSupport.PIIntegrator):
     cdef start(self):
         cdef N.ndarray[double, ndim=2] x, v, g, dv
         cdef N.ndarray[double, ndim=1] m
-        cdef N.ndarray[short, ndim=2] bd
+        cdef N.ndarray[N.int32_t, ndim=2] bd
         cdef N.ndarray[double, ndim=3] ss
         cdef energy_data energy
         cdef double time, delta_t, ke, beta, temperature
