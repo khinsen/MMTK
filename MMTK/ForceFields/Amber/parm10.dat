@@ -887,7 +887,7 @@ CS-CS-OS-EP   1    0.000       180.000           2.000
 HA-CS-OS-EP   1    0.000       180.000           2.000
 H4-CS-OS-EP   1    0.000       180.000           2.000
 N -CT-CT-OH   1    0.000         0.000          -1.         HYP
-N -CT-CT-OH   1    1.490         0.000          -2.         HYP
+N -CT-CT-OH   1    1.490         0.000          -2.         HYP  (JCC 26:1612,2005)
 N -CT-CT-OH   1    0.156         0.000          -3.         HYP
 N -CT-CT-OH   1    0.000         0.000           4.         HYP
 EP-S -S -CT   1    0.00          0.0             3.         cyx (dac)
@@ -993,6 +993,10 @@ MOD4      RE
   MG          0.7926  0.8947             Mg2+ Aqvist JPC 1990,94,8021.(adapted)
   C0          1.7131  0.459789           Ca2+ Aqvist JPC 1990,94,8021.(adapted)
   Zn          1.10    0.0125             Zn2+, Merz,PAK, JACS,113,8262,(1991) 
+  F           1.75    0.061              Gough et al. JCC 13,(1992),963.
+  Cl          1.948   0.265              Fox, JPCB,102,8070,(98),flex.mdl CHCl3
+  Br          2.22    0.320              Junmei(?)
+  I           2.35    0.40               JCC,7,(1986),230;  
   EP          0.00    0.0000             lone pair
  
 END
