@@ -315,6 +315,29 @@ class AmberParameters(object):
         else:
             raise ValueError('Type ' + ljp.type + ' not supported.')
 
+    def merge(self, other):
+        self._merge(self.atom_types, other.atom_types)
+        self._merge(self.bonds, other.bonds)
+        self._merge(self.bond_angles, other.bond_angles)
+        self._merge(self.dihedrals, other.dihedrals)
+        self._merge(self.dihedrals_2, other.dihedrals_2)
+        self._merge(self.impropers, other.impropers)
+        self._merge(self.impropers_1, other.impropers_1)
+        self._merge(self.impropers_2, other.impropers_2)
+        self._merge(self.hbonds, other.hbonds)
+        self._merge(self.lj_equivalent, other.lj_equivalent)
+        for ljpar_set in other.ljpar_sets:
+            if ljpar_set in self.ljpar_sets:
+                self.ljpar_sets[ljpar_set].merge(other.ljpar_sets[ljpar_set])
+            else:
+                self.ljpar_sets[ljpar_set] = other.ljpar_sets[ljpar_set]
+
+    def _merge(self, to_, from_):
+        for key, value in from_.items():
+            if key in to_ and value != to_[key]:
+                raise ValueError("Redefinition of %s" % str(key))
+            to_[key] = value
+
 #
 # Atom type class
 #
@@ -427,6 +450,15 @@ class AmberLJParameterSet(object):
 
     def getEntry(self, name):
         return self.entries[name]
+
+    def merge(self, other):
+        assert self.name == other.name
+        assert self.type == other.type
+        for atype, params in other.entries.items():
+            if atype in self.entries:
+                raise ValueError("Redefinition of %s" % atype)
+            self.entries[atype] = params
+        
 
 #
 # Utility functions
