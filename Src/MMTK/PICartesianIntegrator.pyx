@@ -18,15 +18,11 @@ import numpy.linalg as LA
 from MMTK import Units, ParticleProperties, Features, Environment
 import MMTK.PIIntegratorSupport
 cimport MMTK.PIIntegratorSupport
+from MMTK.forcefield cimport energy_data
 
 cimport MMTK.mtrand
 
-include "MMTK/python.pxi"
-include "MMTK/numeric.pxi"
-include "MMTK/core.pxi"
-include "MMTK/universe.pxi"
-include "MMTK/trajectory.pxi"
-include "MMTK/forcefield.pxi"
+include 'MMTK/trajectory.pxi'
 
 cdef extern from "stdlib.h":
     cdef double sqrt(double)

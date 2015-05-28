@@ -1,6 +1,7 @@
 cdef extern from "Python.h":
 
     ctypedef void PyObject
+    ctypedef PyObject PyListObject
 
     ctypedef struct PyThreadState
 
@@ -9,4 +10,4 @@ cdef extern from "Python.h":
 
     cdef void *PyMem_Malloc(ssize_t length)
     cdef void PyMem_Free(void *)
-    
+

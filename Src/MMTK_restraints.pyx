@@ -2,17 +2,15 @@
 #
 # Written by Konrad Hinsen
 
-include "MMTK/python.pxi"
-include "MMTK/numeric.pxi"
-include "MMTK/core.pxi"
-include "MMTK/universe.pxi"
-include 'MMTK/forcefield.pxi'
-
 cdef extern from "math.h":
     double sqrt(double)
 
 import numpy as N
 cimport numpy as N
+
+from MMTK.core cimport tensor3, vector3
+from MMTK.forcefield cimport EnergyTerm, PyFFEvaluatorObject, energy_data, energy_spec
+from MMTK.numeric cimport PyArrayObject
 
 #
 # Trap potential (harmonic restraint to a fixed point in space)

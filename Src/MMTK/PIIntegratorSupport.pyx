@@ -7,7 +7,7 @@ from libc.stdint cimport int32_t
 
 cimport numpy as N
 
-include "MMTK/core.pxi"
+from MMTK.core cimport vector3
 cimport MMTK_trajectory_generator
 
 from MMTK import Units, ParticleProperties

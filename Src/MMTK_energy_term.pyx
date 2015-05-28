@@ -3,13 +3,8 @@
 # Written by Konrad Hinsen
 #
 
-include "MMTK/python.pxi"
-include "MMTK/numeric.pxi"
-include "MMTK/core.pxi"
-include "MMTK/universe.pxi"
-include 'MMTK/forcefield.pxi'
-
 import MMTK
+from MMTK.forcefield cimport EnergyTerm, PyFFEvaluatorObject, energy_data, energy_spec
 from Scientific import N
 
 cdef class PyEnergyTerm(EnergyTerm):

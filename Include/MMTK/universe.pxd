@@ -1,4 +1,7 @@
-cdef extern from "MMTK/universe.h": 
+from MMTK.core cimport vector3
+from MMTK.numeric cimport PyArrayObject
+
+cdef extern from "MMTK/universe.h":
 
     void import_MMTK_universe()
 
@@ -28,5 +31,4 @@ cdef extern from "MMTK/universe.h":
                                       int action) nogil
 
     cdef void **PyUniverse_API
-    
-import_MMTK_universe()
+

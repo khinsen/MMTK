@@ -4,10 +4,6 @@
 # Written by Konrad Hinsen
 #
 
-include "MMTK/python.pxi"
-include "MMTK/numeric.pxi"
-include "MMTK/core.pxi"
-include "MMTK/universe.pxi"
 include 'MMTK/trajectory.pxi'
 
 cimport MMTK_trajectory_action

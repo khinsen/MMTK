@@ -1,3 +1,7 @@
+from MMTK.core cimport tensor3, vector3
+from MMTK.numeric cimport PyArrayObject
+from MMTK.python cimport PyObject, PyThreadState
+
 cdef extern from "MMTK/forcefield.h":
 
     void import_MMTK_forcefield()
@@ -87,6 +91,4 @@ cdef extern from "MMTK/forcefield.h":
         PyThreadState *tstate_save
 
     cdef void **PyFF_API
-
-import_MMTK_forcefield()
 

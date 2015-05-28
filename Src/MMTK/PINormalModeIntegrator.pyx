@@ -23,14 +23,10 @@ import MMTK.PIIntegratorSupport
 cimport MMTK.PIIntegratorSupport
 import numbers
 
+from MMTK.forcefield cimport energy_data
 cimport MMTK.mtrand
 
-include "MMTK/python.pxi"
-include "MMTK/numeric.pxi"
-include "MMTK/core.pxi"
-include "MMTK/universe.pxi"
-include "MMTK/trajectory.pxi"
-include "MMTK/forcefield.pxi"
+include 'MMTK/trajectory.pxi'
 
 cdef extern from "fftw3.h":
     ctypedef struct fftw_complex

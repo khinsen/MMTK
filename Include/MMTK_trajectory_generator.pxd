@@ -5,12 +5,9 @@
 
 cimport numpy as N
 
-include "MMTK/python.pxi"
-include "MMTK/numeric.pxi"
-include "MMTK/core.pxi"
-include "MMTK/universe.pxi"
-include "MMTK/trajectory.pxi"
-include "MMTK/forcefield.pxi"
+from MMTK.forcefield cimport PyFFEvaluatorObject, energy_data
+from MMTK.trajectory cimport PyTrajectoryVariable, PyTrajectoryOutputSpec
+from MMTK.universe cimport PyUniverseSpecObject
 
 cdef extern from "stdlib.h":
 

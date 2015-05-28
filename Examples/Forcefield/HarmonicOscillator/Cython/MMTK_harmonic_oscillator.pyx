@@ -3,11 +3,9 @@
 #
 # Get all the required declarations
 #
-include "MMTK/python.pxi"
-include "MMTK/numeric.pxi"
-include "MMTK/core.pxi"
-include "MMTK/universe.pxi"
-include 'MMTK/forcefield.pxi'
+from MMTK.core cimport vector3
+from MMTK.forcefield cimport EnergyTerm, PyFFEvaluatorObject, energy_data, energy_spec
+from MMTK.numeric cimport ArrayType, PyArrayObject
 
 #
 # The force field term implementation.

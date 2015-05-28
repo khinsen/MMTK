@@ -3,13 +3,17 @@
 # Written by Konrad Hinsen
 #
 
-import_MMTK_universe()
-import_MMTK_trajectory()
-import_MMTK_forcefield()
-
 from MMTK import Features
 import numpy as N
 cimport numpy as N
+
+from MMTK.core cimport vector3
+from MMTK.numeric cimport PyArrayObject
+from MMTK.python cimport PyEval_SaveThread, PyEval_RestoreThread, PyListObject, PyThreadState
+from MMTK.universe cimport PyUniverseSpec_StateLock, PyUniverseSpecObject, import_MMTK_universe
+import_MMTK_universe()
+
+include 'MMTK/trajectory.pxi'
 
 cdef extern from "stdlib.h":
 

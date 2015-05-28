@@ -3,11 +3,7 @@
 # Written by Konrad Hinsen
 #
 
-include "MMTK/python.pxi"
-include "MMTK/numeric.pxi"
-include "MMTK/core.pxi"
-include "MMTK/universe.pxi"
-include 'MMTK/trajectory.pxi'
+from MMTK.trajectory cimport PyTrajectoryVariable
 
 cdef class TrajectoryAction:
 
