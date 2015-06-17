@@ -159,9 +159,8 @@ cdef class HarmonicCMDistanceTerm(EnergyTerm):
 
         if energy.gradients != NULL:
             gradients = <vector3 *>(<PyArrayObject *> energy.gradients).data
-            deriv = 0. if l == 0. else 2.*self.k*dl/l
-            f1 = self.k*deriv/m1
-            f2 = self.k*deriv/m2
+            f1 = deriv/m1
+            f2 = deriv/m2
             for i in atom_indices_1:
                 for j in range(3):
                     gradients[i][j] -= f1*d[j]*masses[i]

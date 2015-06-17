@@ -112,7 +112,7 @@ class DistanceTest(unittest.TestCase):
         self.universe1.addObject(atom1)
         self.universe1.addObject(atom2)
         ff = Restraints.HarmonicDistanceRestraint(atom1, atom2,
-                                                   0.9, 1.)
+                                                   0.9, 2.)
         self.universe1.setForceField(ff)
 
         self.universe2 = InfiniteUniverse()
@@ -125,7 +125,7 @@ class DistanceTest(unittest.TestCase):
         self.universe2.addObject(cluster1)
         self.universe2.addObject(cluster2)
         ff = Restraints.HarmonicDistanceRestraint(cluster1, cluster2,
-                                                  0.9, 1.)
+                                                  0.9, 2.)
         self.universe2.setForceField(ff)
 
         self.universe3 = InfiniteUniverse()
@@ -134,15 +134,15 @@ class DistanceTest(unittest.TestCase):
         self.universe3.addObject(water1)
         self.universe3.addObject(water2)
         ff = Restraints.HarmonicDistanceRestraint(water1, water2,
-                                                  0.9, 1.)
+                                                  0.9, 2.)
         self.universe3.setForceField(ff)
 
     def test_energy_single_atoms(self):
         e, g, fc = self.universe1.energyGradientsAndForceConstants()
-        self.assertAlmostEqual(e, 0.01, 7)
-        self.assert_((g[0]-Vector(0.2, 0., 0.)).length() < 1.e-5)
+        self.assertAlmostEqual(e, 0.02, 7)
+        self.assert_((g[0]-Vector(0.4, 0., 0.)).length() < 1.e-5)
         fc = fc[0, 0]
-        fc_ref = [2., 0.2, 0.2]
+        fc_ref = [4., 0.4, 0.4]
         for i in range(3):
             self.assertAlmostEqual(fc[i, i], fc_ref[i], 7)
             for j in range(3):
@@ -151,14 +151,14 @@ class DistanceTest(unittest.TestCase):
 
     def test_energy_atom_pairs(self):
         e, g, fc = self.universe2.energyGradientsAndForceConstants()
-        self.assertAlmostEqual(e, 0.01, 7)
-        self.assert_((g[0]-Vector(0.1, 0., 0.)).length() < 1.e-5)
-        self.assert_((g[1]-Vector(0.1, 0., 0.)).length() < 1.e-5)
-        self.assert_((g[2]-Vector(-0.1, 0., 0.)).length() < 1.e-5)
-        self.assert_((g[3]-Vector(-0.1, 0., 0.)).length() < 1.e-5)
+        self.assertAlmostEqual(e, 0.02, 7)
+        self.assert_((g[0]-Vector(0.2, 0., 0.)).length() < 1.e-5)
+        self.assert_((g[1]-Vector(0.2, 0., 0.)).length() < 1.e-5)
+        self.assert_((g[2]-Vector(-0.2, 0., 0.)).length() < 1.e-5)
+        self.assert_((g[3]-Vector(-0.2, 0., 0.)).length() < 1.e-5)
         p1 = [0, 1]
         p2 = [2, 3]
-        fc_ref = [0.5, 0.05, 0.05]
+        fc_ref = [1.0, 0.1, 0.1]
         for a1 in range(4):
             for a2 in range(4):
                 fcp = fc[a1, a2]
@@ -173,8 +173,8 @@ class DistanceTest(unittest.TestCase):
 
     def test_energy_water(self):
         e, g, fc = self.universe3.energyGradientsAndForceConstants()
-        fc_ref = [2., 0.2, 0.2]
-        self.assertAlmostEqual(e, 0.01, 7)
+        fc_ref = [4., 0.4, 0.4]
+        self.assertAlmostEqual(e, 0.02, 7)
         for m, s in [(self.universe3[0], 1), (self.universe3[1], -1),]:
             self.assert_((g[m.H1]-g[m.H2]).length() < 1.e-5)
             self.assert_((g[m.H1]-g[m.O]*m.H1.mass()/m.O.mass()).length()
@@ -196,7 +196,7 @@ class DistanceTest(unittest.TestCase):
         m2 = self.universe3[1]
         subset = Collection([m1.H1, m1.H2, m1.O, m2.H1, m2.H2, m2.O])
         e = self.universe3.energy(subset)
-        self.assertAlmostEqual(e, 0.01, 7)
+        self.assertAlmostEqual(e, 0.02, 7)
         subset = Collection()
         e = self.universe3.energy(subset)
         self.assertAlmostEqual(e, 0., 7)
