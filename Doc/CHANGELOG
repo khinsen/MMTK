@@ -1,3 +1,27 @@
+2.7.9 --> 2.7.10
+================
+
+Improvements:
+
+- Added Amber14SB and GAFF force fields.
+
+- Updated physical constants (CODATA 2010 values).
+
+- Some improvements in handling PDB files.
+
+- Added phosphotyrosine residue definition.
+
+Bug fixes:
+
+- Force field parameters could be assigned incorrectly
+  for dihedral angles whose central atoms have the same
+  atom type.
+
+- TIP3 now works with AMBER12.
+
+- When replacing Cys by Cyx, the residue number remains the same.
+
+
 2.7.8 --> 2.7.9
 ===============
 
