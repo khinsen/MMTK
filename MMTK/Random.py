@@ -11,81 +11,40 @@ __docformat__ = 'restructuredtext'
 
 from Scientific.Geometry import Vector
 from Scientific.Geometry.Transformation import Rotation
-from Scientific import N
+import numpy.oldnumeric as N
+import numpy.oldnumeric.rng as RNG
 from MMTK import ParticleProperties, Units
 
-try:
-    numeric = N.package
-except AttributeError:
-    numeric = "Numeric"
+# Initialize random number generators with a constant seed, for reproducibility.
+_uniform_generator = \
+                RNG.CreateGenerator(1, RNG.UniformDistribution(0., 1.))
+_gaussian_generator = \
+                RNG.CreateGenerator(1, RNG.NormalDistribution(0., 1.))
 
-RNG = None
-try:
-    if numeric == "Numeric":
-        import RNG
-    elif numeric == "NumPy":
-        import numpy.oldnumeric.rng as RNG
-except ImportError:
-    pass
-
-
-if RNG is None:
-
-    if numeric == "Numeric":
-        from RandomArray import uniform, seed
-    elif numeric == "NumPy":
-        from numpy.oldnumeric.random_array import uniform, seed
-    random = __import__('random')
-    seed(1, 1)
-    random.seed(1)
-
-    def initializeRandomNumbersFromTime():
-        random.seed()
-        seed(0, 0)
-
-    def gaussian(mean, std, shape=None):
-        if shape is None:
-            x = random.normalvariate(0., 1.)
-        else:
-            x = N.zeros(shape, N.Float)
-            xflat = N.ravel(x)
-            for i in range(len(xflat)):
-                xflat[i] = random.normalvariate(0., 1.)
-        return mean + std*x
-
-else:
-
+def initializeRandomNumbersFromTime():
+    global _uniform_generator, _gaussian_generator
     _uniform_generator = \
-                    RNG.CreateGenerator(-1, RNG.UniformDistribution(0., 1.))
+                   RNG.CreateGenerator(0, RNG.UniformDistribution(0., 1.))
     _gaussian_generator = \
-                    RNG.CreateGenerator(-1, RNG.NormalDistribution(0., 1.))
+                   RNG.CreateGenerator(0, RNG.NormalDistribution(0., 1.))
 
-    def initializeRandomNumbersFromTime():
-        global _uniform_generator, _gaussian_generator
-        _uniform_generator = \
-                       RNG.CreateGenerator(0, RNG.UniformDistribution(0., 1.))
-        _gaussian_generator = \
-                       RNG.CreateGenerator(0, RNG.NormalDistribution(0., 1.))
+def uniform(x1, x2, shape=None):
+    if shape is None:
+        x = _uniform_generator.ranf()
+    else:
+        n = N.multiply.reduce(shape)
+        x = _uniform_generator.sample(n)
+        x.shape = shape
+    return x1+(x2-x1)*x
 
-    def uniform(x1, x2, shape=None):
-        if shape is None:
-            x = _uniform_generator.ranf()
-        else:
-            n = N.multiply.reduce(shape)
-            x = _uniform_generator.sample(n)
-            x.shape = shape
-        return x1+(x2-x1)*x
-
-    def gaussian(mean, std, shape=None):
-        if shape is None:
-            x = _gaussian_generator.ranf()
-        else:
-            n = N.multiply.reduce(shape)
-            x = _gaussian_generator.sample(n)
-            x.shape = shape
-        return mean+std*x
-
-del numeric
+def gaussian(mean, std, shape=None):
+    if shape is None:
+        x = _gaussian_generator.ranf()
+    else:
+        n = N.multiply.reduce(shape)
+        x = _gaussian_generator.sample(n)
+        x.shape = shape
+    return mean+std*x
 
 #
 # Random point in a rectangular box centered around the origin
