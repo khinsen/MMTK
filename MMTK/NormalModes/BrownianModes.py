@@ -464,7 +464,7 @@ class BrownianModes(Core.NormalModes):
         f = ParticleProperties.ParticleTensor(self.universe)
         for i in range(first_mode, self.nmodes):
             mode = self.rawMode(i)
-            f = f + (1./mode.inv_relaxation_time)*mode.dyadicProduct(mode)
+            f = f + mode.dyadicProduct(mode)*(1./mode.inv_relaxation_time)
         f = Units.k_B*self.temperature*f/self.friction
 
         eisf = N.zeros(q.shape, N.Float)
