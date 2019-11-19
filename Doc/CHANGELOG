@@ -1,3 +1,24 @@
+2.7.10 --> 2.7.12
+=================
+
+Bug fixes:
+
+- MMTK.NormalModes.BrownianModes.EISF failed due to a type
+  incompatibility in addition.
+
+Improvements:
+
+- Add C versions of the Cython modules for easier installation
+
+- Add Guix package file for easier installation from source under Guix
+
+2.7.10 --> 2.7.11
+=================
+
+Improvements:
+
+ - Make random number streams reproducible (fixed seed)
+
 2.7.9 --> 2.7.10
 ================
 
