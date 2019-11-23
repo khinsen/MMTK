@@ -1,0 +1,19 @@
+syntax: glob
+
+*~
+**.pyc
+**.pyo
+**.so
+**.nc
+build
+dist
+Test
+Doc/HTML
+Doc/_build
+MANIFEST
+config/erfc_test
+config/intlen
+config/libm_test
+config/*.o
+Examples/Forcefield/*/Cython/*.c
+1
