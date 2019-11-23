@@ -9,7 +9,8 @@ Vibrational normal modes
 
 __docformat__ = 'restructuredtext'
 
-from MMTK import Features, Units, ParticleProperties
+from MMTK import Features, Units, ParticleProperties, Random
+from Scientific.Functions.Interpolation import InterpolatingFunction
 from Scientific import N
 
 from MMTK.NormalModes import Core
@@ -299,14 +300,14 @@ class VibrationalModes(Core.NormalModes):
             step = (last-first)/50.
         q = N.arange(first, last, step)
     
-        f = MMTK.ParticleTensor(self.universe)
+        f = ParticleProperties.ParticleTensor(self.universe)
         for i in range(first_mode, self.nmodes):
             mode = self[i]
             f = f + mode.dyadicProduct(mode)
     
         eisf = N.zeros(q.shape, N.Float)
         for i in range(random_vectors):
-            v = MMTK.Random.randomDirection()
+            v = Random.randomDirection()
             for a in subset.atomList():
                 exp = N.exp(-v*(f[a]*v))
                 N.add(eisf, weights[a]*exp**(q*q), eisf)
@@ -368,7 +369,7 @@ class VibrationalModes(Core.NormalModes):
         else:
             damping = N.exp(-(time/tau)**2)
         finc = N.zeros(time.shape, N.Float)
-        random_vectors = MMTK.Random.randomDirections(random_vectors)
+        random_vectors = Random.randomDirections(random_vectors)
         for v in random_vectors:
             for a in subset.atomList():
                 msd = 0.
