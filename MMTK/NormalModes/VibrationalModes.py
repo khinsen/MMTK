@@ -299,12 +299,8 @@ class VibrationalModes(Core.NormalModes):
         if step is None:
             step = (last-first)/50.
         q = N.arange(first, last, step)
-    
-        f = ParticleProperties.ParticleTensor(self.universe)
-        for i in range(first_mode, self.nmodes):
-            mode = self[i]
-            f = f + mode.dyadicProduct(mode)
-    
+
+        f = self.anisotropicFluctuations(first_mode=first_mode)
         eisf = N.zeros(q.shape, N.Float)
         for i in range(random_vectors):
             v = Random.randomDirection()

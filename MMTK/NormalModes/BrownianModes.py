@@ -176,6 +176,14 @@ class BrownianModes(Core.NormalModes):
         f = Units.k_B*self.temperature*f/self.friction
         return f
 
+    def anisotropicFluctuations(self, first_mode=6):
+        f = ParticleProperties.ParticleTensor(self.universe)
+        for i in range(first_mode, self.nmodes):
+            mode = self.rawMode(i)
+            f += mode.dyadicProduct(mode)*(1./mode.inv_relaxation_time)
+        f = Units.k_B*self.temperature*f/self.friction
+        return f
+
     def meanSquareDisplacement(self, subset=None, weights=None,
                                time_range = (0., None, None),
                                first_mode = 6):
@@ -461,12 +469,7 @@ class BrownianModes(Core.NormalModes):
             step = (last-first)/50.
         q = N.arange(first, last, step)
 
-        f = ParticleProperties.ParticleTensor(self.universe)
-        for i in range(first_mode, self.nmodes):
-            mode = self.rawMode(i)
-            f = f + mode.dyadicProduct(mode)*(1./mode.inv_relaxation_time)
-        f = Units.k_B*self.temperature*f/self.friction
-
+        f = self.anisotropicFluctuations(first_mode=first_mode)
         eisf = N.zeros(q.shape, N.Float)
         random_vectors = Random.randomDirections(random_vectors)
         for v in random_vectors:
