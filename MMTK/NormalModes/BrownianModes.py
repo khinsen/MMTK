@@ -405,7 +405,6 @@ class BrownianModes(Core.NormalModes):
         eisf = 0.
         random_vectors = Random.randomDirections(random_vectors)
         for v in random_vectors:
-            phase = N.exp(-1.j*q*N.dot(r, v.array))
             faat = N.zeros((natoms, len(time)), N.Float)
             eisf_sum = N.zeros((natoms,), N.Float)
             for i in range(first_mode, self.nmodes):
