@@ -19,6 +19,24 @@ donations.
 Installation
 ============
 
+Note: the following are step-by-step instructions for installing
+from source code. The only package manager that offers an
+up-to-date version of MMTK is [Guix](https://guix.gnu.org/)
+for Gnu/Linux. With Guix, installing MMTK is a matter of typing
+```
+guix install python2-mmtk
+```
+Otherwise, for Unix-like systems you may prefer to use the
+[mmtk_install](https://github.com/roygroup/mmtk_install)
+script for some automation, but be aware that it installs the
+[path_integral branch](https://github.com/khinsen/MMTK/tree/path_integrals)
+rather than the [master branch](https://github.com/khinsen/MMTK/tree/master),
+which may not be what you want/need. You can change this in line 111
+of the script.
+
+Manual installation from source code
+-------------------------------------
+
 Prerequisites: Python 2.5 or higher, ScientificPython 2.6 or higher,
                NumPy between 1.6 and 1.8.
 
