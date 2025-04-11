@@ -1,0 +1,61 @@
+{
+    "@context": "https://doi.org/10.5063/schema/codemeta-2.0",
+    "type": "SoftwareSourceCode",
+    "applicationCategory": "chemistry",
+    "author": [
+        {
+            "id": "https://orcid.org/0000-0003-0330-9428",
+            "type": "Person",
+            "affiliation": {
+                "type": "Organization",
+                "name": "CNRS, France"
+            },
+            "email": "konrad.hinsen@cnrs.fr",
+            "familyName": "Hinsen",
+            "givenName": "Konrad"
+        }
+    ],
+    "codeRepository": "https://github.com/khinsen/MMTK.git",
+    "contributor": [
+        {
+            "id": "_:contributor_1",
+            "type": "Person",
+            "affiliation": {
+                "type": "Organization",
+                "name": "University of Waterloo, Canada"
+            },
+            "familyName": "Ing",
+            "givenName": "Christopher"
+        },
+        {
+            "type": "schema:Role",
+            "contributor": "_:contributor_1"
+        },
+        {
+            "id": "_:contributor_2",
+            "type": "Person",
+            "familyName": "Iouchtchenko",
+            "givenName": "Dmitri"
+        }
+    ],
+    "dateModified": "2023-02-17",
+    "description": "Python library for molecular simulations",
+    "downloadUrl": "https://github.com/khinsen/MMTK/archive/refs/tags/rel2.7.13.zip",
+    "keywords": "molecular simulation",
+    "license": "https://spdx.org/licenses/CECILL-C",
+    "name": "Molecular Modeling Toolkit",
+    "operatingSystem": [
+        "Linux",
+        "Windows",
+        "macOS"
+    ],
+    "programmingLanguage": "Python 2",
+    "softwareRequirements": [
+        "https://numpy.org/",
+        "https://github.com/khinsen/ScientificPython/"
+    ],
+    "version": "2.7.13",
+    "developmentStatus": "unsupported",
+    "issueTracker": "https://github.com/khinsen/MMTK/issues",
+    "referencePublication": "https://doi.org/10.1002/(SICI)1096-987X(20000130)21:2<79::AID-JCC1>3.0.CO;2-B"
+}
